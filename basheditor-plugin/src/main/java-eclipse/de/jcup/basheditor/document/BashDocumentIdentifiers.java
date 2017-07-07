@@ -29,6 +29,8 @@ public enum BashDocumentIdentifiers implements BashDocumentIdentifier {
 	
 	DOUBLE_STRING,
 	
+	BACKTICK_STRING,
+	
 	GRADLE_KEYWORD,
 	
 	INCLUDE_KEYWORD,
@@ -36,6 +38,8 @@ public enum BashDocumentIdentifiers implements BashDocumentIdentifier {
 	BASH_COMMAND,
 	
 	KNOWN_VARIABLES,
+	
+	VARIABLES
 	;
 
 

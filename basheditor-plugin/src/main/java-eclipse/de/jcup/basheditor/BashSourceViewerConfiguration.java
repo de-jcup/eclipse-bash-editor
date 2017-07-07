@@ -82,13 +82,16 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 		// Groovy provides different strings: simple and GStrings, so we use separate colors:
 		addPresentation(reconciler, SINGLE_STRING.getId(), getPreferences().getColor(COLOR_NORMAL_STRING),SWT.NONE);
 		addPresentation(reconciler, DOUBLE_STRING.getId(), getPreferences().getColor(COLOR_GSTRING),SWT.NONE);
+		addPresentation(reconciler, BACKTICK_STRING.getId(), getPreferences().getColor(COLOR_BSTRING),SWT.NONE);
 		
 		addPresentation(reconciler, COMMENT.getId(), getPreferences().getColor(COLOR_COMMENT),SWT.NONE);
 		addPresentation(reconciler, INCLUDE_KEYWORD.getId(), getPreferences().getColor(COLOR_INCLUDE_KEYWORD),SWT.BOLD);
-		addPresentation(reconciler, BASH_COMMAND.getId(), getPreferences().getColor(COLOR_BASH_COMMAND),SWT.BOLD|SWT.ITALIC);
+		addPresentation(reconciler, BASH_COMMAND.getId(), getPreferences().getColor(COLOR_BASH_COMMAND),SWT.BOLD|SWT.NONE);
 		
 		
-		addPresentation(reconciler, KNOWN_VARIABLES.getId(), getPreferences().getColor(COLOR_KNOWN_VARIABLES),SWT.ITALIC);
+		addPresentation(reconciler, VARIABLES.getId(), getPreferences().getColor(COLOR_KNOWN_VARIABLES),SWT.NONE);
+		addPresentation(reconciler, KNOWN_VARIABLES.getId(), getPreferences().getColor(COLOR_KNOWN_VARIABLES),SWT.NONE);
+		
 		addPresentation(reconciler, LITERAL.getId(),  getPreferences().getColor(COLOR_LITERALS),SWT.BOLD);
 		return reconciler;
 	}

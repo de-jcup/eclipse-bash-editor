@@ -16,15 +16,15 @@
  package de.jcup.basheditor.document;
 import org.eclipse.jface.text.rules.IWordDetector;
 
-public class BashWordDetector implements IWordDetector{
+public class BashVariableDetector implements IWordDetector{
 	
 	@Override
 	public boolean isWordStart(char c) {
-		return Character.isJavaIdentifierStart(c);
+		return c== '$';
 	}
 
 	@Override
 	public boolean isWordPart(char c) {
-		return Character.isJavaIdentifierPart(c);
+		return Character.isLetterOrDigit(c) || c=='_';
 	}
 }

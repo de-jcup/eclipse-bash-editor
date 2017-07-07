@@ -17,6 +17,7 @@
 
 public enum BashSpecialVariableKeyWords implements DocumentKeyWord {
 
+	JAVA_HOME("JAVA_HOME"),
 	HOME("HOME"),
 	LANG("LANG"),
 	
