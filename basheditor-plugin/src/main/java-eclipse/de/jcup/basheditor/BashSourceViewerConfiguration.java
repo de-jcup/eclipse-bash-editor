@@ -24,20 +24,15 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
-import org.eclipse.jface.text.hyperlink.IHyperlinkPresenter;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.DefaultAnnotationHover;
-import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import de.jcup.basheditor.presentation.BashDefaultTextScanner;
 import de.jcup.basheditor.presentation.PresentationSupport;
@@ -52,7 +47,6 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 	private ColorManager colorManager;
 
 	private TextAttribute defaultTextAttribute;
-	private IAnnotationHover annotationHoover;
 	/**
 	 * Creates configuration by given adaptable
 	 * 
@@ -61,18 +55,11 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	public BashSourceViewerConfiguration(IAdaptable adaptable) {
 		Assert.isNotNull(adaptable, "adaptable may not be null!");
-		this.annotationHoover = new GradleEditorAnnotationHoover();
 
 		this.colorManager = adaptable.getAdapter(ColorManager.class);
 		Assert.isNotNull(colorManager, " adaptable must support color manager");
 		this.defaultTextAttribute = new TextAttribute(
 				colorManager.getColor(getPreferences().getColor(COLOR_NORMAL_TEXT)));
-	}
-
-	
-	@Override
-	public IHyperlinkPresenter getHyperlinkPresenter(ISourceViewer sourceViewer) {
-		return super.getHyperlinkPresenter(sourceViewer);
 	}
 
 	@Override
@@ -81,23 +68,6 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 		return allIdsToStringArray( 
 				IDocument.DEFAULT_CONTENT_TYPE);
 		/* @formatter:on */
-	}
-
-	@Override
-	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
-		return annotationHoover;
-	}
-
-
-	private class GradleEditorAnnotationHoover extends DefaultAnnotationHover {
-		@Override
-		protected boolean isIncluded(Annotation annotation) {
-			if (annotation instanceof MarkerAnnotation) {
-				return true;
-			}
-			/* we do not support other annotations */
-			return false;
-		}
 	}
 
 	@Override

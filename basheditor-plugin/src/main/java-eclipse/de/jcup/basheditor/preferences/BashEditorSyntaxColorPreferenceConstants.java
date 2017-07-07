@@ -15,8 +15,6 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import org.eclipse.swt.graphics.RGB;
-
 /**
  * Constant definitions for plug-in preferences
  */
@@ -49,8 +47,4 @@ public enum BashEditorSyntaxColorPreferenceConstants implements PreferenceIdenti
 		return id;
 	}
 
-	public RGB getDefaultThemeRGB() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
