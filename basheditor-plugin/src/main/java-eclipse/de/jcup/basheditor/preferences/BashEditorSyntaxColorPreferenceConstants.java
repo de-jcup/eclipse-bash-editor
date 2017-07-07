@@ -24,6 +24,7 @@ public enum BashEditorSyntaxColorPreferenceConstants implements PreferenceIdenti
 	COLOR_LITERALS("colorLiteralKeywords", "Literals"),
 	COLOR_NORMAL_STRING("colorSingleStrings", "Single quoted strings"),
 	COLOR_GSTRING("colorDoubleStrings", "Double quoted strings"),
+	COLOR_BSTRING("colorBackTickStrings", "Backtick strings"),
 	COLOR_COMMENT("colorComments", "Comment"),
 	COLOR_INCLUDE_KEYWORD("colorIncludeKeywords","Includes"),
 	COLOR_BASH_COMMAND("colorCommands","Commands"),

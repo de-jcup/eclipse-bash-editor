@@ -38,31 +38,37 @@ import de.jcup.basheditor.document.keywords.DocumentKeyWord;
 public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 
 	private OnlyLettersKeyWordDetector onlyLettersWordDetector = new OnlyLettersKeyWordDetector();
-	private BashWordDetector bashWordDetector = new BashWordDetector();
+	private BashVariableDetector bashVariableDetector = new BashVariableDetector();
 	
 	public BashDocumentPartitionScanner() {
 		
 		IToken comment = createToken(COMMENT);
 		IToken simpleString = createToken(SINGLE_STRING);
 		IToken doubleString = createToken(DOUBLE_STRING);
+		IToken backtickString = createToken(BACKTICK_STRING);
+		
 		IToken systemKeyword = createToken(BASH_SYSTEM_KEYWORD);
-		IToken javaKeyWord = createToken(BASH_KEYWORD);
-		IToken javaLiteral = createToken(LITERAL);
+		IToken bashKeyword = createToken(BASH_KEYWORD);
+		IToken literal = createToken(LITERAL);
 
 		IToken knownVariables = createToken(KNOWN_VARIABLES);
+		IToken variables = createToken(VARIABLES);
 		IToken includeKeyword = createToken(INCLUDE_KEYWORD);
 		IToken bashCommand = createToken(BASH_COMMAND);
 
 		List<IPredicateRule> rules = new ArrayList<>();
-		buildWordRules(rules, systemKeyword, BashSystemKeyWords.values(),bashWordDetector);
+		buildWordRules(rules, systemKeyword, BashSystemKeyWords.values(),onlyLettersWordDetector);
+		rules.add(new BashVariableRule(bashVariableDetector,variables));
 		rules.add(new SingleLineRule("#", "", comment));
 		rules.add(new MultiLineRule("\"", "\"", doubleString));
 		rules.add(new MultiLineRule("\'", "\'", simpleString));
+		rules.add(new MultiLineRule("`", "`", backtickString));
 		
 		buildWordRules(rules, includeKeyword, BashIncludeKeyWords.values(),onlyLettersWordDetector);
 		buildWordRules(rules, bashCommand, BashCommandKeyWords.values(),onlyLettersWordDetector);
-		buildWordRules(rules, javaKeyWord, BashLanguageKeyWords.values(),bashWordDetector);
-		buildWordRules(rules, javaLiteral, BashLiteralKeyWords.values(),bashWordDetector);
+		buildWordRules(rules, bashKeyword, BashLanguageKeyWords.values(),onlyLettersWordDetector);
+		buildWordRules(rules, literal, BashLiteralKeyWords.values(),onlyLettersWordDetector);
+		
 		buildWordRules(rules, knownVariables, BashSpecialVariableKeyWords.values(),onlyLettersWordDetector);
 
 		setPredicateRules(rules.toArray(new IPredicateRule[rules.size()]));
