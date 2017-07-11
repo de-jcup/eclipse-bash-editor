@@ -19,17 +19,9 @@ public enum BashGnuCommandKeyWords implements DocumentKeyWord{
 
 	/* NEW bash... */
 	
-	EXPORT("export"),
-	
-	EXIT("exit"),
-	
-	ECHO("echo"),
-	
 	CHMOD("chmod"),
 	
 	SUDO("sudo"),
-	
-	SET("set"),
 	
 	GREP("grep"),
 	
