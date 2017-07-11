@@ -15,7 +15,7 @@
  */
  package de.jcup.basheditor.document.keywords;
 
-public enum BashCommandKeyWords implements DocumentKeyWord{
+public enum BashGnuCommandKeyWords implements DocumentKeyWord{
 
 	/* NEW bash... */
 	
@@ -49,7 +49,7 @@ public enum BashCommandKeyWords implements DocumentKeyWord{
 
 	private String text;
 
-	private BashCommandKeyWords(String text) {
+	private BashGnuCommandKeyWords(String text) {
 		this.text = text;
 	}
 

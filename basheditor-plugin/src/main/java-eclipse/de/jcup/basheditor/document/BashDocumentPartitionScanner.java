@@ -28,7 +28,7 @@ import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
 import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 
-import de.jcup.basheditor.document.keywords.BashCommandKeyWords;
+import de.jcup.basheditor.document.keywords.BashGnuCommandKeyWords;
 import de.jcup.basheditor.document.keywords.BashIncludeKeyWords;
 import de.jcup.basheditor.document.keywords.BashLanguageKeyWords;
 import de.jcup.basheditor.document.keywords.BashLiteralKeyWords;
@@ -65,7 +65,7 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		rules.add(new MultiLineRule("`", "`", backtickString));
 		
 		buildWordRules(rules, includeKeyword, BashIncludeKeyWords.values(),onlyLettersWordDetector);
-		buildWordRules(rules, bashCommand, BashCommandKeyWords.values(),onlyLettersWordDetector);
+		buildWordRules(rules, bashCommand, BashGnuCommandKeyWords.values(),onlyLettersWordDetector);
 		buildWordRules(rules, bashKeyword, BashLanguageKeyWords.values(),onlyLettersWordDetector);
 		buildWordRules(rules, literal, BashLiteralKeyWords.values(),onlyLettersWordDetector);
 		

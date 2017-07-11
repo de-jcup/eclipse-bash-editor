@@ -17,34 +17,55 @@
 
 // see http://docs.oracle.com/javase/tutorial/java/nutsandbolts/_keywords.html
 public enum BashLanguageKeyWords implements DocumentKeyWord {
-
-	FOR("for"),
-
-	GOTO("goto"),
+	/* @formatter:off*/
+	/* ---------------- */
+	/* Reserved words : https://www.gnu.org/software/bash/manual/html_node/Reserved-Word-Index.html
+	/* ----------------*/
 	
+	/* C */
+	CASE("case"),
+
+	/* D */ 
 	DO("do"),
-	
-	IF("if"),
-	
-	FI("fi"),
-	
-	THEN("then"),
-	
+	DONE("done"),
+
+	/* E */
+	ELIF("elif"),
 	ELSE("else"),
+	ESAC("esac"),
 	
-	RETURN("return"),
+	/* F */
+	FI("fi"),
+	FOR("for"),
+	FUNCTION("function"),	
+
+	/* I*/
+	IF("if"),
+	IN("in"),
+
+	/* S */
+	SELECT("select"),
 	
+	/* T */
+	THEN("then"),
+	TIME("time"),
+
+	/* U */
+	UNTIL("until"),
+	
+	/* W */
 	WHILE("while"),
 
-	FUNCTION("function"),	
 	
+
+	/* Other commands */
 	LOCAL("local"),	
-
 	SHIFT("shift"),	
-
 	READ("read"),	
-
+	RETURN("return"),
+	GOTO("goto"), // #?'!?
 	;
+	/* @formatter:on*/
 
 	private String text;
 
