@@ -31,6 +31,20 @@ public enum BashCommandKeyWords implements DocumentKeyWord{
 	
 	SET("set"),
 	
+	GREP("grep"),
+	
+	CAT("cat"),
+	
+	FILTER("filter"),
+	
+	UNAME("uname"),
+	
+	RM("rm"),
+	
+	MKDIR("mkdir"),
+	
+	
+	
 	;
 
 	private String text;

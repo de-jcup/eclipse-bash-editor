@@ -34,7 +34,15 @@ public enum BashLanguageKeyWords implements DocumentKeyWord {
 	
 	RETURN("return"),
 	
-	WHILE("while")
+	WHILE("while"),
+
+	FUNCTION("function"),	
+	
+	LOCAL("local"),	
+
+	SHIFT("shift"),	
+
+	READ("read"),	
 
 	;
 
