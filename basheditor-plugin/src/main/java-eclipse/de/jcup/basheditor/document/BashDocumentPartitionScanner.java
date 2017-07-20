@@ -31,7 +31,6 @@ import org.eclipse.jface.text.rules.Token;
 import de.jcup.basheditor.document.keywords.BashGnuCommandKeyWords;
 import de.jcup.basheditor.document.keywords.BashIncludeKeyWords;
 import de.jcup.basheditor.document.keywords.BashLanguageKeyWords;
-import de.jcup.basheditor.document.keywords.BashLiteralKeyWords;
 import de.jcup.basheditor.document.keywords.BashSpecialVariableKeyWords;
 import de.jcup.basheditor.document.keywords.BashSystemKeyWords;
 import de.jcup.basheditor.document.keywords.DocumentKeyWord;
@@ -49,7 +48,6 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		
 		IToken systemKeyword = createToken(BASH_SYSTEM_KEYWORD);
 		IToken bashKeyword = createToken(BASH_KEYWORD);
-		IToken literal = createToken(LITERAL);
 
 		IToken knownVariables = createToken(KNOWN_VARIABLES);
 		IToken variables = createToken(VARIABLES);
@@ -67,7 +65,6 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		buildWordRules(rules, includeKeyword, BashIncludeKeyWords.values(),onlyLettersWordDetector);
 		buildWordRules(rules, bashCommand, BashGnuCommandKeyWords.values(),onlyLettersWordDetector);
 		buildWordRules(rules, bashKeyword, BashLanguageKeyWords.values(),onlyLettersWordDetector);
-		buildWordRules(rules, literal, BashLiteralKeyWords.values(),onlyLettersWordDetector);
 		
 		buildWordRules(rules, knownVariables, BashSpecialVariableKeyWords.values(),onlyLettersWordDetector);
 
