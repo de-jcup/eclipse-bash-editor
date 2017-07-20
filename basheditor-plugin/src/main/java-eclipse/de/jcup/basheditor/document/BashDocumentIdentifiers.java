@@ -19,8 +19,6 @@ public enum BashDocumentIdentifiers implements BashDocumentIdentifier {
 	
 	BASH_KEYWORD,
 	
-	LITERAL,
-	
 	BASH_SYSTEM_KEYWORD ,
 	
 	COMMENT,

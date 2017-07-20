@@ -92,7 +92,6 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 		addPresentation(reconciler, VARIABLES.getId(), getPreferences().getColor(COLOR_KNOWN_VARIABLES),SWT.NONE);
 		addPresentation(reconciler, KNOWN_VARIABLES.getId(), getPreferences().getColor(COLOR_KNOWN_VARIABLES),SWT.NONE);
 		
-		addPresentation(reconciler, LITERAL.getId(),  getPreferences().getColor(COLOR_LITERALS),SWT.BOLD);
 		return reconciler;
 	}
 
