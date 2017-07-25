@@ -57,6 +57,7 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		
 		getPreferences().setDefaultColor(COLOR_BASH_COMMAND, BashEditorColorConstants.TASK_DEFAULT_RED);
 		getPreferences().setDefaultColor(COLOR_KNOWN_VARIABLES, BashEditorColorConstants.DARK_GRAY);
+		getPreferences().setDefaultColor(COLOR_PARAMETERS, BashEditorColorConstants.DARK_BLUE);
 	}
 	
 	

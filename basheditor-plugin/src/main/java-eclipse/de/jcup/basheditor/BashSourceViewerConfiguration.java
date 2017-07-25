@@ -85,6 +85,7 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 		addPresentation(reconciler, BACKTICK_STRING.getId(), getPreferences().getColor(COLOR_BSTRING),SWT.NONE);
 		
 		addPresentation(reconciler, COMMENT.getId(), getPreferences().getColor(COLOR_COMMENT),SWT.NONE);
+		addPresentation(reconciler, PARAMETER.getId(), getPreferences().getColor(COLOR_PARAMETERS),SWT.NONE);
 		addPresentation(reconciler, INCLUDE_KEYWORD.getId(), getPreferences().getColor(COLOR_INCLUDE_KEYWORD),SWT.BOLD);
 		addPresentation(reconciler, BASH_COMMAND.getId(), getPreferences().getColor(COLOR_BASH_COMMAND),SWT.BOLD|SWT.NONE);
 		
