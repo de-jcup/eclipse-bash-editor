@@ -37,7 +37,9 @@ public enum BashDocumentIdentifiers implements BashDocumentIdentifier {
 	
 	KNOWN_VARIABLES,
 	
-	VARIABLES
+	VARIABLES,
+	
+	PARAMETER,
 	;
 
 

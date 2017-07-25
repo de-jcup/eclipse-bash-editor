@@ -41,6 +41,7 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 	
 	public BashDocumentPartitionScanner() {
 		
+		IToken paramString = createToken(PARAMETER);
 		IToken comment = createToken(COMMENT);
 		IToken simpleString = createToken(SINGLE_STRING);
 		IToken doubleString = createToken(DOUBLE_STRING);
@@ -61,6 +62,7 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		rules.add(new MultiLineRule("\"", "\"", doubleString));
 		rules.add(new MultiLineRule("\'", "\'", simpleString));
 		rules.add(new MultiLineRule("`", "`", backtickString));
+		
 		
 		buildWordRules(rules, includeKeyword, BashIncludeKeyWords.values(),onlyLettersWordDetector);
 		buildWordRules(rules, bashCommand, BashGnuCommandKeyWords.values(),onlyLettersWordDetector);
