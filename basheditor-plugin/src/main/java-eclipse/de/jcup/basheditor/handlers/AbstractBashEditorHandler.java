@@ -36,7 +36,7 @@ public abstract class AbstractBashEditorHandler extends AbstractHandler {
 	 * Execute something by using gradle editor instance
 	 * @param bashEditor - never <code>null</code>
 	 */
-	protected abstract void executeOnGradleEditor(BashEditor bashEditor);
+	protected abstract void executeOnBashEditor(BashEditor bashEditor);
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -55,7 +55,7 @@ public abstract class AbstractBashEditorHandler extends AbstractHandler {
 		IEditorPart editor = activePage.getActiveEditor();
 		
 		if (editor instanceof BashEditor){
-			executeOnGradleEditor((BashEditor) editor);
+			executeOnBashEditor((BashEditor) editor);
 		}
 		return null;
 	}

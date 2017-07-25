@@ -20,7 +20,7 @@ import de.jcup.basheditor.BashEditor;
 public class ToggleCommentHandler extends AbstractBashEditorHandler{
 
 	@Override
-	protected void executeOnGradleEditor(BashEditor bashEditor) {
+	protected void executeOnBashEditor(BashEditor bashEditor) {
 		bashEditor.toggleComment();
 	}
 

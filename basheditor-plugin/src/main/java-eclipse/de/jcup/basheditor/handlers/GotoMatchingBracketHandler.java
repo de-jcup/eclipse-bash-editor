@@ -20,7 +20,7 @@ import de.jcup.basheditor.BashEditor;
 public class GotoMatchingBracketHandler extends AbstractBashEditorHandler {
 
 	@Override
-	protected void executeOnGradleEditor(BashEditor bashEditor) {
+	protected void executeOnBashEditor(BashEditor bashEditor) {
 		bashEditor.gotoMatchingBracket();
 	}
 

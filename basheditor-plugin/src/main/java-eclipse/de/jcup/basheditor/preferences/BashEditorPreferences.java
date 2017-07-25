@@ -57,14 +57,14 @@ public class BashEditorPreferences {
 					}
 				}
 				if (colorChanged){
-					updateColorsInEGradleEditors();
+					updateColorsInBashEditors();
 				}
 				
 				
 			}
 
-			private void updateColorsInEGradleEditors() {
-				/* inform all EGradle editors about color changes*/
+			private void updateColorsInBashEditors() {
+				/* inform all Bash editors about color changes*/
 				IWorkbenchPage activePage = EclipseUtil.getActivePage();
 				if (activePage==null){
 					return;

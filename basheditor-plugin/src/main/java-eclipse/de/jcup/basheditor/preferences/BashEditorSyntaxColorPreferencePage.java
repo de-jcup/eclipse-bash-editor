@@ -56,7 +56,7 @@ public class BashEditorSyntaxColorPreferencePage extends FieldEditorPreferencePa
 		}
 		Button restoreDarkThemeColorsButton= new Button(parent,  SWT.PUSH);
 		restoreDarkThemeColorsButton.setText("Restore Defaults for Dark Theme");
-		restoreDarkThemeColorsButton.setToolTipText("Same as 'Restore Defaults' but for dark themes.\n EGradle makes just a suggestion, you still have to apply or cancel the settings.");
+		restoreDarkThemeColorsButton.setToolTipText("Same as 'Restore Defaults' but for dark themes.\n Editor makes just a suggestion, you still have to apply or cancel the settings.");
 		restoreDarkThemeColorsButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
