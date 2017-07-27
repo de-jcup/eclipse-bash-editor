@@ -171,4 +171,19 @@
         <super type="org.eclipse.core.resources.textmarker"/>
         <persistent value="true"/>
     </extension>
+    
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!--                          HELP                                         -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <extension
+         point="org.eclipse.help.toc">
+      <toc
+            file="toc.xml">
+      </toc>
+      <toc
+            file="EditorToc.xml"
+            primary="true">
+      </toc>
+   </extension>
+   
 </plugin>
