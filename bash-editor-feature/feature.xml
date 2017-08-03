@@ -2,7 +2,7 @@
 <feature
       id="de.jcup.basheditor"
       label="Bash Editor"
-      version="0.6.0">
+      version="0.6.1">
 
    <description url="https://marketplace.eclipse.org/content/bash-editor">
       Bash Editor is a plugin for eclipse to edit bash scripts (.sh)

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/de.jcup.basheditor_0.6.0.jar" id="de.jcup.basheditor" version="0.6.0"/>
+   <feature url="features/de.jcup.basheditor_0.6.1.jar" id="de.jcup.basheditor" version="0.6.1"/>
 </site>
