@@ -40,11 +40,31 @@ public class CommandParameterRule implements IPredicateRule {
 
 	@Override
 	public IToken evaluate(ICharacterScanner scanner, boolean resume) {
+		/* xyz -a */
+		/*     ^----- POS */
+		scanner.unread();
+		/* xyz -a */
+		/*    ^----- POS */
+		
+		char before= (char) scanner.read();
+		/* xyz -a */
+		/*     ^----- POS */
+		
+		if (before!=' '){
+			return Token.UNDEFINED;
+		}
+		
+		/* xyz -a */
+		/*      ^----- POS */
 		char start = (char) scanner.read();
 		if ('-' !=start) {
 			scanner.unread();
+			/* xyz -a */
+			/*     ^----- POS */
+			
 			return Token.UNDEFINED;
 		}
+		scanner.unread();
 
 		/* okay could be a parameter*/
 		do {
