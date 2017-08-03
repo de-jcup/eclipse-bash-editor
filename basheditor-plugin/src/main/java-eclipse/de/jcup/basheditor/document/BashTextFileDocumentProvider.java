@@ -38,10 +38,8 @@ public class BashTextFileDocumentProvider extends TextFileDocumentProvider {
 			return document;
 		}
 		/* installation necessary */
-		IDocumentPartitioner partitioner = BashPartionerFactory.create();
-		partitioner.connect(document);
-		document.setDocumentPartitioner(partitioner);
-		
+		BashPartitioner partitioner = BashPartionerFactory.create();
+		partitioner.connect(document,true);
 		return document;
 	}
 

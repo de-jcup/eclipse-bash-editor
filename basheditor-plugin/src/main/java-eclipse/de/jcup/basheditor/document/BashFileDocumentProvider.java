@@ -17,7 +17,6 @@ package de.jcup.basheditor.document;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 /**
@@ -32,9 +31,9 @@ public class BashFileDocumentProvider extends FileDocumentProvider {
 		IDocument document = super.createDocument(element);
 		if (document != null) {
 			/* installation necessary */
-			IDocumentPartitioner partitioner = BashPartionerFactory.create();
+			BashPartitioner partitioner = BashPartionerFactory.create();
 
-			partitioner.connect(document);
+			partitioner.connect(document,true);
 			document.setDocumentPartitioner(partitioner);
 		}
 		return document;
