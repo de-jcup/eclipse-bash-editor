@@ -43,7 +43,18 @@ public class ExactWordPatternRuleTest {
 	}
 
 	@Test
-	public void interface_is_found_scanner_column_is_8() {
+	public void interface_is_found_scanner_column_is_8__onlyLettersDetector_used() {
+		scanner = new OneLineSimpleTestCharacterScanner("interface");
+		ExactWordPatternRule rule = new ExactWordPatternRule(new OnlyLettersKeyWordDetector(), "interface", token);
+		rule.trace=true;
+		rule.evaluate(scanner);
+		
+		assertEquals(8,scanner.column);
+		
+	}
+	
+	@Test
+	public void interface_is_found_scanner_column_is_8___bashvariabledetector_used() {
 		scanner = new OneLineSimpleTestCharacterScanner("interface");
 		ExactWordPatternRule rule = new ExactWordPatternRule(new BashVariableDetector(), "interface", token);
 		rule.trace=true;

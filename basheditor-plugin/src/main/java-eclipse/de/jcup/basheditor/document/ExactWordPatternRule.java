@@ -27,8 +27,13 @@ public class ExactWordPatternRule extends WordPatternRule{
 	boolean trace = false;
 	
 	public ExactWordPatternRule(IWordDetector detector, String exactWord, IToken token) {
+		this(detector,exactWord,token,true);
+	}
+	
+	public ExactWordPatternRule(IWordDetector detector, String exactWord, IToken token, boolean breaksOnEOF) {
 		super(detector, exactWord, null, token);
 		toStringValue=getClass().getSimpleName()+":"+exactWord;
+		this.fBreaksOnEOF=breaksOnEOF;
 	}
 	
 	protected boolean sequenceDetected(ICharacterScanner scanner, char[] sequence, boolean eofAllowed) {

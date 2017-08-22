@@ -122,14 +122,24 @@ public enum BashLanguageKeyWords implements DocumentKeyWord {
 	/* @formatter:on*/
 
 	private String text;
+	private boolean breaksOnEof;
 
 	private BashLanguageKeyWords(String text) {
-		this.text = text;
+		this(text,false);
 	}
 
+	private BashLanguageKeyWords(String text, boolean breaksOnEof) {
+		this.text = text;
+		this.breaksOnEof=breaksOnEof;
+	}
 
 	@Override
 	public String getText() {
 		return text;
+	}
+	
+	@Override
+	public boolean isBreakingOnEof() {
+		return breaksOnEof;
 	}
 }

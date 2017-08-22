@@ -19,4 +19,6 @@ public interface DocumentKeyWord{
 
 	String getText();
 
+	boolean isBreakingOnEof();
+
 }

@@ -34,4 +34,9 @@ public enum BashSpecialVariableKeyWords implements DocumentKeyWord {
 	public String getText() {
 		return text;
 	}
+	
+	@Override
+	public boolean isBreakingOnEof() {
+		return false;
+	}
 }

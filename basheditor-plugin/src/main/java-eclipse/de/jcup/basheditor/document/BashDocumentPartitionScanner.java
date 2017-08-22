@@ -58,7 +58,7 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		List<IPredicateRule> rules = new ArrayList<>();
 		buildWordRules(rules, systemKeyword, BashSystemKeyWords.values(),onlyLettersWordDetector);
 		rules.add(new BashVariableRule(bashVariableDetector,variables));
-		rules.add(new SingleLineRule("#", "", comment));
+		rules.add(new SingleLineRule("#", "", comment, (char)-1,true));
 		
 		rules.add(new MultiLineRule("\"", "\"", doubleString,'\\'));
 		rules.add(new MultiLineRule("\'", "\'", simpleString,'\\'));
@@ -68,8 +68,8 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		
 		
 		buildWordRules(rules, includeKeyword, BashIncludeKeyWords.values(),onlyLettersWordDetector);
-		buildWordRules(rules, bashCommand, BashGnuCommandKeyWords.values(),onlyLettersWordDetector);
 		buildWordRules(rules, bashKeyword, BashLanguageKeyWords.values(),onlyLettersWordDetector);
+		buildWordRules(rules, bashCommand, BashGnuCommandKeyWords.values(),onlyLettersWordDetector);
 		
 		buildWordRules(rules, knownVariables, BashSpecialVariableKeyWords.values(),onlyLettersWordDetector);
 
@@ -79,7 +79,7 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 	private void buildWordRules(List<IPredicateRule> rules, IToken token,
 			DocumentKeyWord[] values, IWordDetector wordDetector) {
 		for (DocumentKeyWord keyWord: values){
-			rules.add(new ExactWordPatternRule(wordDetector, createWordStart(keyWord),token));
+			rules.add(new ExactWordPatternRule(wordDetector, createWordStart(keyWord),token, keyWord.isBreakingOnEof()));
 		}
 	}
 	

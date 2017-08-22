@@ -49,4 +49,9 @@ public enum BashGnuCommandKeyWords implements DocumentKeyWord{
 	public String getText() {
 		return text;
 	}
+	
+	@Override
+	public boolean isBreakingOnEof() {
+		return true;
+	}
 }
