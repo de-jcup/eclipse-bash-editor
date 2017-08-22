@@ -46,15 +46,36 @@ public class CommandParameterRule implements IPredicateRule {
 			return Token.UNDEFINED;
 		}
 
+		/* check if the former character is a space - if not this is not an argument */
+		scanner.unread();
+		scanner.unread();
+		char beforeStart = (char) scanner.read();
+		if (' ' !=beforeStart){
+			/* no unread necessary, scanner is at start position*/
+			return Token.UNDEFINED;
+		}
+		/* go after start again*/
+		scanner.read();
+		
 		/* okay could be a parameter*/
 		do {
 			char c = (char) scanner.read();
-			if (ICharacterScanner.EOF == c || Character.isWhitespace(c)) {
+			if (! isPartOfParameter(c)) {
 				scanner.unread();
 				break;
 			}
 		} while (true);
 		return getSuccessToken();
+	}
+
+	private boolean isPartOfParameter(char c) {
+		if (Character.isLetterOrDigit(c)){
+			return true;
+		}
+		if ('-' == c){
+			return true;
+		}
+		return false;
 	}
 
 }
