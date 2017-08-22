@@ -28,9 +28,6 @@ public class OnlyLettersKeyWordDetector implements IWordDetector{
 
 	@Override
 	public boolean isWordPart(char c) {
-		if (Character.isWhitespace(c)){
-			return false;
-		}
 		if (! Character.isLetter(c)){
 			return false;
 		}
