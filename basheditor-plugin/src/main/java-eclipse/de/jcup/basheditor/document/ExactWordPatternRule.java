@@ -58,7 +58,7 @@ public class ExactWordPatternRule extends WordPatternRule{
 			scannerUnread(scanner, counter);
 			char charBefore =(char)scannerRead(scanner, counter);
 			scannerRead(scanner, counter);
-			wordHasPrefix =fDetector.isWordPart(charBefore);
+			wordHasPrefix = isPrefixCharacter(charBefore);
 		}
 		if (wordHasPrefix){
 			scannerRead(scanner, counter);
@@ -91,6 +91,11 @@ public class ExactWordPatternRule extends WordPatternRule{
 	}
 
 	
+	private boolean isPrefixCharacter(char charBefore) {
+		boolean isPrefix = ! Character.isWhitespace(charBefore);
+		return isPrefix;
+	}
+
 	private int scannerRead(ICharacterScanner scanner, Counter counter) {
 		int c = scanner.read();
 		if (c!=ICharacterScanner.EOF){

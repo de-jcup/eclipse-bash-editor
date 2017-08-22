@@ -54,6 +54,28 @@ public class ExactWordPatternRuleTest {
 	}
 	
 	@Test
+	public void function_with_keyword_help_inside_is_not_found_as_help_onlyLettersDetector_used() {
+		scanner = new OneLineSimpleTestCharacterScanner("function show_help_and_exit(){}");
+		ExactWordPatternRule rule = new ExactWordPatternRule(new OnlyLettersKeyWordDetector(), "help", token);
+		rule.trace=true;
+		rule.evaluate(scanner);
+		
+		assertEquals(0,scanner.column);
+		
+	}
+	
+	@Test
+	public void function_with_keyword_help_inside_is_found_as_funtion_onlyLettersDetector_used() {
+		scanner = new OneLineSimpleTestCharacterScanner("function show_help_and_exit(){}");
+		ExactWordPatternRule rule = new ExactWordPatternRule(new OnlyLettersKeyWordDetector(), "function", token);
+		rule.trace=true;
+		rule.evaluate(scanner);
+		
+		assertEquals(8,scanner.column);
+		
+	}
+	
+	@Test
 	public void interface_is_found_scanner_column_is_8___bashvariabledetector_used() {
 		scanner = new OneLineSimpleTestCharacterScanner("interface");
 		ExactWordPatternRule rule = new ExactWordPatternRule(new BashVariableDetector(), "interface", token);
