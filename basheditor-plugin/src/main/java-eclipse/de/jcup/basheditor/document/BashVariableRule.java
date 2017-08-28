@@ -20,6 +20,11 @@ import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 
+/**
+ * A special rule to scan bash variables
+ * @author Albert Tregnaghi
+ *
+ */
 public class BashVariableRule implements IPredicateRule {
 
 	private IToken token;
