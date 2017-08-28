@@ -37,7 +37,6 @@ import de.jcup.basheditor.document.keywords.DocumentKeyWord;
 public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 
 	private OnlyLettersKeyWordDetector onlyLettersWordDetector = new OnlyLettersKeyWordDetector();
-	private BashVariableDetector bashVariableDetector = new BashVariableDetector();
 	
 	public BashDocumentPartitionScanner() {
 		
@@ -57,7 +56,7 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 
 		List<IPredicateRule> rules = new ArrayList<>();
 		buildWordRules(rules, systemKeyword, BashSystemKeyWords.values(),onlyLettersWordDetector);
-		rules.add(new BashVariableRule(bashVariableDetector,variables));
+		rules.add(new BashVariableRule(variables));
 		rules.add(new SingleLineRule("#", "", comment, (char)-1,true));
 		
 		rules.add(new MultiLineRule("\"", "\"", doubleString,'\\'));

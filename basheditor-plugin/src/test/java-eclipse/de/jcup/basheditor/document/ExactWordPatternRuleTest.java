@@ -19,12 +19,10 @@ import static org.junit.Assert.*;
 
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.Token;
 import org.junit.Before;
 import org.junit.Test;
-
-import de.jcup.basheditor.document.ExactWordPatternRule;
-import de.jcup.basheditor.document.BashVariableDetector;
 
 /**
  * Sorrowly not executable by gradle because of eclipse dependencies. But
@@ -36,16 +34,18 @@ public class ExactWordPatternRuleTest {
 	
 	private IToken token;
 	private OneLineSimpleTestCharacterScanner scanner;
+	private IWordDetector detector;
 
 	@Before
 	public void before(){
 		token = new Token("mocked");
+		detector = new OnlyLettersKeyWordDetector();
 	}
 
 	@Test
-	public void interface_is_found_scanner_column_is_8__onlyLettersDetector_used() {
+	public void interface_is_found_scanner_column_is_8_() {
 		scanner = new OneLineSimpleTestCharacterScanner("interface");
-		ExactWordPatternRule rule = new ExactWordPatternRule(new OnlyLettersKeyWordDetector(), "interface", token);
+		ExactWordPatternRule rule = new ExactWordPatternRule(detector, "interface", token);
 		rule.trace=true;
 		rule.evaluate(scanner);
 		
@@ -54,9 +54,9 @@ public class ExactWordPatternRuleTest {
 	}
 	
 	@Test
-	public void function_with_keyword_help_inside_is_not_found_as_help_onlyLettersDetector_used() {
+	public void function_with_keyword_help_inside_is_not_found_as_help() {
 		scanner = new OneLineSimpleTestCharacterScanner("function show_help_and_exit(){}");
-		ExactWordPatternRule rule = new ExactWordPatternRule(new OnlyLettersKeyWordDetector(), "help", token);
+		ExactWordPatternRule rule = new ExactWordPatternRule(detector, "help", token);
 		rule.trace=true;
 		rule.evaluate(scanner);
 		
@@ -65,20 +65,9 @@ public class ExactWordPatternRuleTest {
 	}
 	
 	@Test
-	public void function_with_keyword_help_inside_is_found_as_funtion_onlyLettersDetector_used() {
+	public void function_with_keyword_help_inside_is_found_as_funtion() {
 		scanner = new OneLineSimpleTestCharacterScanner("function show_help_and_exit(){}");
-		ExactWordPatternRule rule = new ExactWordPatternRule(new OnlyLettersKeyWordDetector(), "function", token);
-		rule.trace=true;
-		rule.evaluate(scanner);
-		
-		assertEquals(8,scanner.column);
-		
-	}
-	
-	@Test
-	public void interface_is_found_scanner_column_is_8___bashvariabledetector_used() {
-		scanner = new OneLineSimpleTestCharacterScanner("interface");
-		ExactWordPatternRule rule = new ExactWordPatternRule(new BashVariableDetector(), "interface", token);
+		ExactWordPatternRule rule = new ExactWordPatternRule(detector, "function", token);
 		rule.trace=true;
 		rule.evaluate(scanner);
 		
@@ -89,7 +78,7 @@ public class ExactWordPatternRuleTest {
 	@Test
 	public void interface_is_NOT_found_scanner_column_is_0__something() {
 		scanner = new OneLineSimpleTestCharacterScanner("something");
-		ExactWordPatternRule rule = new ExactWordPatternRule(new BashVariableDetector(), "interface", token);
+		ExactWordPatternRule rule = new ExactWordPatternRule(detector, "interface", token);
 		rule.trace=true;
 		rule.evaluate(scanner);
 		
@@ -100,7 +89,7 @@ public class ExactWordPatternRuleTest {
 	@Test
 	public void interface_is_NOT_found_scanner_column_is_0__xinterface() {
 		scanner = new OneLineSimpleTestCharacterScanner("xinterface");
-		ExactWordPatternRule rule = new ExactWordPatternRule(new BashVariableDetector(), "interface", token);
+		ExactWordPatternRule rule = new ExactWordPatternRule(detector, "interface", token);
 		rule.trace=true;
 		rule.evaluate(scanner);
 		
@@ -111,7 +100,7 @@ public class ExactWordPatternRuleTest {
 	@Test
 	public void interface_is_NOT_found_scanner_column_is_0__int() {
 		scanner = new OneLineSimpleTestCharacterScanner("int");
-		ExactWordPatternRule rule = new ExactWordPatternRule(new BashVariableDetector(), "interface", token);
+		ExactWordPatternRule rule = new ExactWordPatternRule(detector, "interface", token);
 		rule.trace=true;
 		rule.evaluate(scanner);
 		
@@ -122,7 +111,7 @@ public class ExactWordPatternRuleTest {
 	@Test
 	public void interface_is_NOT_found_scanner_column_is_0__in() {
 		scanner = new OneLineSimpleTestCharacterScanner("in");
-		ExactWordPatternRule rule = new ExactWordPatternRule(new BashVariableDetector(), "interface", token);
+		ExactWordPatternRule rule = new ExactWordPatternRule(detector, "interface", token);
 		rule.trace=true;
 		rule.evaluate(scanner);
 		
