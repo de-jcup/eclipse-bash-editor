@@ -1,4 +1,4 @@
-package de.jcup.basheditor.parser;
+package de.jcup.basheditor.scriptmodel;
 
 import java.util.ArrayList;
 import java.util.Collection;

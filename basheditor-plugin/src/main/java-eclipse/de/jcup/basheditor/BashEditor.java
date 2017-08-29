@@ -31,8 +31,11 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
@@ -43,9 +46,12 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import de.jcup.basheditor.document.BashFileDocumentProvider;
 import de.jcup.basheditor.document.BashTextFileDocumentProvider;
+import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
+import de.jcup.basheditor.outline.Item;
 
 public class BashEditor extends TextEditor implements StatusMessageSupport, IResourceChangeListener {
 
@@ -59,6 +65,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	private BashBracketsSupport bracketMatcher = new BashBracketsSupport();
 
 	private SourceViewerDecorationSupport additionalSourceViewerSupport;
+	private BashEditorContentOutlinePage outlinePage;
 
 	public BashEditor() {
 		setSourceViewerConfiguration(new BashSourceViewerConfiguration(this));
@@ -66,6 +73,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	}
 
 	public void resourceChanged(IResourceChangeEvent event) {
+		getOutlinePage().rebuild(getDocument());
 	}
 
 	public void setErrorMessage(String message) {
@@ -95,6 +103,12 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
 	}
 
+	public BashEditorContentOutlinePage getOutlinePage() {
+		if (outlinePage == null) {
+			outlinePage = new BashEditorContentOutlinePage(this);
+		}
+		return outlinePage;
+	}
 
 	/**
 	 * Installs an additional source viewer support which uses editor
@@ -178,6 +192,9 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		if (BashEditor.class.equals(adapter)) {
 			return (T) this;
 		}
+		if (IContentOutlinePage.class.equals(adapter)) {
+			return (T) getOutlinePage();
+		}
 		if (ColorManager.class.equals(adapter)) {
 			return (T) getColorManager();
 		}
@@ -197,9 +214,6 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		}
 		return super.getAdapter(adapter);
 	}
-
-
-
 
 	/**
 	 * Jumps to the matching bracket.
@@ -222,7 +236,6 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		return doc.get();
 	}
 
-
 	@Override
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		setDocumentProvider(createDocumentProvider(input));
@@ -232,6 +245,17 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			BashEditorUtil.logWarning("No document available for given input:" + input);
 			return;
 		}
+		Display display = Display.getCurrent();
+		if (display == null) {
+			display = Display.getDefault();
+		}
+		display.asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				getOutlinePage().rebuild(document);
+			}
+		});
 	}
 
 	private IDocumentProvider createDocumentProvider(IEditorInput input) {
@@ -360,6 +384,26 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			getSelectionProvider().setSelection(newSelection);
 		} catch (BadLocationException e) {
 			/* ignore */
+		}
+	}
+
+	public void openSelectedTreeItemInEditor(ISelection selection, boolean grabFocus) {
+		if (selection instanceof IStructuredSelection) {
+			IStructuredSelection ss = (IStructuredSelection) selection;
+			Object firstElement = ss.getFirstElement();
+			if (firstElement instanceof Item) {
+				Item item = (Item) firstElement;
+				int offset = item.getOffset();
+				int length = item.getLength();
+				if (length == 0) {
+					/* fall back */
+					length = 1;
+				}
+				selectAndReveal(offset, length);
+				if (grabFocus) {
+					setFocus();
+				}
+			}
 		}
 	}
 
