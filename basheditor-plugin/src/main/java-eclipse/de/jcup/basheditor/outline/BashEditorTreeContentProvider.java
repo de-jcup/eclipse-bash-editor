@@ -13,10 +13,10 @@ import de.jcup.basheditor.scriptmodel.BashScriptModelBuilder;
 public class BashEditorTreeContentProvider implements ITreeContentProvider {
 
 	private Item[] items;
-	private BashScriptModelBuilder parser;
+	private BashScriptModelBuilder modelBuilder;
 
 	public BashEditorTreeContentProvider() {
-		this.parser = new BashScriptModelBuilder();
+		this.modelBuilder = new BashScriptModelBuilder();
 	}
 
 	@Override
@@ -25,7 +25,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			IDocument document = (IDocument) inputElement;
 			String text = document.get();
 			
-			BashScriptModel model = parser.build(text);
+			BashScriptModel model = modelBuilder.build(text);
 			this.items = build(model);
 		}
 		if (items!=null && items.length>0){
