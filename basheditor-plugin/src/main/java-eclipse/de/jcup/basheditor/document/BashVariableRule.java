@@ -13,20 +13,23 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.document;
+package de.jcup.basheditor.document;
 
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 
+/**
+ * A special rule to scan bash variables
+ * @author Albert Tregnaghi
+ *
+ */
 public class BashVariableRule implements IPredicateRule {
 
-	private BashVariableDetector bashVariableDetector;
 	private IToken token;
 
-	public BashVariableRule(BashVariableDetector bashVariableDetector, IToken token) {
-		this.bashVariableDetector = bashVariableDetector;
+	public BashVariableRule(IToken token) {
 		this.token = token;
 	}
 
@@ -42,21 +45,59 @@ public class BashVariableRule implements IPredicateRule {
 
 	@Override
 	public IToken evaluate(ICharacterScanner scanner, boolean resume) {
-		char start =(char) scanner.read();
-		if (! bashVariableDetector.isWordStart(start)){
+		char start = (char) scanner.read();
+		if (!isWordStart(start)) {
 			scanner.unread();
 			return Token.UNDEFINED;
 		}
-		
+		boolean curlyBracesOpened = false;
 		/* okay is a variable, so read until end reached */
-		do{
+		do {
 			char c = (char) scanner.read();
-			if (ICharacterScanner.EOF== c || (! bashVariableDetector.isWordPart(c))){
+			if (ICharacterScanner.EOF == c || (!isWordPart(c, curlyBracesOpened))) {
 				scanner.unread();
 				break;
 			}
-		}while(true);
+			if (c == '{') {
+				curlyBracesOpened = true;
+			}
+			if (c == '}') {
+				/* end of variable detected */
+				break;
+			}
+		} while (true);
 		return getSuccessToken();
 	}
 
+	private boolean isWordStart(char c) {
+		return c == '$';
+	}
+
+	// see http://tldp.org/LDP/abs/html/string-manipulation.html
+	private boolean isWordPart(char c, boolean curlyBracesOpened) {
+		if (curlyBracesOpened) {
+			if (c == '{') {
+				return false; // already opened brace, we do not support {{
+			}
+		}
+		boolean wordPart = false;
+		wordPart = wordPart || Character.isLetterOrDigit(c);
+		wordPart = wordPart || c == '_';
+		wordPart = wordPart || c == '{';
+
+		if (curlyBracesOpened) {
+			wordPart = wordPart || c == '}';
+			wordPart = wordPart || c == ' ';
+			wordPart = wordPart || c == '/';
+			wordPart = wordPart || c == '=';
+			wordPart = wordPart || c == '*';
+			wordPart = wordPart || c == '@';
+			wordPart = wordPart || c == ':';
+			wordPart = wordPart || c == '#';
+			wordPart = wordPart || c == '$';
+			wordPart = wordPart || c == '%';
+			wordPart = wordPart || c == '-';
+		}
+		return wordPart;
+	}
 }
