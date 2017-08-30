@@ -1,8 +1,13 @@
+![Bash Editor Logo](https://github.com/de-jcup/eclipse-bash-editor/blob/master/basheditor-plugin/html/images/bash-editor-logo.png)
+
+[![Build status:](https://travis-ci.org/de-jcup/eclipse-bash-editor.svg?branch=master)](https://travis-ci.org/de-jcup/eclipse-bash-editor)
+
 ## In a nutshell
 Bash Editor is a plugin for eclipse to edit bash scripts (.sh)
 
 It supports
 - Syntax coloring, customizeable, additional defaults for dark theme
+- Outline (functions only)
 - Bracket switching + highlighting
 - Block commenting (CTRL+7)
 - Auto bracket closing for []
