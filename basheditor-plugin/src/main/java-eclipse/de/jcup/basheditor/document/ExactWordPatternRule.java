@@ -83,7 +83,8 @@ public class ExactWordPatternRule extends WordPatternRule{
 		char charAfter = (char)scannerRead(scanner, counter);
 		scannerUnread(scanner, counter);
 		
-		if (fDetector.isWordPart(charAfter)){
+		/* when not a whitespace and not end reached - do cleanup*/
+		if (! Character.isWhitespace(charAfter) && ICharacterScanner.EOF!=charAfter){
 			/* the word is more than the exact one - e.g. instead of 'test' 'testx' ... so not correct*/
 			return counter.cleanupAndReturn(scanner,false);
 		}
