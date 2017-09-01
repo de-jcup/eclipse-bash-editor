@@ -20,10 +20,17 @@ import java.util.Collection;
 
 public class BashScriptModel {
 
-	Collection<BashFunction> functions = new ArrayList<BashFunction>();
+	Collection<BashFunction> functions = new ArrayList<>();
+	Collection<BashError> errors = new ArrayList<>();
 
 	public Collection<BashFunction> getFunctions() {
 		return functions;
 	}
+
+	public Collection<BashError> getErrors() {
+		return errors;
+	}
+	
+	
 
 }

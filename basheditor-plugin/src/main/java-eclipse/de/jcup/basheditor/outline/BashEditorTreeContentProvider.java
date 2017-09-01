@@ -71,7 +71,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.name = function.getName();
 			item.type = ItemType.FUNCTION;
 			item.offset = function.getPosition();
-			item.length=function.getLength();
+			item.length=function.getLengthToNameEnd();
 			list.add(item);
 		}
 		return list.toArray(new Item[list.size()]);

@@ -24,13 +24,58 @@ import org.junit.Test;
 public class BashScriptModelBuilderTest {
 
 	private BashScriptModelBuilder builderToTest;
+
 	@Before
 	public void before() {
 		builderToTest = new BashScriptModelBuilder();
 	}
 
 	@Test
-	public void function_xyz_no_curly_brackets_is_not_recognized_as_function() {
+	public void a_comments_with_function_is_not_handled_as_function() {
+		/* prepare */
+		String code = "#\n# this function displays...\nfunction display {\n}";
+		
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+
+		/* test */
+		assertThat(bashScriptModel).hasFunction("display").hasFunctions(1).hasNoErrors();
+	}
+
+	@Test
+	/**
+	 * Bash does not support functions inside functions - so if somebody such
+	 * things it's not allowed
+	 */
+	public void function_f1_has_only_open_bracket__must_have_no_function_but_an_error() {
+		/* prepare */
+		String code = "function f1(){";
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+
+		/* test */
+		assertThat(bashScriptModel).hasNoFunctions().hasErrors(1);
+	}
+
+	@Test
+	/**
+	 * Bash does not support functions inside functions - so if somebody such
+	 * things it's not allowed
+	 */
+	public void function_f1_containing_illegal_child_function_f1b__followed_by_function_f2__results_in_functions_f1_f2__only() {
+		/* prepare */
+		String code = "function f1(){function f1b() {}} function f2 {}";
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+
+		/* test */
+		assertThat(bashScriptModel).hasFunctions(2).hasFunction("f1").hasFunction("f2").hasNoFunction("f1b");
+	}
+
+	@Test
+	public void function_xyz_no_curly_brackets_is_not_recognized_as_function_and_has_an_error() {
 		/* prepare */
 		String code = "function xy";
 
@@ -38,11 +83,11 @@ public class BashScriptModelBuilderTest {
 		BashScriptModel bashScriptModel = builderToTest.build(code);
 
 		/* test */
-		assertThat(bashScriptModel).hasNoFunctions();
+		assertThat(bashScriptModel).hasNoFunctions().hasErrors(1);
 	}
-	
+
 	@Test
-	public void function_read_hyphen_file__curlyBrackets_open_close__is_recognized_as_function_read_hyphen_file() {
+	public void function_read_hyphen_file__curlyBrackets_open_close__is_recognized_as_function_read_hyphen_file__and_has_no_errors() {
 		/* prepare */
 		String code = "function read-file{}";
 
@@ -50,9 +95,9 @@ public class BashScriptModelBuilderTest {
 		BashScriptModel bashScriptModel = builderToTest.build(code);
 
 		/* test */
-		assertThat(bashScriptModel).hasFunctions(1).hasFunction("read-file");
+		assertThat(bashScriptModel).hasFunctions(1).hasFunction("read-file").hasNoErrors();
 	}
-	
+
 	@Test
 	public void function_read_hyphen_file_curlyBraceOpen_NewLine__content_NewLine_curlybraceClose_is_recognized_as_function_read_hyphen_file() {
 		/* prepare */
@@ -64,11 +109,11 @@ public class BashScriptModelBuilderTest {
 		/* test */
 		assertThat(bashScriptModel).hasFunctions(1).hasFunction("read-file");
 	}
-	
+
 	@Test
 	public void function_read_hyphen_file_hypen_format_followed_with_brackets_is_recognized_as_function_read_hyphen_file_hypen_format() {
 		/* prepare */
-		String code = "function read-file-format()";
+		String code = "function read-file-format()\n{\n}";
 
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(code);
@@ -76,11 +121,11 @@ public class BashScriptModelBuilderTest {
 		/* test */
 		assertThat(bashScriptModel).hasFunctions(1).hasFunction("read-file-format");
 	}
-	
+
 	@Test
 	public void function_read_hyphen_file_hypen_format_space_followed_with_brackets_is_recognized_as_function_read_hyphen_file_hypen_format() {
 		/* prepare */
-		String code = "function read-file-format ()";
+		String code = "function read-file-format (){}";
 
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(code);
@@ -134,26 +179,26 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void a_line_with_function_test_is_recognized_and_returns_function_with_pos_0() {
+	public void a_line_with_function_test_is_recognized_and_returns_function_with_pos_0_and_has_no_errors() {
 		BashScriptModel bashScriptModel = builderToTest.build("function test {}");
 		assertNotNull(bashScriptModel);
 
 		/* test */
-		assertThat(bashScriptModel).hasFunctions(1).hasFunctionWithPosition("test",0);
+		assertThat(bashScriptModel).hasFunctions(1).hasFunctionWithPosition("test", 0).hasNoErrors();
 	}
 
 	@Test
 	public void a_line_with_function_test_is_recognized_and_returns_function_with_pos_1_when_first_line_empty() {
 		BashScriptModel bashScriptModel = builderToTest.build("\nfunction test {}");
 		/* test */
-		assertThat(bashScriptModel).hasFunctions(1).hasFunctionWithPosition("test",1);
+		assertThat(bashScriptModel).hasFunctions(1).hasFunctionWithPosition("test", 1);
 	}
 
 	@Test
 	public void a_line_with_5_spaces_and_function_test_is_recognized_and_returns_function_with_pos_5() {
 		BashScriptModel bashScriptModel = builderToTest.build("     function test {}");
 		/* test */
-		assertThat(bashScriptModel).hasFunctions(1).hasFunctionWithPosition("test",5);
+		assertThat(bashScriptModel).hasFunctions(1).hasFunctionWithPosition("test", 5);
 	}
 
 	@Test

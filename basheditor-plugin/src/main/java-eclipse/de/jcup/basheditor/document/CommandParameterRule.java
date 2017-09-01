@@ -51,7 +51,7 @@ public class CommandParameterRule implements IPredicateRule {
 		scanner.unread();
 		char beforeStart = (char) scanner.read();
 		if (' ' !=beforeStart){
-			/* no unread necessary, scanner is at start position*/
+			/* no unread necessary, scanner is at start start*/
 			return Token.UNDEFINED;
 		}
 		/* go after start again*/

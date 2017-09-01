@@ -19,10 +19,10 @@ public class BashFunction {
 
 	String name;
 	int position;
-	int length;
+	int lengthToNameEnd;
 
-	public int getLength() {
-		return length;
+	public int getLengthToNameEnd() {
+		return lengthToNameEnd;
 	}
 	
 	public String getName() {

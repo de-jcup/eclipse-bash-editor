@@ -58,12 +58,12 @@ public class AssertScriptModel {
 				fail("Did not expect, but script has function with name:" + functionName);
 			}
 
-			/* assert position if wanted */
+			/* assert start if wanted */
 			assertFunctionHasPosition(found, expectedPosition);
 
 		} else {
 			if (excpectedFunctionExists) {
-				fail("This script has NO function with name:" + functionName+". functinos contained are:"+createFunctionStringList());
+				fail("This script has NO function with name:" + functionName+". But it contains following functions:"+createFunctionStringList());
 			}
 		}
 
@@ -96,6 +96,21 @@ public class AssertScriptModel {
 		Collection<BashFunction> functions = model.getFunctions();
 		assertNotNull(functions);
 		return functions;
+	}
+	
+	private Collection<BashError> getErrors() {
+		Collection<BashError> errors = model.getErrors();
+		assertNotNull(errors);
+		return errors;
+	}
+
+	public AssertScriptModel hasErrors(int expectedAmountOfErrors) {
+		assertEquals("Script has not expected amount of errors!",expectedAmountOfErrors, getErrors().size());
+		return this;
+	}
+
+	public AssertScriptModel hasNoErrors() {
+		return hasErrors(0);
 	}
 
 }

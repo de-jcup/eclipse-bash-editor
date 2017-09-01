@@ -115,8 +115,8 @@ public class PresentationSupport implements IPresentationDamager, IPresentationR
 	 *            the text presentation to be extended
 	 * @param offset
 	 *            the offset of the range to be styled
-	 * @param length
-	 *            the length of the range to be styled
+	 * @param lengthToNameEnd
+	 *            the lengthToNameEnd of the range to be styled
 	 * @param attr
 	 *            the attribute describing the style of the range to be styled
 	 */

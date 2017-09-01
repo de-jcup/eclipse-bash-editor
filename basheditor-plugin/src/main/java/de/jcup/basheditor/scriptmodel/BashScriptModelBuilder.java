@@ -13,10 +13,13 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+package de.jcup.basheditor.scriptmodel;
+
+import java.util.List;
 
 /**
  * A bash script model builder
+ * 
  * @author Albert Tregnaghi
  *
  */
@@ -51,15 +54,32 @@ public class BashScriptModelBuilder {
 	 * @param bashScript
 	 */
 	void buildFunctions(String bashScript, BashScriptModel model) {
+		/*
+		 * A little bit ugly but this works: we use the simple scan approach for
+		 * functions and combine it with a token parser result for only comment
+		 * tokens. So it is possible to check if the function text is inside a a
+		 * comment or its code part. Maybe in future the token parser could be
+		 * used inside this builder to iterate over code tokens as well and to
+		 * handle the logic by the token only - without own string scannnig etc.
+		 */
+		TokenParser parser = new TokenParser();
+		parser.setFilterCodeTokens(true);
+		parser.setFilterCommentTokens(false);
+
+		List<ParseToken> commentTokens = parser.parse(bashScript);
+
 		String scanString = "function ";
-		int pos = 0;
-		while (true) {
-			if (pos >= bashScript.length()) {
-				break;
-			}
+		scanForFunctions(bashScript, model, commentTokens, scanString, 0);
+	}
+
+	private void scanForFunctions(String bashScript, BashScriptModel model, List<ParseToken> commentTokens,
+			String scanString, int pos) {
+		while (pos < bashScript.length()) {
+			
 			pos = bashScript.indexOf(scanString, pos);
 			if (pos < 0) {
-				break;
+				/* no longer found*/
+				return;
 			}
 			if (pos > 0) {
 				/* check if before is only a whitespace */
@@ -69,6 +89,21 @@ public class BashScriptModelBuilder {
 					/* not a function but e.g. XFunction */
 					continue;
 				}
+			}
+			/* check if its inside a comment */
+			boolean isInsideComment = false;
+			for (ParseToken comment : commentTokens) {
+				if (comment.start < pos) {
+					if (pos < comment.end) {
+						/* is inside comment */
+						isInsideComment = true;
+						pos = comment.end;
+						break;
+					}
+				}
+			}
+			if (isInsideComment) {
+				continue;
 			}
 			int namePos = pos + scanString.length();
 			while (true) {
@@ -86,29 +121,79 @@ public class BashScriptModelBuilder {
 			/* +++++++++++++ */
 			StringBuilder sb = new StringBuilder();
 
-			while (true) {
-				if (namePos >= bashScript.length()) {
-					break;
-				}
+			while (namePos < bashScript.length()) {
 				char charAt = bashScript.charAt(namePos);
-				if (Character.isLetterOrDigit(charAt)|| charAt=='_'|| charAt=='-') {
+				if (Character.isLetterOrDigit(charAt) || charAt == '_' || charAt == '-') {
 					sb.append(charAt);
 					namePos++;
 				} else {
 					break;
 				}
 			}
-
+			int lengthToName = namePos - pos;
+			/* ++++++++++++ */
+			/* + validate + */
+			/* ++++++++++++ */
+			int amountOfCurlyOpen = 0;
+			int amountOfCurlyCose = 0;
+			boolean curlyScanStarted = false;
+			/* after name there must curly braces */
+			while (namePos < bashScript.length() && (!curlyScanStarted || (amountOfCurlyOpen != amountOfCurlyCose))) {
+				char charAt = bashScript.charAt(namePos++);
+				if (Character.isWhitespace(charAt)) {
+					continue;
+				}
+				if (charAt == '(') {
+					continue;
+				}
+				if (charAt == ')') {
+					continue;
+				}
+				if (charAt == '{') {
+					curlyScanStarted = true;
+					amountOfCurlyOpen++;
+					continue;
+				}
+				if (charAt == '}') {
+					amountOfCurlyCose++;
+					continue;
+				}
+			}
+			boolean failed = checkFailed(model, pos, amountOfCurlyOpen, amountOfCurlyCose, curlyScanStarted);
+			if (failed){
+				return;
+			}
 			/* next create the function and add... */
-			BashFunction bashFunction = new BashFunction();
-			bashFunction.name = sb.toString();
-			bashFunction.position = pos;
-			bashFunction.length = namePos - pos;
-
-			model.functions.add(bashFunction);
+			addFunction(model, pos, sb, lengthToName);
 
 			pos = namePos + 1;
 		}
+	}
+
+	private boolean checkFailed(BashScriptModel model, int pos, int amountOfCurlyOpen, int amountOfCurlyCose,
+			boolean curlyScanStarted) {
+		boolean failed=false;
+		if (!curlyScanStarted) {
+			/* means no real function end - illegal */
+			model.errors.add(new BashError(pos, "Function has no curly braces defined!"));
+			failed=true;
+		}
+		if (amountOfCurlyOpen != amountOfCurlyCose) {
+			/* means no real function end - illegal */
+			model.errors.add(
+					new BashError(pos, "Function has no end. You must define a bash function by curly braces!"));
+			failed=true;
+		}
+		return failed;
+	}
+
+	private void addFunction(BashScriptModel model, int pos, StringBuilder sb, int lengthToName) {
+		BashFunction bashFunction = new BashFunction();
+		bashFunction.name = sb.toString();
+		bashFunction.position = pos;
+		bashFunction.lengthToNameEnd = lengthToName;
+
+		model.functions.add(bashFunction);
 	}
 
 }

@@ -44,7 +44,7 @@ class BashBracketInsertionCompleter extends KeyAdapter {
 			return;
 		}
 		/*
-		 * do not use last caret position - because the listener ordering
+		 * do not use last caret start - because the listener ordering
 		 * could be different
 		 */
 		ISelectionProvider selectionProvider = this.bashEditor.getSelectionProvider();
