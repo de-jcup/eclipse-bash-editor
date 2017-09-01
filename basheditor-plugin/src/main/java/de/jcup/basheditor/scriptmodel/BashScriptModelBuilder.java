@@ -51,11 +51,7 @@ public class BashScriptModelBuilder {
 	 * @param bashScript
 	 */
 	void buildFunctions(String bashScript, BashScriptModel model) {
-		scanForIdentifierFollowedByWord(bashScript, model, "function ");
-	}
-
-	
-	private void scanForIdentifierFollowedByWord(String bashScript, BashScriptModel model, String scanString) {
+		String scanString = "function ";
 		int pos = 0;
 		while (true) {
 			if (pos >= bashScript.length()) {
@@ -95,7 +91,7 @@ public class BashScriptModelBuilder {
 					break;
 				}
 				char charAt = bashScript.charAt(namePos);
-				if (Character.isLetterOrDigit(charAt)|| charAt=='_') {
+				if (Character.isLetterOrDigit(charAt)|| charAt=='_'|| charAt=='-') {
 					sb.append(charAt);
 					namePos++;
 				} else {
