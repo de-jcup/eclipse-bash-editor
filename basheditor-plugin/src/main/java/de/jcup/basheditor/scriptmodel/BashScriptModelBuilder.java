@@ -84,7 +84,7 @@ public class BashScriptModelBuilder {
 			if (pos > 0) {
 				/* check if before is only a whitespace */
 				char before = bashScript.charAt(pos - 1);
-				if (!Character.isWhitespace(before)) {
+				if (!Character.isWhitespace(before) && before!=';') {
 					pos++;
 					/* not a function but e.g. XFunction */
 					continue;
