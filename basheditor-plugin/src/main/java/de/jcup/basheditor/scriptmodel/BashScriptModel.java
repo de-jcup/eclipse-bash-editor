@@ -17,6 +17,7 @@
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 public class BashScriptModel {
 
@@ -29,6 +30,24 @@ public class BashScriptModel {
 
 	public Collection<BashError> getErrors() {
 		return errors;
+	}
+	
+	public String getCombinedErrorMessage(){
+		StringBuilder sb = new StringBuilder();
+		Iterator<BashError> it = getErrors().iterator();
+		while (it.hasNext()){
+			BashError error = it.next();
+			sb.append(error.getMessage());
+			if (it.hasNext()){
+				sb.append("\n");
+			}
+		}
+		
+		return sb.toString();
+	}
+	
+	public boolean hasErrors(){
+		return !getErrors().isEmpty();
 	}
 	
 	
