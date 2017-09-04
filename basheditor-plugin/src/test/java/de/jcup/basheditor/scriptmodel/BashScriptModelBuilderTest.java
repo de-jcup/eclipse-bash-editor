@@ -31,10 +31,58 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
+	public void semicolon_function_xy_is_recognized_as_function_xy() {
+		/* prepare */
+		String code = ";function xy{}";
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+
+		/* test */
+		assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").hasNoErrors();
+	}
+
+	@Test
+	public void space_semicolon_function_xy_is_recognized_as_function_xy() {
+		/* prepare */
+		String code = " ;function xy{}";
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+
+		/* test */
+		assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").hasNoErrors();
+	}
+
+	@Test
+	public void space_semicolon_space_function_xy_is_recognized_as_function_xy() {
+		/* prepare */
+		String code = " ; function xy{}";
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+
+		/* test */
+		assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").hasNoErrors();
+	}
+
+	@Test
+	public void semicolon_space_function_xy_is_recognized_as_function_xy() {
+		/* prepare */
+		String code = "; function xy{}";
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+
+		/* test */
+		assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").hasNoErrors();
+	}
+
+	@Test
 	public void a_comments_with_function_is_not_handled_as_function() {
 		/* prepare */
 		String code = "#\n# this function displays...\nfunction display {\n}";
-		
+
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(code);
 
