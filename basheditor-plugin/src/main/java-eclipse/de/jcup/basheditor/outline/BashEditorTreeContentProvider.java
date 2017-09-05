@@ -43,7 +43,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			BashScriptModel model = modelBuilder.build(text);
 			this.items = build(model);
 			if (model.hasErrors()){
-				return new Object[] { model.getCombinedErrorMessage() };
+				return new Object[] { "Bash script contains errors." };
 			}
 		}
 		if (items!=null && items.length>0){

@@ -31,18 +31,6 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void getErrorMessage_returns_messages_for_error() {
-		/* prepare */
-		String code = ";function xy{}";
-
-		/* execute */
-		BashScriptModel bashScriptModel = builderToTest.build(code);
-		bashScriptModel.getErrors().add(new BashError(100, "buh"));
-		/* test */
-		assertEquals("buh", bashScriptModel.getCombinedErrorMessage());
-	}
-
-	@Test
 	public void semicolon_function_xy_is_recognized_as_function_xy() {
 		/* prepare */
 		String code = ";function xy{}";
