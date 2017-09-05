@@ -16,49 +16,32 @@
 package de.jcup.basheditor.outline;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.ui.IEditorPart;
 
-import de.jcup.basheditor.BashEditorUtil;
-import de.jcup.basheditor.EclipseUtil;
-import de.jcup.basheditor.scriptmodel.BashError;
 import de.jcup.basheditor.scriptmodel.BashFunction;
 import de.jcup.basheditor.scriptmodel.BashScriptModel;
-import de.jcup.basheditor.scriptmodel.BashScriptModelBuilder;
 
 public class BashEditorTreeContentProvider implements ITreeContentProvider {
 
-	private Item[] items;
-	private BashScriptModelBuilder modelBuilder;
-
-	public BashEditorTreeContentProvider() {
-		this.modelBuilder = new BashScriptModelBuilder();
+	private static final String BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS = "Bash script does not contain any functions";
+	private static final Object[] RESULT_WHEN_EMPTY = new Object[] { BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS };
+	private Object[] items;
+	
+	BashEditorTreeContentProvider(){
+		items = RESULT_WHEN_EMPTY;
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof IDocument) {
-			IDocument document = (IDocument) inputElement;
-			BashEditorUtil.removeAllScriptErrors();
-
-			String text = document.get();
-			BashScriptModel model = modelBuilder.build(text);
-
-			this.items = build(model);
-
-			if (model.hasErrors()) {
-				addErrorMarkers(model);
-				return new Object[] { "Bash script contains errors." };
-			}
+		if (! (inputElement instanceof BashScriptModel)){
+			return new Object[] { "Unsupported input element" };
 		}
 		if (items != null && items.length > 0) {
 			return items;
 		}
-		return new Object[] { "This bash script does not contain any functions" };
+		return RESULT_WHEN_EMPTY;
 	}
 
 	@Override
@@ -76,23 +59,8 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 		return false;
 	}
 
-	private void addErrorMarkers(BashScriptModel model) {
-		if (model==null){
-			return;
-		}
-		IEditorPart editor = EclipseUtil.getActiveEditor();
-		if (editor == null) {
-			return;
-		}
-		Collection<BashError> errors = model.getErrors();
-		for (BashError error : errors) {
-			BashEditorUtil.addScriptError(editor, error);
-		}
-
-	}
-
-	private Item[] build(BashScriptModel model) {
-		List<Item> list = new ArrayList<>();
+	private Object[] createItems(BashScriptModel model) {
+		List<Object> list = new ArrayList<>();
 		for (BashFunction function : model.getFunctions()) {
 			Item item = new Item();
 			item.name = function.getName();
@@ -101,7 +69,21 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.length = function.getLengthToNameEnd();
 			list.add(item);
 		}
-		return list.toArray(new Item[list.size()]);
+		if (list.isEmpty()){
+			list.add(BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS);
+		}
+		if (model.hasErrors()){
+			list.add(0,"Bash script contains errors.");
+		}
+		return list.toArray(new Object[list.size()]);
+	}
+
+	public void rebuildTree(BashScriptModel model) {
+		if (model == null) {
+			items = null;
+			return;
+		}
+		items = createItems(model);
 	}
 
 }

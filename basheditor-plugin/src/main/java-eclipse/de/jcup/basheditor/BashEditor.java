@@ -17,11 +17,17 @@ package de.jcup.basheditor;
 
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 
+import java.util.Collection;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -34,7 +40,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
@@ -43,6 +48,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
+import org.eclipse.ui.ide.ResourceUtil;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -51,6 +57,9 @@ import de.jcup.basheditor.document.BashFileDocumentProvider;
 import de.jcup.basheditor.document.BashTextFileDocumentProvider;
 import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
 import de.jcup.basheditor.outline.Item;
+import de.jcup.basheditor.scriptmodel.BashError;
+import de.jcup.basheditor.scriptmodel.BashScriptModel;
+import de.jcup.basheditor.scriptmodel.BashScriptModelBuilder;
 
 public class BashEditor extends TextEditor implements StatusMessageSupport, IResourceChangeListener {
 
@@ -62,17 +71,70 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	public static final String EDITOR_RULER_CONTEXT_MENU_ID = EDITOR_CONTEXT_MENU_ID + ".ruler";
 
 	private BashBracketsSupport bracketMatcher = new BashBracketsSupport();
-
 	private SourceViewerDecorationSupport additionalSourceViewerSupport;
 	private BashEditorContentOutlinePage outlinePage;
+	private BashScriptModelBuilder modelBuilder;
 
 	public BashEditor() {
 		setSourceViewerConfiguration(new BashSourceViewerConfiguration(this));
-
+		this.modelBuilder = new BashScriptModelBuilder();
 	}
 
 	public void resourceChanged(IResourceChangeEvent event) {
-		getOutlinePage().rebuild(getDocument());
+		if (isMarkerChangeForThisEditor(event)) {
+			int severity = getSeverity();
+
+			setTitleImageDependingOnSeverity(severity);
+		}
+	}
+
+	void setTitleImageDependingOnSeverity(int severity) {
+		if (severity == IMarker.SEVERITY_ERROR) {
+			setTitleImage(EclipseUtil.getImage("icons/bash-editor-with-error.png", BashEditorActivator.PLUGIN_ID));
+		} else {
+			setTitleImage(EclipseUtil.getImage("icons/bash-editor.png", BashEditorActivator.PLUGIN_ID));
+		}
+	}
+
+	private int getSeverity() {
+		IEditorInput editorInput = getEditorInput();
+		if (editorInput == null) {
+			return IMarker.SEVERITY_INFO;
+		}
+		try {
+			final IResource resource = ResourceUtil.getResource(editorInput);
+			if (resource == null) {
+				return IMarker.SEVERITY_INFO;
+			}
+			int severity = resource.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+			return severity;
+		} catch (CoreException e) {
+			// Might be a project that is not open
+		}
+		return IMarker.SEVERITY_INFO;
+	}
+
+	private void addErrorMarkers(BashScriptModel model) {
+		if (model == null) {
+			return;
+		}
+		IDocument document = getDocument();
+		if (document==null){
+			return;
+		}
+		Collection<BashError> errors = model.getErrors();
+		for (BashError error : errors) {
+			int startPos = error.getStart();
+			int line;
+			try {
+				line = document.getLineOfOffset(startPos);
+			} catch (BadLocationException e) {
+				EclipseUtil.logError("Cannot get line offset for " + startPos, e);
+				line = 0;
+			}
+			BashEditorUtil.addScriptError(this, line, error);
+		}
+
 	}
 
 	public void setErrorMessage(String message) {
@@ -100,6 +162,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		 */
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 
+		setTitleImageInitial();
 	}
 
 	public BashEditorContentOutlinePage getOutlinePage() {
@@ -239,22 +302,85 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		setDocumentProvider(createDocumentProvider(input));
 		super.doSetInput(input);
-		IDocument document = getDocument();
-		if (document == null) {
-			BashEditorUtil.logWarning("No document available for given input:" + input);
-			return;
-		}
-		Display display = Display.getCurrent();
-		if (display == null) {
-			display = Display.getDefault();
-		}
-		display.asyncExec(new Runnable() {
+
+		rebuildOutline();
+	}
+
+	@Override
+	protected void editorSaved() {
+		super.editorSaved();
+		rebuildOutline();
+	}
+
+	private void rebuildOutline() {
+		String text = getDocumentText();
+
+		EclipseUtil.safeAsyncExec(new Runnable() {
 
 			@Override
 			public void run() {
-				getOutlinePage().rebuild(document);
+				BashEditorUtil.removeScriptErrors(BashEditor.this);
+
+				BashScriptModel model = modelBuilder.build(text);
+
+				getOutlinePage().rebuild(model);
+
+				if (model.hasErrors()) {
+					addErrorMarkers(model);
+				}
 			}
 		});
+	}
+
+	/**
+	 * Set initial title image dependent on current marker severity. This will
+	 * mark error icon on startup time which is not handled by resource change
+	 * handling, because having no change...
+	 */
+	private void setTitleImageInitial() {
+		IResource resource = resolveResource();
+		if (resource != null) {
+			try {
+				int maxSeverity = resource.findMaxProblemSeverity(null, true, IResource.DEPTH_INFINITE);
+				setTitleImageDependingOnSeverity(maxSeverity);
+			} catch (CoreException e) {
+				/* ignore */
+			}
+		}
+	}
+
+	/**
+	 * Resolves resource from current editor input.
+	 * 
+	 * @return file resource or <code>null</code>
+	 */
+	private IResource resolveResource() {
+		IEditorInput input = getEditorInput();
+		if (!(input instanceof IFileEditorInput)) {
+			return null;
+		}
+		return ((IFileEditorInput) input).getFile();
+	}
+
+	private boolean isMarkerChangeForThisEditor(IResourceChangeEvent event) {
+		IResource resource = ResourceUtil.getResource(getEditorInput());
+		if (resource == null) {
+			return false;
+		}
+		IPath path = resource.getFullPath();
+		if (path == null) {
+			return false;
+		}
+		IResourceDelta eventDelta = event.getDelta();
+		if (eventDelta == null) {
+			return false;
+		}
+		IResourceDelta delta = eventDelta.findMember(path);
+		if (delta == null) {
+			return false;
+		}
+		boolean isMarkerChangeForThisResource = (delta.getFlags() & IResourceDelta.MARKERS) != 0;
+		return isMarkerChangeForThisResource;
 	}
 
 	private IDocumentProvider createDocumentProvider(IEditorInput input) {

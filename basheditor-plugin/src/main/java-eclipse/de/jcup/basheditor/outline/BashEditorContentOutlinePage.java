@@ -15,21 +15,20 @@
  */
  package de.jcup.basheditor.outline;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import de.jcup.basheditor.BashEditor;
+import de.jcup.basheditor.scriptmodel.BashScriptModel;
 
 public class BashEditorContentOutlinePage extends ContentOutlinePage implements IDoubleClickListener {
 
-	private ITreeContentProvider contentProvider;
+	private BashEditorTreeContentProvider contentProvider;
 	private Object input;
 	private BashEditor editor;
 	private BashEditorOutlineLabelProvider labelProvider;
@@ -66,15 +65,16 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
 		editor.openSelectedTreeItemInEditor(selection,true);
 	}
 	
-	public void rebuild(IDocument document) {
-		if (document==null){
+	public void rebuild(BashScriptModel model) {
+		if (model==null){
 			return;
 		}
+		contentProvider.rebuildTree(model);
+
 		TreeViewer treeViewer= getTreeViewer();
-		if (treeViewer==null){
-			return;
+		if (treeViewer!=null){
+			treeViewer.setInput(model);
 		}
-		treeViewer.setInput(document);
-		
 	}
+	
 }

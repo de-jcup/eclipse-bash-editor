@@ -13,7 +13,7 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor;
+package de.jcup.basheditor;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -42,44 +42,54 @@ public class BashEditorUtil {
 	public static void logWarning(String warning) {
 		getLog().log(new Status(IStatus.WARNING, BashEditorActivator.PLUGIN_ID, warning));
 	}
-	
+
 	public static void logError(String error, Throwable t) {
-		getLog().log(new Status(IStatus.ERROR, BashEditorActivator.PLUGIN_ID, error,t));
+		getLog().log(new Status(IStatus.ERROR, BashEditorActivator.PLUGIN_ID, error, t));
 	}
-	
-	public static void removeAllScriptErrors() {
-		try {
-			scriptProblemMarkerHelper.removeAllRegisteredMarkers();
-		} catch (CoreException e) {
-			logError("Was not able to remove all build script errors", e);
-		}
-	}
-	
-	public static void addScriptError(IEditorPart editor, BashError error){
-		if (editor==null){
-			return;
-		}
-		if (error==null){
+
+	public static void removeScriptErrors(IEditorPart editor) {
+		if (editor == null) {
 			return;
 		}
 		IEditorInput input = editor.getEditorInput();
-		if (input==null){
+		if (input == null) {
 			return;
 		}
 		IResource editorResource = input.getAdapter(IResource.class);
-		if (editorResource==null){
+		if (editorResource == null) {
+			return;
+		}
+		scriptProblemMarkerHelper.removeMarkers(editorResource);
+	}
+
+	public static void addScriptError(IEditorPart editor, int line, BashError error) {
+		if (editor == null) {
+			return;
+		}
+		if (error == null) {
+			return;
+		}
+
+		IEditorInput input = editor.getEditorInput();
+		if (input == null) {
+			return;
+		}
+		IResource editorResource = input.getAdapter(IResource.class);
+		if (editorResource == null) {
 			return;
 		}
 		try {
-			scriptProblemMarkerHelper.createErrorMarker(editorResource,error.getMessage(),-1, error.getStart(), error.getStart()+error.getEnd());
+			scriptProblemMarkerHelper.createErrorMarker(editorResource, error.getMessage(), line, error.getStart(),
+					+ error.getEnd());
 		} catch (CoreException e) {
-			logError("Was not able to create error marker", e);
+			logError("Was not able to add error markers", e);
 		}
+
 	}
 
 	private static ILog getLog() {
 		ILog log = BashEditorActivator.getDefault().getLog();
 		return log;
 	}
-	
+
 }

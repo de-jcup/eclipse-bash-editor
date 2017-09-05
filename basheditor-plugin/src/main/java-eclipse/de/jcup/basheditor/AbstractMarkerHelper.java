@@ -126,25 +126,25 @@ abstract class AbstractMarkerHelper {
 	/**
 	 * Removes all markers from this file having defined marker type
 	 * 
-	 * @param file
+	 * @param resource
 	 */
-	protected void removeMarkers(IFile file) {
-		if (file == null) {
+	public void removeMarkers(IResource resource) {
+		if (resource == null) {
 			return;
 		}
-		removeMarkers(file, markerType);
+		removeMarkers(resource, markerType);
 
 	}
 
-	private IMarker[] removeMarkers(IFile file, String markerType) {
-		if (file == null) {
+	private IMarker[] removeMarkers(IResource resource, String markerType) {
+		if (resource == null) {
 			/* maybe sync problem - guard close */
 			return new IMarker[] {};
 		}
 		IMarker[] tasks = null;
-		if (file != null) {
+		if (resource != null) {
 			try {
-				tasks = file.findMarkers(markerType, true, IResource.DEPTH_ZERO);
+				tasks = resource.findMarkers(markerType, true, IResource.DEPTH_ZERO);
 				for (int i = 0; i < tasks.length; i++) {
 					tasks[i].delete();
 				}

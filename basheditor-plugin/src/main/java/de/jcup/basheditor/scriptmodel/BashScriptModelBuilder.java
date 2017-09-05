@@ -74,17 +74,18 @@ public class BashScriptModelBuilder {
 
 	private void scanForFunctions(String bashScript, BashScriptModel model, List<ParseToken> commentTokens,
 			String scanString, int pos) {
+		int maxPos = bashScript.length() - 1;
 		while (pos < bashScript.length()) {
-			
+
 			pos = bashScript.indexOf(scanString, pos);
 			if (pos < 0) {
-				/* no longer found*/
+				/* no longer found */
 				return;
 			}
 			if (pos > 0) {
 				/* check if before is only a whitespace */
 				char before = bashScript.charAt(pos - 1);
-				if (!Character.isWhitespace(before) && before!=';') {
+				if (!Character.isWhitespace(before) && before != ';') {
 					pos++;
 					/* not a function but e.g. XFunction */
 					continue;
@@ -159,8 +160,9 @@ public class BashScriptModelBuilder {
 					continue;
 				}
 			}
-			boolean failed = checkFailed(model, pos, namePos, amountOfCurlyOpen, amountOfCurlyCose, curlyScanStarted, sb);
-			if (failed){
+			boolean failed = checkFailed(model, pos, namePos, amountOfCurlyOpen, amountOfCurlyCose, curlyScanStarted,
+					sb, maxPos);
+			if (failed) {
 				return;
 			}
 			/* next create the function and add... */
@@ -170,19 +172,25 @@ public class BashScriptModelBuilder {
 		}
 	}
 
-	private boolean checkFailed(BashScriptModel model, int pos, int end, int amountOfCurlyOpen, int amountOfCurlyCose,
-			boolean curlyScanStarted, StringBuilder sb) {
-		boolean failed=false;
+	private boolean checkFailed(BashScriptModel model, int start, int endPos, int amountOfCurlyOpen,
+			int amountOfCurlyCose, boolean curlyScanStarted, StringBuilder sb, int maxPos) {
+		boolean failed = false;
+		int end = endPos;
+		if (end > maxPos) {
+			end = maxPos;
+		}
 		if (!curlyScanStarted) {
 			/* means no real function end - illegal */
-			model.errors.add(new BashError(pos, end, "Function '"+sb.toString()+"' has no curly braces defined:"));
-			failed=true;
+			BashError error = new BashError(start, end,
+					"Function '" + sb.toString() + "' has no curly braces defined!");
+			model.errors.add(error);
+			failed = true;
 		}
 		if (amountOfCurlyOpen != amountOfCurlyCose) {
 			/* means no real function end - illegal */
-			model.errors.add(
-					new BashError(pos, end, "Function '"+sb.toString()+"'has no ending curly brace!"));
-			failed=true;
+			BashError error = new BashError(start, end, "Function '" + sb.toString() + "'has no ending curly brace!");
+			model.errors.add(error);
+			failed = true;
 		}
 		return failed;
 	}
