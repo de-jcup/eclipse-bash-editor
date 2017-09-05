@@ -13,14 +13,19 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.outline;
+package de.jcup.basheditor.outline;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.ui.IEditorPart;
 
+import de.jcup.basheditor.BashEditorUtil;
+import de.jcup.basheditor.EclipseUtil;
+import de.jcup.basheditor.scriptmodel.BashError;
 import de.jcup.basheditor.scriptmodel.BashFunction;
 import de.jcup.basheditor.scriptmodel.BashScriptModel;
 import de.jcup.basheditor.scriptmodel.BashScriptModelBuilder;
@@ -38,15 +43,19 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof IDocument) {
 			IDocument document = (IDocument) inputElement;
+			BashEditorUtil.removeAllScriptErrors();
+
 			String text = document.get();
-			
 			BashScriptModel model = modelBuilder.build(text);
+
 			this.items = build(model);
-			if (model.hasErrors()){
+
+			if (model.hasErrors()) {
+				addErrorMarkers(model);
 				return new Object[] { "Bash script contains errors." };
 			}
 		}
-		if (items!=null && items.length>0){
+		if (items != null && items.length > 0) {
 			return items;
 		}
 		return new Object[] { "This bash script does not contain any functions" };
@@ -67,6 +76,21 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 		return false;
 	}
 
+	private void addErrorMarkers(BashScriptModel model) {
+		if (model==null){
+			return;
+		}
+		IEditorPart editor = EclipseUtil.getActiveEditor();
+		if (editor == null) {
+			return;
+		}
+		Collection<BashError> errors = model.getErrors();
+		for (BashError error : errors) {
+			BashEditorUtil.addScriptError(editor, error);
+		}
+
+	}
+
 	private Item[] build(BashScriptModel model) {
 		List<Item> list = new ArrayList<>();
 		for (BashFunction function : model.getFunctions()) {
@@ -74,7 +98,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.name = function.getName();
 			item.type = ItemType.FUNCTION;
 			item.offset = function.getPosition();
-			item.length=function.getLengthToNameEnd();
+			item.length = function.getLengthToNameEnd();
 			list.add(item);
 		}
 		return list.toArray(new Item[list.size()]);

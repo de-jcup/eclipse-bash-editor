@@ -2,19 +2,26 @@ package de.jcup.basheditor.scriptmodel;
 
 public class BashError {
 	
-	public BashError(int line, String message){
-		this.position=line;
+	private int end;
+	private int start;
+	private String message;
+
+	public BashError(int start, int end, String message){
+		this.start=start;
+		this.end=end;
 		this.message=message;
 	}
 
-	private int position;
-	private String message;
 
-	public int getPosition() {
-		return position;
+	public int getStart() {
+		return start;
 	}
 
 	public String getMessage() {
 		return message;
+	}
+
+	public int getEnd() {
+		return end;
 	}
 }

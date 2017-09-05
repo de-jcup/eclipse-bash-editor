@@ -159,7 +159,7 @@ public class BashScriptModelBuilder {
 					continue;
 				}
 			}
-			boolean failed = checkFailed(model, pos, amountOfCurlyOpen, amountOfCurlyCose, curlyScanStarted);
+			boolean failed = checkFailed(model, pos, namePos, amountOfCurlyOpen, amountOfCurlyCose, curlyScanStarted, sb);
 			if (failed){
 				return;
 			}
@@ -170,18 +170,18 @@ public class BashScriptModelBuilder {
 		}
 	}
 
-	private boolean checkFailed(BashScriptModel model, int pos, int amountOfCurlyOpen, int amountOfCurlyCose,
-			boolean curlyScanStarted) {
+	private boolean checkFailed(BashScriptModel model, int pos, int end, int amountOfCurlyOpen, int amountOfCurlyCose,
+			boolean curlyScanStarted, StringBuilder sb) {
 		boolean failed=false;
 		if (!curlyScanStarted) {
 			/* means no real function end - illegal */
-			model.errors.add(new BashError(pos, "Function has no curly braces defined!"));
+			model.errors.add(new BashError(pos, end, "Function '"+sb.toString()+"' has no curly braces defined:"));
 			failed=true;
 		}
 		if (amountOfCurlyOpen != amountOfCurlyCose) {
 			/* means no real function end - illegal */
 			model.errors.add(
-					new BashError(pos, "Function has no end. You must define a bash function by curly braces!"));
+					new BashError(pos, end, "Function '"+sb.toString()+"'has no ending curly brace!"));
 			failed=true;
 		}
 		return failed;

@@ -15,13 +15,21 @@
  */
  package de.jcup.basheditor;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 
 import de.jcup.basheditor.preferences.BashEditorPreferences;
+import de.jcup.basheditor.scriptmodel.BashError;
 
 public class BashEditorUtil {
+
+	private static UnpersistedMarkerHelper scriptProblemMarkerHelper = new UnpersistedMarkerHelper(
+			"de.jcup.basheditor.script.problem");
 
 	public static BashEditorPreferences getPreferences() {
 		return BashEditorPreferences.getInstance();
@@ -38,9 +46,40 @@ public class BashEditorUtil {
 	public static void logError(String error, Throwable t) {
 		getLog().log(new Status(IStatus.ERROR, BashEditorActivator.PLUGIN_ID, error,t));
 	}
+	
+	public static void removeAllScriptErrors() {
+		try {
+			scriptProblemMarkerHelper.removeAllRegisteredMarkers();
+		} catch (CoreException e) {
+			logError("Was not able to remove all build script errors", e);
+		}
+	}
+	
+	public static void addScriptError(IEditorPart editor, BashError error){
+		if (editor==null){
+			return;
+		}
+		if (error==null){
+			return;
+		}
+		IEditorInput input = editor.getEditorInput();
+		if (input==null){
+			return;
+		}
+		IResource editorResource = input.getAdapter(IResource.class);
+		if (editorResource==null){
+			return;
+		}
+		try {
+			scriptProblemMarkerHelper.createErrorMarker(editorResource,error.getMessage(),-1, error.getStart(), error.getStart()+error.getEnd());
+		} catch (CoreException e) {
+			logError("Was not able to create error marker", e);
+		}
+	}
 
 	private static ILog getLog() {
 		ILog log = BashEditorActivator.getDefault().getLog();
 		return log;
 	}
+	
 }

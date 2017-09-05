@@ -16,7 +16,7 @@ public class BashScriptModelTest {
 	@Test
 	public void has_errors_returns_true_when_one_error_is_added() {
 		/* execute */
-		modelToTest.getErrors().add(new BashError(100, "buh"));
+		modelToTest.getErrors().add(new BashError(100, 120, "buh"));
 		
 		/* test */
 		assertTrue(modelToTest.hasErrors());
