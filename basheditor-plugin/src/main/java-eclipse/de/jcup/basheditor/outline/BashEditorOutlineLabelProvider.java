@@ -32,7 +32,8 @@ import de.jcup.basheditor.EclipseUtil;
 public class BashEditorOutlineLabelProvider extends BaseLabelProvider implements IStyledLabelProvider, IColorProvider {
 
 	private static final String ICON_FUNCTION = "public_co.png";
-
+	private static final String ICON_ERROR ="error_tsk.png";
+	private static final String ICON_INFO ="info_tsk.png";
 
 	private Styler outlineItemTypeStyler = new Styler() {
 
@@ -49,7 +50,7 @@ public class BashEditorOutlineLabelProvider extends BaseLabelProvider implements
 
 	@Override
 	public Color getForeground(Object element) {
-		return null;// getColorManager().getColor(GradleEditorColorConstants.BLACK);
+		return null;
 	}
 
 	@Override
@@ -70,6 +71,10 @@ public class BashEditorOutlineLabelProvider extends BaseLabelProvider implements
 			switch (type) {
 			case FUNCTION:
 				return getOutlineImage(ICON_FUNCTION);
+			case META_ERROR:
+				return getOutlineImage(ICON_ERROR);
+			case META_INFO:
+				return getOutlineImage(ICON_INFO);
 			default:
 				return null;
 			}

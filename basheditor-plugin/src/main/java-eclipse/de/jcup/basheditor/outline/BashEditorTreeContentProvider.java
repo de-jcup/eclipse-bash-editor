@@ -25,6 +25,7 @@ import de.jcup.basheditor.scriptmodel.BashScriptModel;
 
 public class BashEditorTreeContentProvider implements ITreeContentProvider {
 
+	private static final String BASH_SCRIPT_CONTAINS_ERRORS = "Bash script contains errors.";
 	private static final String BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS = "Bash script does not contain any functions";
 	private static final Object[] RESULT_WHEN_EMPTY = new Object[] { BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS };
 	private Object[] items;
@@ -59,8 +60,8 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 		return false;
 	}
 
-	private Object[] createItems(BashScriptModel model) {
-		List<Object> list = new ArrayList<>();
+	private Item[] createItems(BashScriptModel model) {
+		List<Item> list = new ArrayList<>();
 		for (BashFunction function : model.getFunctions()) {
 			Item item = new Item();
 			item.name = function.getName();
@@ -70,12 +71,22 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			list.add(item);
 		}
 		if (list.isEmpty()){
-			list.add(BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS);
+			Item item = new Item();
+			item.name=BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS;
+			item.type=ItemType.META_INFO;
+			item.offset=0;
+			item.length=0;
+			list.add(item);
 		}
 		if (model.hasErrors()){
-			list.add(0,"Bash script contains errors.");
+			Item item = new Item();
+			item.name=BASH_SCRIPT_CONTAINS_ERRORS;
+			item.type=ItemType.META_ERROR;
+			item.offset=0;
+			item.length=0;
+			list.add(0,item);
 		}
-		return list.toArray(new Object[list.size()]);
+		return list.toArray(new Item[list.size()]);
 	}
 
 	public void rebuildTree(BashScriptModel model) {
