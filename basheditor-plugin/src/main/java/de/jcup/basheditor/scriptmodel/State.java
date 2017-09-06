@@ -3,7 +3,12 @@ package de.jcup.basheditor.scriptmodel;
 enum State{
 	INIT,
 	INSIDE_COMMENT,
-	START_TEXT,
+	
+	INSIDE_SINGLE_STRING,
+	INSIDE_DOUBLE_STRING,
+	INSIDE_DOUBLE_TICKED,
+	
+	CODE,
 	FUNCTION, 
 	UNKNOWN,
 }

@@ -15,6 +15,7 @@
  */
 package de.jcup.basheditor.scriptmodel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +34,20 @@ public class BashScriptModelBuilder {
 	public BashScriptModel build(String bashScript) {
 		BashScriptModel model = new BashScriptModel();
 		buildFunctions(bashScript, model);
+		
+		TokenParser parser = new TokenParser();
+		parser.setFilterCodeTokens(false);
+		parser.setFilterCommentTokens(true);
+		
+		List<ParseToken> tokens = parser.parse(bashScript);
+		List<ValidationResult> results = new ArrayList<>();
+		results.addAll(new DoEndsWithDoneValidator().validate(tokens));
+		
+		for (ValidationResult result: results){
+			if (result instanceof BashError){
+				model.errors.add((BashError) result);
+			}
+		}
 		return model;
 	}
 

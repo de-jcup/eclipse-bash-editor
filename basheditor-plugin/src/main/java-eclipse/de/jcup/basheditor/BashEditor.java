@@ -58,6 +58,7 @@ import de.jcup.basheditor.document.BashTextFileDocumentProvider;
 import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
 import de.jcup.basheditor.outline.Item;
 import de.jcup.basheditor.scriptmodel.BashError;
+import de.jcup.basheditor.scriptmodel.ValidationResult;
 import de.jcup.basheditor.scriptmodel.BashScriptModel;
 import de.jcup.basheditor.scriptmodel.BashScriptModelBuilder;
 

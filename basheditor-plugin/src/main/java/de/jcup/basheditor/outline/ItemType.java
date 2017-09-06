@@ -17,5 +17,9 @@
 
 public enum ItemType {
 	
-	FUNCTION
+	FUNCTION, 
+	
+	META_INFO, 
+	
+	META_ERROR
 }

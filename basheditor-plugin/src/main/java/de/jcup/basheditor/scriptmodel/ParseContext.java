@@ -66,4 +66,22 @@ class ParseContext{
 	public boolean inState(State state) {
 		return getState().equals(state);
 	}
+
+	public char getCharBefore() {
+		int posBefore = pos-1;
+		if (posBefore>=0){
+			if (chars.length>0){
+				return chars[posBefore];
+			}
+		}
+		return 0;
+	}
+
+	public boolean insideString() {
+		boolean inString = false;
+		inString= inString || inState(State.INSIDE_DOUBLE_STRING);
+		inString= inString || inState(State.INSIDE_DOUBLE_TICKED);
+		inString= inString || inState(State.INSIDE_SINGLE_STRING);
+		return inString;
+	}
 }

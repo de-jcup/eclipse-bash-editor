@@ -1,6 +1,6 @@
 package de.jcup.basheditor.scriptmodel;
 
-public class BashError {
+public class BashError implements ValidationResult {
 	
 	private int end;
 	private int start;
@@ -12,16 +12,23 @@ public class BashError {
 		this.message=message;
 	}
 
-
+	@Override
 	public int getStart() {
 		return start;
 	}
 
+	@Override
 	public String getMessage() {
 		return message;
 	}
 
+	@Override
 	public int getEnd() {
 		return end;
+	}
+	
+	@Override
+	public Type getType() {
+		return Type.ERROR;
 	}
 }

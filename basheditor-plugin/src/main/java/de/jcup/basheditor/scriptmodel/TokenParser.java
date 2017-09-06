@@ -47,7 +47,7 @@ public class TokenParser {
 				if (!filterCommentTokens){
 					context.addTokenAndResetText();
 				}
-				context.switchTo(State.START_TEXT);
+				context.switchTo(State.CODE);
 				return;
 			}else{
 				if (!filterCommentTokens){
@@ -56,15 +56,109 @@ public class TokenParser {
 			}
 			return;
 		}
+		/* ++++++++++++++++++++++++++++++++ */
+		/* ++++++ Not in comment state  +++ */
+		/* ++++++++++++++++++++++++++++++++ */
 		
-		/* not in comment state */
+		/* handle single string */
+		if (c == '\''){
+			if (context.inState(State.INSIDE_DOUBLE_STRING)){
+				/* inside other string - ignore*/
+				context.appendCharToText();
+				return;
+			}
+			if (context.inState(State.INSIDE_DOUBLE_TICKED)){
+				/* inside other string - ignore*/
+				context.appendCharToText();
+				return;
+			}
+			if (context.getCharBefore()=='\\'){
+				/* escaped*/
+				context.appendCharToText();
+				return;
+			}
+			if (context.inState(State.INSIDE_SINGLE_STRING)){
+				/* close single string*/
+				context.appendCharToText();
+				context.switchTo(State.CODE);
+				return;
+			}
+			context.switchTo(State.INSIDE_SINGLE_STRING);
+			return;
+		}
+		/* handle double string */
+		if (c == '\"'){
+			if (context.inState(State.INSIDE_SINGLE_STRING)){
+				/* inside other string - ignore*/
+				context.appendCharToText();
+				return;
+			}
+			if (context.inState(State.INSIDE_DOUBLE_TICKED)){
+				/* inside other string - ignore*/
+				context.appendCharToText();
+				return;
+			}
+			if (context.getCharBefore()=='\\'){
+				/* escaped*/
+				context.appendCharToText();
+				return;
+			}
+			if (context.inState(State.INSIDE_DOUBLE_STRING)){
+				/* close double string*/
+				context.appendCharToText();
+				context.switchTo(State.CODE);
+				return;
+			}
+			context.switchTo(State.INSIDE_DOUBLE_STRING);
+			return;
+		}
+		/* handle double ticked string */
+		if (c == '`'){
+			if (context.inState(State.INSIDE_SINGLE_STRING)){
+				/* inside other string - ignore*/
+				context.appendCharToText();
+				return;
+			}
+			if (context.inState(State.INSIDE_DOUBLE_STRING)){
+				/* inside other string - ignore*/
+				context.appendCharToText();
+				return;
+			}
+			if (context.getCharBefore()=='\\'){
+				/* escaped*/
+				context.appendCharToText();
+				return;
+			}
+			if (context.inState(State.INSIDE_DOUBLE_TICKED)){
+				/* close double string*/
+				context.appendCharToText();
+				context.switchTo(State.CODE);
+				return;
+			}
+			context.switchTo(State.INSIDE_DOUBLE_TICKED);
+			return;
+		}
+		if (context.insideString()){
+			context.appendCharToText();
+			return;
+		}
+		/* +++++++++++++++++++++++++++++++ */
+		/* ++++++ Not in string state  +++ */
+		/* +++++++++++++++++++++++++++++++ */
 		if (c == '\r') {
+			/* ignore - we only use \n inside the data parsed so we will handle easy \r\n and \n*/
 			return;
 		}
 		if (c == '\n') {
-			context.switchTo(State.START_TEXT);
+			if (context.insideString()){
+				context.appendCharToText();
+				return;
+			}
+			context.addTokenAndResetText();
+			context.switchTo(State.CODE);
 			return;
 		}
+		
 		if (c == '#') {
 			if (!filterCodeTokens){
 				context.addTokenAndResetText();

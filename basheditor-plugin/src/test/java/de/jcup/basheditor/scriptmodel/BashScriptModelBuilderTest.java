@@ -215,7 +215,7 @@ public class BashScriptModelBuilderTest {
 		BashScriptModel bashScriptModel = builderToTest
 				.build("function test1 {\n#something\n}\n #other line\n\nfunction test2 {\n#something else\n}\n");
 		/* test */
-		assertThat(bashScriptModel).hasFunctions(2).hasFunction("test1").hasFunction("test2");
+		assertThat(bashScriptModel).hasFunction("test1").hasFunction("test2").hasFunctions(2);
 	}
 
 	@Test
