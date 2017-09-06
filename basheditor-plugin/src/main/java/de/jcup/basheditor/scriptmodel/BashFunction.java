@@ -20,6 +20,7 @@ public class BashFunction {
 	String name;
 	int position;
 	int lengthToNameEnd;
+	public int end;
 
 	public int getLengthToNameEnd() {
 		return lengthToNameEnd;
@@ -33,9 +34,13 @@ public class BashFunction {
 		return position;
 	}
 	
+	public int getEnd() {
+		return end;
+	}
+	
 	@Override
 	public String toString() {
-		return "function "+name+"():pos="+position;
+		return "function "+name+"()";
 	}
 
 }

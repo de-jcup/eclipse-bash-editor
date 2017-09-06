@@ -45,6 +45,29 @@ public class AssertParseTokens {
 		return this;
 	}
 	
+	/**
+	 * Ensures there exists at least one token with given text. The first token will be returned
+	 * @param token
+	 * @return token, never <code>null</code>
+	 */
+	public AssertParseToken token(String token){
+		return token(token,1);
+	}
+		
+	public AssertParseToken token(String token, int tokenNumber){
+		int nr=0;
+		for (ParseToken found: parseTokens){
+			if (token.equals(found.text)){
+				nr++;
+				if (tokenNumber==nr){
+					return AssertParseToken.assertThat(found);
+				}
+			}
+		}
+		fail("Tried to get token '"+token+"' number:"+tokenNumber+" but did found only "+nr+" in:"+parseTokens);
+		return null;
+	}
+
 	public AssertParseTokens containsTokens(String ...tokens){
 		List<String> found = new ArrayList<String>();
 		for (ParseToken token: parseTokens){

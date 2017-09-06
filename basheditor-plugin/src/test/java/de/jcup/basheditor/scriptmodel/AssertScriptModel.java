@@ -24,7 +24,10 @@ public class AssertScriptModel {
 	}
 		
 	public AssertScriptModel hasFunctions(int amount) {
-		assertEquals("bash script model has not expected amount of functions!",amount, getFunctions().size());
+		Collection<BashFunction> functions = getFunctions();
+		if (amount!=functions.size()){
+			assertEquals("bash script model has not expected amount of functions \nfunctions found:"+functions,amount, functions.size());
+		}
 		return this;
 	}
 

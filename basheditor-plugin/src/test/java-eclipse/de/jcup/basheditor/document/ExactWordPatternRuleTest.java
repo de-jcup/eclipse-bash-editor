@@ -43,12 +43,15 @@ public class ExactWordPatternRuleTest {
 	}
 
 	@Test
-	public void interface_is_found_scanner_column_is_8_() {
+	public void interface_is_found() {
+		/* prepare */
 		scanner = new OneLineSimpleTestCharacterScanner("interface");
 		ExactWordPatternRule rule = new ExactWordPatternRule(detector, "interface", token);
 		rule.trace=true;
+		/* execute */
 		rule.evaluate(scanner);
 		
+		/* test */
 		assertEquals(8,scanner.column);
 		
 	}
@@ -58,8 +61,10 @@ public class ExactWordPatternRuleTest {
 		scanner = new OneLineSimpleTestCharacterScanner("function show_help_and_exit(){}");
 		ExactWordPatternRule rule = new ExactWordPatternRule(detector, "help", token);
 		rule.trace=true;
+		/* execute */
 		rule.evaluate(scanner);
 		
+		/* test */
 		assertEquals(0,scanner.column);
 		
 	}
@@ -68,9 +73,12 @@ public class ExactWordPatternRuleTest {
 	public void function_with_keyword_help_inside_is_found_as_funtion() {
 		scanner = new OneLineSimpleTestCharacterScanner("function show_help_and_exit(){}");
 		ExactWordPatternRule rule = new ExactWordPatternRule(detector, "function", token);
-		rule.trace=true;
-		rule.evaluate(scanner);
 		
+		/* execute */
+		IToken result = rule.evaluate(scanner);
+		
+		/* test */
+		assertEquals(token, result);
 		assertEquals(8,scanner.column);
 		
 	}

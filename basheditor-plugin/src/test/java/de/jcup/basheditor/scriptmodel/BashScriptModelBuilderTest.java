@@ -29,6 +29,42 @@ public class BashScriptModelBuilderTest {
 	public void before() {
 		builderToTest = new BashScriptModelBuilder();
 	}
+	
+	@Test
+	public void function_a_open_bracket_open_bracket_close_bracket_has_error(){
+		/* prepare*/
+		String code = "function a {{}}";
+		
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+		
+		/* test */
+		assertThat(bashScriptModel).hasFunction("a").hasErrors(1);
+	}
+	
+	@Test
+	public void usage_space_x_msg_space_y_fatal_space_z(){
+		/* prepare*/
+		String code = "Usage () {x} Msg () {y} Fatal () {z}";
+		
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+		
+		/* test */
+		assertThat(bashScriptModel).hasFunction("Usage").hasFunction("Msg").hasFunction("Fatal").hasFunctions(3);
+	}
+	
+	@Test
+	public void usage_x_msg_y_fatal_z(){
+		/* prepare*/
+		String code = "Usage() {x} Msg() {y} Fatal() {z}";
+		
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+		
+		/* test */
+		assertThat(bashScriptModel).hasFunction("Usage").hasFunction("Msg").hasFunction("Fatal").hasFunctions(3);
+	}
 
 	@Test
 	public void semicolon_function_xy_is_recognized_as_function_xy() {
@@ -42,6 +78,18 @@ public class BashScriptModelBuilderTest {
 		assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").hasNoErrors();
 	}
 
+	@Test
+	public void method_Usage_space_open_close_brackets__is_recognized_as_function_Usage(){
+		/* prepare */
+		String code = "Usage () {}";
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+
+		/* test */
+		assertThat(bashScriptModel).hasFunctions(1).hasFunction("Usage");
+	}
+	
 	@Test
 	public void space_semicolon_function_xy_is_recognized_as_function_xy() {
 		/* prepare */

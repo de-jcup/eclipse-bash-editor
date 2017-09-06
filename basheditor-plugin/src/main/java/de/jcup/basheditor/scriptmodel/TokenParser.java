@@ -5,24 +5,6 @@ import java.util.List;
 
 public class TokenParser {
 
-	private boolean filterCodeTokens;
-	private boolean filterCommentTokens = true;
-
-	public void setFilterCodeTokens(boolean filterCodeTokens) {
-		this.filterCodeTokens = filterCodeTokens;
-	}
-
-	public boolean isFilterCodeTokens() {
-		return filterCodeTokens;
-	}
-	public boolean isFilterCommentTokens() {
-		return filterCommentTokens;
-	}
-	
-	public void setFilterCommentTokens(boolean filterCommentTokens) {
-		this.filterCommentTokens = filterCommentTokens;
-	}
-
 	public List<ParseToken> parse(String bashScript) {
 		if (bashScript == null) {
 			return new ArrayList<>();
@@ -41,44 +23,40 @@ public class TokenParser {
 
 	private void parse(ParseContext context) {
 		char c = context.getCharAtPos();
-		if (context.inState(State.INSIDE_COMMENT)){
+		if (context.inState(State.INSIDE_COMMENT)) {
 			/* in comment state */
 			if (c == '\n') {
-				if (!filterCommentTokens){
-					context.addTokenAndResetText();
-				}
+				context.addTokenAndResetText();
 				context.switchTo(State.CODE);
 				return;
-			}else{
-				if (!filterCommentTokens){
-					context.appendCharToText();
-				}
+			} else {
+				context.appendCharToText();
 			}
 			return;
 		}
 		/* ++++++++++++++++++++++++++++++++ */
-		/* ++++++ Not in comment state  +++ */
+		/* ++++++ Not in comment state +++ */
 		/* ++++++++++++++++++++++++++++++++ */
-		
+
 		/* handle single string */
-		if (c == '\''){
-			if (context.inState(State.INSIDE_DOUBLE_STRING)){
-				/* inside other string - ignore*/
+		if (c == '\'') {
+			if (context.inState(State.INSIDE_DOUBLE_STRING)) {
+				/* inside other string - ignore */
 				context.appendCharToText();
 				return;
 			}
-			if (context.inState(State.INSIDE_DOUBLE_TICKED)){
-				/* inside other string - ignore*/
+			if (context.inState(State.INSIDE_DOUBLE_TICKED)) {
+				/* inside other string - ignore */
 				context.appendCharToText();
 				return;
 			}
-			if (context.getCharBefore()=='\\'){
-				/* escaped*/
+			if (context.getCharBefore() == '\\') {
+				/* escaped */
 				context.appendCharToText();
 				return;
 			}
-			if (context.inState(State.INSIDE_SINGLE_STRING)){
-				/* close single string*/
+			if (context.inState(State.INSIDE_SINGLE_STRING)) {
+				/* close single string */
 				context.appendCharToText();
 				context.switchTo(State.CODE);
 				return;
@@ -87,24 +65,24 @@ public class TokenParser {
 			return;
 		}
 		/* handle double string */
-		if (c == '\"'){
-			if (context.inState(State.INSIDE_SINGLE_STRING)){
-				/* inside other string - ignore*/
+		if (c == '\"') {
+			if (context.inState(State.INSIDE_SINGLE_STRING)) {
+				/* inside other string - ignore */
 				context.appendCharToText();
 				return;
 			}
-			if (context.inState(State.INSIDE_DOUBLE_TICKED)){
-				/* inside other string - ignore*/
+			if (context.inState(State.INSIDE_DOUBLE_TICKED)) {
+				/* inside other string - ignore */
 				context.appendCharToText();
 				return;
 			}
-			if (context.getCharBefore()=='\\'){
-				/* escaped*/
+			if (context.getCharBefore() == '\\') {
+				/* escaped */
 				context.appendCharToText();
 				return;
 			}
-			if (context.inState(State.INSIDE_DOUBLE_STRING)){
-				/* close double string*/
+			if (context.inState(State.INSIDE_DOUBLE_STRING)) {
+				/* close double string */
 				context.appendCharToText();
 				context.switchTo(State.CODE);
 				return;
@@ -113,24 +91,24 @@ public class TokenParser {
 			return;
 		}
 		/* handle double ticked string */
-		if (c == '`'){
-			if (context.inState(State.INSIDE_SINGLE_STRING)){
-				/* inside other string - ignore*/
+		if (c == '`') {
+			if (context.inState(State.INSIDE_SINGLE_STRING)) {
+				/* inside other string - ignore */
 				context.appendCharToText();
 				return;
 			}
-			if (context.inState(State.INSIDE_DOUBLE_STRING)){
-				/* inside other string - ignore*/
+			if (context.inState(State.INSIDE_DOUBLE_STRING)) {
+				/* inside other string - ignore */
 				context.appendCharToText();
 				return;
 			}
-			if (context.getCharBefore()=='\\'){
-				/* escaped*/
+			if (context.getCharBefore() == '\\') {
+				/* escaped */
 				context.appendCharToText();
 				return;
 			}
-			if (context.inState(State.INSIDE_DOUBLE_TICKED)){
-				/* close double string*/
+			if (context.inState(State.INSIDE_DOUBLE_TICKED)) {
+				/* close double string */
 				context.appendCharToText();
 				context.switchTo(State.CODE);
 				return;
@@ -138,46 +116,57 @@ public class TokenParser {
 			context.switchTo(State.INSIDE_DOUBLE_TICKED);
 			return;
 		}
-		if (context.insideString()){
+		if (context.insideString()) {
 			context.appendCharToText();
 			return;
 		}
 		/* +++++++++++++++++++++++++++++++ */
-		/* ++++++ Not in string state  +++ */
+		/* ++++++ Not in string state +++ */
 		/* +++++++++++++++++++++++++++++++ */
 		if (c == '\r') {
-			/* ignore - we only use \n inside the data parsed so we will handle easy \r\n and \n*/
+			/*
+			 * ignore - we only use \n inside the data parsed so we will handle
+			 * easy \r\n and \n
+			 */
+			context.moveCurrentPosWhenEmptyText();
 			return;
 		}
 		if (c == '\n') {
-			if (context.insideString()){
-				context.appendCharToText();
-				return;
-			}
 			context.addTokenAndResetText();
 			context.switchTo(State.CODE);
 			return;
 		}
-		
-		if (c == '#') {
-			if (!filterCodeTokens){
-				context.addTokenAndResetText();
-			}
-			context.switchTo(State.INSIDE_COMMENT);
-			if (!filterCommentTokens){
-				context.appendCharToText();
-			}
-		}else{
-			/* not inside a comment build token */
-			if (!filterCodeTokens){
-				if (Character.isWhitespace(c)){
-					context.addTokenAndResetText();
-					return;
-				}
-				context.appendCharToText();
-			}
+
+		if (c == ';') {
+			// special bash semicolon operator, separates only commands so
+			// handle like a whitespace
+			context.addTokenAndResetText();
+			context.switchTo(State.CODE);
+			return;
 		}
-	
+
+		if (c == '{' || c == '}') {
+			// block start/ endf found, add as own token
+			context.addTokenAndResetText();
+			context.appendCharToText();
+			context.addTokenAndResetText();
+			context.switchTo(State.CODE);
+			return;
+		}
+
+		if (c == '#') {
+			context.addTokenAndResetText();
+			context.switchTo(State.INSIDE_COMMENT);
+			context.appendCharToText();
+		} else {
+			/* not inside a comment build token nor in string, so whitespaces are not necessary!*/
+			if (Character.isWhitespace(c)) {
+				context.addTokenAndResetText();
+				return;
+			}
+			context.appendCharToText();
+		}
+
 	}
 
 }

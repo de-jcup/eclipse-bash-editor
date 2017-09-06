@@ -10,8 +10,12 @@ class ParseContext{
 	StringBuilder sb;
 	char[] chars;
 	int pos;
-	int posNextToken;
 	private State state = State.INIT;
+	private ParseToken currentToken;
+	
+	public ParseContext(){
+		currentToken=createToken();
+	}
 
 	public void appendCharToText(){
 		getSb().append(getCharAtPos());
@@ -19,7 +23,6 @@ class ParseContext{
 	
 	public StringBuilder getSb() {
 		if (sb==null){
-			posNextToken=pos;
 			sb=new StringBuilder();
 		}
 		return sb;
@@ -28,21 +31,34 @@ class ParseContext{
 		return getSb().toString();
 	}
 	
+	private ParseToken createToken(){
+		ParseToken token = new ParseToken();
+		token.start=pos;
+		return token;
+	}
+
 	public void addTokenAndResetText(){
-		if (getSb().length()==0){
-			// no token, nothing to reset 
+		if (moveCurrentPosWhenEmptyText()){
 			return;
 		}
-
-		ParseToken token = new ParseToken();
-		token.text=sb.toString();
-		token.start=posNextToken;
-		token.end=pos;
-		tokens.add(token);
+		
+		currentToken.text=sb.toString();
+		currentToken.end=pos;
+		tokens.add(currentToken);
+		
+		/* new token on next position */
+		currentToken=createToken();
+		currentToken.start=pos+1;
 		
 		resetText();
-		
-		posNextToken=pos;
+	}
+
+	public boolean moveCurrentPosWhenEmptyText() {
+		if (getSb().length()==0){
+			currentToken.start++;
+			return true;
+		}
+		return false;
 	}
 	
 	public void resetText(){

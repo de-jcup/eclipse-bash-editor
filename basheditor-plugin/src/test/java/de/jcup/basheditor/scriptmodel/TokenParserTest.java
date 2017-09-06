@@ -17,7 +17,193 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
+	@Test
+	public void for_abc_10_newlines_x_token_x_has_position_13() {
+		/* prepare */
+		String string = "abc\n\n\n\n\n\n\n\n\n\nx";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).token("x").hasStart(13);
+		
+	}
 	
+	@Test
+	public void for_a_cariage_return_newline_x__token_x_has_position_3() {
+		/* prepare */
+		String string = "a\r\nx";
+		System.out.println(string);
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).token("x").hasStart(3);
+		
+	}
+	@Test
+	public void for_ab_cariage_return_newline_x__token_x_has_position_4() {
+		/* prepare */
+		String string = "ab\r\nx";
+		System.out.println(string);
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).token("x").hasStart(4);
+		
+	}
+	
+	@Test
+	public void for_ab_cariage_return_newline_cariage_return_newline_x__token_x_has_position_4() {
+		/* prepare */
+		String string = "ab\r\n\r\nx";
+		System.out.println(string);
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).token("x").hasStart(6);
+		
+	}
+	@Test
+	public void for_abc_10_cariage_return_newlines_x_token_x_has_position_13() {
+		/* prepare */
+		String string = "abc\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nx";
+		System.out.println(string);
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).token("x").hasStart(23);
+		
+	}
+	
+	@Test
+	public void for_abc__token_abc_has_pos_0() {
+		/* prepare */
+		String string = "abc";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).token("abc").hasStart(0);
+		
+	}
+	
+	@Test
+	public void for_abc__token_abc_has_end_2() {
+		/* prepare */
+		String string = "abc";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).token("abc").hasEnd(2);
+		
+	}
+	
+	
+	@Test
+	public void for_space_abc__token_abc_has_pos_1() {
+		/* prepare */
+		String string = " abc";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).token("abc").hasStart(1);
+		
+	}
+	
+	@Test
+	public void for_space_abc__token_abc_has_end_3() {
+		/* prepare */
+		String string = " abc";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).token("abc").hasEnd(3);
+		
+	}
+	
+	@Test
+	public void token_abc_followed_by_open_curly_brace_results_in_two_tokens() {
+		/* prepare */
+		String string = "abc{";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).containsTokens("abc","{");
+	}
+	
+	@Test
+	public void token_abc_followed_by_close_curly_brace_results_in_two_tokens() {
+		/* prepare */
+		String string = "abc}";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).containsTokens("abc","}");
+	}
+	
+	@Test
+	public void token_abc_followed_by_open_and_close_curly_brace_results_in_three_tokens() {
+		/* prepare */
+		String string = "abc{}";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).containsTokens("abc","{","}");
+	}
+	
+	@Test
+	public void semicolon_abc_results_in_token_abc_only(){
+		/* prepare */
+		String string = ";abc";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).containsTokens("abc");
+	}
+	
+	@Test
+	public void semicolon_abc_semicolon_def_results_in_tokens_abc_and_def(){
+		/* prepare */
+		String string = ";abc;def";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).containsTokens("abc","def");
+	}
+	
+	@Test
+	public void semicolon_abc_space_def_results_in_tokens_abc_and_def(){
+		/* prepare */
+		String string = ";abc def";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).containsTokens("abc","def");
+	}
 	
 	@Test
 	public void do_x_do_y_done(){
@@ -212,115 +398,45 @@ public class TokenParserTest {
 	public void abc_def_ghji_is_parsed_as_three_tokens__and_correct_positions() {
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse("abc def ghji");
+		//............................................01234567890
 
 		/* test */
-		assertNotNull(tokens);
-		assertEquals(3, tokens.size());
+		assertThat(tokens).containsTokens("abc","def","ghji");
+		assertThat(tokens).token("abc").hasStart(0);
+		assertThat(tokens).token("def").hasStart(4);
+		assertThat(tokens).token("ghji").hasStart(8);
 
-		Iterator<ParseToken> it = tokens.iterator();
-		ParseToken token1 = it.next();
-		ParseToken token2 = it.next();
-		ParseToken token3 = it.next();
-
-		assertEquals(0, token1.start);
-		assertEquals(4, token2.start);
-		assertEquals(8, token3.start);
 	}
 
 	@Test
-	public void comment1_returns_no_tokens() {
+	public void comment1_returns_one_tokens() {
 		List<ParseToken> tokens = parserToTest.parse("#comment1");
 
-		assertNotNull(tokens);
-		assertEquals(0, tokens.size());
+		assertThat(tokens).containsOneToken("#comment1");
 
 	}
 
 	@Test
-	public void comment1_new_line_returns_no_tokens() {
+	public void comment1_new_line_returns_one_tokens() {
 		List<ParseToken> tokens = parserToTest.parse("#comment1\n");
 
-		assertNotNull(tokens);
-		assertEquals(0, tokens.size());
-
+		assertThat(tokens).containsOneToken("#comment1");
+		
 	}
 
 	@Test
-	public void comment1_new_line_function_space_name_returns_2_tokens_function_and_name() {
+	public void comment1_new_line_function_space_name_returns_3_tokens_comment1_function_and_name() {
 		List<ParseToken> tokens = parserToTest.parse("#comment1\nfunction name");
-
-		assertNotNull(tokens);
-		assertEquals(2, tokens.size());
-
-		Iterator<ParseToken> it = tokens.iterator();
-		ParseToken token1 = it.next();
-		ParseToken token2 = it.next();
-
-		assertEquals("function", token1.text);
-		assertEquals("name", token2.text);
+		
+		assertThat(tokens).containsTokens("#comment1","function","name");
 	}
 
 	@Test
-	public void comment1_new_line_function_space_name_directly_followed_by_brackets_returns_2_tokens_function_and_name() {
+	public void comment1_new_line_function_space_name_directly_followed_by_brackets_returns_3_tokens_comment1_function_and_name() {
 		List<ParseToken> tokens = parserToTest.parse("#comment1\nfunction name()");
 
-		assertNotNull(tokens);
-		assertEquals(2, tokens.size());
-
-		Iterator<ParseToken> it = tokens.iterator();
-		ParseToken token1 = it.next();
-		ParseToken token2 = it.next();
-
-		assertEquals("function", token1.text);
-		assertEquals("name()", token2.text);
+		assertThat(tokens).containsTokens("#comment1","function","name()");
 	}
 
-	@Test
-	public void test_code_tokens_not_filtered_per_default() {
-		/* test */
-		assertFalse(parserToTest.isFilterCodeTokens());
-	}
 
-	@Test
-	public void test_comment_tokens_filtered_per_default() {
-		/* test */
-		assertTrue(parserToTest.isFilterCommentTokens());
-	}
-
-	@Test
-	public void five_spaces_comment1_new_line_function_space_name_directly_followed_by_brackets_returns_1_token_comment1_when_codetokens_filtered_and_code_comments_not_filtered() {
-		parserToTest.setFilterCodeTokens(true);
-		parserToTest.setFilterCommentTokens(false);
-
-		List<ParseToken> tokens = parserToTest.parse("     #comment1\nfunction name()");
-
-		assertNotNull(tokens);
-		assertEquals(1, tokens.size());
-
-		Iterator<ParseToken> it = tokens.iterator();
-		ParseToken token1 = it.next();
-
-		assertEquals("#comment1", token1.text);
-		assertEquals(5, token1.start);
-		assertEquals(14, token1.end);
-	}
-
-	@Test
-	public void function1_comment1_function2_comment2_comments_not_filtered_but_code() {
-		parserToTest.setFilterCodeTokens(true);
-		parserToTest.setFilterCommentTokens(false);
-
-		List<ParseToken> tokens = parserToTest.parse("function 1 #comment1\nfunction name() #comment2");
-
-		assertNotNull(tokens);
-		assertEquals(2, tokens.size());
-
-		Iterator<ParseToken> it = tokens.iterator();
-		ParseToken token1 = it.next();
-
-		assertEquals("#comment1", token1.text);
-
-		ParseToken token2 = it.next();
-		assertEquals("#comment2", token2.text);
-	}
 }
