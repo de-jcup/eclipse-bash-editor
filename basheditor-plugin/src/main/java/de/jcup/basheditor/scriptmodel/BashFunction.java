@@ -32,5 +32,10 @@ public class BashFunction {
 	public int getPosition() {
 		return position;
 	}
+	
+	@Override
+	public String toString() {
+		return "function "+name+"():pos="+position;
+	}
 
 }

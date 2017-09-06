@@ -220,10 +220,13 @@ public class BashScriptModelBuilderTest {
 
 	@Test
 	public void two_lines_with_functions_test1_and_test2_are_recognized_and_returns_2_function_with_name_test1_and_teset2__but_with_backslash_r() {
-		BashScriptModel bashScriptModel = builderToTest
-				.build("function test1 {\n#something\n}\n #other line\n\nfunction test2 {\r\n#something else\r\n}\r\n");
+		/* prepare */
+		String bashScript = "function test1 {\n#something\n}\n #other line\n\nfunction test2 {\r\n#something else\r\n}\r\n";
+		
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(bashScript);
 		/* test */
-		assertThat(bashScriptModel).hasFunctions(2).hasFunction("test1").hasFunction("test2");
+		assertThat(bashScriptModel).hasNoErrors().hasFunction("test1").hasFunction("test2").hasFunctions(2);
 	}
 
 	@Test
