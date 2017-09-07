@@ -80,4 +80,20 @@ public class ParseToken {
 	public boolean isCloseBlock() {
 		 return text.length()==1 && text.endsWith("}");
 	}
+
+	public boolean isDo() {
+		return text.equals("do");
+	}
+	
+	public boolean isDone() {
+		return text.equals("done");
+	}
+	
+	public boolean isIf() {
+		return text.equals("if");
+	}
+	
+	public boolean isFi() {
+		return text.equals("fi");
+	}
 }

@@ -42,6 +42,7 @@ public class BashScriptModelBuilder {
 		List<ValidationResult> results = new ArrayList<>();
 		results.addAll(new DoEndsWithDoneValidator().validate(tokens));
 		results.addAll(new ClosedBlocksValidator().validate(tokens));
+		results.addAll(new IfEndsWithFiValidator().validate(tokens));
 
 		for (ValidationResult result : results) {
 			if (result instanceof BashError) {

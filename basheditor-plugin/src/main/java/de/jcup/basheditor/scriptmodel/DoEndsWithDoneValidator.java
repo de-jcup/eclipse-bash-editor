@@ -16,7 +16,7 @@ public class DoEndsWithDoneValidator extends AbstractParseTokenListValidator {
 			if (inspectedUnchainedDoToken == null) {
 				inspectedUnchainedDoToken = token;
 			}
-			if (isDo(token)) {
+			if (token.isDo()) {
 				if (countOfDo == countOfDone) {
 					/*
 					 * former do was closed - so set this token as last
@@ -25,7 +25,7 @@ public class DoEndsWithDoneValidator extends AbstractParseTokenListValidator {
 					inspectedUnchainedDoToken = token;
 				}
 				countOfDo++;
-			} else if (isDone(token)) {
+			} else if (token.isDone()) {
 				if (countOfDo > 0) {
 					countOfDone++;
 				}
@@ -37,14 +37,6 @@ public class DoEndsWithDoneValidator extends AbstractParseTokenListValidator {
 				result.add(error);
 			}
 		}
-	}
-
-	private boolean isDo(ParseToken token) {
-		return "do".equalsIgnoreCase(token.text);
-	}
-
-	private boolean isDone(ParseToken token) {
-		return "done".equalsIgnoreCase(token.text);
 	}
 
 }
