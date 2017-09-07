@@ -28,6 +28,11 @@ public class BashError implements ValidationResult {
 	}
 	
 	@Override
+	public String toString() {
+		return "BashError [message=" + message + ", end=" + end + ", start=" + start + "]";
+	}
+
+	@Override
 	public Type getType() {
 		return Type.ERROR;
 	}

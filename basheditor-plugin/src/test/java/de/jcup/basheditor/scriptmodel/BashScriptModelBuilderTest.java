@@ -33,7 +33,7 @@ public class BashScriptModelBuilderTest {
 	@Test
 	public void function_a_open_bracket_open_bracket_close_bracket_has_error(){
 		/* prepare*/
-		String code = "function a {{}}";
+		String code = "function a {{}";
 		
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(code);
@@ -143,7 +143,7 @@ public class BashScriptModelBuilderTest {
 	 * Bash does not support functions inside functions - so if somebody such
 	 * things it's not allowed
 	 */
-	public void function_f1_has_only_open_bracket__must_have_no_function_but_an_error() {
+	public void function_f1_has_only_open_bracket__must_have_no_function_but_two_error() {
 		/* prepare */
 		String code = "function f1(){";
 
@@ -151,7 +151,7 @@ public class BashScriptModelBuilderTest {
 		BashScriptModel bashScriptModel = builderToTest.build(code);
 
 		/* test */
-		assertThat(bashScriptModel).hasNoFunctions().hasErrors(1);
+		assertThat(bashScriptModel).hasNoFunctions().hasErrors(2); // function build has one error and one of the valdiators too
 	}
 
 	@Test
