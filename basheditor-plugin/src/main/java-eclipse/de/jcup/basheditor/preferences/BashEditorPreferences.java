@@ -39,51 +39,74 @@ public class BashEditorPreferences {
 	private BashEditorPreferences() {
 		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, BashEditorActivator.PLUGIN_ID);
 		store.addPropertyChangeListener(new IPropertyChangeListener() {
-			
+
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
-				if (event==null){
+				if (event == null) {
 					return;
 				}
 				String property = event.getProperty();
-				if (property==null){
+				if (property == null) {
 					return;
 				}
-				boolean colorChanged = false;
-				for (BashEditorSyntaxColorPreferenceConstants c: BashEditorSyntaxColorPreferenceConstants.values()){
-					if (property.equals(c.getId())){
-						colorChanged=true;
+				ChangeContext context = new ChangeContext();
+				for (BashEditorSyntaxColorPreferenceConstants c : BashEditorSyntaxColorPreferenceConstants.values()) {
+					if (property.equals(c.getId())) {
+						context.colorChanged = true;
 						break;
 					}
 				}
-				if (colorChanged){
-					updateColorsInBashEditors();
+				for (BashEditorValidationPreferenceConstants c : BashEditorValidationPreferenceConstants.values()) {
+					if (property.equals(c.getId())) {
+						context.validationChanged = true;
+						break;
+					}
 				}
-				
-				
+
+				updateColorsInBashEditors(context);
+
 			}
 
-			private void updateColorsInBashEditors() {
-				/* inform all Bash editors about color changes*/
+			private void updateColorsInBashEditors(ChangeContext context) {
+				if (!context.hasChanges()) {
+					return;
+				}
+				/* inform all Bash editors about color changes */
 				IWorkbenchPage activePage = EclipseUtil.getActivePage();
-				if (activePage==null){
+				if (activePage == null) {
 					return;
 				}
 				IEditorReference[] references = activePage.getEditorReferences();
-				for (IEditorReference ref: references){
+				for (IEditorReference ref : references) {
 					IEditorPart editor = ref.getEditor(false);
-					if (editor==null){
+					if (editor == null) {
 						continue;
 					}
-					if (! (editor instanceof BashEditor)){
+					if (!(editor instanceof BashEditor)) {
 						continue;
 					}
 					BashEditor geditor = (BashEditor) editor;
-					geditor.handleColorSettingsChanged();
+					if (context.colorChanged){
+						geditor.handleColorSettingsChanged();
+					}
+					if (context.validationChanged){
+						geditor.rebuildOutline();
+					}
 				}
 			}
 		});
-			
+
+	}
+
+	private class ChangeContext {
+		private boolean colorChanged = false;
+		private boolean validationChanged = false;
+
+		private boolean hasChanges() {
+			boolean changedAtAll = colorChanged;
+			changedAtAll = changedAtAll || validationChanged;
+			return changedAtAll;
+		}
 	}
 
 	public String getStringPreference(BashEditorPreferenceConstants id) {
@@ -116,28 +139,28 @@ public class BashEditorPreferences {
 		RGB color = PreferenceConverter.getColor(getPreferenceStore(), identifiable.getId());
 		return color;
 	}
-	
+
 	/**
 	 * Returns color as a web color in format "#RRGGBB"
+	 * 
 	 * @param identifiable
 	 * @return web color string
 	 */
 	public String getWebColor(PreferenceIdentifiable identifiable) {
 		RGB color = getColor(identifiable);
-		if (color==null){
+		if (color == null) {
 			return null;
 		}
-		String webColor= ColorUtil.convertToHexColor(color);
+		String webColor = ColorUtil.convertToHexColor(color);
 		return webColor;
 	}
 
 	public void setDefaultColor(PreferenceIdentifiable identifiable, RGB color) {
 		PreferenceConverter.setDefault(getPreferenceStore(), identifiable.getId(), color);
 	}
-	
+
 	public static BashEditorPreferences getInstance() {
 		return INSTANCE;
 	}
 
-	
 }

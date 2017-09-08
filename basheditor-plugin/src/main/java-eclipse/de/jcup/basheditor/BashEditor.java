@@ -16,6 +16,7 @@
 package de.jcup.basheditor;
 
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.*;
 
 import java.util.Collection;
 
@@ -58,7 +59,6 @@ import de.jcup.basheditor.document.BashTextFileDocumentProvider;
 import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
 import de.jcup.basheditor.outline.Item;
 import de.jcup.basheditor.scriptmodel.BashError;
-import de.jcup.basheditor.scriptmodel.ValidationResult;
 import de.jcup.basheditor.scriptmodel.BashScriptModel;
 import de.jcup.basheditor.scriptmodel.BashScriptModelBuilder;
 
@@ -313,15 +313,27 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		rebuildOutline();
 	}
 
-	private void rebuildOutline() {
+	public void rebuildOutline() {
 		String text = getDocumentText();
+		
+		IPreferenceStore store = BashEditorUtil.getPreferences().getPreferenceStore();
+
+		final boolean validateBlocks=store.getBoolean(VALIDATE_BLOCK_STATEMENTS.getId());
+		final boolean validateDo=store.getBoolean(VALIDATE_DO_STATEMENTS.getId());
+		final boolean validateIf=store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
+		final boolean validateFunctions=store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
 
 		EclipseUtil.safeAsyncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				BashEditorUtil.removeScriptErrors(BashEditor.this);
-
+				
+				modelBuilder.setIgnoreBlockValidation(! validateBlocks);
+				modelBuilder.setIgnoreDoValidation(! validateDo);
+				modelBuilder.setIgnoreIfValidation(! validateIf);
+				modelBuilder.setIgnoreFunctionValidation(! validateFunctions);
+				
 				BashScriptModel model = modelBuilder.build(text);
 
 				getOutlinePage().rebuild(model);

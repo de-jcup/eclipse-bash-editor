@@ -17,6 +17,11 @@
    		id="basheditor.preferences.keyword.editor"
    		label="editor">
      </keyword>
+     <keyword
+   		id="basheditor.preferences.keyword.validation"
+   		label="validation">
+     </keyword>
+    
    </extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          EDITOR                                      -->
@@ -163,6 +168,15 @@
          </keywordReference>
           <keywordReference
                id="basheditor.preferences.keyword.color">
+         </keywordReference>
+      </page>
+      <page
+         id="basheditor.eclipse.gradleeditor.preferences.BashEditorValidationPreferencePage"
+         class="de.jcup.basheditor.preferences.BashEditorValidationPreferencePage"
+         name="Validation"
+         category="basheditor.eclipse.gradleeditor.preferences.BashEditorEditorPreferencePage">
+         <keywordReference
+               id="basheditor.preferences.keyword.validation">
          </keywordReference>
       </page>
     </extension>
