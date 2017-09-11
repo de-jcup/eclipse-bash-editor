@@ -25,5 +25,8 @@ enum State{
 	
 	CODE,
 	FUNCTION, 
+	
+	VARIABLE,
+	
 	UNKNOWN,
 }

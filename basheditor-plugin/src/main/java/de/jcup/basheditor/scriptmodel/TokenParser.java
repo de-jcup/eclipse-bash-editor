@@ -160,7 +160,24 @@ public class TokenParser {
 			return;
 		}
 
+		if (c== '$'){
+			context.appendCharToText();
+			context.switchTo(State.VARIABLE);
+			return;
+		}
+
+		
 		if (c == '{' || c == '}') {
+			if (context.inState(State.VARIABLE)){
+				context.appendCharToText();
+				context.appendCharToText();
+				if (c=='}'){
+					context.addTokenAndResetText();
+					context.switchTo(State.CODE);
+				}
+				return;
+				
+			}
 			// block start/ endf found, add as own token
 			context.addTokenAndResetText();
 			context.appendCharToText();
@@ -169,7 +186,7 @@ public class TokenParser {
 			return;
 		}
 
-		if (c == '#') {
+		if (c == '#' && ! context.inState(State.VARIABLE)) {
 			context.addTokenAndResetText();
 			context.switchTo(State.INSIDE_COMMENT);
 			context.appendCharToText();
