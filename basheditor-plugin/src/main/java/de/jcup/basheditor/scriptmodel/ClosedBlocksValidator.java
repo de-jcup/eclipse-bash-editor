@@ -45,13 +45,13 @@ public class ClosedBlocksValidator extends AbstractParseTokenListValidator {
 		}
 		if (amountOfClosed > amountOfOpened){
 			if (lastWorksBeforeClose == null) {
-				result.add(new BashError(0, 0, "More closing brackets than opened ones. It seems you got a { missing"));
+				result.add(new BashError(0, 0, "More closing brackets than opened ones. It seems you got a '{' missing"));
 			}else{
 				result.add(new BashError(lastWorksBeforeClose.start, lastWorksBeforeClose.end, "It seems this closing bracket is missing a opening one"));
 			}
 		}else{
 			if (lastWorkingOpen == null) {
-				result.add(new BashError(0, 0, "More opening brackets than closed ones. It seems you got a } missing"));
+				result.add(new BashError(0, 0, "More opening brackets than closed ones. It seems you got a '}' missing"));
 			}else{
 				result.add(new BashError(lastWorkingOpen.start, lastWorkingOpen.end, "It seems this opening bracket is missing a closing one."));
 			}
