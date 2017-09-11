@@ -170,7 +170,6 @@ public class TokenParser {
 		if (c == '{' || c == '}') {
 			if (context.inState(State.VARIABLE)){
 				context.appendCharToText();
-				context.appendCharToText();
 				if (c=='}'){
 					context.addTokenAndResetText();
 					context.switchTo(State.CODE);
