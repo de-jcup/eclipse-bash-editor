@@ -31,6 +31,18 @@ public class BashScriptModelBuilderTest {
 	}
 	
 	@Test
+	public void bugfix_39__variable_with_hash_do_not_result_errors(){
+		/* prepare*/
+		String code = "declare -A TitleMap\nif [ ${#TitleMap[*]} -eq 0 ]\nthen\n   displayerr \"Map is empty\"\n    exit 1\nfi";
+		
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(code);
+		
+		/* test */
+		assertThat(bashScriptModel).hasErrors(0);
+	}
+	
+	@Test
 	public void function_a_open_bracket_open_bracket_close_bracket_has_error(){
 		/* prepare*/
 		String code = "function a {{}";

@@ -32,6 +32,20 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
+	
+	@Test
+	public void bugfix_39__a_variable_containing_hash_is_not_recognized_as_comment() {
+		/* prepare */
+		String string = "if [ ${#TitleMap[*]} -eq 0 ]";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).containsNotToken("#TitleMap[*]} -eq 0 ]");
+		
+	}
+	
 	@Test
 	public void for_abc_10_newlines_x_token_x_has_position_13() {
 		/* prepare */
