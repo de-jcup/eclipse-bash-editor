@@ -35,6 +35,33 @@ public class DoEndsWithDoneValidatorTest {
 	}
 	
 	@Test
+	public void done_do_has_problem() {
+		/* prepare */
+		tokens.add(new ParseToken("done"));
+		tokens.add(new ParseToken("do"));
+		
+		/* execute */
+		List<ValidationResult> results = validatorToTest.validate(tokens);
+		
+		/* test */
+		assertEquals(1,results.size());
+	}
+	
+	@Test
+	public void do_done_done_has_problem() {
+		/* prepare */
+		tokens.add(new ParseToken("do"));
+		tokens.add(new ParseToken("done"));
+		tokens.add(new ParseToken("do"));
+		
+		/* execute */
+		List<ValidationResult> results = validatorToTest.validate(tokens);
+		
+		/* test */
+		assertEquals(1,results.size());
+	}
+	
+	@Test
 	public void do_something_done__has_no_problems() {
 		/* prepare */
 		tokens.add(new ParseToken("do"));
