@@ -15,7 +15,17 @@
  */
 package de.jcup.basheditor.document;
 
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.*;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.BACKTICK_STRING;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_COMMAND;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_KEYWORD;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_SYSTEM_KEYWORD;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.COMMENT;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.DOUBLE_STRING;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.INCLUDE_KEYWORD;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.KNOWN_VARIABLES;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.PARAMETER;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.SINGLE_STRING;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.VARIABLES;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +33,6 @@ import java.util.List;
 import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
-import org.eclipse.jface.text.rules.MultiLineRule;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
 import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
@@ -59,9 +68,9 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		rules.add(new BashVariableRule(variables));
 		rules.add(new SingleLineRule("#", "", comment, (char)-1,true));
 		
-		rules.add(new SingleLineRule("\"", "\"", doubleString,'\\'));
-		rules.add(new SingleLineRule("\'", "\'", simpleString,'\\'));
-		rules.add(new SingleLineRule("`", "`", backtickString,'\\'));
+		rules.add(new BashStringLineRule("\"", "\"", doubleString));
+		rules.add(new BashStringLineRule("\'", "\'", simpleString));
+		rules.add(new BashStringLineRule("`", "`", backtickString));
 		
 		rules.add(new CommandParameterRule(parameters));
 		
