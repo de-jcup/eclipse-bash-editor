@@ -3,9 +3,7 @@ alpha() {
 
  	a=${b}
     c={d[e]}
-    # next line is NOT problematic $ is followed by space
-    f=$ {g[h]}
-    # next line is problematic because of $ ?
-    i=${j[k] }
+    f=${g[h]}
+    # next line made problems with bracket switching support
+    i={j[k]}
 }
-
