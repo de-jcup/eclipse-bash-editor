@@ -5,10 +5,15 @@ import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.PatternRule;
 import org.eclipse.jface.text.rules.Token;
 
-public class BashStringLineRule extends PatternRule {
+public class BashStringRule extends PatternRule {
 
-	public BashStringLineRule(String startSequence, String endSequence, IToken token) {
-		super(startSequence, endSequence, token, '\\', true, true, false);
+	private static final boolean BREAKS_ON_EOL = false; // support multi line strings!
+	private static final boolean BREAKS_ON_EOF = true;
+	private static final boolean ESCAPE_CONTINUES_LINE = false;
+
+
+	public BashStringRule(String startSequence, String endSequence, IToken token) {
+		super(startSequence, endSequence, token, '\\', BREAKS_ON_EOL, BREAKS_ON_EOF, ESCAPE_CONTINUES_LINE);
 	}
 
 	

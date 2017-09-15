@@ -32,6 +32,30 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
+	@Test
+	public void $bracketPIDbracket_create_databaseDOTsql_is_recognizedas_two_tokens(){
+		
+		/* prepare */
+		String string = "${PID}_create_database.sql";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).containsTokens("${PID}","_create_database.sql");
+	}
+	
+	@Test
+	public void echo_$myVar1_echo_$myVar2_parsed_correctly() {
+		/* prepare */
+		String string = "echo $myVar1 echo $myVar2";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */
+		assertThat(tokens).containsTokens("echo","$myVar1","echo","$myVar2");
+	}
 	
 	@Test
 	public void bugfix_39__a_variable_containing_hash_is_not_recognized_as_comment() {
