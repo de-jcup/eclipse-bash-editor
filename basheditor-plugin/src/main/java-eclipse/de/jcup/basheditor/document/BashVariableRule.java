@@ -85,6 +85,10 @@ public class BashVariableRule implements IPredicateRule {
 		if (Character.isWhitespace(c)){
 			return false;
 		}
+		if (c=='\'' || c=='\"' || c=='`'){
+			/* e.g. on a $PID"-is interesting" */
+			return false;
+		}
 		/* all other characters are allowed */
 		return true;
 	}
