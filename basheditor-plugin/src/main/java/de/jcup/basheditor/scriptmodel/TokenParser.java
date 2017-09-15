@@ -73,10 +73,11 @@ public class TokenParser {
 			if (context.inState(State.INSIDE_SINGLE_STRING)) {
 				/* close single string */
 				context.appendCharToText();
-				context.switchTo(State.CODE);
+				context.restoreStateBeforeString();
 				return;
 			}
-			context.switchTo(State.INSIDE_SINGLE_STRING);
+			context.switchToStringState(State.INSIDE_SINGLE_STRING);
+			context.appendCharToText();
 			return;
 		}
 		/* handle double string */
@@ -99,10 +100,11 @@ public class TokenParser {
 			if (context.inState(State.INSIDE_DOUBLE_STRING)) {
 				/* close double string */
 				context.appendCharToText();
-				context.switchTo(State.CODE);
+				context.restoreStateBeforeString();
 				return;
 			}
-			context.switchTo(State.INSIDE_DOUBLE_STRING);
+			context.switchToStringState(State.INSIDE_DOUBLE_STRING);
+			context.appendCharToText();
 			return;
 		}
 		/* handle double ticked string */
@@ -125,10 +127,11 @@ public class TokenParser {
 			if (context.inState(State.INSIDE_DOUBLE_TICKED)) {
 				/* close double string */
 				context.appendCharToText();
-				context.switchTo(State.CODE);
+				context.restoreStateBeforeString();
 				return;
 			}
-			context.switchTo(State.INSIDE_DOUBLE_TICKED);
+			context.switchToStringState(State.INSIDE_DOUBLE_TICKED);
+			context.appendCharToText();
 			return;
 		}
 		if (context.insideString()) {
@@ -148,7 +151,9 @@ public class TokenParser {
 		}
 		if (c == '\n') {
 			context.addTokenAndResetText();
-			context.switchTo(State.CODE);
+			if (context.inState(State.INSIDE_COMMENT)){
+				context.switchTo(State.CODE);
+			}
 			return;
 		}
 
@@ -157,6 +162,12 @@ public class TokenParser {
 			// handle like a whitespace
 			context.addTokenAndResetText();
 			context.switchTo(State.CODE);
+			return;
+		}
+		if (c == '=') {
+			// special assign operator
+			context.appendCharToText();
+			context.addTokenAndResetText();
 			return;
 		}
 

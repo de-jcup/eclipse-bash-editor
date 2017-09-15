@@ -27,6 +27,7 @@ class ParseContext{
 	int pos;
 	private State state = State.INIT;
 	private ParseToken currentToken;
+	private State stateBeforeString;
 	
 	public ParseContext(){
 		currentToken=createToken();
@@ -114,5 +115,14 @@ class ParseContext{
 		inString= inString || inState(State.INSIDE_DOUBLE_TICKED);
 		inString= inString || inState(State.INSIDE_SINGLE_STRING);
 		return inString;
+	}
+
+	public void switchToStringState(State newStringState) {
+		this.stateBeforeString=getState();
+		switchTo(newStringState);
+	}
+	
+	public void restoreStateBeforeString() {
+		switchTo(stateBeforeString);
 	}
 }

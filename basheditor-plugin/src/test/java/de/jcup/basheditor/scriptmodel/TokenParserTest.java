@@ -401,7 +401,7 @@ public class TokenParserTest {
 		List<ParseToken> tokens = parserToTest.parse("\" This is the 'way' it is \"");
 
 		/* test */
-		assertThat(tokens).containsNotToken("\" This is the 'way' it is \"");
+		assertThat(tokens).containsOneToken("\" This is the 'way' it is \"");
 		
 	}
 	
@@ -411,7 +411,7 @@ public class TokenParserTest {
 		List<ParseToken> tokens = parserToTest.parse("\" This is the `way` it is \"");
 
 		/* test */
-		assertThat(tokens).containsNotToken("\" This is the `way` it is \"");
+		assertThat(tokens).containsOneToken("\" This is the `way` it is \"");
 		
 	}
 
@@ -421,7 +421,7 @@ public class TokenParserTest {
 		List<ParseToken> tokens = parserToTest.parse("' This is the \\\"way\\\" it is '");
 
 		/* test */
-		assertThat(tokens).containsNotToken("' This is the \\\"way\\\" it is '");
+		assertThat(tokens).containsOneToken("' This is the \\\"way\\\" it is '");
 		
 	}
 	
@@ -431,7 +431,7 @@ public class TokenParserTest {
 		List<ParseToken> tokens = parserToTest.parse("' This is the `way` it is '");
 
 		/* test */
-		assertThat(tokens).containsNotToken("' This is the `way` it is '");
+		assertThat(tokens).containsOneToken("' This is the `way` it is '");
 		
 	}
 
