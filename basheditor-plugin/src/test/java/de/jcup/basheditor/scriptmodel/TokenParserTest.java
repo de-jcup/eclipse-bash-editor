@@ -15,6 +15,7 @@
  */
  package de.jcup.basheditor.scriptmodel;
 
+import static de.jcup.basheditor.scriptmodel.AssertParseTokens.assertThat;
 import static org.junit.Assert.*;
 
 import java.util.Iterator;
@@ -22,11 +23,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import de.jcup.basheditor.TestScriptLoader;
-
-import static de.jcup.basheditor.scriptmodel.AssertParseTokens.*;
-import static de.jcup.basheditor.scriptmodel.AssertScriptModel.assertThat;
 
 public class TokenParserTest {
 
@@ -36,7 +32,25 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
-	
+	@Test
+	public void bugfix_43() throws Exception{
+		/* prepare */
+		String string = "alpha() { eval  \"a\"=${_e#*=} }";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */ /* @formatter:off*/
+		assertThat(tokens).
+			containsTokens(
+					"alpha()",
+					"{",
+						"eval",
+						"\"a\"=",
+						"${_e#*=}",
+					"}");
+		/* @formatter:on*/
+	}
 	@Test
 	public void bugfix_41_2_handle_arrays() throws Exception{
 		/* prepare */

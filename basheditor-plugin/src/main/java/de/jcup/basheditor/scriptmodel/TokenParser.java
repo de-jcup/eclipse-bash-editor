@@ -167,7 +167,9 @@ public class TokenParser {
 		if (c == '=') {
 			// special assign operator
 			context.appendCharToText();
-			context.addTokenAndResetText();
+			if (! context.inState(State.VARIABLE)){
+				context.addTokenAndResetText();
+			}
 			return;
 		}
 
