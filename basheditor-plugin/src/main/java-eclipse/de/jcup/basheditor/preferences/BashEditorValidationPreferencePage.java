@@ -15,12 +15,14 @@ package de.jcup.basheditor.preferences;
  *
  */
 
+import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.*;
+
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.*;
+
 import de.jcup.basheditor.BashEditorUtil;
 
 public class BashEditorValidationPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {

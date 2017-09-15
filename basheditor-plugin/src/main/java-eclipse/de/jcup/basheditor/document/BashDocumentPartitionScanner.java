@@ -15,17 +15,7 @@
  */
 package de.jcup.basheditor.document;
 
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.BACKTICK_STRING;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_COMMAND;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_KEYWORD;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_SYSTEM_KEYWORD;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.COMMENT;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.DOUBLE_STRING;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.INCLUDE_KEYWORD;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.KNOWN_VARIABLES;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.PARAMETER;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.SINGLE_STRING;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.VARIABLES;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.*;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -16,14 +16,14 @@ package de.jcup.basheditor.preferences;
  */
  
 
+import static de.jcup.basheditor.BashEditorColorConstants.*;
 import static de.jcup.basheditor.BashEditorUtil.*;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.*;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.*;
+
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
-
-import static de.jcup.basheditor.BashEditorColorConstants.*;
 
 /**
  * Class used to initialize default preference values.
