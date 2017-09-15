@@ -89,6 +89,10 @@ public class BashVariableRule implements IPredicateRule {
 			/* e.g. on a $PID"-is interesting" */
 			return false;
 		}
+		if (c=='/' ){
+			/* e.g. on a $package/var/... */
+			return false;
+		}
 		/* all other characters are allowed */
 		return true;
 	}
