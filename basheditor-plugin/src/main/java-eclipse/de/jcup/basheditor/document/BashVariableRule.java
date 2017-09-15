@@ -87,12 +87,17 @@ public class BashVariableRule implements IPredicateRule {
 
 		if (curlyBracesOpened) {
 			wordPart = wordPart || c == '}';
+			wordPart = wordPart || c == '\'';
+			wordPart = wordPart || c == '\"';
+			wordPart = wordPart || c == '`';
 			wordPart = wordPart || c == ' ';
 			wordPart = wordPart || c == '/';
 			wordPart = wordPart || c == '=';
 			wordPart = wordPart || c == '*';
 			wordPart = wordPart || c == '@';
 			wordPart = wordPart || c == ':';
+			wordPart = wordPart || c == '[';
+			wordPart = wordPart || c == ']';
 			wordPart = wordPart || c == '#';
 			wordPart = wordPart || c == '$';
 			wordPart = wordPart || c == '%';
