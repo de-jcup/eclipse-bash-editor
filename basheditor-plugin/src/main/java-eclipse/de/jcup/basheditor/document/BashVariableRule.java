@@ -79,30 +79,13 @@ public class BashVariableRule implements IPredicateRule {
 			if (c == '{') {
 				return false; // already opened brace, we do not support {{
 			}
+			return true;
 		}
-		boolean wordPart = false;
-		wordPart = wordPart || Character.isLetterOrDigit(c);
-		wordPart = wordPart || c == '_';
-		wordPart = wordPart || c == '{';
-
-		if (curlyBracesOpened) {
-			wordPart = wordPart || c == '}';
-			wordPart = wordPart || c == '\'';
-			wordPart = wordPart || c == '\"';
-			wordPart = wordPart || c == '`';
-			wordPart = wordPart || c == ' ';
-			wordPart = wordPart || c == '/';
-			wordPart = wordPart || c == '=';
-			wordPart = wordPart || c == '*';
-			wordPart = wordPart || c == '@';
-			wordPart = wordPart || c == ':';
-			wordPart = wordPart || c == '[';
-			wordPart = wordPart || c == ']';
-			wordPart = wordPart || c == '#';
-			wordPart = wordPart || c == '$';
-			wordPart = wordPart || c == '%';
-			wordPart = wordPart || c == '-';
+		/* curly braces not opened! so we allow all except whitespaces */
+		if (Character.isWhitespace(c)){
+			return false;
 		}
-		return wordPart;
+		/* all other characters are allowed */
+		return true;
 	}
 }

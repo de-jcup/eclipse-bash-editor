@@ -7,3 +7,12 @@ alpha() {
     # next line made problems with bracket switching support
     i={j[k]}
 }
+
+
+function array-to-string {
+    
+    for key in ${!_params[@]}
+    do
+        echo hello...
+    done
+}
