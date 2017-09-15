@@ -21,6 +21,8 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.jcup.basheditor.TestScriptLoader;
+
 public class BashScriptModelBuilderTest {
 
 	private BashScriptModelBuilder builderToTest;
@@ -28,6 +30,30 @@ public class BashScriptModelBuilderTest {
 	@Before
 	public void before() {
 		builderToTest = new BashScriptModelBuilder();
+	}
+	
+	@Test
+	public void bugfix_41_1_handle_arrays() throws Exception{
+		/* prepare */
+		String script = TestScriptLoader.loadScriptFromTestScripts("bugfix_41_1.sh");
+		
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(script);
+		
+		/* test */
+		assertThat(bashScriptModel).hasErrors(0);
+	}
+	
+	@Test
+	public void bugfix_41_2_handle_arrays() throws Exception{
+		/* prepare */
+		String script = TestScriptLoader.loadScriptFromTestScripts("bugfix_41_2.sh");
+		
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(script);
+		
+		/* test */
+		assertThat(bashScriptModel).hasErrors(0);
 	}
 	
 	@Test

@@ -22,7 +22,11 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import de.jcup.basheditor.TestScriptLoader;
+
 import static de.jcup.basheditor.scriptmodel.AssertParseTokens.*;
+import static de.jcup.basheditor.scriptmodel.AssertScriptModel.assertThat;
 
 public class TokenParserTest {
 
@@ -32,6 +36,29 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
+	
+	@Test
+	public void bugfix_41_2_handle_arrays() throws Exception{
+		/* prepare */
+		String string = "alpha() { a=${b[`id`]} } beta(){ }";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */ /* @formatter:off*/
+		assertThat(tokens).
+			containsTokens(
+					"alpha()",
+					"{",
+					"a=",
+					"${b[`id`]}",
+					"}",
+					"beta()",
+					"{",
+					"}");
+		/* @formatter:on*/
+	}
+	
 	@Test
 	public void $bracketPIDbracket_create_databaseDOTsql_is_recognizedas_two_tokens(){
 		
