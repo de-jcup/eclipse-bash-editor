@@ -49,8 +49,13 @@ public class TokenParser {
 		if (context.inState(VARIABLE)) {
 			VariableContext variableContext = context.getVariableContext();
 			if (c == '$') {
-				/* variable content containing variables is done as simple */
 				context.appendCharToText();
+				/* as described at http://tldp.org/LDP/abs/html/special-chars.html "$$" is a special variable holding the process id
+				 so in this case it terminates the variable!*/
+				if (context.getCharBefore()=='$'){
+					context.addTokenAndResetText();
+					context.switchTo(CODE);
+				}
 				return;
 			}
 			if (c == '#') {
