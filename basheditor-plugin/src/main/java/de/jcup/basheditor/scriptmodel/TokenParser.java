@@ -18,6 +18,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import static de.jcup.basheditor.scriptmodel.ParserState.*;
+
 public class TokenParser {
 
 	public List<ParseToken> parse(String bashScript) {
@@ -38,11 +40,11 @@ public class TokenParser {
 
 	private void parse(ParseContext context) {
 		char c = context.getCharAtPos();
-		if (context.inState(State.INSIDE_COMMENT)) {
+		if (context.inState(INSIDE_COMMENT)) {
 			/* in comment state */
 			if (c == '\n') {
 				context.addTokenAndResetText();
-				context.switchTo(State.CODE);
+				context.switchTo(CODE);
 				return;
 			} else {
 				context.appendCharToText();
@@ -55,83 +57,17 @@ public class TokenParser {
 
 		/* handle single string */
 		if (c == '\'') {
-			if (context.inState(State.INSIDE_DOUBLE_STRING)) {
-				/* inside other string - ignore */
-				context.appendCharToText();
-				return;
-			}
-			if (context.inState(State.INSIDE_DOUBLE_TICKED)) {
-				/* inside other string - ignore */
-				context.appendCharToText();
-				return;
-			}
-			if (context.getCharBefore() == '\\') {
-				/* escaped */
-				context.appendCharToText();
-				return;
-			}
-			if (context.inState(State.INSIDE_SINGLE_STRING)) {
-				/* close single string */
-				context.appendCharToText();
-				context.restoreStateBeforeString();
-				return;
-			}
-			context.switchToStringState(State.INSIDE_SINGLE_STRING);
-			context.appendCharToText();
+			handleString(INSIDE_SINGLE_STRING, context, INSIDE_DOUBLE_TICKED, INSIDE_DOUBLE_STRING);
 			return;
 		}
 		/* handle double string */
 		if (c == '\"') {
-			if (context.inState(State.INSIDE_SINGLE_STRING)) {
-				/* inside other string - ignore */
-				context.appendCharToText();
-				return;
-			}
-			if (context.inState(State.INSIDE_DOUBLE_TICKED)) {
-				/* inside other string - ignore */
-				context.appendCharToText();
-				return;
-			}
-			if (context.getCharBefore() == '\\') {
-				/* escaped */
-				context.appendCharToText();
-				return;
-			}
-			if (context.inState(State.INSIDE_DOUBLE_STRING)) {
-				/* close double string */
-				context.appendCharToText();
-				context.restoreStateBeforeString();
-				return;
-			}
-			context.switchToStringState(State.INSIDE_DOUBLE_STRING);
-			context.appendCharToText();
+			handleString(INSIDE_DOUBLE_STRING, context, INSIDE_DOUBLE_TICKED, INSIDE_SINGLE_STRING);
 			return;
 		}
 		/* handle double ticked string */
 		if (c == '`') {
-			if (context.inState(State.INSIDE_SINGLE_STRING)) {
-				/* inside other string - ignore */
-				context.appendCharToText();
-				return;
-			}
-			if (context.inState(State.INSIDE_DOUBLE_STRING)) {
-				/* inside other string - ignore */
-				context.appendCharToText();
-				return;
-			}
-			if (context.getCharBefore() == '\\') {
-				/* escaped */
-				context.appendCharToText();
-				return;
-			}
-			if (context.inState(State.INSIDE_DOUBLE_TICKED)) {
-				/* close double string */
-				context.appendCharToText();
-				context.restoreStateBeforeString();
-				return;
-			}
-			context.switchToStringState(State.INSIDE_DOUBLE_TICKED);
-			context.appendCharToText();
+			handleString(INSIDE_DOUBLE_TICKED, context, INSIDE_SINGLE_STRING, INSIDE_DOUBLE_STRING);
 			return;
 		}
 		if (context.insideString()) {
@@ -151,8 +87,8 @@ public class TokenParser {
 		}
 		if (c == '\n') {
 			context.addTokenAndResetText();
-			if (context.inState(State.INSIDE_COMMENT)){
-				context.switchTo(State.CODE);
+			if (context.inState(INSIDE_COMMENT)){
+				context.switchTo(CODE);
 			}
 			return;
 		}
@@ -161,13 +97,13 @@ public class TokenParser {
 			// special bash semicolon operator, separates only commands so
 			// handle like a whitespace
 			context.addTokenAndResetText();
-			context.switchTo(State.CODE);
+			context.switchTo(CODE);
 			return;
 		}
 		if (c == '=') {
 			// special assign operator
 			context.appendCharToText();
-			if (! context.inState(State.VARIABLE)){
+			if (! context.inState(VARIABLE)){
 				context.addTokenAndResetText();
 			}
 			return;
@@ -175,32 +111,32 @@ public class TokenParser {
 
 		if (c== '$'){
 			context.appendCharToText();
-			context.switchTo(State.VARIABLE);
+			context.switchTo(VARIABLE);
 			return;
 		}
 
 		
 		if (c == '{' || c == '}') {
-			if (context.inState(State.VARIABLE)){
+			if (context.inState(VARIABLE)){
 				context.appendCharToText();
 				if (c=='}'){
 					context.addTokenAndResetText();
-					context.switchTo(State.CODE);
+					context.switchTo(CODE);
 				}
 				return;
 				
 			}
-			// block start/ endf found, add as own token
+			// block start/ end found, add as own token
 			context.addTokenAndResetText();
 			context.appendCharToText();
 			context.addTokenAndResetText();
-			context.switchTo(State.CODE);
+			context.switchTo(CODE);
 			return;
 		}
 
-		if (c == '#' && ! context.inState(State.VARIABLE)) {
+		if (c == '#' && ! context.inState(VARIABLE)) {
 			context.addTokenAndResetText();
-			context.switchTo(State.INSIDE_COMMENT);
+			context.switchTo(INSIDE_COMMENT);
 			context.appendCharToText();
 		} else {
 			/* not inside a comment build token nor in string, so whitespaces are not necessary!*/
@@ -211,6 +147,32 @@ public class TokenParser {
 			context.appendCharToText();
 		}
 
+	}
+
+	private void handleString(ParserState stringState, ParseContext context, ParserState ...otherStringStates) {
+		for (ParserState otherStringState: otherStringStates){
+			if (context.inState(otherStringState)) {
+				/* inside other string - ignore */
+				context.appendCharToText();
+				return;
+			}
+			
+		}
+		if (context.getCharBefore() == '\\') {
+			/* escaped */
+			context.appendCharToText();
+			return;
+		}
+		if (context.inState(stringState)) {
+			/* close single string */
+			context.appendCharToText();
+			context.restoreStateBeforeString();
+			return;
+		}
+		context.switchToStringState(stringState);
+		context.appendCharToText();
+		return;
+		
 	}
 
 }

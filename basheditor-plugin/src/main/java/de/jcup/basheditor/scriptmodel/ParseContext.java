@@ -25,9 +25,9 @@ class ParseContext{
 	StringBuilder sb;
 	char[] chars;
 	int pos;
-	private State state = State.INIT;
+	private ParserState parserState = ParserState.INIT;
 	private ParseToken currentToken;
-	private State stateBeforeString;
+	private ParserState stateBeforeString;
 	
 	public ParseContext(){
 		currentToken=createToken();
@@ -81,22 +81,22 @@ class ParseContext{
 		sb=null;
 	}
 	
-	public State getState() {
-		if (state==null){
-			state=State.UNKNOWN;
+	public ParserState getState() {
+		if (parserState==null){
+			parserState=ParserState.UNKNOWN;
 		}
-		return state;
+		return parserState;
 	}
 	
-	public void switchTo(State state) {
-		this.state = state;
+	public void switchTo(ParserState parserState) {
+		this.parserState = parserState;
 	}
 	
 	public char getCharAtPos(){
 		return chars[pos];
 	}
-	public boolean inState(State state) {
-		return getState().equals(state);
+	public boolean inState(ParserState parserState) {
+		return getState().equals(parserState);
 	}
 
 	public char getCharBefore() {
@@ -111,13 +111,13 @@ class ParseContext{
 
 	public boolean insideString() {
 		boolean inString = false;
-		inString= inString || inState(State.INSIDE_DOUBLE_STRING);
-		inString= inString || inState(State.INSIDE_DOUBLE_TICKED);
-		inString= inString || inState(State.INSIDE_SINGLE_STRING);
+		inString= inString || inState(ParserState.INSIDE_DOUBLE_STRING);
+		inString= inString || inState(ParserState.INSIDE_DOUBLE_TICKED);
+		inString= inString || inState(ParserState.INSIDE_SINGLE_STRING);
 		return inString;
 	}
 
-	public void switchToStringState(State newStringState) {
+	public void switchToStringState(ParserState newStringState) {
 		this.stateBeforeString=getState();
 		switchTo(newStringState);
 	}

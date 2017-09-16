@@ -15,7 +15,7 @@
  */
  package de.jcup.basheditor.scriptmodel;
 
-enum State{
+enum ParserState{
 	INIT,
 	INSIDE_COMMENT,
 	
