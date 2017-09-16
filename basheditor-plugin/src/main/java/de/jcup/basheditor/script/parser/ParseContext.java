@@ -21,39 +21,19 @@ import java.util.List;
 
 class ParseContext{
 	
-	List<ParseToken> tokens = new ArrayList<ParseToken>();
-	StringBuilder sb;
 	char[] chars;
 	int pos;
-	private ParserState parserState = ParserState.INIT;
+	StringBuilder sb;
+	List<ParseToken> tokens = new ArrayList<ParseToken>();
 	private ParseToken currentToken;
+	private ParserState parserState = ParserState.INIT;
 	private ParserState stateBeforeString;
 	
-	public ParseContext(){
+	ParseContext(){
 		currentToken=createToken();
 	}
 
-	public void appendCharToText(){
-		getSb().append(getCharAtPos());
-	}
-	
-	public StringBuilder getSb() {
-		if (sb==null){
-			sb=new StringBuilder();
-		}
-		return sb;
-	}
-	public String getText(){
-		return getSb().toString();
-	}
-	
-	private ParseToken createToken(){
-		ParseToken token = new ParseToken();
-		token.start=pos;
-		return token;
-	}
-
-	public void addTokenAndResetText(){
+	void addTokenAndResetText(){
 		if (moveCurrentPosWhenEmptyText()){
 			return;
 		}
@@ -68,38 +48,16 @@ class ParseContext{
 		
 		resetText();
 	}
-
-	public boolean moveCurrentPosWhenEmptyText() {
-		if (getSb().length()==0){
-			currentToken.start++;
-			return true;
-		}
-		return false;
+	
+	void appendCharToText(){
+		getSb().append(getCharAtPos());
 	}
 	
-	public void resetText(){
-		sb=null;
-	}
-	
-	public ParserState getState() {
-		if (parserState==null){
-			parserState=ParserState.UNKNOWN;
-		}
-		return parserState;
-	}
-	
-	public void switchTo(ParserState parserState) {
-		this.parserState = parserState;
-	}
-	
-	public char getCharAtPos(){
+	char getCharAtPos(){
 		return chars[pos];
 	}
-	public boolean inState(ParserState parserState) {
-		return getState().equals(parserState);
-	}
 
-	public char getCharBefore() {
+	char getCharBefore() {
 		int posBefore = pos-1;
 		if (posBefore>=0){
 			if (chars.length>0){
@@ -109,20 +67,59 @@ class ParseContext{
 		return 0;
 	}
 
-	public boolean insideString() {
+	boolean insideString() {
 		boolean inString = false;
 		inString= inString || inState(ParserState.INSIDE_DOUBLE_STRING);
 		inString= inString || inState(ParserState.INSIDE_DOUBLE_TICKED);
 		inString= inString || inState(ParserState.INSIDE_SINGLE_STRING);
 		return inString;
 	}
-
-	public void switchToStringState(ParserState newStringState) {
+	
+	boolean inState(ParserState parserState) {
+		return getState().equals(parserState);
+	}
+	
+	boolean moveCurrentPosWhenEmptyText() {
+		if (getSb().length()==0){
+			currentToken.start++;
+			return true;
+		}
+		return false;
+	}
+	
+	void restoreStateBeforeString() {
+		switchTo(stateBeforeString);
+	}
+	
+	void switchTo(ParserState parserState) {
+		this.parserState = parserState;
+	}
+	void switchToStringState(ParserState newStringState) {
 		this.stateBeforeString=getState();
 		switchTo(newStringState);
 	}
+
+	private ParseToken createToken(){
+		ParseToken token = new ParseToken();
+		token.start=pos;
+		return token;
+	}
+
+	private StringBuilder getSb() {
+		if (sb==null){
+			sb=new StringBuilder();
+		}
+		return sb;
+	}
+
+	private ParserState getState() {
+		if (parserState==null){
+			parserState=ParserState.UNKNOWN;
+		}
+		return parserState;
+	}
 	
-	public void restoreStateBeforeString() {
-		switchTo(stateBeforeString);
+	private void resetText(){
+		sb=null;
 	}
 }
