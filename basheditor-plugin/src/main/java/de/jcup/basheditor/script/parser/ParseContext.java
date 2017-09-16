@@ -28,6 +28,7 @@ class ParseContext{
 	private ParseToken currentToken;
 	private ParserState parserState = ParserState.INIT;
 	private ParserState stateBeforeString;
+	private VariableState variableState = VariableState.NO_ARRAY;
 	
 	ParseContext(){
 		currentToken=createToken();
@@ -93,6 +94,9 @@ class ParseContext{
 	
 	void switchTo(ParserState parserState) {
 		this.parserState = parserState;
+		if (ParserState.VARIABLE.equals(parserState)){
+			variableState=VariableState.NO_ARRAY;
+		}
 	}
 	void switchToStringState(ParserState newStringState) {
 		this.stateBeforeString=getState();
@@ -121,5 +125,24 @@ class ParseContext{
 	
 	private void resetText(){
 		sb=null;
+	}
+
+	public void variableArrayOpened() {
+		variableState=VariableState.ARRAY_OPENED;
+	}
+	
+	public void variableArrayClosed() {
+		variableState=VariableState.ARRAY_CLOSED;
+	}
+
+	public boolean isInsideVariableArray() {
+		boolean isInside = inState(ParserState.VARIABLE);
+		isInside = isInside && VariableState.ARRAY_OPENED.equals(variableState);
+		return isInside;
+	}
+	
+	@Override
+	public String toString() {
+		return "ParseContext:"+getSb().toString()+"\nTokens:"+tokens;
 	}
 }

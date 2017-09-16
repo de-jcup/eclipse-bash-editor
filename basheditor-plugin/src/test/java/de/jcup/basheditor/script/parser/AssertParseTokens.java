@@ -91,9 +91,11 @@ public class AssertParseTokens {
 			found.add(token.text);
 		} 
 		if (tokens.length != found.size()){
-			fail("tokens length differ!\nexpected tokens:"+Arrays.asList(tokens)+"\nfound tokens:"+found);
+			fail("Tokens length differ!\nexpected tokens:\n"+Arrays.asList(tokens)+"\nfound tokens:\n"+found);
 		}
-		assertArrayEquals("Tokens not as in expected way",tokens, found.toArray());
+		if (! Arrays.equals(tokens, found.toArray())){
+			fail("Tokens content differ!\nexpected tokens:\n"+Arrays.asList(tokens)+"\nfound tokens:\n"+found);
+		}
 		return this;
 	}
 	

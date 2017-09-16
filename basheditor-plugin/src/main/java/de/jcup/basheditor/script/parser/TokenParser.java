@@ -13,7 +13,7 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.script.parser;
+package de.jcup.basheditor.script.parser;
 
 import static de.jcup.basheditor.script.parser.ParserState.*;
 
@@ -40,6 +40,72 @@ public class TokenParser {
 
 	private void parse(ParseContext context) {
 		char c = context.getCharAtPos();
+		
+		/* +++++++++++++++++++++++++++ */
+		/* ++++++ Handle variables +++ */
+		/* +++++++++++++++++++++++++++ */
+		if (context.inState(VARIABLE)) {
+			if (c == '$') {
+				context.appendCharToText();
+				return;
+			}
+			if (c == '#') {
+				context.appendCharToText();
+				return;
+			}
+			if (c == '[') {
+				context.variableArrayOpened();
+				context.appendCharToText();
+				return;
+			}
+			if (c == ']') {
+				context.variableArrayClosed();
+				context.appendCharToText();
+				return;
+			}
+
+			if (c == '{' || c == '}') {
+				context.appendCharToText();
+				if (c == '}') {
+					context.addTokenAndResetText();
+					context.switchTo(CODE);
+				}
+				return;
+
+			}
+
+			if (Character.isWhitespace(c)) {
+				context.addTokenAndResetText();
+				return;
+			}
+			if (context.isInsideVariableArray()) {
+				if (isStringChar(c)){
+					context.appendCharToText();
+					return;
+				}
+				context.appendCharToText();
+				return;
+			}else{
+				/* normal variable or array closed*/
+				if (Character.isWhitespace(c)) {
+					context.addTokenAndResetText();
+					context.switchTo(ParserState.CODE);
+					return;
+				}
+				if (isStringChar(c)){
+					/* this is a string char - means end of variable def*/
+					context.addTokenAndResetText();
+					context.switchTo(ParserState.CODE);
+					/* no return, handle normal!*/
+					
+				}else{
+					context.appendCharToText();
+					return;
+				}
+				
+			}
+		}
+		
 		if (context.inState(INSIDE_COMMENT)) {
 			/* in comment state */
 			if (c == '\n') {
@@ -51,9 +117,9 @@ public class TokenParser {
 			}
 			return;
 		}
-		/* ++++++++++++++++++++++++++++++++ */
-		/* ++++++ Not in comment state +++ */
-		/* ++++++++++++++++++++++++++++++++ */
+		/* +++++++++++++++++++++++++++++++++++++++++++ */
+		/* ++++++ Not in variable or comment state +++ */
+		/* +++++++++++++++++++++++++++++++++++++++++++ */
 
 		/* handle single string */
 		if (c == '\'') {
@@ -74,9 +140,9 @@ public class TokenParser {
 			context.appendCharToText();
 			return;
 		}
-		/* +++++++++++++++++++++++++++++++ */
-		/* ++++++ Not in string state +++ */
-		/* +++++++++++++++++++++++++++++++ */
+		/* +++++++++++++++++++++++++++++++++++++++++++++++++++ */
+		/* ++++++ Not in comment, string or variable state +++ */
+		/* +++++++++++++++++++++++++++++++++++++++++++++++++++ */
 		if (c == '\r') {
 			/*
 			 * ignore - we only use \n inside the data parsed so we will handle
@@ -87,7 +153,7 @@ public class TokenParser {
 		}
 		if (c == '\n') {
 			context.addTokenAndResetText();
-			if (context.inState(INSIDE_COMMENT)){
+			if (context.inState(INSIDE_COMMENT)) {
 				context.switchTo(CODE);
 			}
 			return;
@@ -103,29 +169,18 @@ public class TokenParser {
 		if (c == '=') {
 			// special assign operator
 			context.appendCharToText();
-			if (! context.inState(VARIABLE)){
+			if (!context.inState(VARIABLE)) {
 				context.addTokenAndResetText();
 			}
 			return;
 		}
-
-		if (c== '$'){
+		if (c == '$') {
 			context.appendCharToText();
 			context.switchTo(VARIABLE);
 			return;
 		}
 
-		
 		if (c == '{' || c == '}') {
-			if (context.inState(VARIABLE)){
-				context.appendCharToText();
-				if (c=='}'){
-					context.addTokenAndResetText();
-					context.switchTo(CODE);
-				}
-				return;
-				
-			}
 			// block start/ end found, add as own token
 			context.addTokenAndResetText();
 			context.appendCharToText();
@@ -134,12 +189,15 @@ public class TokenParser {
 			return;
 		}
 
-		if (c == '#' && ! context.inState(VARIABLE)) {
+		if (c == '#') {
 			context.addTokenAndResetText();
 			context.switchTo(INSIDE_COMMENT);
 			context.appendCharToText();
 		} else {
-			/* not inside a comment build token nor in string, so whitespaces are not necessary!*/
+			/*
+			 * not inside a comment build token nor in string, so whitespaces
+			 * are not necessary!
+			 */
 			if (Character.isWhitespace(c)) {
 				context.addTokenAndResetText();
 				return;
@@ -149,14 +207,21 @@ public class TokenParser {
 
 	}
 
-	private void handleString(ParserState stringState, ParseContext context, ParserState ...otherStringStates) {
-		for (ParserState otherStringState: otherStringStates){
+	private boolean isStringChar(char c) {
+		boolean isStringChar = c=='\"';
+		isStringChar = isStringChar ||c=='\'';
+		isStringChar = isStringChar ||c=='`';
+		return isStringChar;
+	}
+
+	private void handleString(ParserState stringState, ParseContext context, ParserState... otherStringStates) {
+		for (ParserState otherStringState : otherStringStates) {
 			if (context.inState(otherStringState)) {
 				/* inside other string - ignore */
 				context.appendCharToText();
 				return;
 			}
-			
+
 		}
 		if (context.getCharBefore() == '\\') {
 			/* escaped */
@@ -169,10 +234,14 @@ public class TokenParser {
 			context.restoreStateBeforeString();
 			return;
 		}
+		if (context.inState(ParserState.VARIABLE)) {
+			context.appendCharToText();
+			return;
+		}
 		context.switchToStringState(stringState);
 		context.appendCharToText();
 		return;
-		
+
 	}
 
 }
