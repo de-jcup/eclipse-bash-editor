@@ -34,6 +34,18 @@ public class BashScriptModelBuilderTest {
 	}
 	
 	@Test
+	public void bugfix_46_no_longer_errors_for_file() throws Exception{
+		/* prepare */
+		String script = TestScriptLoader.loadScriptFromTestScripts("bugfix_46.sh");
+		
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(script);
+		
+		/* test */
+		assertThat(bashScriptModel).hasErrors(0);
+	}
+	
+	@Test
 	public void bugfix_41_1_handle_arrays() throws Exception{
 		/* prepare */
 		String script = TestScriptLoader.loadScriptFromTestScripts("bugfix_41_1.sh");

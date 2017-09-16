@@ -35,7 +35,20 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
-	
+	@Test 
+	public void bugfix_46__variable_containing_multiple_curly_end_brackets_are_supported(){
+		/* prepare */
+		String string = "${NAWK:=${awk:=awk}}";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */ /* @formatter:off*/
+		assertThat(tokens).
+			containsTokens(
+					"${NAWK:=${awk:=awk}}");
+		/* @formatter:on*/
+	}
 	@Test
 	public void bugfix_45() throws Exception{
 		/* prepare */
