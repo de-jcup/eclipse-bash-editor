@@ -46,6 +46,7 @@ public class TokenParser {
 		/* +++++++++++++++++++++++++++ */
 		if (context.inState(VARIABLE)) {
 			if (c == '$') {
+				/* variable content containing variables is done as simple */
 				context.appendCharToText();
 				return;
 			}
@@ -175,6 +176,7 @@ public class TokenParser {
 			return;
 		}
 		if (c == '$') {
+			context.addTokenAndResetText();
 			context.appendCharToText();
 			context.switchTo(VARIABLE);
 			return;

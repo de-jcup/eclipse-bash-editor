@@ -48,7 +48,9 @@ public class TokenParserTest {
 		assertThat(tokens).
 			containsTokens(
 					"cd",
-					"\"$(dirname \"$BASH_SOURCE\")\"",
+					"\"$(dirname \"",
+					"$BASH_SOURCE",
+					"\")\"",
 					"# Check if the database exists");
 		/* @formatter:on*/
 	}
@@ -63,11 +65,11 @@ public class TokenParserTest {
 		
 		/* test */ /* @formatter:off*/
 		assertThat(tokens).
-			containsTokens(
-					"\"a\"",
-					"$z",
-					"\"b\"",
-					"# x");
+			containsTokens( 
+					"\"a\"", //"a"
+					"$z",    //$z
+					"\"b\"", //"b"
+					"# x");  //"#x"
 		/* @formatter:on*/
 	}
 
