@@ -13,9 +13,13 @@
  * and limitations under the License.
  *
  */
-package de.jcup.basheditor.scriptmodel;
+package de.jcup.basheditor.script.parser.validator;
 
 import java.util.List;
+
+import de.jcup.basheditor.script.BashError;
+import de.jcup.basheditor.script.ValidationResult;
+import de.jcup.basheditor.script.parser.ParseToken;
 
 public class DoEndsWithDoneValidator extends AbstractParseTokenListValidator {
 
@@ -48,7 +52,7 @@ public class DoEndsWithDoneValidator extends AbstractParseTokenListValidator {
 		}
 		if (countOfDo != countOfDone) {
 			if (inspectedUnchainedDoToken != null) {
-				BashError error = new BashError(inspectedUnchainedDoToken.start, inspectedUnchainedDoToken.end,
+				BashError error = new BashError(inspectedUnchainedDoToken.getStart(), inspectedUnchainedDoToken.getEnd(),
 						"This 'Do' is not correct closed. A 'Done' is missing");
 				result.add(error);
 			}

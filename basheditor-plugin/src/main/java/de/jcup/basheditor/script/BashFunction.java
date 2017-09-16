@@ -13,34 +13,34 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script;
 
-import static org.junit.Assert.*;
+public class BashFunction {
 
-import org.junit.Before;
-import org.junit.Test;
+	String name;
+	int position;
+	int lengthToNameEnd;
+	public int end;
 
-public class BashScriptModelTest {
-	private BashScriptModel modelToTest;
-
-	@Before
-	public void before() {
-		modelToTest = new BashScriptModel();
-	}
-
-	@Test
-	public void has_errors_returns_true_when_one_error_is_added() {
-		/* execute */
-		modelToTest.getErrors().add(new BashError(100, 120, "buh"));
-		
-		/* test */
-		assertTrue(modelToTest.hasErrors());
+	public int getLengthToNameEnd() {
+		return lengthToNameEnd;
 	}
 	
-	@Test
-	public void has_errors_returns_false_when_no_error_is_added() {
-		/* test */
-		assertFalse(modelToTest.hasErrors());
+	public String getName() {
+		return name;
+	}
+
+	public int getPosition() {
+		return position;
 	}
 	
+	public int getEnd() {
+		return end;
+	}
+	
+	@Override
+	public String toString() {
+		return "function "+name+"()";
+	}
+
 }

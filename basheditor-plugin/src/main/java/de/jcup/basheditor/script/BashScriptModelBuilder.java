@@ -13,10 +13,16 @@
  * and limitations under the License.
  *
  */
-package de.jcup.basheditor.scriptmodel;
+package de.jcup.basheditor.script;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.jcup.basheditor.script.parser.ParseToken;
+import de.jcup.basheditor.script.parser.TokenParser;
+import de.jcup.basheditor.script.parser.validator.ClosedBlocksValidator;
+import de.jcup.basheditor.script.parser.validator.DoEndsWithDoneValidator;
+import de.jcup.basheditor.script.parser.validator.IfEndsWithFiValidator;
 
 /**
  * A bash script model builder
@@ -102,7 +108,7 @@ public class BashScriptModelBuilder {
 			/* could be 'function MethodName()' or 'function MethodName()' */
 			if (token.isFunctionKeyword() && hasPos(currentTokenNr, tokens)) {
 				isFunctionName = true;
-				functionStart = Integer.valueOf(token.start);
+				functionStart = Integer.valueOf(token.getStart());
 				token = tokens.get(currentTokenNr++);
 			}
 			/* could be 'MethodName()' */
@@ -116,10 +122,10 @@ public class BashScriptModelBuilder {
 			}
 			if (isFunctionName) {
 				if (functionStart == null) {
-					functionStart = Integer.valueOf(token.start);
+					functionStart = Integer.valueOf(token.getStart());
 				}
 				String functionName = token.getTextAsFunctionName();
-				functionEnd = token.end;
+				functionEnd = token.getEnd();
 				/* ++++++++++++++++++++++++++++++ */
 				/* + Scan for curly braces open + */
 				/* ++++++++++++++++++++++++++++++ */
@@ -150,7 +156,7 @@ public class BashScriptModelBuilder {
 				while (hasPos(currentTokenNr, tokens)) {
 					ParseToken closeCurlyBraceToken = tokens.get(currentTokenNr++);
 					if (closeCurlyBraceToken.isCloseBlock()) {
-						function.end = closeCurlyBraceToken.end;
+						function.end = closeCurlyBraceToken.getEnd();
 						break;
 					}
 				}
@@ -174,12 +180,12 @@ public class BashScriptModelBuilder {
 
 	private BashError createBashErrorCloseFunctionCurlyBraceMissing(String functionName,
 			ParseToken openCurlyBraceToken) {
-		return new BashError(openCurlyBraceToken.start, openCurlyBraceToken.end,
+		return new BashError(openCurlyBraceToken.getStart(), openCurlyBraceToken.getEnd(),
 				"This curly brace is not closed. So function '" + functionName + "' is not valid.");
 	}
 
 	private BashError createBashErrorFunctionMissingCurlyBrace(ParseToken token, String functionName) {
-		return new BashError(token.start, token.end,
+		return new BashError(token.getStart(), token.getEnd(),
 				"The function '" + functionName + "' is not valid because no opening curly brace found.");
 	}
 

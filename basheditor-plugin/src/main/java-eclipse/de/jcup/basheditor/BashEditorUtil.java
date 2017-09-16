@@ -24,7 +24,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 
 import de.jcup.basheditor.preferences.BashEditorPreferences;
-import de.jcup.basheditor.scriptmodel.BashError;
+import de.jcup.basheditor.script.BashError;
 
 public class BashEditorUtil {
 

@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
-import de.jcup.basheditor.scriptmodel.BashFunction;
-import de.jcup.basheditor.scriptmodel.BashScriptModel;
+import de.jcup.basheditor.script.BashFunction;
+import de.jcup.basheditor.script.BashScriptModel;
 
 public class BashEditorTreeContentProvider implements ITreeContentProvider {
 

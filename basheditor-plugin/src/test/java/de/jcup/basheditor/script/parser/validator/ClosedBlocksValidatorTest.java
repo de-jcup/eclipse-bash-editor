@@ -13,7 +13,7 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script.parser.validator;
 
 import static org.junit.Assert.*;
 
@@ -22,6 +22,10 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import de.jcup.basheditor.script.ValidationResult;
+import de.jcup.basheditor.script.parser.ParseToken;
+import de.jcup.basheditor.script.parser.TestParseToken;
 
 public class ClosedBlocksValidatorTest {
 	private ClosedBlocksValidator validatorToTest;
@@ -37,9 +41,9 @@ public class ClosedBlocksValidatorTest {
 	@Test
 	public void missing_close_part_detected() {
 		/* prepare */
-		tokens.add(new ParseToken("{"));
-		tokens.add(new ParseToken("{"));
-		tokens.add(new ParseToken("}"));
+		tokens.add(new TestParseToken("{"));
+		tokens.add(new TestParseToken("{"));
+		tokens.add(new TestParseToken("}"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -51,9 +55,9 @@ public class ClosedBlocksValidatorTest {
 	@Test
 	public void missing_open_part_detected() {
 		/* prepare */
-		tokens.add(new ParseToken("{"));
-		tokens.add(new ParseToken("}"));
-		tokens.add(new ParseToken("}"));
+		tokens.add(new TestParseToken("{"));
+		tokens.add(new TestParseToken("}"));
+		tokens.add(new TestParseToken("}"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -65,10 +69,10 @@ public class ClosedBlocksValidatorTest {
 	@Test
 	public void no_missing_close_parts_have_no_error() {
 		/* prepare */
-		tokens.add(new ParseToken("{"));
-		tokens.add(new ParseToken("{"));
-		tokens.add(new ParseToken("}"));
-		tokens.add(new ParseToken("}"));
+		tokens.add(new TestParseToken("{"));
+		tokens.add(new TestParseToken("{"));
+		tokens.add(new TestParseToken("}"));
+		tokens.add(new TestParseToken("}"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);

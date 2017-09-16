@@ -13,11 +13,13 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script.parser;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import de.jcup.basheditor.script.parser.ParseToken;
 
 public class ParseTokenTest {
 

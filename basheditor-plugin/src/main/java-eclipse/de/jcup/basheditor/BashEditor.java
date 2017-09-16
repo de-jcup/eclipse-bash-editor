@@ -58,9 +58,9 @@ import de.jcup.basheditor.document.BashFileDocumentProvider;
 import de.jcup.basheditor.document.BashTextFileDocumentProvider;
 import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
 import de.jcup.basheditor.outline.Item;
-import de.jcup.basheditor.scriptmodel.BashError;
-import de.jcup.basheditor.scriptmodel.BashScriptModel;
-import de.jcup.basheditor.scriptmodel.BashScriptModelBuilder;
+import de.jcup.basheditor.script.BashError;
+import de.jcup.basheditor.script.BashScriptModel;
+import de.jcup.basheditor.script.BashScriptModelBuilder;
 
 public class BashEditor extends TextEditor implements StatusMessageSupport, IResourceChangeListener {
 

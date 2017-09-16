@@ -13,9 +13,13 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+package de.jcup.basheditor.script.parser;
 
 public class ParseToken {
+
+	String text;
+	int start;
+	int end;
 
 	ParseToken() {
 
@@ -34,9 +38,18 @@ public class ParseToken {
 		this.end = end;
 	}
 
-	String text;
-	int start;
-	int end;
+
+	public String getText() {
+		return text;
+	}
+
+	public int getStart() {
+		return start;
+	}
+
+	public int getEnd() {
+		return end;
+	}
 
 	@Override
 	public String toString() {
@@ -69,45 +82,45 @@ public class ParseToken {
 	}
 
 	public boolean isFunctionName() {
-		return endsWithFunctionBrackets() && !isComment() && text.length()>2 && !isString();
+		return endsWithFunctionBrackets() && !isComment() && text.length() > 2 && !isString();
 	}
-	
-	public boolean endsWithFunctionBrackets(){
+
+	public boolean endsWithFunctionBrackets() {
 		return text.endsWith("()");
 	}
-	
-	public boolean hasLength(int length){
-		return text.length()==length;
+
+	public boolean hasLength(int length) {
+		return text.length() == length;
 	}
-	
+
 	public String getTextAsFunctionName() {
-		//String name = token.text;
-		 if (text.endsWith("()")){
-			 return text.substring(0,text.length()-2);
-		 }
+		// String name = token.text;
+		if (text.endsWith("()")) {
+			return text.substring(0, text.length() - 2);
+		}
 		return text;
 	}
 
 	public boolean isOpenBlock() {
-		 return text.length()==1 && text.endsWith("{");
+		return text.length() == 1 && text.endsWith("{");
 	}
-	
+
 	public boolean isCloseBlock() {
-		 return text.length()==1 && text.endsWith("}");
+		return text.length() == 1 && text.endsWith("}");
 	}
 
 	public boolean isDo() {
 		return text.equals("do");
 	}
-	
+
 	public boolean isDone() {
 		return text.equals("done");
 	}
-	
+
 	public boolean isIf() {
 		return text.equals("if");
 	}
-	
+
 	public boolean isFi() {
 		return text.equals("fi");
 	}

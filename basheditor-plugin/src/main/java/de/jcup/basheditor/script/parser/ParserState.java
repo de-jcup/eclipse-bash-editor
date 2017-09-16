@@ -13,34 +13,20 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script.parser;
 
-public class BashFunction {
-
-	String name;
-	int position;
-	int lengthToNameEnd;
-	public int end;
-
-	public int getLengthToNameEnd() {
-		return lengthToNameEnd;
-	}
+enum ParserState{
+	INIT,
+	INSIDE_COMMENT,
 	
-	public String getName() {
-		return name;
-	}
-
-	public int getPosition() {
-		return position;
-	}
+	INSIDE_SINGLE_STRING,
+	INSIDE_DOUBLE_STRING,
+	INSIDE_DOUBLE_TICKED,
 	
-	public int getEnd() {
-		return end;
-	}
+	CODE,
+	FUNCTION, 
 	
-	@Override
-	public String toString() {
-		return "function "+name+"()";
-	}
-
+	VARIABLE,
+	
+	UNKNOWN,
 }

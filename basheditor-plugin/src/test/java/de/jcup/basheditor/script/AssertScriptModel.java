@@ -13,7 +13,7 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script;
 
 import static org.junit.Assert.*;
 

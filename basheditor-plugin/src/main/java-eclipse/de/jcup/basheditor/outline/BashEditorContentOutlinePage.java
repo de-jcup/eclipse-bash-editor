@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import de.jcup.basheditor.BashEditor;
-import de.jcup.basheditor.scriptmodel.BashScriptModel;
+import de.jcup.basheditor.script.BashScriptModel;
 
 public class BashEditorContentOutlinePage extends ContentOutlinePage implements IDoubleClickListener {
 

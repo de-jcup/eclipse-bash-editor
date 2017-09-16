@@ -13,20 +13,28 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script;
 
-enum ParserState{
-	INIT,
-	INSIDE_COMMENT,
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class BashScriptModel {
+
+	Collection<BashFunction> functions = new ArrayList<>();
+	Collection<BashError> errors = new ArrayList<>();
+
+	public Collection<BashFunction> getFunctions() {
+		return functions;
+	}
+
+	public Collection<BashError> getErrors() {
+		return errors;
+	}
 	
-	INSIDE_SINGLE_STRING,
-	INSIDE_DOUBLE_STRING,
-	INSIDE_DOUBLE_TICKED,
+	public boolean hasErrors(){
+		return !getErrors().isEmpty();
+	}
 	
-	CODE,
-	FUNCTION, 
 	
-	VARIABLE,
-	
-	UNKNOWN,
+
 }

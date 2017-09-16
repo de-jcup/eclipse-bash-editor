@@ -13,7 +13,7 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script.parser.validator;
 
 import static org.junit.Assert.*;
 
@@ -22,6 +22,10 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import de.jcup.basheditor.script.ValidationResult;
+import de.jcup.basheditor.script.parser.ParseToken;
+import de.jcup.basheditor.script.parser.TestParseToken;
 
 public class IfEndsWithFiValidatorTest {
 
@@ -38,9 +42,9 @@ public class IfEndsWithFiValidatorTest {
 	@Test
 	public void if_something_fi_has_no_problems() {
 		/* prepare */
-		tokens.add(new ParseToken("if"));
-		tokens.add(new ParseToken("something"));
-		tokens.add(new ParseToken("fi"));
+		tokens.add(new TestParseToken("if"));
+		tokens.add(new TestParseToken("something"));
+		tokens.add(new TestParseToken("fi"));
 
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -52,9 +56,9 @@ public class IfEndsWithFiValidatorTest {
 	@Test
 	public void if_something_fine_has_problem() {
 		/* prepare */
-		tokens.add(new ParseToken("if"));
-		tokens.add(new ParseToken("something"));
-		tokens.add(new ParseToken("fine"));
+		tokens.add(new TestParseToken("if"));
+		tokens.add(new TestParseToken("something"));
+		tokens.add(new TestParseToken("fine"));
 
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -68,10 +72,10 @@ public class IfEndsWithFiValidatorTest {
 	@Test
 	public void if_something_if_something2_fine_has_problem() {
 		/* prepare */
-		tokens.add(new ParseToken("if"));
-		tokens.add(new ParseToken("something"));
-		tokens.add(new ParseToken("if"));
-		tokens.add(new ParseToken("fi"));
+		tokens.add(new TestParseToken("if"));
+		tokens.add(new TestParseToken("something"));
+		tokens.add(new TestParseToken("if"));
+		tokens.add(new TestParseToken("fi"));	
 
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);

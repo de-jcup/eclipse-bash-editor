@@ -13,10 +13,14 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script.parser.validator;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.jcup.basheditor.script.BashScriptValidator;
+import de.jcup.basheditor.script.ValidationResult;
+import de.jcup.basheditor.script.parser.ParseToken;
 
 public abstract class AbstractParseTokenListValidator implements BashScriptValidator<List<ParseToken>>{
 

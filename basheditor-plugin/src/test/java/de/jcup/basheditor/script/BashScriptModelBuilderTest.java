@@ -13,15 +13,16 @@
  * and limitations under the License.
  *
  */
-package de.jcup.basheditor.scriptmodel;
+package de.jcup.basheditor.script;
 
-import static de.jcup.basheditor.scriptmodel.AssertScriptModel.assertThat;
+import static de.jcup.basheditor.script.AssertScriptModel.*;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import de.jcup.basheditor.TestScriptLoader;
+import de.jcup.basheditor.script.BashScriptModelBuilder;
 
 public class BashScriptModelBuilderTest {
 

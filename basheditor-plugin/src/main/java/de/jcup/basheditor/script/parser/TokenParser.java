@@ -13,12 +13,12 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script.parser;
+
+import static de.jcup.basheditor.script.parser.ParserState.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static de.jcup.basheditor.scriptmodel.ParserState.*;
 
 public class TokenParser {
 

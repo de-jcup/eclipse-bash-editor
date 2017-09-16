@@ -13,9 +13,13 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script.parser.validator;
 
 import java.util.List;
+
+import de.jcup.basheditor.script.BashError;
+import de.jcup.basheditor.script.ValidationResult;
+import de.jcup.basheditor.script.parser.ParseToken;
 
 public class ClosedBlocksValidator extends AbstractParseTokenListValidator {
 
@@ -47,13 +51,13 @@ public class ClosedBlocksValidator extends AbstractParseTokenListValidator {
 			if (lastWorksBeforeClose == null) {
 				result.add(new BashError(0, 0, "More closing brackets than opened ones. It seems you got a '{' missing"));
 			}else{
-				result.add(new BashError(lastWorksBeforeClose.start, lastWorksBeforeClose.end, "It seems this closing bracket is missing a opening one"));
+				result.add(new BashError(lastWorksBeforeClose.getStart(), lastWorksBeforeClose.getEnd(), "It seems this closing bracket is missing a opening one"));
 			}
 		}else{
 			if (lastWorkingOpen == null) {
 				result.add(new BashError(0, 0, "More opening brackets than closed ones. It seems you got a '}' missing"));
 			}else{
-				result.add(new BashError(lastWorkingOpen.start, lastWorkingOpen.end, "It seems this opening bracket is missing a closing one."));
+				result.add(new BashError(lastWorkingOpen.getStart(), lastWorkingOpen.getEnd(), "It seems this opening bracket is missing a closing one."));
 			}
 		}
 		

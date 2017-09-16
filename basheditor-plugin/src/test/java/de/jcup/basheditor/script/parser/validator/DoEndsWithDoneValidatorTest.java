@@ -13,7 +13,7 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script.parser.validator;
 
 import static org.junit.Assert.*;
 
@@ -22,6 +22,10 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import de.jcup.basheditor.script.ValidationResult;
+import de.jcup.basheditor.script.parser.ParseToken;
+import de.jcup.basheditor.script.parser.TestParseToken;
 
 public class DoEndsWithDoneValidatorTest {
 
@@ -37,8 +41,8 @@ public class DoEndsWithDoneValidatorTest {
 	@Test
 	public void done_do_has_problem() {
 		/* prepare */
-		tokens.add(new ParseToken("done"));
-		tokens.add(new ParseToken("do"));
+		tokens.add(new TestParseToken("done"));
+		tokens.add(new TestParseToken("do"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -50,9 +54,9 @@ public class DoEndsWithDoneValidatorTest {
 	@Test
 	public void do_done_done_has_problem() {
 		/* prepare */
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("done"));
-		tokens.add(new ParseToken("do"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("done"));
+		tokens.add(new TestParseToken("do"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -64,9 +68,9 @@ public class DoEndsWithDoneValidatorTest {
 	@Test
 	public void do_something_done__has_no_problems() {
 		/* prepare */
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("something"));
-		tokens.add(new ParseToken("done"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("something"));
+		tokens.add(new TestParseToken("done"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -78,9 +82,9 @@ public class DoEndsWithDoneValidatorTest {
 	@Test
 	public void do_something_doxne__has_problem() {
 		/* prepare */
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("something"));
-		tokens.add(new ParseToken("doxne"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("something"));
+		tokens.add(new TestParseToken("doxne"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -95,8 +99,8 @@ public class DoEndsWithDoneValidatorTest {
 	@Test
 	public void do_something_has_problem() {
 		/* prepare */
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("something"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("something"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -111,11 +115,11 @@ public class DoEndsWithDoneValidatorTest {
 	@Test
 	public void do_something_do_something2_done_has_problem() {
 		/* prepare */
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("something"));
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("something2"));
-		tokens.add(new ParseToken("done"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("something"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("something2"));
+		tokens.add(new TestParseToken("done"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -129,11 +133,11 @@ public class DoEndsWithDoneValidatorTest {
 	@Test
 	public void do_something_done_something2_done_has_problem() {
 		/* prepare */
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("something"));
-		tokens.add(new ParseToken("done"));
-		tokens.add(new ParseToken("something2"));
-		tokens.add(new ParseToken("done"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("something"));
+		tokens.add(new TestParseToken("done"));
+		tokens.add(new TestParseToken("something2"));
+		tokens.add(new TestParseToken("done"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -147,15 +151,15 @@ public class DoEndsWithDoneValidatorTest {
 	@Test
 	public void do_x_done_do_y_done_do_done_done_do__has_problem() {
 		/* prepare */
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("x"));
-		tokens.add(new ParseToken("done"));
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("y"));
-		tokens.add(new ParseToken("done"));
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("done"));
-		tokens.add(new ParseToken("do"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("x"));
+		tokens.add(new TestParseToken("done"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("y"));
+		tokens.add(new TestParseToken("done"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("done"));
+		tokens.add(new TestParseToken("do"));
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
 		
@@ -168,12 +172,12 @@ public class DoEndsWithDoneValidatorTest {
 	@Test
 	public void do_something_do_something2_done_done_has_no_problems() {
 		/* prepare */
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("something"));
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("something2"));
-		tokens.add(new ParseToken("done"));
-		tokens.add(new ParseToken("done"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("something"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("something2"));
+		tokens.add(new TestParseToken("done"));
+		tokens.add(new TestParseToken("done"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);
@@ -185,12 +189,12 @@ public class DoEndsWithDoneValidatorTest {
 	@Test
 	public void do_something_simple_string_with_do_something2_done_done_has_problems() {
 		/* prepare */
-		tokens.add(new ParseToken("do"));
-		tokens.add(new ParseToken("something"));
-		tokens.add(new ParseToken("'do'"));
-		tokens.add(new ParseToken("something2"));
-		tokens.add(new ParseToken("done"));
-		tokens.add(new ParseToken("done"));
+		tokens.add(new TestParseToken("do"));
+		tokens.add(new TestParseToken("something"));
+		tokens.add(new TestParseToken("'do'"));
+		tokens.add(new TestParseToken("something2"));
+		tokens.add(new TestParseToken("done"));
+		tokens.add(new TestParseToken("done"));
 		
 		/* execute */
 		List<ValidationResult> results = validatorToTest.validate(tokens);

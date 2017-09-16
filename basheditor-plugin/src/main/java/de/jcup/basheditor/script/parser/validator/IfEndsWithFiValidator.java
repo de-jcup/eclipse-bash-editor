@@ -13,9 +13,13 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.scriptmodel;
+ package de.jcup.basheditor.script.parser.validator;
 
 import java.util.List;
+
+import de.jcup.basheditor.script.BashError;
+import de.jcup.basheditor.script.ValidationResult;
+import de.jcup.basheditor.script.parser.ParseToken;
 
 public class IfEndsWithFiValidator extends AbstractParseTokenListValidator {
 
@@ -48,7 +52,7 @@ public class IfEndsWithFiValidator extends AbstractParseTokenListValidator {
 		}
 		if (countOfIf!=countOfFi){
 			if (inspectedUnchainedIfToken!=null){
-				BashError error = new BashError(inspectedUnchainedIfToken.start,inspectedUnchainedIfToken.end,"This 'if' statement is not correct closed. A 'fi' is missing");
+				BashError error = new BashError(inspectedUnchainedIfToken.getStart(),inspectedUnchainedIfToken.getEnd(),"This 'if' statement is not correct closed. A 'fi' is missing");
 				result.add(error);
 			}
 		}
