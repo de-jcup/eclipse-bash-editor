@@ -49,6 +49,24 @@ public class TokenParserTest {
 					"# Check if the database exists");
 		/* @formatter:on*/
 	}
+	
+	@Test
+	public void bugfix_45_simplified() throws Exception{
+		/* prepare "a"$z"b" # x*/
+		String string = "\"a\"$z\"b\" # x";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+		
+		/* test */ /* @formatter:off*/
+		assertThat(tokens).
+			containsTokens(
+					"\"a\"",
+					"$z",
+					"\"b\"",
+					"# x");
+		/* @formatter:on*/
+	}
 
 	@Test
 	public void bugfix_43() throws Exception {
