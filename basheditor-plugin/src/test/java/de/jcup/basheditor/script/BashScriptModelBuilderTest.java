@@ -32,87 +32,99 @@ public class BashScriptModelBuilderTest {
 	public void before() {
 		builderToTest = new BashScriptModelBuilder();
 	}
-	
+
 	@Test
-	public void bugfix_46_no_longer_errors_for_file() throws Exception{
+	public void bugfix_47_no_longer_errors_for_file() throws Exception {
+		/* prepare */
+		String script = TestScriptLoader.loadScriptFromTestScripts("bugfix_47.sh");
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(script);
+
+		/* test */
+		assertThat(bashScriptModel).hasErrors(0);
+	}
+
+	@Test
+	public void bugfix_46_no_longer_errors_for_file() throws Exception {
 		/* prepare */
 		String script = TestScriptLoader.loadScriptFromTestScripts("bugfix_46.sh");
-		
+
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(script);
-		
+
 		/* test */
 		assertThat(bashScriptModel).hasErrors(0);
 	}
-	
+
 	@Test
-	public void bugfix_41_1_handle_arrays() throws Exception{
+	public void bugfix_41_1_handle_arrays() throws Exception {
 		/* prepare */
 		String script = TestScriptLoader.loadScriptFromTestScripts("bugfix_41_1.sh");
-		
+
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(script);
-		
+
 		/* test */
 		assertThat(bashScriptModel).hasErrors(0);
 	}
-	
+
 	@Test
-	public void bugfix_41_2_handle_arrays() throws Exception{
+	public void bugfix_41_2_handle_arrays() throws Exception {
 		/* prepare */
 		String script = TestScriptLoader.loadScriptFromTestScripts("bugfix_41_2.sh");
-		
+
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(script);
-		
+
 		/* test */
 		assertThat(bashScriptModel).hasErrors(0);
 	}
-	
+
 	@Test
-	public void bugfix_39__variable_with_hash_do_not_result_errors(){
-		/* prepare*/
+	public void bugfix_39__variable_with_hash_do_not_result_errors() {
+		/* prepare */
 		String code = "declare -A TitleMap\nif [ ${#TitleMap[*]} -eq 0 ]\nthen\n   displayerr \"Map is empty\"\n    exit 1\nfi";
-		
+
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(code);
-		
+
 		/* test */
 		assertThat(bashScriptModel).hasErrors(0);
 	}
-	
+
 	@Test
-	public void function_a_open_bracket_open_bracket_close_bracket_has_error(){
-		/* prepare*/
+	public void function_a_open_bracket_open_bracket_close_bracket_has_error() {
+		/* prepare */
 		String code = "function a {{}";
-		
+
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(code);
-		
+
 		/* test */
 		assertThat(bashScriptModel).hasFunction("a").hasErrors(1);
 	}
-	
+
 	@Test
-	public void usage_space_x_msg_space_y_fatal_space_z(){
-		/* prepare*/
+	public void usage_space_x_msg_space_y_fatal_space_z() {
+		/* prepare */
 		String code = "Usage () {x} Msg () {y} Fatal () {z}";
-		
+
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(code);
-		
+
 		/* test */
 		assertThat(bashScriptModel).hasFunction("Usage").hasFunction("Msg").hasFunction("Fatal").hasFunctions(3);
 	}
-	
+
 	@Test
-	public void usage_x_msg_y_fatal_z(){
-		/* prepare*/
+	public void usage_x_msg_y_fatal_z() {
+		/* prepare */
 		String code = "Usage() {x} Msg() {y} Fatal() {z}";
-		
+
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(code);
-		
+
 		/* test */
 		assertThat(bashScriptModel).hasFunction("Usage").hasFunction("Msg").hasFunction("Fatal").hasFunctions(3);
 	}
@@ -130,7 +142,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void method_Usage_space_open_close_brackets__is_recognized_as_function_Usage(){
+	public void method_Usage_space_open_close_brackets__is_recognized_as_function_Usage() {
 		/* prepare */
 		String code = "Usage () {}";
 
@@ -140,7 +152,7 @@ public class BashScriptModelBuilderTest {
 		/* test */
 		assertThat(bashScriptModel).hasFunctions(1).hasFunction("Usage");
 	}
-	
+
 	@Test
 	public void space_semicolon_function_xy_is_recognized_as_function_xy() {
 		/* prepare */
@@ -202,7 +214,13 @@ public class BashScriptModelBuilderTest {
 		BashScriptModel bashScriptModel = builderToTest.build(code);
 
 		/* test */
-		assertThat(bashScriptModel).hasNoFunctions().hasErrors(2); // function build has one error and one of the valdiators too
+		assertThat(bashScriptModel).hasNoFunctions().hasErrors(2); // function
+																	// build has
+																	// one error
+																	// and one
+																	// of the
+																	// valdiators
+																	// too
 	}
 
 	@Test
@@ -321,7 +339,7 @@ public class BashScriptModelBuilderTest {
 	public void two_lines_with_functions_test1_and_test2_are_recognized_and_returns_2_function_with_name_test1_and_teset2__but_with_backslash_r() {
 		/* prepare */
 		String bashScript = "function test1 {\n#something\n}\n #other line\n\nfunction test2 {\r\n#something else\r\n}\r\n";
-		
+
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(bashScript);
 		/* test */

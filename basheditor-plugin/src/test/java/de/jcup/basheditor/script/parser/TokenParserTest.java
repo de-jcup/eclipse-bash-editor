@@ -35,28 +35,49 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
-	@Test 
-	public void bugfix_46__variable_containing_multiple_curly_end_brackets_are_supported(){
+
+	@Test
+	public void bugfix_47__$$_is_no_longer_a_problem() {
 		/* prepare */
-		String string = "${NAWK:=${awk:=awk}}";
-		
+		String string = "export DB2CLP=**$$**";
+
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse(string);
-		
+
+		/* test */ /* @formatter:off*/
+		assertThat(tokens).
+			containsTokens(
+					"export",
+					"DB2CLP=",
+					"**",
+					"$$",
+					"**");
+		/* @formatter:on*/
+	}
+
+	@Test
+	public void bugfix_46__variable_containing_multiple_curly_end_brackets_are_supported() {
+		/* prepare */
+		String string = "${NAWK:=${awk:=awk}}";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
 		/* test */ /* @formatter:off*/
 		assertThat(tokens).
 			containsTokens(
 					"${NAWK:=${awk:=awk}}");
 		/* @formatter:on*/
 	}
+
 	@Test
-	public void bugfix_45() throws Exception{
+	public void bugfix_45() throws Exception {
 		/* prepare */
 		String string = "cd \"$(dirname \"$BASH_SOURCE\")\"\n\n# Check if the database exists";
-		
+
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse(string);
-		
+
 		/* test */ /* @formatter:off*/
 		assertThat(tokens).
 			containsTokens(
@@ -67,15 +88,15 @@ public class TokenParserTest {
 					"# Check if the database exists");
 		/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void bugfix_45_simplified() throws Exception{
-		/* prepare "a"$z"b" # x*/
+	public void bugfix_45_simplified() throws Exception {
+		/* prepare "a"$z"b" # x */
 		String string = "\"a\"$z\"b\" # x";
-		
+
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse(string);
-		
+
 		/* test */ /* @formatter:off*/
 		assertThat(tokens).
 			containsTokens( 
