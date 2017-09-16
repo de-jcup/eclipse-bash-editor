@@ -13,14 +13,13 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.script.parser;
+package de.jcup.basheditor.script.parser;
 
 import java.util.ArrayList;
 import java.util.List;
 
+class ParseContext {
 
-class ParseContext{
-	
 	char[] chars;
 	int pos;
 	StringBuilder sb;
@@ -28,40 +27,74 @@ class ParseContext{
 	private ParseToken currentToken;
 	private ParserState parserState = ParserState.INIT;
 	private ParserState stateBeforeString;
-	private VariableState variableState = VariableState.NO_ARRAY;
-	
-	ParseContext(){
-		currentToken=createToken();
+	private VariableContext variableContext;
+
+	ParseContext() {
+		currentToken = createToken();
 	}
 
-	void addTokenAndResetText(){
-		if (moveCurrentPosWhenEmptyText()){
+	public class VariableContext {
+		private VariableState variableState = VariableState.NO_ARRAY;
+		private int variableOpenCurlyBraces;
+		private int variableCloseCurlyBraces;
+
+		public void incrementVariableOpenCurlyBraces() {
+			variableOpenCurlyBraces++;
+
+		}
+
+		public void incrementVariableCloseCurlyBraces() {
+			variableCloseCurlyBraces++;
+
+		}
+
+		public boolean areVariableCurlyBracesBalanced() {
+			return variableOpenCurlyBraces == variableCloseCurlyBraces;
+		}
+
+		public void variableArrayOpened() {
+			variableState = VariableState.ARRAY_OPENED;
+		}
+
+		public void variableArrayClosed() {
+			variableState = VariableState.ARRAY_CLOSED;
+		}
+
+		public boolean isInsideVariableArray() {
+			boolean isInside = inState(ParserState.VARIABLE);
+			isInside = isInside && VariableState.ARRAY_OPENED.equals(variableState);
+			return isInside;
+		}
+	}
+
+	void addTokenAndResetText() {
+		if (moveCurrentPosWhenEmptyText()) {
 			return;
 		}
-		
-		currentToken.text=sb.toString();
-		currentToken.end=pos;
+
+		currentToken.text = sb.toString();
+		currentToken.end = pos;
 		tokens.add(currentToken);
-		
+
 		/* new token on next position */
-		currentToken=createToken();
-		currentToken.start=pos+1;
-		
+		currentToken = createToken();
+		currentToken.start = pos + 1;
+
 		resetText();
 	}
-	
-	void appendCharToText(){
+
+	void appendCharToText() {
 		getSb().append(getCharAtPos());
 	}
-	
-	char getCharAtPos(){
+
+	char getCharAtPos() {
 		return chars[pos];
 	}
 
 	char getCharBefore() {
-		int posBefore = pos-1;
-		if (posBefore>=0){
-			if (chars.length>0){
+		int posBefore = pos - 1;
+		if (posBefore >= 0) {
+			if (chars.length > 0) {
 				return chars[posBefore];
 			}
 		}
@@ -70,79 +103,76 @@ class ParseContext{
 
 	boolean insideString() {
 		boolean inString = false;
-		inString= inString || inState(ParserState.INSIDE_DOUBLE_STRING);
-		inString= inString || inState(ParserState.INSIDE_DOUBLE_TICKED);
-		inString= inString || inState(ParserState.INSIDE_SINGLE_STRING);
+		inString = inString || inState(ParserState.INSIDE_DOUBLE_STRING);
+		inString = inString || inState(ParserState.INSIDE_DOUBLE_TICKED);
+		inString = inString || inState(ParserState.INSIDE_SINGLE_STRING);
 		return inString;
 	}
-	
+
 	boolean inState(ParserState parserState) {
 		return getState().equals(parserState);
 	}
-	
+
 	boolean moveCurrentPosWhenEmptyText() {
-		if (getSb().length()==0){
+		if (getSb().length() == 0) {
 			currentToken.start++;
 			return true;
 		}
 		return false;
 	}
-	
+
 	void restoreStateBeforeString() {
 		switchTo(stateBeforeString);
 	}
-	
+
 	void switchTo(ParserState parserState) {
 		this.parserState = parserState;
-		if (ParserState.VARIABLE.equals(parserState)){
-			variableState=VariableState.NO_ARRAY;
+		if (ParserState.VARIABLE.equals(parserState)) {
+			getVariableContext().variableState = VariableState.NO_ARRAY;
+		} else {
+			variableContext = null;
 		}
 	}
+
 	void switchToStringState(ParserState newStringState) {
-		this.stateBeforeString=getState();
+		this.stateBeforeString = getState();
 		switchTo(newStringState);
 	}
 
-	private ParseToken createToken(){
+	private ParseToken createToken() {
 		ParseToken token = new ParseToken();
-		token.start=pos;
+		token.start = pos;
 		return token;
 	}
 
 	private StringBuilder getSb() {
-		if (sb==null){
-			sb=new StringBuilder();
+		if (sb == null) {
+			sb = new StringBuilder();
 		}
 		return sb;
 	}
 
 	private ParserState getState() {
-		if (parserState==null){
-			parserState=ParserState.UNKNOWN;
+		if (parserState == null) {
+			parserState = ParserState.UNKNOWN;
 		}
 		return parserState;
 	}
-	
-	private void resetText(){
-		sb=null;
+
+	private void resetText() {
+		sb = null;
 	}
 
-	public void variableArrayOpened() {
-		variableState=VariableState.ARRAY_OPENED;
-	}
-	
-	public void variableArrayClosed() {
-		variableState=VariableState.ARRAY_CLOSED;
+	public VariableContext getVariableContext() {
+		if (variableContext == null) {
+			variableContext = new VariableContext();
+		}
+		return variableContext;
 	}
 
-	public boolean isInsideVariableArray() {
-		boolean isInside = inState(ParserState.VARIABLE);
-		isInside = isInside && VariableState.ARRAY_OPENED.equals(variableState);
-		return isInside;
-	}
-	
 	@Override
 	public String toString() {
-		return "ParseContext:"+getSb().toString()+"\nTokens:"+tokens;
+		return "ParseContext:" + getSb().toString() + "\nTokens:" + tokens;
 	}
+
 }

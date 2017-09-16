@@ -20,6 +20,8 @@ import static de.jcup.basheditor.script.parser.ParserState.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.jcup.basheditor.script.parser.ParseContext.VariableContext;
+
 public class TokenParser {
 
 	public List<ParseToken> parse(String bashScript) {
@@ -45,6 +47,7 @@ public class TokenParser {
 		/* ++++++ Handle variables +++ */
 		/* +++++++++++++++++++++++++++ */
 		if (context.inState(VARIABLE)) {
+			VariableContext variableContext = context.getVariableContext();
 			if (c == '$') {
 				/* variable content containing variables is done as simple */
 				context.appendCharToText();
@@ -55,31 +58,35 @@ public class TokenParser {
 				return;
 			}
 			if (c == '[') {
-				context.variableArrayOpened();
+				variableContext.variableArrayOpened();
 				context.appendCharToText();
 				return;
 			}
 			if (c == ']') {
-				context.variableArrayClosed();
+				variableContext.variableArrayClosed();
 				context.appendCharToText();
 				return;
 			}
-
 			if (c == '{' || c == '}') {
 				context.appendCharToText();
+				if (c == '{' ) {
+					variableContext.incrementVariableOpenCurlyBraces();
+				}
 				if (c == '}') {
+					variableContext.incrementVariableCloseCurlyBraces();
+				}
+				if (c == '}' && variableContext.areVariableCurlyBracesBalanced()) {
 					context.addTokenAndResetText();
 					context.switchTo(CODE);
 				}
 				return;
-
 			}
 
 			if (Character.isWhitespace(c)) {
 				context.addTokenAndResetText();
 				return;
 			}
-			if (context.isInsideVariableArray()) {
+			if (variableContext.isInsideVariableArray()) {
 				if (isStringChar(c)){
 					context.appendCharToText();
 					return;
