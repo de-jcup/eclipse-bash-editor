@@ -29,18 +29,21 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 	private static final String BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS = "Bash script does not contain any functions";
 	private static final Object[] RESULT_WHEN_EMPTY = new Object[] { BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS };
 	private Object[] items;
-	
-	BashEditorTreeContentProvider(){
+	private Object monitor = new Object();
+
+	BashEditorTreeContentProvider() {
 		items = RESULT_WHEN_EMPTY;
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (! (inputElement instanceof BashScriptModel)){
-			return new Object[] { "Unsupported input element" };
-		}
-		if (items != null && items.length > 0) {
-			return items;
+		synchronized (monitor) {
+			if (!(inputElement instanceof BashScriptModel)) {
+				return new Object[] { "Unsupported input element:"+inputElement };
+			}
+			if (items != null && items.length > 0) {
+				return items;
+			}
 		}
 		return RESULT_WHEN_EMPTY;
 	}
@@ -70,31 +73,55 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.length = function.getLengthToNameEnd();
 			list.add(item);
 		}
-		if (list.isEmpty()){
+		if (list.isEmpty()) {
 			Item item = new Item();
-			item.name=BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS;
-			item.type=ItemType.META_INFO;
-			item.offset=0;
-			item.length=0;
+			item.name = BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS;
+			item.type = ItemType.META_INFO;
+			item.offset = 0;
+			item.length = 0;
 			list.add(item);
 		}
-		if (model.hasErrors()){
+		if (model.hasErrors()) {
 			Item item = new Item();
-			item.name=BASH_SCRIPT_CONTAINS_ERRORS;
-			item.type=ItemType.META_ERROR;
-			item.offset=0;
-			item.length=0;
-			list.add(0,item);
+			item.name = BASH_SCRIPT_CONTAINS_ERRORS;
+			item.type = ItemType.META_ERROR;
+			item.offset = 0;
+			item.length = 0;
+			list.add(0, item);
 		}
 		return list.toArray(new Item[list.size()]);
+
 	}
 
 	public void rebuildTree(BashScriptModel model) {
-		if (model == null) {
-			items = null;
-			return;
+		synchronized (monitor) {
+			if (model == null) {
+				items = null;
+				return;
+			}
+			items = createItems(model);
 		}
-		items = createItems(model);
+	}
+
+	public Item tryToFindByOffset(int offset) {
+		synchronized (monitor) {
+			if (items==null){
+				return null;
+			}
+			for (Object oitem: items){
+				if (!(oitem instanceof Item)){
+					continue;
+				}
+				Item item = (Item) oitem;
+				int itemStart = item.getOffset();
+				int itemEnd = itemStart+item.getLength();
+				if (offset >= itemStart && offset<=itemEnd ){
+					return item;
+				}
+			}
+			
+		}
+		return null;
 	}
 
 }

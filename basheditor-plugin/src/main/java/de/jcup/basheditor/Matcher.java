@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Albert Tregnaghi
+ * Copyright 2016 Albert Tregnaghi
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,35 +13,16 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.outline;
+ package de.jcup.basheditor;
 
-public class Item {
+@AdaptedFromEGradle
+public interface Matcher<T> {
 
-	ItemType type;
-	String name;
-	int offset;
-	int length;
-	
 	/**
-	 * @return item type , or <code>null</code>
+	 * Returns true when matcher matches
+	 * @param toMatch
+	 * @return <code>true</code> when matching
 	 */
-	public ItemType getItemType(){
-		return type;
-	}
+	public boolean matches(T toMatch) ;
 
-	public String getName() {
-		return name;
-	}
-
-	public int getOffset() {
-		return offset;
-	}
-
-	public int getLength() {
-		return length;
-	}
-
-	public String buildSearchString() {
-		return name;
-	}
 }

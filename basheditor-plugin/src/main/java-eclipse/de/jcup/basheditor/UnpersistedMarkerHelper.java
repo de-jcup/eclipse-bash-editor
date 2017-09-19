@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.CoreException;
  * @author albert
  *
  */
+@AdaptedFromEGradle
 public class UnpersistedMarkerHelper extends AbstractMarkerHelper {
 
 	private List<IMarker> markerRegistry;

@@ -38,6 +38,10 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
 		this.contentProvider=new BashEditorTreeContentProvider();
 	}
 	
+	public BashEditorTreeContentProvider getContentProvider() {
+		return contentProvider;
+	}
+	
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
@@ -76,5 +80,6 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
 			treeViewer.setInput(model);
 		}
 	}
+
 	
 }

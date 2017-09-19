@@ -75,6 +75,12 @@
    </extension>
    
    <extension point="org.eclipse.ui.commands">
+   	   <command
+            name="Quick outline"
+            description="Show quick outline dialog"
+            categoryId="basheditor.commands.category"
+            id="basheditor.editor.commands.quickoutline">
+      </command>
       <command
             name="Toggle comment"
             description="Toggle comment in selected line(s)"
@@ -89,6 +95,10 @@
       </command>
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
+	 <handler
+            commandId="basheditor.editor.commands.quickoutline"
+            class="de.jcup.basheditor.handlers.OpenQuickOutlineHandler">
+      </handler>
       <handler
             commandId="basheditor.editor.commands.source.toggleComment"
             class="de.jcup.basheditor.handlers.ToggleCommentHandler">
@@ -103,6 +113,12 @@
    <!--                          KEY BINDING                                 -->
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <extension point="org.eclipse.ui.bindings">
+   		<key
+            sequence="M1+O"
+            contextId="org.basheditor.editors.BashEditor.context"
+            commandId="basheditor.editor.commands.quickoutline"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">	  
+		</key>
 		<key
             sequence="M1+7"
             contextId="org.basheditor.editors.BashEditor.context"
@@ -121,6 +137,14 @@
    <!--                          MENU                                 -->
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
     <extension point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.basheditor.editors.BashEditor.context?after=additions">
+         <command
+               commandId="basheditor.editor.commands.quickoutline"
+               >
+         </command>
+      </menuContribution>
+      
       <menuContribution
             locationURI="menu:org.eclipse.ui.main.menu?after=edit">
             

@@ -39,8 +39,13 @@ import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.swt.custom.CaretEvent;
+import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
@@ -57,11 +62,14 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import de.jcup.basheditor.document.BashFileDocumentProvider;
 import de.jcup.basheditor.document.BashTextFileDocumentProvider;
 import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
+import de.jcup.basheditor.outline.BashEditorTreeContentProvider;
+import de.jcup.basheditor.outline.BashQuickOutlineDialog;
 import de.jcup.basheditor.outline.Item;
 import de.jcup.basheditor.script.BashError;
 import de.jcup.basheditor.script.BashScriptModel;
 import de.jcup.basheditor.script.BashScriptModelBuilder;
 
+@AdaptedFromEGradle
 public class BashEditor extends TextEditor implements StatusMessageSupport, IResourceChangeListener {
 
 	/** The COMMAND_ID of this editor as defined in plugin.xml */
@@ -75,7 +83,10 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	private SourceViewerDecorationSupport additionalSourceViewerSupport;
 	private BashEditorContentOutlinePage outlinePage;
 	private BashScriptModelBuilder modelBuilder;
-
+	private Object monitor = new Object();
+	private boolean quickOutlineOpened;
+	private int lastCaretPosition;
+	
 	public BashEditor() {
 		setSourceViewerConfiguration(new BashSourceViewerConfiguration(this));
 		this.modelBuilder = new BashScriptModelBuilder();
@@ -86,6 +97,39 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			int severity = getSeverity();
 
 			setTitleImageDependingOnSeverity(severity);
+		}
+	}
+	
+	/**
+	 * Opens quick outline
+	 */
+	public void openQuickOutline() {
+		synchronized (monitor) {
+			if (quickOutlineOpened) {
+				/*
+				 * already opened - this is in future the anker point for
+				 * ctrl+o+o...
+				 */
+				return;
+			}
+			quickOutlineOpened = true;
+		}
+		Shell shell = getEditorSite().getShell();
+		String text = getDocumentText();
+		
+		/* for quick outline create own model and ignore any validations */
+		modelBuilder.setIgnoreBlockValidation(true);
+		modelBuilder.setIgnoreDoValidation(true);
+		modelBuilder.setIgnoreIfValidation(true);
+		modelBuilder.setIgnoreFunctionValidation(true);
+		
+		BashScriptModel model = modelBuilder.build(text);
+		BashQuickOutlineDialog dialog = new BashQuickOutlineDialog(this, shell, "Quick outline");
+		dialog.setInput(model);
+		
+		dialog.open();
+		synchronized (monitor) {
+			quickOutlineOpened = false;
 		}
 	}
 
@@ -150,6 +194,13 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 
+		Control adapter = getAdapter(Control.class);
+		if (adapter instanceof StyledText) {
+			StyledText text = (StyledText) adapter;
+			text.addCaretListener(new BashEditorCaretListener());
+		}
+
+		
 		activateBashEditorContext();
 
 		installAdditionalSourceViewerSupport();
@@ -274,6 +325,12 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		}
 		if (StatusMessageSupport.class.equals(adapter)) {
 			return (T) this;
+		}
+		if (ITreeContentProvider.class.equals(adapter) || BashEditorTreeContentProvider.class.equals(adapter)) {
+			if (outlinePage==null){
+				return null;
+			}
+			return (T) outlinePage.getContentProvider();
 		}
 		return super.getAdapter(adapter);
 	}
@@ -545,4 +602,31 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		}
 	}
 
+	public Item getItemAtCarretPosition() {
+		return getItemAt(lastCaretPosition);
+	}
+
+	public Item getItemAt(int offset) {
+		if (outlinePage==null){
+			return null;
+		}
+		BashEditorTreeContentProvider contentProvider = outlinePage.getContentProvider();
+		if (contentProvider == null) {
+			return null;
+		}
+		Item item = contentProvider.tryToFindByOffset(offset);
+		return item;
+	}
+
+	private class BashEditorCaretListener implements CaretListener {
+
+		@Override
+		public void caretMoved(CaretEvent event) {
+			if (event == null) {
+				return;
+			}
+			lastCaretPosition = event.caretOffset;
+		}
+
+	}
 }
