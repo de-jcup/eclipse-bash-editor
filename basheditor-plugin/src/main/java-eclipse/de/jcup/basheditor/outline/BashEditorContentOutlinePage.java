@@ -13,7 +13,7 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.outline;
+package de.jcup.basheditor.outline;
 
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -32,16 +32,16 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
 	private Object input;
 	private BashEditor editor;
 	private BashEditorOutlineLabelProvider labelProvider;
-	
+
 	public BashEditorContentOutlinePage(BashEditor editor) {
-		this.editor=editor;
-		this.contentProvider=new BashEditorTreeContentProvider();
+		this.editor = editor;
+		this.contentProvider = new BashEditorTreeContentProvider();
 	}
-	
+
 	public BashEditorTreeContentProvider getContentProvider() {
 		return contentProvider;
 	}
-	
+
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
@@ -52,34 +52,37 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
 		viewer.addDoubleClickListener(this);
 		viewer.setLabelProvider(new DelegatingStyledCellLabelProvider(labelProvider));
 		viewer.addSelectionChangedListener(this);
-		
-		/* it can happen that input is already updated before control created*/
-		if (input!=null){
+
+		/* it can happen that input is already updated before control created */
+		if (input != null) {
 			viewer.setInput(input);
+		}
+		/* when no input is set on init state - let the editor rebuild outline (async)*/
+		if (input == null && editor != null) {
+			editor.rebuildOutline();
 		}
 
 	}
 
 	@Override
 	public void doubleClick(DoubleClickEvent event) {
-		if (editor==null){
+		if (editor == null) {
 			return;
 		}
 		ISelection selection = event.getSelection();
-		editor.openSelectedTreeItemInEditor(selection,true);
+		editor.openSelectedTreeItemInEditor(selection, true);
 	}
-	
+
 	public void rebuild(BashScriptModel model) {
-		if (model==null){
+		if (model == null) {
 			return;
 		}
 		contentProvider.rebuildTree(model);
 
-		TreeViewer treeViewer= getTreeViewer();
-		if (treeViewer!=null){
+		TreeViewer treeViewer = getTreeViewer();
+		if (treeViewer != null) {
 			treeViewer.setInput(model);
 		}
 	}
 
-	
 }

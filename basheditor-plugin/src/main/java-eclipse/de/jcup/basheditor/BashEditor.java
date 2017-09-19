@@ -370,6 +370,9 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		rebuildOutline();
 	}
 
+	/**
+	 * Does rebuild the outline - this is done asynchronous
+	 */
 	public void rebuildOutline() {
 		String text = getDocumentText();
 		
