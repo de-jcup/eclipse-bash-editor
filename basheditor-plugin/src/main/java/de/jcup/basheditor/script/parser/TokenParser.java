@@ -206,7 +206,7 @@ public class TokenParser {
 			return true;
 		}else{
 			/* normal variable or array closed*/
-			if (Character.isWhitespace(c)) {
+			if (Character.isWhitespace(c) || c==';') {
 				if (variableContext.areVariableCurlyBracesBalanced()){
 					context.addTokenAndResetText();
 					context.switchTo(ParserState.CODE);
