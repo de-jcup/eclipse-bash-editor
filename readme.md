@@ -7,7 +7,8 @@ Bash Editor is a plugin for eclipse to edit bash scripts (.sh)
 
 It supports
 - Syntax coloring, customizeable, additional defaults for dark theme
-- Outline (functions only)
+- Outline view (functions only)
+- Quick outline (CTRL+o)
 - Validation
 - Bracket switching + highlighting
 - Block commenting (CTRL+7)
