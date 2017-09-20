@@ -37,6 +37,23 @@ public class TokenParserTest {
 	}
 
 	@Test
+	public void bugfix_41_3__variable_with_array_having_string_containing_space_recognized_correct() {
+
+		/* prepare */
+		String string = "x=${y[`z1 z2`]}";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"x=",
+						"${y[`z1 z2`]}"
+						);	/* @formatter:on*/
+	}
+
+	@Test
 	public void bugfix_47__$$_is_no_longer_a_problem() {
 		/* prepare */
 		String string = "export DB2CLP=**$$**";

@@ -15,14 +15,15 @@
  */
 package de.jcup.basheditor.script;
 
-import static de.jcup.basheditor.script.AssertScriptModel.*;
+import static de.jcup.basheditor.script.AssertScriptModel.assertThat;
 import static org.junit.Assert.*;
+
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import de.jcup.basheditor.TestScriptLoader;
-import de.jcup.basheditor.script.BashScriptModelBuilder;
 
 public class BashScriptModelBuilderTest {
 
@@ -31,6 +32,45 @@ public class BashScriptModelBuilderTest {
 	@Before
 	public void before() {
 		builderToTest = new BashScriptModelBuilder();
+	}
+	
+	@Test
+	public void none_of_the_testscripts_contains_any_failure() throws Exception{
+		/* prepare */
+		StringBuilder errorCollector = new StringBuilder();
+		List<String> scriptNames = TestScriptLoader.fetchAllTestScriptNames();
+		for (String scriptName: scriptNames){
+			
+			String script = TestScriptLoader.loadScriptFromTestScripts(scriptName);
+			
+			/* execute */
+			BashScriptModel bashScriptModel = builderToTest.build(script);
+			
+			/* test */
+			if (bashScriptModel.hasErrors()){
+				errorCollector.append("script file:").append(scriptName).append(" contains errors:\n");
+				for (BashError error: bashScriptModel.getErrors()){
+					errorCollector.append("-");
+					errorCollector.append(error.getMessage());
+					errorCollector.append("\n");
+				}
+			}
+		}
+		if (errorCollector.length()>0){
+			fail(errorCollector.toString());
+		}
+	}
+	
+	@Test
+	public void bugfix_52_$x_followed_by_comment_line_with_if_results_in_no_error(){
+		/* prepare */
+		String script = "a=$x\n# check if the host is pingable";
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(script);
+
+		/* test */
+		assertThat(bashScriptModel).hasErrors(0);
 	}
 
 	@Test
@@ -73,6 +113,18 @@ public class BashScriptModelBuilderTest {
 	public void bugfix_41_2_handle_arrays() throws Exception {
 		/* prepare */
 		String script = TestScriptLoader.loadScriptFromTestScripts("bugfix_41_2.sh");
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(script);
+
+		/* test */
+		assertThat(bashScriptModel).hasErrors(0);
+	}
+	
+	@Test
+	public void bugfix_41_3_handle_arrays_simplified() throws Exception {
+		/* prepare */
+		String script = TestScriptLoader.loadScriptFromTestScripts("bugfix_41_3.sh");
 
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(script);

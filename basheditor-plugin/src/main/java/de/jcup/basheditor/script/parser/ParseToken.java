@@ -53,23 +53,45 @@ public class ParseToken {
 
 	@Override
 	public String toString() {
-		return text;
+		StringBuilder sb = new StringBuilder();
+		sb.append("Type:");
+		if (isComment()){
+			sb.append("isComment,");
+		}
+		if (isString()){
+			sb.append("isString,");
+		}
+		if (isIf()){
+			sb.append("isIf,");
+		}
+		if (isFi()){
+			sb.append("isFi,");
+		}
+		
+		sb.append("content:");
+		sb.append(text);
+		
+		return sb.toString();
 	}
 
 	public boolean isComment() {
-		return text.startsWith("#");
+		return getSafeText().startsWith("#");
 	}
 
 	public boolean isSingleString() {
-		return text.startsWith("'");
+		return getSafeText().startsWith("'");
 	}
 
 	public boolean isDoubleString() {
-		return text.startsWith("\"");
+		return getSafeText().startsWith("\"");
 	}
 
 	public boolean isDoubleTickedString() {
-		return text.startsWith("`");
+		return getSafeText().startsWith("`");
+	}
+
+	private String getSafeText() {
+		return text==null ? "":text;
 	}
 
 	public boolean isString() {
@@ -86,42 +108,42 @@ public class ParseToken {
 	}
 
 	public boolean endsWithFunctionBrackets() {
-		return text.endsWith("()");
+		return getSafeText().endsWith("()");
 	}
 
 	public boolean hasLength(int length) {
-		return text.length() == length;
+		return getSafeText().length() == length;
 	}
 
 	public String getTextAsFunctionName() {
 		// String name = token.text;
-		if (text.endsWith("()")) {
+		if (getSafeText().endsWith("()")) {
 			return text.substring(0, text.length() - 2);
 		}
 		return text;
 	}
 
 	public boolean isOpenBlock() {
-		return text.length() == 1 && text.endsWith("{");
+		return getSafeText().length() == 1 && text.endsWith("{");
 	}
 
 	public boolean isCloseBlock() {
-		return text.length() == 1 && text.endsWith("}");
+		return getSafeText().length() == 1 && text.endsWith("}");
 	}
 
 	public boolean isDo() {
-		return text.equals("do");
+		return getSafeText().equals("do");
 	}
 
 	public boolean isDone() {
-		return text.equals("done");
+		return getSafeText().equals("done");
 	}
 
 	public boolean isIf() {
-		return text.equals("if");
+		return getSafeText().equals("if");
 	}
 
 	public boolean isFi() {
-		return text.equals("fi");
+		return getSafeText().equals("fi");
 	}
 }

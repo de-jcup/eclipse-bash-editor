@@ -19,21 +19,31 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestScriptLoader {
-	private static File testScriptRootFolder = new File("./basheditor-other");
+	private static File testScriptRootFolder = new File("./basheditor-other/testscripts");
 	static{
 		if (!testScriptRootFolder.exists()){
 			// workaround for difference between eclipse test and gradle execution (being in root folder...)
-			testScriptRootFolder = new File("./../basheditor-other/");
+			testScriptRootFolder = new File("./../basheditor-other/testscripts");
 		}
 	}
-	public static String loadScriptFromTestScripts(String testScriptName) throws IOException{
-		if (!testScriptRootFolder.exists()){
-			throw new IllegalArgumentException("Test setup corrupt! Root folder of test scripts not found:"+testScriptRootFolder);
+	
+	public static List<String> fetchAllTestScriptNames() {
+		assertTestscriptFolderExists();
+		List<String> list = new ArrayList<>();
+		for (File file: testScriptRootFolder.listFiles()){
+			list.add(file.getName());
 		}
+		return list;
+	}
+	
+	public static String loadScriptFromTestScripts(String testScriptName) throws IOException{
+		assertTestscriptFolderExists();
 		
-		File file = new File(testScriptRootFolder,"testscripts/"+testScriptName);
+		File file = new File(testScriptRootFolder,testScriptName);
 		if (!file.exists()){
 			throw new IllegalArgumentException("Test case corrupt! Test script file does not exist:"+file);
 		}
@@ -46,5 +56,11 @@ public class TestScriptLoader {
 			}
 		}
 		return sb.toString();
+	}
+
+	private static void assertTestscriptFolderExists() {
+		if (!testScriptRootFolder.exists()){
+			throw new IllegalArgumentException("Test setup corrupt! Root folder of test scripts not found:"+testScriptRootFolder);
+		}
 	}
 }

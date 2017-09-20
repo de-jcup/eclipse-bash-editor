@@ -47,6 +47,10 @@ public class BashScriptModelBuilder {
 
 		TokenParser parser = new TokenParser();
 		List<ParseToken> tokens = parser.parse(bashScript);
+		
+		if (Boolean.parseBoolean(System.getProperty("basheditor.debug.dumptokens"))){
+			dumpTokens(tokens);
+		}
 
 		buildFunctionsByTokens(model, tokens);
 
@@ -61,6 +65,15 @@ public class BashScriptModelBuilder {
 			}
 		}
 		return model;
+	}
+
+	private void dumpTokens(List<ParseToken> tokens) {
+		System.out.println("Dump tokens");
+		System.out.println("-----------");
+		for (ParseToken token: tokens){
+			System.out.println("Token:"+token);
+		}
+		
 	}
 
 	public void setIgnoreBlockValidation(boolean ignoreBlockValidation) {

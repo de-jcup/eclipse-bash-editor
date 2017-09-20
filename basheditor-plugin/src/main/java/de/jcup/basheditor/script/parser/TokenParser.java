@@ -47,75 +47,9 @@ public class TokenParser {
 		/* ++++++ Handle variables +++ */
 		/* +++++++++++++++++++++++++++ */
 		if (context.inState(VARIABLE)) {
-			VariableContext variableContext = context.getVariableContext();
-			if (c == '$') {
-				context.appendCharToText();
-				/* as described at http://tldp.org/LDP/abs/html/special-chars.html "$$" is a special variable holding the process id
-				 so in this case it terminates the variable!*/
-				if (context.getCharBefore()=='$'){
-					context.addTokenAndResetText();
-					context.switchTo(CODE);
-				}
+			boolean handled = handleVariableState(context);
+			if(handled){
 				return;
-			}
-			if (c == '#') {
-				context.appendCharToText();
-				return;
-			}
-			if (c == '[') {
-				variableContext.variableArrayOpened();
-				context.appendCharToText();
-				return;
-			}
-			if (c == ']') {
-				variableContext.variableArrayClosed();
-				context.appendCharToText();
-				return;
-			}
-			if (c == '{' || c == '}') {
-				context.appendCharToText();
-				if (c == '{' ) {
-					variableContext.incrementVariableOpenCurlyBraces();
-				}
-				if (c == '}') {
-					variableContext.incrementVariableCloseCurlyBraces();
-				}
-				if (c == '}' && variableContext.areVariableCurlyBracesBalanced()) {
-					context.addTokenAndResetText();
-					context.switchTo(CODE);
-				}
-				return;
-			}
-
-			if (Character.isWhitespace(c)) {
-				context.addTokenAndResetText();
-				return;
-			}
-			if (variableContext.isInsideVariableArray()) {
-				if (isStringChar(c)){
-					context.appendCharToText();
-					return;
-				}
-				context.appendCharToText();
-				return;
-			}else{
-				/* normal variable or array closed*/
-				if (Character.isWhitespace(c)) {
-					context.addTokenAndResetText();
-					context.switchTo(ParserState.CODE);
-					return;
-				}
-				if (isStringChar(c)){
-					/* this is a string char - means end of variable def*/
-					context.addTokenAndResetText();
-					context.switchTo(ParserState.CODE);
-					/* no return, handle normal!*/
-					
-				}else{
-					context.appendCharToText();
-					return;
-				}
-				
 			}
 		}
 		
@@ -219,6 +153,82 @@ public class TokenParser {
 			context.appendCharToText();
 		}
 
+	}
+
+	private boolean handleVariableState(ParseContext context) {
+		char c = context.getCharAtPos();
+		VariableContext variableContext = context.getVariableContext();
+		if (c == '$') {
+			context.appendCharToText();
+			/* as described at http://tldp.org/LDP/abs/html/special-chars.html "$$" is a special variable holding the process id
+			 so in this case it terminates the variable!*/
+			if (context.getCharBefore()=='$'){
+				context.addTokenAndResetText();
+				context.switchTo(CODE);
+			}
+			return true;
+		}
+		if (c == '#') {
+			context.appendCharToText();
+			return true;
+		}
+		if (c == '[') {
+			variableContext.variableArrayOpened();
+			context.appendCharToText();
+			return true;
+		}
+		if (c == ']') {
+			variableContext.variableArrayClosed();
+			context.appendCharToText();
+			return true;
+		}
+		if (c == '{' || c == '}') {
+			context.appendCharToText();
+			if (c == '{' ) {
+				variableContext.incrementVariableOpenCurlyBraces();
+			}
+			if (c == '}') {
+				variableContext.incrementVariableCloseCurlyBraces();
+			}
+			if (c == '}' && variableContext.areVariableCurlyBracesBalanced()) {
+				context.addTokenAndResetText();
+				context.switchTo(CODE);
+			}
+			return true;
+		}
+
+		if (variableContext.isInsideVariableArray()) {
+			if (isStringChar(c)){
+				context.appendCharToText();
+				return true;
+			}
+			context.appendCharToText();
+			return true;
+		}else{
+			/* normal variable or array closed*/
+			if (Character.isWhitespace(c)) {
+				if (variableContext.areVariableCurlyBracesBalanced()){
+					context.addTokenAndResetText();
+					context.switchTo(ParserState.CODE);
+					return true;
+				}else{
+					context.appendCharToText();
+					return true;
+				}
+			}
+			if (isStringChar(c)){
+				/* this is a string char - means end of variable def*/
+				context.addTokenAndResetText();
+				context.switchTo(ParserState.CODE);
+				/* no return, handle normal!*/
+				return false;
+				
+			}else{
+				context.appendCharToText();
+				return true;
+			}
+			
+		}
 	}
 
 	private boolean isStringChar(char c) {
