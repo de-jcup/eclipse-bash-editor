@@ -37,6 +37,66 @@ public class TokenParserTest {
 	}
 	
 	@Test
+	public void a_variable_array_with_string_inside_and_escaped_string_char_having_bracket(){
+		/* prepare */
+		String string = "$abc['\'nonsense]']";
+	
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+		assertThat(tokens).
+			containsTokens(
+					"$abc['\'nonsense]']"
+					);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void a_variable_array_with_string_inside_having_bracket(){
+		/* prepare */
+		String string = "$abc['nonsense]']";
+	
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+		assertThat(tokens).
+			containsTokens(
+					"$abc['nonsense]']"
+					);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void a_variable_curly_braced_with_string_inside_having_curly_bracket(){
+		/* prepare */
+		String string = "${'nonsense }'}";
+	
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+		assertThat(tokens).
+			containsTokens(
+					"${'nonsense }'}"
+					);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void a_variable_group_with_string_inside_having_close_bracket_like_group(){
+		/* prepare */
+		String string = "$('nonsense ;-)')";
+	
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+		assertThat(tokens).
+			containsTokens(
+					"$('nonsense ;-)'"
+					);	/* @formatter:on*/
+	}
+	
+	@Test
 	public void complex_variable_with_group(){
 		/* prepare */
 		String string = "DIST=$(grep \"DISTRIB_ID\" /etc/lsb-release|awk -F \"=\" '{print $2}'|tr -d \"\\\"', \\n\")";
