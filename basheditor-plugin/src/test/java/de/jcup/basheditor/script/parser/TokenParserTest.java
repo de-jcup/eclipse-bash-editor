@@ -35,6 +35,22 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
+	
+	@Test
+	public void complex_variable_with_group(){
+		/* prepare */
+		String string = "DIST=$(grep \"DISTRIB_ID\" /etc/lsb-release|awk -F \"=\" '{print $2}'|tr -d \"\\\"', \\n\")";
+		
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+		assertThat(tokens).
+			containsTokens(
+					"DIST=",
+					"$(grep \"DISTRIB_ID\" /etc/lsb-release|awk -F \"=\" '{print $2}'|tr -d \"\\\"', \\n\")"
+					);	/* @formatter:on*/
+	}
 
 	@Test
 	public void bugfix_54_a_variable_having_braces_and_a_string_inside_is_closed_by_braces() {
@@ -46,11 +62,11 @@ public class TokenParserTest {
 		List<ParseToken> tokens = parserToTest.parse(string);
 
 		/* test */ /* @formatter:off*/
-					assertThat(tokens).
-						containsTokens(
-								"BLACK=",
-								"$(tput setaf 0 'STRING')"
-								);	/* @formatter:on*/
+		assertThat(tokens).
+			containsTokens(
+					"BLACK=",
+					"$(tput setaf 0 'STRING')"
+					);	/* @formatter:on*/
 	}
 	
 	@Test
@@ -80,11 +96,11 @@ public class TokenParserTest {
 		List<ParseToken> tokens = parserToTest.parse(string);
 
 		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"x=",
-						"${y[`z1 z2`]}"
-						);	/* @formatter:on*/
+		assertThat(tokens).
+			containsTokens(
+					"x=",
+					"${y[`z1 z2`]}"
+					);	/* @formatter:on*/
 	}
 
 	@Test

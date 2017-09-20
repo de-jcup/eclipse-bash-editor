@@ -95,7 +95,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 		if (model.hasDebugTokens()){
 			for(ParseToken token: model.getDebugTokens()){
 				Item item = new Item();
-				item.name = SimpleStringUtils.shortString(token.getText(),20)+" :<- "+token.createTypeDescription();
+				item.name = SimpleStringUtils.shortString(token.getText(),40)+" :<- "+token.createTypeDescription();
 				item.type = ItemType.META_DEBUG;
 				item.offset = token.getStart();
 				item.length = token.getText().length();

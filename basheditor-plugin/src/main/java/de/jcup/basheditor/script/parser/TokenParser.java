@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.jcup.basheditor.script.parser.ParseContext.VariableContext;
+import de.jcup.basheditor.script.parser.ParseContext.VariableType;
 
 public class TokenParser {
 
@@ -28,82 +29,81 @@ public class TokenParser {
 		if (bashScript == null) {
 			return new ArrayList<>();
 		}
-		ParseContext parseContext = new ParseContext();
-		parseContext.chars = bashScript.toCharArray();
+		ParseContext context = new ParseContext();
+		context.chars = bashScript.toCharArray();
 
-		for (int i = 0; i < parseContext.chars.length; i++) {
-			parseContext.pos = i;
-			parse(parseContext);
+		for (int i = 0; i < context.chars.length; i++) {
+			context.pos = i;
+
+			if (isVariableStateHandled(context)) {
+				continue;
+			}
+			if (isCommentStateHandled(context)) {
+				continue;
+			}
+			if (isStringStateHandled(context)) {
+				continue;
+			}
+			handleNotVariableNorCommentOrString(context);
 		}
 		// add last token if existing
-		parseContext.addTokenAndResetText();
-		return parseContext.tokens;
+		context.addTokenAndResetText();
+		return context.tokens;
 	}
 
-	private void parse(ParseContext context) {
+	private boolean isStringStateHandled(ParseContext context) {
 		char c = context.getCharAtPos();
-		
-		/* +++++++++++++++++++++++++++ */
-		/* ++++++ Handle variables +++ */
-		/* +++++++++++++++++++++++++++ */
-		if (context.inState(VARIABLE)) {
-			boolean handled = handleVariableState(context);
-			if(handled){
-				return;
-			}
+
+		if (c == '\'') {
+			return handleString(INSIDE_SINGLE_STRING, context, INSIDE_DOUBLE_TICKED, INSIDE_DOUBLE_STRING);
 		}
-		
+		/* handle double string */
+		if (c == '\"') {
+			return handleString(INSIDE_DOUBLE_STRING, context, INSIDE_DOUBLE_TICKED, INSIDE_SINGLE_STRING);
+		}
+		/* handle double ticked string */
+		if (c == '`') {
+			return handleString(INSIDE_DOUBLE_TICKED, context, INSIDE_SINGLE_STRING, INSIDE_DOUBLE_STRING);
+		}
+		if (context.insideString()) {
+			context.appendCharToText();
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isCommentStateHandled(ParseContext context) {
+		char c = context.getCharAtPos();
+
 		if (context.inState(INSIDE_COMMENT)) {
 			/* in comment state */
 			if (c == '\n') {
 				context.addTokenAndResetText();
 				context.switchTo(CODE);
-				return;
 			} else {
 				context.appendCharToText();
 			}
-			return;
+			return true;
 		}
-		/* +++++++++++++++++++++++++++++++++++++++++++ */
-		/* ++++++ Not in variable or comment state +++ */
-		/* +++++++++++++++++++++++++++++++++++++++++++ */
+		return false;
+	}
 
-		/* handle single string */
-		if (c == '\'') {
-			handleString(INSIDE_SINGLE_STRING, context, INSIDE_DOUBLE_TICKED, INSIDE_DOUBLE_STRING);
-			return;
-		}
-		/* handle double string */
-		if (c == '\"') {
-			handleString(INSIDE_DOUBLE_STRING, context, INSIDE_DOUBLE_TICKED, INSIDE_SINGLE_STRING);
-			return;
-		}
-		/* handle double ticked string */
-		if (c == '`') {
-			handleString(INSIDE_DOUBLE_TICKED, context, INSIDE_SINGLE_STRING, INSIDE_DOUBLE_STRING);
-			return;
-		}
-		if (context.insideString()) {
-			context.appendCharToText();
-			return;
-		}
-		/* +++++++++++++++++++++++++++++++++++++++++++++++++++ */
-		/* ++++++ Not in comment, string or variable state +++ */
-		/* +++++++++++++++++++++++++++++++++++++++++++++++++++ */
+	private boolean handleNotVariableNorCommentOrString(ParseContext context) {
+		char c = context.getCharAtPos();
 		if (c == '\r') {
 			/*
 			 * ignore - we only use \n inside the data parsed so we will handle
 			 * easy \r\n and \n
 			 */
 			context.moveCurrentPosWhenEmptyText();
-			return;
+			return true;
 		}
 		if (c == '\n') {
 			context.addTokenAndResetText();
 			if (context.inState(INSIDE_COMMENT)) {
 				context.switchTo(CODE);
 			}
-			return;
+			return true;
 		}
 
 		if (c == ';') {
@@ -111,21 +111,16 @@ public class TokenParser {
 			// handle like a whitespace
 			context.addTokenAndResetText();
 			context.switchTo(CODE);
-			return;
+			return true;
 		}
+		/* FIXME ATR: remove this'? */
 		if (c == '=') {
 			// special assign operator
 			context.appendCharToText();
 			if (!context.inState(VARIABLE)) {
 				context.addTokenAndResetText();
 			}
-			return;
-		}
-		if (c == '$') {
-			context.addTokenAndResetText();
-			context.appendCharToText();
-			context.switchTo(VARIABLE);
-			return;
+			return true;
 		}
 
 		if (c == '{' || c == '}') {
@@ -134,44 +129,134 @@ public class TokenParser {
 			context.appendCharToText();
 			context.addTokenAndResetText();
 			context.switchTo(CODE);
-			return;
+			return true;
 		}
 
 		if (c == '#') {
 			context.addTokenAndResetText();
 			context.switchTo(INSIDE_COMMENT);
 			context.appendCharToText();
-		} else {
-			/*
-			 * not inside a comment build token nor in string, so whitespaces
-			 * are not necessary!
-			 */
-			if (Character.isWhitespace(c)) {
+			return true;
+		}
+		/*
+		 * not inside a comment build token nor in string, so whitespaces are
+		 * not necessary!
+		 */
+		if (Character.isWhitespace(c)) {
+			context.addTokenAndResetText();
+			return true;
+		}
+		/* otherwise simply add text */
+		context.appendCharToText();
+		return false;
+	}
+
+	/**
+	 * A very simple variable handling: <br>
+	 * We differt between:
+	 * 
+	 * <html>
+	 * <table border='1'>
+	 * <tr>
+	 * <th>Expression</th>
+	 * <th>Type</th>
+	 * <th>Description</th>
+	 * </tr>
+	 * <tr>
+	 * <td>$a</td>
+	 * <td>STANDARD</td>
+	 * <td>Termination by followed whitespace, string start, or special variable
+	 * ending e.g. for $$</td>
+	 * </tr>
+	 * <tr>
+	 * <td>$a['arrayname']</td>
+	 * <td>STANDARD</td>
+	 * <td>Termination by last balanced ']'</td>
+	 * </tr>
+	 * <tr>
+	 * <td>${...}</td>
+	 * <td>CURLY_BRACED</td>
+	 * <td>Termination by last balanced '}'</td>
+	 * </tr>
+	 * <tr>
+	 * <td>$(...)</td>
+	 * <td>GROUPED</td>
+	 * <td>Termination by last balanced ')'</td>
+	 * </tr>
+	 * </table>
+	 * </html>
+	 * 
+	 * @param context
+	 * @return
+	 */
+	private boolean isVariableStateHandled(ParseContext context) {
+		char c = context.getCharAtPos();
+		/*
+		 * handle change to VARIABLE state when from CODE - comments and strings
+		 * are ignored
+		 */
+		if (context.inState(CODE) || context.inState(INIT)) {
+			if (c == '$') {
 				context.addTokenAndResetText();
-				return;
+				context.appendCharToText();
+				context.switchTo(VARIABLE);
+				return true;
 			}
-			context.appendCharToText();
+			return false;
+		}
+		/* okay, other state */
+		if (!context.inState(VARIABLE)) {
+			/* not in variable state */
+			return false;
+		}
+
+		/* in variable state */
+		VariableContext variableContext = context.getVariableContext();
+		VariableType type = variableContext.getType();
+		if (type == null || type == VariableType.INITIAL) {
+			return handleInitialVariableTypeDetermination(context, c);
+		} else if (type == VariableType.GROUPED) {
+			return handleGroupedVariable(context, c, variableContext);
+		} else if (type == VariableType.CURLY_BRACED) {
+			return handleCurlyBracedVariable(context, c, variableContext);
+		} else if (type == VariableType.STANDARD) {
+			return handleStandardVariables(context, c, variableContext);
+		} else {
+			return false;
 		}
 
 	}
 
-	private boolean handleVariableState(ParseContext context) {
-		char c = context.getCharAtPos();
-		VariableContext variableContext = context.getVariableContext();
+	private boolean handleInitialVariableTypeDetermination(ParseContext context, char c) {
+		if (!context.inState(ParserState.VARIABLE)) {
+			return false;
+		}
+		context.appendCharToText();
 		if (c == '$') {
-			context.appendCharToText();
-			/* as described at http://tldp.org/LDP/abs/html/special-chars.html "$$" is a special variable holding the process id
-			 so in this case it terminates the variable!*/
-			if (context.getCharBefore()=='$'){
-				context.addTokenAndResetText();
-				context.switchTo(CODE);
-			}
+			/*
+			 * as described at http://tldp.org/LDP/abs/html/special-chars.html
+			 * "$$" is a special variable holding the process id so in this case
+			 * it terminates the variable!
+			 */
+			context.addTokenAndResetText();
+			context.switchTo(CODE);
+			return true;
+		} else if (c == '{') {
+			context.getVariableContext().setType(VariableType.CURLY_BRACED);
+			context.getVariableContext().incrementVariableOpenCurlyBraces();
+			return true;
+		} else if (c == '(') {
+			context.getVariableContext().setType(VariableType.GROUPED);
+			context.getVariableContext().variableGroupOpened();
+			return true;
+		} else {
+			context.getVariableContext().setType(VariableType.STANDARD);
 			return true;
 		}
-		if (c == '#') {
-			context.appendCharToText();
-			return true;
-		}
+	}
+
+	private boolean handleStandardVariables(ParseContext context, char c, VariableContext variableContext) {
+
 		if (c == '[') {
 			variableContext.variableArrayOpened();
 			context.appendCharToText();
@@ -182,9 +267,44 @@ public class TokenParser {
 			context.appendCharToText();
 			return true;
 		}
+
+		/* array variant */
+		if (variableContext.isInsideVariableArray()) {
+			if (isStringChar(c)) {
+				context.appendCharToText();
+				return true;
+			}
+			context.appendCharToText();
+			return true;
+		}
+		/* normal variable or array closed */
+		if (Character.isWhitespace(c) || c == ';') {
+			if (isBalanced(variableContext)) {
+				context.addTokenAndResetText();
+				context.switchTo(ParserState.CODE);
+				return true;
+			} else {
+				context.appendCharToText();
+				return true;
+			}
+		}else if (isStringChar(c) && isBalanced(variableContext)) {
+			/* this is a string char - means end of variable def */
+			context.addTokenAndResetText();
+			context.switchTo(ParserState.CODE);
+			/* no return, handle normal! */
+			return false;
+
+		} else {
+			context.appendCharToText();
+			return true;
+		}
+
+	}
+
+	private boolean handleCurlyBracedVariable(ParseContext context, char c, VariableContext variableContext) {
 		if (c == '{' || c == '}') {
 			context.appendCharToText();
-			if (c == '{' ) {
+			if (c == '{') {
 				variableContext.incrementVariableOpenCurlyBraces();
 			}
 			if (c == '}') {
@@ -196,75 +316,68 @@ public class TokenParser {
 			}
 			return true;
 		}
+		/* just append */
+		context.appendCharToText();
+		return true;
+	}
 
-		if (variableContext.isInsideVariableArray()) {
-			if (isStringChar(c)){
-				context.appendCharToText();
-				return true;
-			}
+	private boolean handleGroupedVariable(ParseContext context, char c, VariableContext variableContext) {
+		if (c == '(') {
+			variableContext.variableGroupOpened();
 			context.appendCharToText();
 			return true;
-		}else{
-			/* normal variable or array closed*/
-			if (Character.isWhitespace(c) || c==';') {
-				if (variableContext.areVariableCurlyBracesBalanced()){
-					context.addTokenAndResetText();
-					context.switchTo(ParserState.CODE);
-					return true;
-				}else{
-					context.appendCharToText();
-					return true;
-				}
-			}
-			if (isStringChar(c)){
-				/* this is a string char - means end of variable def*/
+		} else if (c == ')') {
+			variableContext.variableGroupClosed();
+			context.appendCharToText();
+			if (variableContext.areVariableGroupsBalanced()) {
 				context.addTokenAndResetText();
-				context.switchTo(ParserState.CODE);
-				/* no return, handle normal!*/
-				return false;
-				
-			}else{
-				context.appendCharToText();
-				return true;
+				context.switchTo(CODE);
 			}
-			
+			return true;
 		}
+		/* just append */
+		context.appendCharToText();
+		return true;
+	}
+
+	private boolean isBalanced(VariableContext variableContext) {
+		return variableContext.areVariableCurlyBracesBalanced() && variableContext.areVariableGroupsBalanced();
 	}
 
 	private boolean isStringChar(char c) {
-		boolean isStringChar = c=='\"';
-		isStringChar = isStringChar ||c=='\'';
-		isStringChar = isStringChar ||c=='`';
+		boolean isStringChar = c == '\"';
+		isStringChar = isStringChar || c == '\'';
+		isStringChar = isStringChar || c == '`';
 		return isStringChar;
 	}
 
-	private void handleString(ParserState stringState, ParseContext context, ParserState... otherStringStates) {
+	private boolean handleString(ParserState stringState, ParseContext context, ParserState... otherStringStates) {
 		for (ParserState otherStringState : otherStringStates) {
 			if (context.inState(otherStringState)) {
 				/* inside other string - ignore */
 				context.appendCharToText();
-				return;
+				return true;
 			}
 
 		}
 		if (context.getCharBefore() == '\\') {
 			/* escaped */
 			context.appendCharToText();
-			return;
+			return true;
 		}
 		if (context.inState(stringState)) {
 			/* close single string */
 			context.appendCharToText();
 			context.restoreStateBeforeString();
-			return;
+			return true;
 		}
 		if (context.inState(ParserState.VARIABLE)) {
 			context.appendCharToText();
-			return;
+			return true;
 		}
 		context.switchToStringState(stringState);
 		context.appendCharToText();
-		return;
+		return true;
 
 	}
 

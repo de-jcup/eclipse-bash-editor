@@ -55,28 +55,51 @@ public class ParseToken {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(createTypeDescription());
-		sb.append("content:");
+		sb.append(":'");
 		sb.append(text);
+		sb.append('\'');
 		
 		return sb.toString();
 	}
 
 	public String createTypeDescription() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Type:");
+		
 		if (isComment()){
-			sb.append("isComment,");
+			sb.append("COMMENT");
+		}
+		if (isVariable()){
+			sb.append("VARIABLE");
 		}
 		if (isString()){
-			sb.append("isString,");
+			sb.append("STRING");
 		}
 		if (isIf()){
-			sb.append("isIf,");
+			sb.append("IF");
 		}
 		if (isFi()){
-			sb.append("isFi,");
+			sb.append("FI");
+		}
+		if (isDo()){
+			sb.append("DO");
+		}
+		if (isDone()){
+			sb.append("DONE");
+		}
+		if (isCloseBlock()){
+			sb.append("BLOCK-CLOSE");
+		}
+		if (isOpenBlock()){
+			sb.append("BLOCK-OPEN");
+		}
+		if (sb.length()==0){
+			sb.append("EXPRESSION");
 		}
 		return sb.toString();
+	}
+
+	private boolean isVariable() {
+		return getSafeText().startsWith("$");
 	}
 
 	public boolean isComment() {

@@ -32,15 +32,51 @@ class ParseContext {
 	ParseContext() {
 		currentToken = createToken();
 	}
+	
+	public enum VariableType{
+		/**
+		 * Initial - no type defined
+		 */
+		INITIAL,
+		
+		/**
+		 * Standard variable definition, maybe with array usage
+		 */
+		STANDARD,
+		
+		/**
+		 * Something like $(....), so everything inside is part of token, termination is recognized by corresponding ).
+		 * Check for balance necessary
+		 */
+		GROUPED,
+		
+		/**
+		 * Something like ${....}, so everything inside is part of token, termination is recognized by corresponding },
+		 * * Check for balance necessary
+		 */
+		CURLY_BRACED
+	}
 
 	public class VariableContext {
+		
 		private VariableState variableState = VariableState.NO_ARRAY;
+		private VariableType type;
 		private int variableOpenCurlyBraces;
 		private int variableCloseCurlyBraces;
+		private int variableGroupOpen;
+		private int variableGroupClosed;
 
 		public void incrementVariableOpenCurlyBraces() {
 			variableOpenCurlyBraces++;
 
+		}
+		
+		public VariableType getType() {
+			return type;
+		}
+		
+		public void setType(VariableType type) {
+			this.type = type;
 		}
 
 		public void incrementVariableCloseCurlyBraces() {
@@ -64,6 +100,18 @@ class ParseContext {
 			boolean isInside = inState(ParserState.VARIABLE);
 			isInside = isInside && VariableState.ARRAY_OPENED.equals(variableState);
 			return isInside;
+		}
+
+		public void variableGroupOpened() {
+			variableGroupOpen++;
+		}
+		
+		public void variableGroupClosed() {
+			variableGroupClosed++;
+		}
+		
+		public boolean areVariableGroupsBalanced() {
+			return variableGroupOpen == variableGroupClosed;
 		}
 	}
 
@@ -129,6 +177,7 @@ class ParseContext {
 		this.parserState = parserState;
 		if (ParserState.VARIABLE.equals(parserState)) {
 			getVariableContext().variableState = VariableState.NO_ARRAY;
+			getVariableContext().setType(VariableType.INITIAL);
 		} else {
 			variableContext = null;
 		}

@@ -91,9 +91,13 @@ public class BashEditorOutlineLabelProvider extends BaseLabelProvider implements
 		if (element instanceof Item) {
 			Item item = (Item) element;
 
-			if (item.getItemType()==ItemType.FUNCTION){
+			ItemType itemType = item.getItemType();
+			if (itemType==ItemType.FUNCTION){
 				
 				StyledString typeString = new StyledString("function ", outlineItemTypeStyler);
+				styled.append(typeString);
+			}else if (itemType==ItemType.META_DEBUG){
+				StyledString typeString = new StyledString(item.getOffset()+": ", outlineItemTypeStyler);
 				styled.append(typeString);
 			}
 			String name = item.getName();
