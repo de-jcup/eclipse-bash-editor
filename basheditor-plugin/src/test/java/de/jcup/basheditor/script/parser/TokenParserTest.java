@@ -37,6 +37,40 @@ public class TokenParserTest {
 	}
 
 	@Test
+	public void bugfix_54_a_variable_having_braces_and_a_string_inside_is_closed_by_braces() {
+
+		/* prepare */
+		String string = "BLACK=$(tput setaf 0 'STRING')";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+					assertThat(tokens).
+						containsTokens(
+								"BLACK=",
+								"$(tput setaf 0 'STRING')"
+								);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void bugfix_54_a_variable_having_braces_is_closed_by_braces() {
+
+		/* prepare */
+		String string = "BLACK=$(tput setaf 0)";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+					assertThat(tokens).
+						containsTokens(
+								"BLACK=",
+								"$(tput setaf 0)"
+								);	/* @formatter:on*/
+	}
+
+	@Test
 	public void bugfix_41_3__variable_with_array_having_string_containing_space_recognized_correct() {
 
 		/* prepare */
