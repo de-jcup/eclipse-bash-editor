@@ -5,4 +5,5 @@
    <feature url="features/de.jcup.basheditor_0.9.1.jar" id="de.jcup.basheditor" version="0.9.1"/>
    <feature url="features/de.jcup.basheditor_0.9.2.jar" id="de.jcup.basheditor" version="0.9.2"/>
    <feature url="features/de.jcup.basheditor_0.9.3.jar" id="de.jcup.basheditor" version="0.9.3"/>
+   <feature url="features/de.jcup.basheditor_0.10.0.jar" id="de.jcup.basheditor" version="0.10.0"/>
 </site>
