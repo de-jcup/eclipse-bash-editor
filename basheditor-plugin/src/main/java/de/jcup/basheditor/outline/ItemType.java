@@ -21,5 +21,7 @@ public enum ItemType {
 	
 	META_INFO, 
 	
-	META_ERROR
+	META_ERROR,
+	
+	META_DEBUG
 }

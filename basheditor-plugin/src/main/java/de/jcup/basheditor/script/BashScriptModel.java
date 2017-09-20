@@ -17,11 +17,15 @@
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
+import de.jcup.basheditor.script.parser.ParseToken;
 
 public class BashScriptModel {
 
 	Collection<BashFunction> functions = new ArrayList<>();
 	Collection<BashError> errors = new ArrayList<>();
+	List<ParseToken> debugTokenList;
 
 	public Collection<BashFunction> getFunctions() {
 		return functions;
@@ -33,6 +37,21 @@ public class BashScriptModel {
 	
 	public boolean hasErrors(){
 		return !getErrors().isEmpty();
+	}
+	
+	/**
+	 * Returns a debug token list - if list is null, a new one will be created
+	 * @return debug token list, never <code>null</code>
+	 */
+	public List<ParseToken> getDebugTokens(){
+		if (debugTokenList==null){
+			debugTokenList=new ArrayList<>();
+		}
+		return debugTokenList;
+	}
+	
+	public boolean hasDebugTokens() {
+		return debugTokenList!=null;
 	}
 	
 	

@@ -378,21 +378,25 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		
 		IPreferenceStore store = BashEditorUtil.getPreferences().getPreferenceStore();
 
-		final boolean validateBlocks=store.getBoolean(VALIDATE_BLOCK_STATEMENTS.getId());
-		final boolean validateDo=store.getBoolean(VALIDATE_DO_STATEMENTS.getId());
-		final boolean validateIf=store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
-		final boolean validateFunctions=store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
+		boolean validateBlocks=store.getBoolean(VALIDATE_BLOCK_STATEMENTS.getId());
+		boolean validateDo=store.getBoolean(VALIDATE_DO_STATEMENTS.getId());
+		boolean validateIf=store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
+		boolean validateFunctions=store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
+		
+		boolean debugMode = Boolean.parseBoolean(System.getProperty("basheditor.debug.enabled"));
+		
+		modelBuilder.setIgnoreBlockValidation(! validateBlocks);
+		modelBuilder.setIgnoreDoValidation(! validateDo);
+		modelBuilder.setIgnoreIfValidation(! validateIf);
+		modelBuilder.setIgnoreFunctionValidation(! validateFunctions);
 
+		modelBuilder.setDebug(debugMode);
+		
 		EclipseUtil.safeAsyncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				BashEditorUtil.removeScriptErrors(BashEditor.this);
-				
-				modelBuilder.setIgnoreBlockValidation(! validateBlocks);
-				modelBuilder.setIgnoreDoValidation(! validateDo);
-				modelBuilder.setIgnoreIfValidation(! validateIf);
-				modelBuilder.setIgnoreFunctionValidation(! validateFunctions);
 				
 				BashScriptModel model = modelBuilder.build(text);
 

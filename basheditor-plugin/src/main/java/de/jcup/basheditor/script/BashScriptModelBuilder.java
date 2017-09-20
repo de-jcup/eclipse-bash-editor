@@ -35,6 +35,7 @@ public class BashScriptModelBuilder {
 	private boolean ignoreBlockValidation;
 	private boolean ignoreIfValidation;
 	private boolean ignoreFunctionValidation;
+	private boolean debugMode;
 
 	/**
 	 * Parses given script and creates a bash script model
@@ -48,9 +49,6 @@ public class BashScriptModelBuilder {
 		TokenParser parser = new TokenParser();
 		List<ParseToken> tokens = parser.parse(bashScript);
 		
-		if (Boolean.parseBoolean(System.getProperty("basheditor.debug.dumptokens"))){
-			dumpTokens(tokens);
-		}
 
 		buildFunctionsByTokens(model, tokens);
 
@@ -64,16 +62,16 @@ public class BashScriptModelBuilder {
 				model.errors.add((BashError) result);
 			}
 		}
+		
+		if (debugMode){
+			appendDebugTokens(model, tokens);
+		}
+		
 		return model;
 	}
 
-	private void dumpTokens(List<ParseToken> tokens) {
-		System.out.println("Dump tokens");
-		System.out.println("-----------");
-		for (ParseToken token: tokens){
-			System.out.println("Token:"+token);
-		}
-		
+	private void appendDebugTokens(BashScriptModel model, List<ParseToken> tokens) {
+		model.getDebugTokens().addAll(tokens);
 	}
 
 	public void setIgnoreBlockValidation(boolean ignoreBlockValidation) {
@@ -207,6 +205,10 @@ public class BashScriptModelBuilder {
 			return false;
 		}
 		return pos < elements.size();
+	}
+
+	public void setDebug(boolean debugMode) {
+		this.debugMode=debugMode;
 	}
 
 }

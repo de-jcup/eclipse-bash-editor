@@ -131,4 +131,15 @@ public class AssertScriptModel {
 		return hasErrors(0);
 	}
 
+	public AssertScriptModel hasNoDebugTokens() {
+		assertFalse(model.hasDebugTokens());
+		return this;
+	}
+
+	public AssertScriptModel hasDebugTokens(int amount) {
+		assertTrue(model.hasDebugTokens());
+		assertEquals("Amount of debug tokens not as expected", amount ,model.getDebugTokens().size());
+		return this;
+	}
+
 }

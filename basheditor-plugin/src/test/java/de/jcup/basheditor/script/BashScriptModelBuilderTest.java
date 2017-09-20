@@ -62,6 +62,32 @@ public class BashScriptModelBuilderTest {
 	}
 	
 	@Test
+	public void has_no_debugtoken_list__when_debug_is_turned_off_means_default(){
+		/* prepare */
+		String script = "a b";
+
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(script);
+
+		/* test */
+		assertThat(bashScriptModel).hasNoDebugTokens();
+	}
+	
+	@Test
+	public void has_debugtoken_list___when_debug_is_turned_on(){
+		/* prepare */
+		String script = "a b";
+		builderToTest.setDebug(true);
+		
+		/* execute */
+		BashScriptModel bashScriptModel = builderToTest.build(script);
+
+		/* test */
+		assertThat(bashScriptModel).hasDebugTokens(2);
+	}
+
+	
+	@Test
 	public void bugfix_52_$x_followed_by_comment_line_with_if_results_in_no_error(){
 		/* prepare */
 		String script = "a=$x\n# check if the host is pingable";

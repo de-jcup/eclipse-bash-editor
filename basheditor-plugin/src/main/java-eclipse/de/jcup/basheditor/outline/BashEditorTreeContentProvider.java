@@ -20,8 +20,10 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
+import de.jcup.basheditor.SimpleStringUtils;
 import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.script.BashScriptModel;
+import de.jcup.basheditor.script.parser.ParseToken;
 
 public class BashEditorTreeContentProvider implements ITreeContentProvider {
 
@@ -88,6 +90,17 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.offset = 0;
 			item.length = 0;
 			list.add(0, item);
+		}
+		/* debug part*/
+		if (model.hasDebugTokens()){
+			for(ParseToken token: model.getDebugTokens()){
+				Item item = new Item();
+				item.name = SimpleStringUtils.shortString(token.getText(),20)+" :<- "+token.createTypeDescription();
+				item.type = ItemType.META_DEBUG;
+				item.offset = token.getStart();
+				item.length = token.getText().length();
+				list.add(item);
+			}
 		}
 		return list.toArray(new Item[list.size()]);
 

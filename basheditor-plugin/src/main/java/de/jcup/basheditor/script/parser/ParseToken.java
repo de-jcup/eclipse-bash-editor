@@ -54,6 +54,15 @@ public class ParseToken {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(createTypeDescription());
+		sb.append("content:");
+		sb.append(text);
+		
+		return sb.toString();
+	}
+
+	public String createTypeDescription() {
+		StringBuilder sb = new StringBuilder();
 		sb.append("Type:");
 		if (isComment()){
 			sb.append("isComment,");
@@ -67,10 +76,6 @@ public class ParseToken {
 		if (isFi()){
 			sb.append("isFi,");
 		}
-		
-		sb.append("content:");
-		sb.append(text);
-		
 		return sb.toString();
 	}
 
