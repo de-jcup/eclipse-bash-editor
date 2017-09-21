@@ -241,8 +241,8 @@ public class TokenParser {
 			return false;
 		}
 		context.appendCharToText();
-		if (c == '$') {
-			/*
+		if (c == '$' || c =='?') {
+			/* c is the NEXT char after the $ was recognized!
 			 * as described at http://tldp.org/LDP/abs/html/special-chars.html
 			 * "$$" is a special variable holding the process id so in this case
 			 * it terminates the variable!
