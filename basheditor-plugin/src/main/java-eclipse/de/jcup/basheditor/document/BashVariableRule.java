@@ -85,8 +85,9 @@ public class BashVariableRule implements IPredicateRule {
 		
 		/* okay is a variable, so read until end reached */
 		do {
-			char c = (char) scanner.read();
-			if (ICharacterScanner.EOF == c || (!isWordPart(c, context))) {
+			int read = scanner.read(); // use int for EOF detection, char makes problems here!
+			char c = (char) read;
+			if (ICharacterScanner.EOF == read || (!isWordPart(c, context))) {
 				scanner.unread();
 				break;
 			}
@@ -155,7 +156,6 @@ public class BashVariableRule implements IPredicateRule {
 			return false;
 		}
 		
-		/* all other characters are allowed */
 		return true;
 	}
 }
