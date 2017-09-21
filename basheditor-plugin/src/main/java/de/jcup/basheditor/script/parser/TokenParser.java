@@ -196,7 +196,10 @@ public class TokenParser {
 		 */
 		if (context.inState(CODE) || context.inState(INIT)) {
 			if (c == '$') {
-				context.addTokenAndResetText();
+				context.addTokenAndResetText(); //$ is NOT appended at this moment, so only stuff before is inside new token
+				// current token is now at wrong position because $ was ignored (necessary but ugly)
+				// so fix this now:
+				context.currentToken.start--;
 				context.appendCharToText();
 				context.switchTo(VARIABLE);
 				return true;

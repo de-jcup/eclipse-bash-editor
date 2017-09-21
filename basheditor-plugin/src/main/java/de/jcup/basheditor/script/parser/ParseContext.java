@@ -24,7 +24,7 @@ class ParseContext {
 	int pos;
 	StringBuilder sb;
 	List<ParseToken> tokens = new ArrayList<ParseToken>();
-	private ParseToken currentToken;
+	ParseToken currentToken;
 	private ParserState parserState = ParserState.INIT;
 	private ParserState stateBeforeString;
 	private VariableContext variableContext;
@@ -116,12 +116,12 @@ class ParseContext {
 			return variableGroupOpen == variableGroupClosed;
 		}
 	}
-
+	
 	void addTokenAndResetText() {
 		if (moveCurrentTokenPosWhenEmptyText()) {
 			return;
 		}
-
+		
 		currentToken.text = sb.toString();
 		currentToken.end = pos;
 		tokens.add(currentToken);
@@ -240,6 +240,11 @@ class ParseContext {
 
 	public boolean isCharBeforeEscapeSign() {
 		return getCharBefore() == '\\';
+	}
+
+	public void moveBackWard() {
+		pos--;
+		
 	}
 
 	

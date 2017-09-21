@@ -98,6 +98,16 @@ public class AssertParseTokens {
 		}
 		return this;
 	}
+
+	public ParseToken resolveToken(String string) {
+		for (ParseToken token: parseTokens){
+			if (token.text.equals(string)){
+				return token;
+			}
+		} 
+		fail("Tried to resolve token '"+string+"' but did not found in:"+parseTokens);
+		return null;
+	}
 	
 	
 }
