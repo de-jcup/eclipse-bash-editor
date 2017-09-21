@@ -37,9 +37,76 @@ public class TokenParserTest {
 	}
 	
 	@Test
+	public void moveUntilNextCharWillBeNoStringContent_no_string_contend_handled_as_expected(){
+		/* prepare */
+		ParseContext context = new ParseContext();
+		context.chars="$(tput 'STRING')".toCharArray();
+		context.pos=2;// at t(put)
+		
+		/* execute */
+		parserToTest.moveUntilNextCharWillBeNoStringContent(context);
+		context.moveForward(); // we must simulate the for next move forwarding!
+		parserToTest.moveUntilNextCharWillBeNoStringContent(context);
+		context.moveForward();
+		parserToTest.moveUntilNextCharWillBeNoStringContent(context);
+		context.moveForward();
+		parserToTest.moveUntilNextCharWillBeNoStringContent(context);
+		context.moveForward();
+		
+		/* test */
+		assertEquals("tput",context.sb.toString());
+		
+		/* execute */
+		parserToTest.moveUntilNextCharWillBeNoStringContent(context);
+		context.moveForward();
+		
+		/* test */
+		assertEquals("tput ",context.sb.toString());
+
+		/* execute */
+		parserToTest.moveUntilNextCharWillBeNoStringContent(context);
+		context.moveForward();
+
+		/* test */
+		assertEquals("tput 'STRING'",context.sb.toString());
+	}
+	
+	@Test
+	public void moveUntilNextCharWillBeNoStringContent_tests(){
+		assertMoveUntilNextCharWillBeNoStringContent("$('nonsense ;-)'",2, "'nonsense ;-)'",15);
+		assertMoveUntilNextCharWillBeNoStringContent("'abc'd",0, "'abc'",4);
+		assertMoveUntilNextCharWillBeNoStringContent("'abc'd",1, "a",1);
+		assertMoveUntilNextCharWillBeNoStringContent("('abc'd",0, "(",0);
+		assertMoveUntilNextCharWillBeNoStringContent("('abc'd",1, "'abc'",5);
+	}
+	@Test
+	public void moveUntilNextCharWillBeNoStringContent_tests_with_escaped_strings(){
+		assertMoveUntilNextCharWillBeNoStringContent("$('non\\\'sense ;-)'",2, "'non\\\'sense ;-)'",17);
+	}
+	
+	@Test
+	public void moveUntilNextCharWillBeNoStringContent_tests_with_other_stringtype_inside(){
+		assertMoveUntilNextCharWillBeNoStringContent("$('non\"sense ;-)'",2, "'non\"sense ;-)'",16);
+	}
+	
+	private void assertMoveUntilNextCharWillBeNoStringContent(String code, int codePos, String expectedContent, int expectedNextPos){
+		/* prepare */
+		ParseContext context = new ParseContext();
+		context.chars=code.toCharArray();
+		context.pos=codePos;
+		
+		/* execute */
+		parserToTest.moveUntilNextCharWillBeNoStringContent(context);
+		
+		/* test */
+		assertEquals(expectedContent,context.sb.toString());
+		assertEquals(expectedNextPos,context.pos);
+	}
+	
+	@Test
 	public void a_variable_array_with_string_inside_and_escaped_string_char_having_bracket(){
 		/* prepare */
-		String string = "$abc['\'nonsense]']";
+		String string = "$abc['\\\'nonsense]']";
 	
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse(string);
@@ -47,7 +114,7 @@ public class TokenParserTest {
 		/* test */ /* @formatter:off*/
 		assertThat(tokens).
 			containsTokens(
-					"$abc['\'nonsense]']"
+					"$abc['\\\'nonsense]']"
 					);	/* @formatter:on*/
 	}
 	
@@ -92,7 +159,7 @@ public class TokenParserTest {
 		/* test */ /* @formatter:off*/
 		assertThat(tokens).
 			containsTokens(
-					"$('nonsense ;-)'"
+					"$('nonsense ;-)')"
 					);	/* @formatter:on*/
 	}
 	
@@ -401,7 +468,7 @@ public class TokenParserTest {
 		List<ParseToken> tokens = parserToTest.parse(string);
 
 		/* test */
-		assertThat(tokens).token("abc").hasEnd(2);
+		assertThat(tokens).token("abc").hasEnd(3);
 
 	}
 
@@ -427,7 +494,7 @@ public class TokenParserTest {
 		List<ParseToken> tokens = parserToTest.parse(string);
 
 		/* test */
-		assertThat(tokens).token("abc").hasEnd(3);
+		assertThat(tokens).token("abc").hasEnd(4);
 
 	}
 

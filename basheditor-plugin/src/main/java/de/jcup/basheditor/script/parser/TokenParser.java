@@ -32,8 +32,7 @@ public class TokenParser {
 		ParseContext context = new ParseContext();
 		context.chars = bashScript.toCharArray();
 
-		for (int i = 0; i < context.chars.length; i++) {
-			context.pos = i;
+		for (; context.hasValidPos(); context.moveForward()) {
 
 			if (isVariableStateHandled(context)) {
 				continue;
@@ -95,7 +94,7 @@ public class TokenParser {
 			 * ignore - we only use \n inside the data parsed so we will handle
 			 * easy \r\n and \n
 			 */
-			context.moveCurrentPosWhenEmptyText();
+			context.moveCurrentTokenPosWhenEmptyText();
 			return true;
 		}
 		if (c == '\n') {
@@ -216,7 +215,7 @@ public class TokenParser {
 		if (type == null || type == VariableType.INITIAL) {
 			return handleInitialVariableTypeDetermination(context, c);
 		} else if (type == VariableType.GROUPED) {
-			return handleGroupedVariable(context, c, variableContext);
+			return handleGroupedVariable(context);
 		} else if (type == VariableType.CURLY_BRACED) {
 			return handleCurlyBracedVariable(context, c, variableContext);
 		} else if (type == VariableType.STANDARD) {
@@ -228,7 +227,14 @@ public class TokenParser {
 	}
 
 	private boolean handleInitialVariableTypeDetermination(ParseContext context, char c) {
+		/* the state setting to VARIABLE is done on another method - this
+		 * does only handle initial way
+		 */
 		if (!context.inState(ParserState.VARIABLE)) {
+			return false;
+		}
+		VariableContext variableContext = context.getVariableContext();
+		if (variableContext.getType()!=VariableType.INITIAL) {
 			return false;
 		}
 		context.appendCharToText();
@@ -242,24 +248,30 @@ public class TokenParser {
 			context.switchTo(CODE);
 			return true;
 		} else if (c == '{') {
-			context.getVariableContext().setType(VariableType.CURLY_BRACED);
-			context.getVariableContext().incrementVariableOpenCurlyBraces();
+			variableContext.setType(VariableType.CURLY_BRACED);
+			variableContext.incrementVariableOpenCurlyBraces();
 			return true;
 		} else if (c == '(') {
-			context.getVariableContext().setType(VariableType.GROUPED);
-			context.getVariableContext().variableGroupOpened();
+			variableContext.setType(VariableType.GROUPED);
+			variableContext.variableGroupOpened();
 			return true;
 		} else {
-			context.getVariableContext().setType(VariableType.STANDARD);
+			variableContext.setType(VariableType.STANDARD);
 			return true;
 		}
 	}
 
 	private boolean handleStandardVariables(ParseContext context, char c, VariableContext variableContext) {
-
+		if (variableContext.getType()!=VariableType.STANDARD){
+			return false;
+		}
 		if (c == '[') {
 			variableContext.variableArrayOpened();
 			context.appendCharToText();
+			if (context.canMoveForward()){
+				context.moveForward();
+			}
+			moveUntilNextCharWillBeNoStringContent(context);
 			return true;
 		}
 		if (c == ']') {
@@ -302,8 +314,13 @@ public class TokenParser {
 	}
 
 	private boolean handleCurlyBracedVariable(ParseContext context, char c, VariableContext variableContext) {
+		if (variableContext.getType()!=VariableType.CURLY_BRACED){
+			return false;
+		}
+		
+		moveUntilNextCharWillBeNoStringContent(context);
+		
 		if (c == '{' || c == '}') {
-			context.appendCharToText();
 			if (c == '{') {
 				variableContext.incrementVariableOpenCurlyBraces();
 			}
@@ -316,27 +333,28 @@ public class TokenParser {
 			}
 			return true;
 		}
-		/* just append */
-		context.appendCharToText();
 		return true;
 	}
 
-	private boolean handleGroupedVariable(ParseContext context, char c, VariableContext variableContext) {
+	private boolean handleGroupedVariable(ParseContext context) {
+		VariableContext variableContext = context.getVariableContext();
+		if (variableContext.getType()!=VariableType.GROUPED){
+			return false;
+		}
+		moveUntilNextCharWillBeNoStringContent(context);
+		char c = context.getCharAtPos();
+		
 		if (c == '(') {
 			variableContext.variableGroupOpened();
-			context.appendCharToText();
 			return true;
 		} else if (c == ')') {
 			variableContext.variableGroupClosed();
-			context.appendCharToText();
 			if (variableContext.areVariableGroupsBalanced()) {
 				context.addTokenAndResetText();
 				context.switchTo(CODE);
 			}
 			return true;
 		}
-		/* just append */
-		context.appendCharToText();
 		return true;
 	}
 
@@ -360,7 +378,7 @@ public class TokenParser {
 			}
 
 		}
-		if (context.getCharBefore() == '\\') {
+		if (context.isCharBeforeEscapeSign()) {
 			/* escaped */
 			context.appendCharToText();
 			return true;
@@ -379,6 +397,52 @@ public class TokenParser {
 		context.appendCharToText();
 		return true;
 
+	}
+	
+	/**
+	 * Situation: <br>
+	 * <pre>
+	 * $('hello' a'x')
+         ^------  
+	 * 012345678
+	 * </pre>
+	 * Cursor is at a position after "$(". means index:2.<br><br>
+	 * 
+	 * The method will now check if this is a string start, if so the complete content of string will be fetched and appended and pos changed.
+	 * In the example above the postion will be 8 after execution and string of context will be <code>"$('hello'"</code>.
+	 * 
+	 */
+	void moveUntilNextCharWillBeNoStringContent(ParseContext context) {
+		context.appendCharToText();
+		
+		char c = context.getCharAtPos();
+		if (!isStringChar(c)){
+			/* no string - do nothing, pos increment/move forward is done outside in for next loop!*/
+			return;
+		}
+		if (context.isCharBeforeEscapeSign()){
+			return;
+		}
+		char stringCharToScan = c;
+		moveToNextCharNotInStringAndAppendMovements(context,stringCharToScan);
+		
+		
+	}
+	private void moveToNextCharNotInStringAndAppendMovements(ParseContext context, char stringCharToScan) {
+		if (!context.canMoveForward()){
+			return;
+		}
+		context.moveForward();
+		context.appendCharToText();
+		
+		char c = context.getCharAtPos();
+		if (c==stringCharToScan){
+			if (! context.isCharBeforeEscapeSign()){
+				/* found ending of string - so simply return */
+				return;
+			}
+		}
+		moveToNextCharNotInStringAndAppendMovements(context,stringCharToScan);
 	}
 
 }

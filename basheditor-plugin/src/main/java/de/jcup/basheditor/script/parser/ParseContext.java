@@ -32,33 +32,35 @@ class ParseContext {
 	ParseContext() {
 		currentToken = createToken();
 	}
-	
-	public enum VariableType{
+
+	public enum VariableType {
 		/**
 		 * Initial - no type defined
 		 */
 		INITIAL,
-		
+
 		/**
 		 * Standard variable definition, maybe with array usage
 		 */
 		STANDARD,
-		
+
 		/**
-		 * Something like $(....), so everything inside is part of token, termination is recognized by corresponding ).
-		 * Check for balance necessary
+		 * Something like $(....), so everything inside is part of token,
+		 * termination is recognized by corresponding ). Check for balance
+		 * necessary
 		 */
 		GROUPED,
-		
+
 		/**
-		 * Something like ${....}, so everything inside is part of token, termination is recognized by corresponding },
-		 * * Check for balance necessary
+		 * Something like ${....}, so everything inside is part of token,
+		 * termination is recognized by corresponding }, * Check for balance
+		 * necessary
 		 */
 		CURLY_BRACED
 	}
 
 	public class VariableContext {
-		
+
 		private VariableState variableState = VariableState.NO_ARRAY;
 		private VariableType type;
 		private int variableOpenCurlyBraces;
@@ -70,11 +72,11 @@ class ParseContext {
 			variableOpenCurlyBraces++;
 
 		}
-		
+
 		public VariableType getType() {
 			return type;
 		}
-		
+
 		public void setType(VariableType type) {
 			this.type = type;
 		}
@@ -105,18 +107,18 @@ class ParseContext {
 		public void variableGroupOpened() {
 			variableGroupOpen++;
 		}
-		
+
 		public void variableGroupClosed() {
 			variableGroupClosed++;
 		}
-		
+
 		public boolean areVariableGroupsBalanced() {
 			return variableGroupOpen == variableGroupClosed;
 		}
 	}
 
 	void addTokenAndResetText() {
-		if (moveCurrentPosWhenEmptyText()) {
+		if (moveCurrentTokenPosWhenEmptyText()) {
 			return;
 		}
 
@@ -161,7 +163,7 @@ class ParseContext {
 		return getState().equals(parserState);
 	}
 
-	boolean moveCurrentPosWhenEmptyText() {
+	boolean moveCurrentTokenPosWhenEmptyText() {
 		if (getSb().length() == 0) {
 			currentToken.start++;
 			return true;
@@ -223,5 +225,23 @@ class ParseContext {
 	public String toString() {
 		return "ParseContext:" + getSb().toString() + "\nTokens:" + tokens;
 	}
+
+	public boolean hasValidPos() {
+		return pos < chars.length;
+	}
+
+	public void moveForward() {
+		pos++;
+	}
+
+	public boolean canMoveForward() {
+		return pos < chars.length-1;
+	}
+
+	public boolean isCharBeforeEscapeSign() {
+		return getCharBefore() == '\\';
+	}
+
+	
 
 }
