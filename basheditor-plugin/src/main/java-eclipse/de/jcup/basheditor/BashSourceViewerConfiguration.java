@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
+import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.eclipse.jface.text.hyperlink.URLHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
@@ -52,6 +54,7 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 
 	private TextAttribute defaultTextAttribute;
 	private BashEditorAnnotationHoover annotationHoover;
+	private IAdaptable adaptable;
 	/**
 	 * Creates configuration by given adaptable
 	 * 
@@ -66,6 +69,7 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 		Assert.isNotNull(colorManager, " adaptable must support color manager");
 		this.defaultTextAttribute = new TextAttribute(
 				colorManager.getColor(getPreferences().getColor(COLOR_NORMAL_TEXT)));
+		this.adaptable=adaptable;
 	}
 	
 	
@@ -93,6 +97,14 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 		/* @formatter:on */
 	}
 
+	@Override
+	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
+		if (sourceViewer == null)
+			return null;
+
+		return new IHyperlinkDetector[] { new URLHyperlinkDetector(), new BashHyperlinkDetector(adaptable) };
+	}
+	
 	@Override
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 		PresentationReconciler reconciler = new PresentationReconciler();

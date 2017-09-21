@@ -66,6 +66,7 @@ import de.jcup.basheditor.outline.BashEditorTreeContentProvider;
 import de.jcup.basheditor.outline.BashQuickOutlineDialog;
 import de.jcup.basheditor.outline.Item;
 import de.jcup.basheditor.script.BashError;
+import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.script.BashScriptModel;
 import de.jcup.basheditor.script.BashScriptModelBuilder;
 
@@ -115,6 +116,17 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			quickOutlineOpened = true;
 		}
 		Shell shell = getEditorSite().getShell();
+		BashScriptModel model = buildModelWithoutValidation();
+		BashQuickOutlineDialog dialog = new BashQuickOutlineDialog(this, shell, "Quick outline");
+		dialog.setInput(model);
+		
+		dialog.open();
+		synchronized (monitor) {
+			quickOutlineOpened = false;
+		}
+	}
+
+	private BashScriptModel buildModelWithoutValidation() {
 		String text = getDocumentText();
 		
 		/* for quick outline create own model and ignore any validations */
@@ -124,13 +136,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		modelBuilder.setIgnoreFunctionValidation(true);
 		
 		BashScriptModel model = modelBuilder.build(text);
-		BashQuickOutlineDialog dialog = new BashQuickOutlineDialog(this, shell, "Quick outline");
-		dialog.setInput(model);
-		
-		dialog.open();
-		synchronized (monitor) {
-			quickOutlineOpened = false;
-		}
+		return model;
 	}
 
 	void setTitleImageDependingOnSeverity(int severity) {
@@ -635,5 +641,24 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			lastCaretPosition = event.caretOffset;
 		}
 
+	}
+
+	public void selectFunction(String text) {
+		System.out.println("should select functin:"+text);
+		
+	}
+
+	public BashFunction findBashFunction(String functionName) {
+		if (functionName==null){
+			return null;
+		}
+		BashScriptModel model = buildModelWithoutValidation();
+		Collection<BashFunction> functions = model.getFunctions();
+		for (BashFunction function:functions){
+			if (functionName.equals(function.getName())){
+				return function;
+			}
+		}
+		return null;
 	}
 }
