@@ -21,6 +21,12 @@ public enum BashSpecialVariableKeyWords implements DocumentKeyWord {
 	HOME("HOME"),
 	LANG("LANG"),
 	
+	PS1("PS1"),
+	PS2("PS2"),
+	PS3("PS3"),
+	PS4("PS4"),
+	
+	PROMPT_COMMAND("PROMPT_COMMAND"),
 	;
 
 	private String text;

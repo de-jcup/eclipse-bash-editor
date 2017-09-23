@@ -35,7 +35,21 @@ public enum BashGnuCommandKeyWords implements DocumentKeyWord{
 	
 	MKDIR("mkdir"),
 	
+	TPUT("tput"),
 	
+	TERMINFO("terminfo"),
+	
+	PS("ps"),
+	
+	LS("ls"),
+	
+	AWK("awk"),
+	
+	SED("sed"),
+	
+	WC("wc"),
+	
+	TR("tr"),
 	
 	;
 
