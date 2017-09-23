@@ -35,6 +35,8 @@ public enum BashGnuCommandKeyWords implements DocumentKeyWord{
 	
 	MKDIR("mkdir"),
 	
+	
+	
 	TPUT("tput"),
 	
 	TERMINFO("terminfo"),
@@ -50,6 +52,15 @@ public enum BashGnuCommandKeyWords implements DocumentKeyWord{
 	WC("wc"),
 	
 	TR("tr"),
+	
+	
+	MV("mv"),
+	
+	TAR("tar"),
+	
+	SSH("ssh"),
+	
+	PING("ping")
 	
 	;
 

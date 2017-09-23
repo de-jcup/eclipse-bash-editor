@@ -12,6 +12,10 @@ ps ax | wc -l | sed -e "s: ::g"
 
 BLACK=$(tput setaf 0)
 
+mv a.txt b.txt
+ssh 'Xxx'
+ping localhost
+tar * tar-ball.tar -xyz
 
 tput xxx
 terminfo xx
