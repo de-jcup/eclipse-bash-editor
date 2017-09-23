@@ -20,19 +20,19 @@ import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.WordPatternRule;
 
-public class ExactWordPatternRule extends WordPatternRule{
+public class VariableDefKeyWordPatternRule extends WordPatternRule{
 
 	private String toStringValue;
 	StringBuilder traceSb;
 	boolean trace = false;
 	
-	public ExactWordPatternRule(IWordDetector detector, String exactWord, IToken token) {
+	public VariableDefKeyWordPatternRule(IWordDetector detector, String exactWord, IToken token) {
 		this(detector,exactWord,token,true);
 	}
 	
-	public ExactWordPatternRule(IWordDetector detector, String exactWord, IToken token, boolean breaksOnEOF) {
+	public VariableDefKeyWordPatternRule(IWordDetector detector, String exactWord, IToken token, boolean breaksOnEOF) {
 		super(detector, exactWord, null, token);
-		toStringValue=getClass().getSimpleName()+":"+exactWord;
+		toStringValue=getClass().getSimpleName()+":"+exactWord+"=";
 		this.fBreaksOnEOF=breaksOnEOF;
 	}
 	
@@ -84,8 +84,8 @@ public class ExactWordPatternRule extends WordPatternRule{
 		char charAfter = (char)read;
 		scannerUnread(scanner, counter);
 		
-		/* when not a whitespace and not end reached - do cleanup*/
-		if (! Character.isWhitespace(charAfter) && ICharacterScanner.EOF!=read){
+		/* when not a = at end- do cleanup*/
+		if (charAfter != '=' ){
 			/* the word is more than the exact one - e.g. instead of 'test' 'testx' ... so not correct*/
 			return counter.cleanupAndReturn(scanner,false);
 		}
