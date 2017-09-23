@@ -16,7 +16,44 @@
  package de.jcup.basheditor.document.keywords;
 
 public enum BashSystemKeyWords implements DocumentKeyWord {
-	SHEBANG("#!/bin/bash"), // with(closure) method from GDK
+	
+	SHA_BANG("#!/bin/bash"), 
+	
+	/* TODO ATR, 24.09.2017: the outcomment part does not work complete, because it is possible to doe something like
+	 * "a|b" and not only "a | b" so the simple keyword detection mechansim would not work
+	 * I let the outcommented part - to show possibilities only. Maybe a dedicated redirect rule would make 
+	 * sense here. But if so also an addtional colour should be introduced for those operation parts to differ from normal
+	 * keywords.
+	 */
+//	DO_IN_BACKGROUND("&"),
+//	// see http://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO.html
+//	AND_PREVIOUS_COMMAND_COMPLETED_SUCESSFUL("&&"),
+//	
+//	PIPE("|"),
+//	
+//	// see http://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO-3.html ("all about redirection")
+//	
+//	REDIRECT__STDOUT_2_FILE(">"),
+//	
+//	REDIRECT__STDERR_2_FILE("2>"),
+//	
+//	REDIRECT__STDOUT_2_STDERR("1>&2"),
+//	
+//	REDIRECT__STDERR_2_STDOUT("2>&1"),
+//	
+//	REDIRECT_STDERR_AND_STDOUT_2_FILE("&>"),
+//	
+//	
+//	
+//	REDIRECT_AND_APPEND__STDOUT_2_FILE(">>"),
+//	
+//	REDIRECT_AND_APPEND__STDERR_2_FILE("2>>"),
+//	
+//	REDIRECT_AND_APPEND__STDOUT_2_STDERR("1>>&2"),
+//	
+//	REDIRECT_AND_APPEND__STDERR_2_STDOUT("2>>&1"),
+//	
+//	REDIRECT_AND_APPEND__STDERR_AND_STDOUT_2_FILE("&>>"),
 	
 	;
 
