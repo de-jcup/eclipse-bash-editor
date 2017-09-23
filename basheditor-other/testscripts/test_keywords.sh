@@ -15,13 +15,15 @@ BLACK=$(tput setaf 0)
 mv a.txt b.txt
 ssh 'Xxx'
 ping localhost
-tar * tar-ball.tar -xyz
+tar -cZf /var/my-backup.tgz /home/me/
 
 tput xxx
 terminfo xx
 
 export xxx
 kill -9 1234
+
+ls -all > output.txt
 
 PS1="$abc"
 PS2="$abc"

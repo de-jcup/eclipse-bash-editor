@@ -37,6 +37,36 @@ public class TokenParserTest {
 	}
 
 	@Test
+	public void bracket_bracket_1_plus_1_bracket_close_close__recognized() {
+		/* prepare */
+		String string = "echo $((1+1))";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"echo", "$((1+1))"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void sbracket_sbracket_1_plus_1_sbracket_close_close__recognized() {
+		/* prepare */
+		String string = "echo $[[1+1]]";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"echo", "$[[1+1]]"
+						);	/* @formatter:on*/
+	}
+
+	@Test
 	public void $1_has_start_0_end_2() {
 		/* prepare */
 		String string = "$1";
