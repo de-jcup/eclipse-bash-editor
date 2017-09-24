@@ -19,57 +19,63 @@ public enum BashGnuCommandKeyWords implements DocumentKeyWord{
 
 	/* NEW bash... */
 	
-	CHMOD("chmod"),
+	CHMOD,
 	
-	SUDO("sudo"),
+	SUDO,
 	
-	GREP("grep"),
+	GREP,
 	
-	CAT("cat"),
+	CAT,
 	
-	FILTER("filter"),
+	FILTER,
 	
-	UNAME("uname"),
+	UNAME,
 	
-	RM("rm"),
+	RM,
 	
-	MKDIR("mkdir"),
-	
-	
-	
-	TPUT("tput"),
-	
-	TERMINFO("terminfo"),
-	
-	PS("ps"),
-	
-	LS("ls"),
-	
-	AWK("awk"),
-	
-	SED("sed"),
-	
-	WC("wc"),
-	
-	TR("tr"),
+	MKDIR,
 	
 	
-	MV("mv"),
 	
-	TAR("tar"),
+	TPUT,
 	
-	SSH("ssh"),
+	TERMINFO,
 	
-	PING("ping")
+	PS,
+	
+	LS,
+	
+	AWK,
+	
+	SED,
+	
+	WC,
+	
+	TR,
+	
+	
+	MV,
+	
+	TAR,
+	
+	SSH,
+	
+	PING,
+	
+	TOUCH,
+	
+	GZIP,
+	
+	TEE,
 	
 	;
 
 	private String text;
 
-	private BashGnuCommandKeyWords(String text) {
-		this.text = text;
+	private BashGnuCommandKeyWords() {
+		this.text = name().toLowerCase();
 	}
-
+	
 	@Override
 	public String getText() {
 		return text;
