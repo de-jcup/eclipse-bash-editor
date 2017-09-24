@@ -10,10 +10,15 @@ It supports
 - Outline view (functions only)
 - Quick outline (CTRL+o)
 - Validation
+- Open referenced Functions
 - Bracket switching + highlighting
 - Block commenting (CTRL+7)
 - Auto bracket closing for []
 
+There are also some videos about bash editor features available at <a href="https://www.youtube.com/playlist?list=PLaBYAz_I_8tF7sZVIcUv8zOVe2RMiWn-L">YouTube</a>
+
+## Installation
+You can find this plugin at https://marketplace.eclipse.org/content/bash-editor	
 
 ## License
 Bash Editor is under Apache 2.0 license (http://www.apache.org/licenses/LICENSE-2.0)
