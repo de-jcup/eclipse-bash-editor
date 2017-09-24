@@ -112,7 +112,6 @@ public class TokenParser {
 			context.switchTo(CODE);
 			return true;
 		}
-		/* FIXME ATR: remove this'? */
 		if (c == '=') {
 			// special assign operator
 			context.appendCharToText();

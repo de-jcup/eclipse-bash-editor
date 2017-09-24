@@ -37,7 +37,6 @@ public class ClosedBlocksValidatorTest {
 		tokens = new ArrayList<>();
 	}
 	
-	/* FIXME ATR, 06.09.2017:  write more test cases + special:inside comments and strings {may not be calculated!*/
 	@Test
 	public void missing_close_part_detected() {
 		/* prepare */
