@@ -22,12 +22,15 @@ import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceCons
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.URLHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
+import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
@@ -35,9 +38,11 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.DefaultAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import de.jcup.basheditor.presentation.BashDefaultTextScanner;
@@ -47,7 +52,7 @@ import de.jcup.basheditor.presentation.PresentationSupport;
  * @author Albert Tregnaghi
  *
  */
-public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
+public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration {
 
 	private BashDefaultTextScanner gradleScanner;
 	private ColorManager colorManager;
@@ -62,6 +67,10 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 	 *            must provide {@link ColorManager} and {@link IFile}
 	 */
 	public BashSourceViewerConfiguration(IAdaptable adaptable) {
+		IPreferenceStore generalTextStore = EditorsUI.getPreferenceStore();
+		this.fPreferenceStore = new ChainedPreferenceStore(
+				new IPreferenceStore[] { getPreferences().getPreferenceStore(), generalTextStore });
+
 		Assert.isNotNull(adaptable, "adaptable may not be null!");
 		this.annotationHoover = new BashEditorAnnotationHoover();
 
@@ -72,6 +81,15 @@ public class BashSourceViewerConfiguration extends SourceViewerConfiguration {
 		this.adaptable=adaptable;
 	}
 	
+	@Override
+	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
+		/* currently we avoid the default quick assitence parts (spell checking etc.)*/
+		return null;
+	}
+	public IReconciler getReconciler(ISourceViewer sourceViewer) {
+		/* currently we avoid the default reconciler mechanism parts (spell checking etc.)*/
+		return null;
+	}
 	
 	@Override
 	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
