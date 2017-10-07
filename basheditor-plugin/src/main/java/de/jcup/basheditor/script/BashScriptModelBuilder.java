@@ -110,7 +110,7 @@ public class BashScriptModelBuilder {
 		for (int tokenNr = 0; tokenNr < tokens.size(); tokenNr++) {
 			int currentTokenNr = tokenNr;
 			ParseToken token = tokens.get(currentTokenNr++);
-			boolean isFunctionName = false;
+			boolean isFunction = false;
 			Integer functionStart = null;
 			int functionEnd = 0;
 			/* ++++++++++++++++++++++ */
@@ -118,20 +118,20 @@ public class BashScriptModelBuilder {
 			/* ++++++++++++++++++++++ */
 			/* could be 'function MethodName()' or 'function MethodName()' */
 			if (token.isFunctionKeyword() && hasPos(currentTokenNr, tokens)) {
-				isFunctionName = true;
+				isFunction = true;
 				functionStart = Integer.valueOf(token.getStart());
 				token = tokens.get(currentTokenNr++);
 			}
 			/* could be 'MethodName()' */
-			isFunctionName = isFunctionName || token.isFunctionName();
-			if (!isFunctionName) {
-				/* could be 'MethodName ()' */
-				if (hasPos(currentTokenNr, tokens)) {
+			isFunction = isFunction || token.isFunction();
+			if (!isFunction) {
+				/* could be 'MethodName ()' but NOT something like params=()*/
+				if (token.isLegalFunctionName() && hasPos(currentTokenNr, tokens)) {
 					ParseToken followToken = tokens.get(currentTokenNr++);
-					isFunctionName = followToken.hasLength(2) && followToken.endsWithFunctionBrackets();
+					isFunction = followToken.hasLength(2) && followToken.endsWithFunctionBrackets();
 				}
 			}
-			if (isFunctionName) {
+			if (isFunction) {
 				if (functionStart == null) {
 					functionStart = Integer.valueOf(token.getStart());
 				}

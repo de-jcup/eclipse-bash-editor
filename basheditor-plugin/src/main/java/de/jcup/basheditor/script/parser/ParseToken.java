@@ -17,6 +17,7 @@ package de.jcup.basheditor.script.parser;
 
 public class ParseToken {
 
+	private static final String EQUAL_OPERAND = "=";
 	String text;
 	int start;
 	int end;
@@ -131,8 +132,22 @@ public class ParseToken {
 		return "function".equals(text);
 	}
 
-	public boolean isFunctionName() {
-		return endsWithFunctionBrackets() && !isComment() && text.length() > 2 && !isString();
+	/**
+	 * @return <code>true</code> when token ends with function brackets and contains no illegal states (e.g. string, comment)
+	 * and also no illegal characters in name
+	 */ 
+	public boolean isFunction() {
+		boolean isFunctionName = endsWithFunctionBrackets();
+		isFunctionName = isFunctionName && isLegalFunctionName();
+		isFunctionName = isFunctionName && !isComment();
+		isFunctionName = isFunctionName && text.length() > 2;
+		isFunctionName = isFunctionName && !isString();
+		
+		return  isFunctionName;
+	}
+
+	public boolean isLegalFunctionName() {
+		return ! getSafeText().contains(EQUAL_OPERAND);
 	}
 
 	public boolean endsWithFunctionBrackets() {

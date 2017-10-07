@@ -58,6 +58,7 @@ public class ParseTokenTest {
 		assertTrue(new ParseToken("function").isFunctionKeyword());
 	}
 	
+	
 	@Test
 	public void functions_is_NOT_functionKeyword() {
 		assertFalse(new ParseToken("functions").isFunctionKeyword());
@@ -65,22 +66,28 @@ public class ParseTokenTest {
 	
 	@Test
 	public void function_is_NOT_functionName() {
-		assertFalse(new ParseToken("function").isFunctionName());
+		assertFalse(new ParseToken("function").isFunction());
 	}
 	
 	@Test
 	public void xyz_is_NOT_functionName() {
-		assertFalse(new ParseToken("xyz").isFunctionName());
+		assertFalse(new ParseToken("xyz").isFunction());
 	}
 	
 	@Test
 	public void xyz_followed_by_open_and_close_bracket_is_functionName() {
-		assertTrue(new ParseToken("xyz()").isFunctionName());
+		assertTrue(new ParseToken("xyz()").isFunction());
 	}
 	
 	@Test
 	public void only_open_and_close_bracket_is_NOT_functionName() {
-		assertFalse(new ParseToken("()").isFunctionName());
+		assertFalse(new ParseToken("()").isFunction());
+	}
+	
+
+	@Test
+	public void function_params_equal_open_and_close_bracket_is_NOT_functionName() {
+		assertFalse(new ParseToken("params=()").isFunction());
 	}
 	
 	@Test
