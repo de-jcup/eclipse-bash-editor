@@ -352,7 +352,7 @@ public abstract class AbstractFilterableTreeQuickDialog<T> extends AbstractQuick
 				dirty = true;
 			}
 
-			UIJob job = new UIJob("Rebuild egradle quick outline") {
+			UIJob job = new UIJob("Rebuild bash editor quick outline") {
 
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
@@ -385,12 +385,18 @@ public abstract class AbstractFilterableTreeQuickDialog<T> extends AbstractQuick
 		}
 
 		private boolean selectfirstMatching(Object[] elements) {
+			if (treeViewer==null){
+				return false;
+			}
+			if (textFilter==null){
+				return false;
+			}
 			if (elements == null) {
 				return false;
 			}
 			for (int i = 0; i < elements.length; i++) {
 				Object element = elements[i];
-				if (Boolean.TRUE.equals(textFilter.isMatching(element))) {
+				if (textFilter.isMatching(element)) {
 					StructuredSelection selection = new StructuredSelection(element);
 					treeViewer.setSelection(selection, true);
 					return true;

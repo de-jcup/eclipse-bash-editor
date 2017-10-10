@@ -13,34 +13,36 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor;
+package de.jcup.basheditor;
 
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 @AdaptedFromEGradle
-public abstract class AbstractTextMatcher<T>  implements FilterPatternMatcher<T> {
+public abstract class AbstractTextMatcher<T> implements FilterPatternMatcher<T> {
 
 	private Pattern PATTERN_DEREGEX_ASTERISK = Pattern.compile("\\*");
 	private Pattern PATTERN_DEREGEX_DOT = Pattern.compile("\\.");
 	protected Pattern filterPattern;
 
-	public AbstractTextMatcher() {
-		super();
-	}
-	
 	@Override
 	public boolean matches(T item) {
 		if (item == null) {
 			return false;
 		}
 
-		if (filterPattern == null) {
+		if (! hasFilterPattern()) {
 			/* no filter matches all... */
 			return true;
 		}
 
-		String itemText=createItemText(item);
+		String itemText;
+		try {
+			itemText = createItemText(item);
+		} catch (ClassCastException e) {
+			/* text matcher is not able to handle this so let it be null */
+			itemText = null;
+		}
 		return matchesString(itemText);
 	}
 
@@ -51,22 +53,28 @@ public abstract class AbstractTextMatcher<T>  implements FilterPatternMatcher<T>
 	}
 
 	protected boolean matchesString(String itemText) {
+		if (itemText == null) {
+			return false;
+		}
 		if (itemText.length() == 0) {
 			return false;
 		}
-	
+		if (! hasFilterPattern()) {
+			/* no filter matches all... */
+			return true;
+		}
 		/* filter pattern set */
 		boolean filterPatternMatches = filterPattern.matcher(itemText).matches();
 		return filterPatternMatches;
 	}
 
 	public void setFilterText(String filterText) {
-		this.filterPattern = null;
+		resetFilterPattern();
 		if (filterText == null) {
 			return;
 		}
 		filterText = filterText.trim();
-	
+
 		if (filterText.length() == 0) {
 			return;
 		}
@@ -82,13 +90,17 @@ public abstract class AbstractTextMatcher<T>  implements FilterPatternMatcher<T>
 		}
 		newPattern = PATTERN_DEREGEX_ASTERISK.matcher(newPattern).replaceAll(".*");
 		newPattern = PATTERN_DEREGEX_DOT.matcher(newPattern).replaceAll("\\.");
-	
+
 		try {
 			Pattern filterPattern = Pattern.compile(newPattern, Pattern.CASE_INSENSITIVE);
 			this.filterPattern = filterPattern;
 		} catch (PatternSyntaxException e) {
 			/* ignore - filterPattern is now null, fall back is used */
 		}
+	}
+
+	protected void resetFilterPattern() {
+		this.filterPattern = null;
 	}
 
 }
