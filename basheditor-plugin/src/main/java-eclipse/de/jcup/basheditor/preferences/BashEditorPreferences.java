@@ -15,6 +15,8 @@ package de.jcup.basheditor.preferences;
  *
  */
 
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -126,6 +128,10 @@ public class BashEditorPreferences {
 		getPreferenceStore().setValue(id.getId(), value);
 	}
 
+	public boolean isLinkOutlineWithEditorEnabled() {
+		return getBooleanPreference(P_LINK_OUTLINE_WITH_EDITOR);
+	}
+	
 	public IPreferenceStore getPreferenceStore() {
 		return store;
 	}
@@ -162,5 +168,7 @@ public class BashEditorPreferences {
 	public static BashEditorPreferences getInstance() {
 		return INSTANCE;
 	}
+
+	
 
 }

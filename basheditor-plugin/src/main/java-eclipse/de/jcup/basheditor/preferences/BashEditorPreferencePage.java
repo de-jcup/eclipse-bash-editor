@@ -59,6 +59,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 	private Button matchingBracketRadioButton;
 
 	private ColorFieldEditor matchingBracketsColor;
+	private BooleanFieldEditor linkEditorWithOutline;
 
 	private ArrayList<MasterButtonSlaveSelectionListener> masterSlaveListeners = new ArrayList<>();
 
@@ -116,9 +117,17 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		otherLayout.marginHeight = 0;
 		otherComposite.setLayout(otherLayout);
 
+		/* linking with outline */
+		linkEditorWithOutline = new BooleanFieldEditor(P_LINK_OUTLINE_WITH_EDITOR.getId(),
+				"New opened editors are linked with outline", otherComposite);
+		linkEditorWithOutline.getDescriptionControl(otherComposite)
+		.setToolTipText("Via this setting the default behaviour for new opened outlines is set");
+		addField(linkEditorWithOutline);
+		
+
 		/* BRACKETS */
 		/*
-		 * Why so ugly implemented and not using field editors ? Because 
+		 * Why so ugly implemented and not using field editors ? Because
 		 * SourceViewerDecorationSupport needs 3 different preference keys to do
 		 * its job, so this preference doing must be same as on Java editor
 		 * preferences.
@@ -129,12 +138,16 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		gd.heightHint = convertHeightInCharsToPixels(1) / 2;
 		spacer.setLayoutData(gd);
 
+		autoCreateEndBrackets = new BooleanFieldEditor(P_EDITOR_AUTO_CREATE_END_BRACKETSY.getId(),
+				"Auto create ending brackets", appearanceComposite);
+		addField(autoCreateEndBrackets);
+
 		String label = "Bracket highlighting";
 
 		bracketHighlightingCheckbox = addButton(appearanceComposite, SWT.CHECK, label, 0, new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				matchingBrackets=bracketHighlightingCheckbox.getSelection();
+				matchingBrackets = bracketHighlightingCheckbox.getSelection();
 			}
 		});
 
@@ -161,7 +174,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						if (matchingBracketAndCaretLocationRadioButton.getSelection()) {
-							highlightBracketAtCaretLocation= true;
+							highlightBracketAtCaretLocation = true;
 						}
 					}
 				});
@@ -173,7 +186,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean selection = enclosingBracketsRadioButton.getSelection();
-				enclosingBrackets=selection;
+				enclosingBrackets = selection;
 				if (selection) {
 					highlightBracketAtCaretLocation = true;
 				}
@@ -188,8 +201,6 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		createDependency(bracketHighlightingCheckbox, matchingBracketsColor.getColorSelector().getButton());
 
 		
-		autoCreateEndBrackets = new BooleanFieldEditor(P_EDITOR_AUTO_CREATE_END_BRACKETSY.getId(), "Auto create ending brackets", getFieldEditorParent());
-		addField(autoCreateEndBrackets);
 	}
 
 	@Override
@@ -236,13 +247,13 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		matchingBrackets = getDefaultBoolean(P_EDITOR_MATCHING_BRACKETS_ENABLED);
 		highlightBracketAtCaretLocation = getDefaultBoolean(P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION);
 		enclosingBrackets = getDefaultBoolean(P_EDITOR_ENCLOSING_BRACKETS);
-		
+
 		updateBracketUI();
 	}
 
 	private void updateBracketUI() {
 		this.bracketHighlightingCheckbox.setSelection(matchingBrackets);
-		
+
 		this.enclosingBracketsRadioButton.setSelection(enclosingBrackets);
 		if (!(enclosingBrackets)) {
 			this.matchingBracketRadioButton.setSelection(!(highlightBracketAtCaretLocation));

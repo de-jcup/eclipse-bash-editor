@@ -21,6 +21,7 @@ public class Item {
 	String name;
 	int offset;
 	int length;
+	int endOffset;
 	
 	/**
 	 * @return item type , or <code>null</code>
@@ -39,6 +40,27 @@ public class Item {
 
 	public int getLength() {
 		return length;
+	}
+	
+	public int getEndOffset() {
+		return endOffset;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Item:");
+		sb.append("name:");
+		sb.append(name);
+		sb.append(",type:");
+		sb.append(type);
+		sb.append(",offset:");
+		sb.append(offset);
+		sb.append(",length:");
+		sb.append(length);
+		sb.append(",endOffset:");
+		sb.append(endOffset);
+		return sb.toString();
 	}
 
 	public String buildSearchString() {

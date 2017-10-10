@@ -20,6 +20,7 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
@@ -74,11 +75,25 @@ public class BashQuickOutlineDialog extends AbstractFilterableTreeQuickDialog<It
 		if (editor == null) {
 			return;
 		}
-		/*
-		 * select part in editor - grab focus not necessary, because this will
-		 * close quick outline dialog as well, so editor will get focus back
-		 */
-		editor.openSelectedTreeItemInEditor(selection, false);
+		BashEditorContentOutlinePage outlinePage = editor.getOutlinePage();
+		boolean outlineAvailable = outlinePageVisible(outlinePage);
+		if (outlineAvailable){
+			/*
+			 * select part in editor - grab focus not necessary, because this will
+			 * close quick outline dialog as well, so editor will get focus back
+			 */
+			editor.openSelectedTreeItemInEditor(selection, false);
+		}else{
+			outlinePage.setSelection(selection);
+		}
+		
+	}
+
+	protected boolean outlinePageVisible(BashEditorContentOutlinePage outlinePage) {
+		Control control = outlinePage.getControl();
+		/* when control is not available - means outline view is not visible, */
+		boolean controlAvailable = control==null || control.isDisposed() || ! control.isVisible();
+		return controlAvailable;
 	}
 
 	@Override

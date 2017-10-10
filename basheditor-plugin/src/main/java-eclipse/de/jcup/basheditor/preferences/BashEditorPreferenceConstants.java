@@ -21,16 +21,15 @@ package de.jcup.basheditor.preferences;
  * Constant definitions for plug-in preferences
  */
 public enum BashEditorPreferenceConstants implements PreferenceIdentifiable{
+
 	
-	/**
-	 * Tasks which are executed on test
-	 */
 	P_EDITOR_MATCHING_BRACKETS_ENABLED("matchingBrackets"),
 	P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION("highlightBracketAtCaretLocation"),
 	P_EDITOR_ENCLOSING_BRACKETS("enclosingBrackets"),
 	P_EDITOR_MATCHING_BRACKETS_COLOR("matchingBracketsColor"),
 	P_EDITOR_AUTO_CREATE_END_BRACKETSY("autoCreateEndBrackets"),
 	
+	P_LINK_OUTLINE_WITH_EDITOR("linkOutlineWithEditor"),
 	;
 
 	private String id;

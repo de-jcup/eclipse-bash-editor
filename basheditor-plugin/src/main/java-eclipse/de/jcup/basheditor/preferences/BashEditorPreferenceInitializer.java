@@ -34,6 +34,9 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		BashEditorPreferences preferences = getPreferences();
 		IPreferenceStore store = preferences.getPreferenceStore();
 		
+		/* Outline */
+		store.setDefault(P_LINK_OUTLINE_WITH_EDITOR.getId(), true);
+		
 		/* ++++++++++++ */
 		/* + Brackets + */
 		/* ++++++++++++ */

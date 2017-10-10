@@ -65,6 +65,7 @@ import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
 import de.jcup.basheditor.outline.BashEditorTreeContentProvider;
 import de.jcup.basheditor.outline.BashQuickOutlineDialog;
 import de.jcup.basheditor.outline.Item;
+import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.script.BashError;
 import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.script.BashScriptModel;
@@ -305,6 +306,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
 	private String bgColor;
 	private String fgColor;
+	private boolean ignoreNextCaretMove;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -607,6 +609,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 					/* fall back */
 					length = 1;
 				}
+				ignoreNextCaretMove = true;
 				selectAndReveal(offset, length);
 				if (grabFocus) {
 					setFocus();
@@ -631,17 +634,6 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		return item;
 	}
 
-	private class BashEditorCaretListener implements CaretListener {
-
-		@Override
-		public void caretMoved(CaretEvent event) {
-			if (event == null) {
-				return;
-			}
-			lastCaretPosition = event.caretOffset;
-		}
-
-	}
 
 	public void selectFunction(String text) {
 		System.out.println("should select functin:"+text);
@@ -660,5 +652,29 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			}
 		}
 		return null;
+	}
+	
+	public BashEditorPreferences getPreferences(){
+		return BashEditorPreferences.getInstance();
+	}
+	
+	private class BashEditorCaretListener implements CaretListener {
+
+		@Override
+		public void caretMoved(CaretEvent event) {
+			if (event == null) {
+				return;
+			}
+			lastCaretPosition = event.caretOffset;
+			if (ignoreNextCaretMove) {
+				ignoreNextCaretMove = false;
+				return;
+			}
+			if (outlinePage == null) {
+				return;
+			}
+			outlinePage.onEditorCaretMoved(event.caretOffset);
+		}
+
 	}
 }
