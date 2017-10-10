@@ -40,7 +40,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getElements(Object inputElement) {
 		synchronized (monitor) {
-			if (!(inputElement instanceof BashScriptModel)) {
+			if (inputElement!=null && !(inputElement instanceof BashScriptModel)) {
 				return new Object[] { "Unsupported input element:"+inputElement };
 			}
 			if (items != null && items.length > 0) {
@@ -73,6 +73,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.type = ItemType.FUNCTION;
 			item.offset = function.getPosition();
 			item.length = function.getLengthToNameEnd();
+			item.endOffset=function.getEnd();
 			list.add(item);
 		}
 		if (list.isEmpty()) {
@@ -81,6 +82,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.type = ItemType.META_INFO;
 			item.offset = 0;
 			item.length = 0;
+			item.endOffset=0;
 			list.add(item);
 		}
 		if (model.hasErrors()) {
@@ -89,6 +91,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.type = ItemType.META_ERROR;
 			item.offset = 0;
 			item.length = 0;
+			item.endOffset=0;
 			list.add(0, item);
 		}
 		/* debug part*/
@@ -99,6 +102,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 				item.type = ItemType.META_DEBUG;
 				item.offset = token.getStart();
 				item.length = token.getText().length();
+				item.endOffset=token.getEnd();
 				list.add(item);
 			}
 		}
@@ -127,7 +131,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 				}
 				Item item = (Item) oitem;
 				int itemStart = item.getOffset();
-				int itemEnd = itemStart+item.getLength();
+				int itemEnd = item.getEndOffset();// old: itemStart+item.getLength();
 				if (offset >= itemStart && offset<=itemEnd ){
 					return item;
 				}
