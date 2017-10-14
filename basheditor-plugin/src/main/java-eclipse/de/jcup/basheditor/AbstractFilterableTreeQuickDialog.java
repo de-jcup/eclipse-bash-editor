@@ -396,7 +396,7 @@ public abstract class AbstractFilterableTreeQuickDialog<T> extends AbstractQuick
 			}
 			for (int i = 0; i < elements.length; i++) {
 				Object element = elements[i];
-				if (textFilter.isMatching(element)) {
+				if (Boolean.TRUE.equals(textFilter.isMatchingOrNull(element))) {
 					StructuredSelection selection = new StructuredSelection(element);
 					treeViewer.setSelection(selection, true);
 					return true;

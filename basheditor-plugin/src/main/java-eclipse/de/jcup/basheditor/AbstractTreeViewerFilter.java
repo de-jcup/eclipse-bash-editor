@@ -71,7 +71,7 @@ public abstract class AbstractTreeViewerFilter<T> extends ViewerFilter {
 			return true;
 		}
 		TreeViewer treeViewer = (TreeViewer) viewer;
-		Boolean matchingResult = isMatching(element);
+		Boolean matchingResult = isMatchingOrNull(element);
 		if (matchingResult != null) {
 			return matchingResult;
 		}
@@ -79,7 +79,7 @@ public abstract class AbstractTreeViewerFilter<T> extends ViewerFilter {
 	}
 
 	@SuppressWarnings("unchecked")
-	Boolean isMatching(Object element) {
+	Boolean isMatchingOrNull(Object element) {
 		T item = null;
 		try {
 			item = (T) element;
