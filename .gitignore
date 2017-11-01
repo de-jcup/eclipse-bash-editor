@@ -14,3 +14,6 @@ bin/
 gen/
 src-gen/
 rebel.xml
+# one of the markdown editors does write a html file for previews - prevent this to be added on repo:
+*.md.html
+
