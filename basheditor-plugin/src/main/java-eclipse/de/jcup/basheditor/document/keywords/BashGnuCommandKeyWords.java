@@ -17,7 +17,7 @@
 
 public enum BashGnuCommandKeyWords implements DocumentKeyWord{
 
-	/* NEW bash... */
+	CP,
 	
 	CHMOD,
 	
