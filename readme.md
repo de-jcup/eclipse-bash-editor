@@ -12,6 +12,10 @@ and integrated Eclipse help (preview at https://rawgit.com/de-jcup/eclipse-bash-
 ## Installation
 You can find this plugin at https://marketplace.eclipse.org/content/bash-editor	
 
+## Developing
+
+To change what word are to be highlighted, check inside `basheditor-plugin/src/main/java-eclipse/de/jcup/basheditor/document/keywords` 
+
 ## License
 Bash Editor is under Apache 2.0 license (http://www.apache.org/licenses/LICENSE-2.0)
 
