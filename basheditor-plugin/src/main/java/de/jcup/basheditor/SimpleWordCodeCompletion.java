@@ -2,29 +2,31 @@ package de.jcup.basheditor;
 
 import static java.util.Collections.*;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class SimpleWordCodeCompletion {
 
-	private SortedSet<String> allWordsCache = new TreeSet<>();
-	
 	private Set<String> additionalWordsCache = new HashSet<>();
+	
+	private SortedSet<String> allWordsCache = new TreeSet<>();
 
+	SimpleWordListBuilder wordListBuilder = new SimpleWordListBuilder();
+	
 	/**
-	 * Reset allWordsCache
-	 * 
-	 * @return completion
+	 * Adds an additional word - will be removed on all of {@link #reset()}
+	 * @param word
 	 */
-	public SimpleWordCodeCompletion reset() {
-		allWordsCache.clear();
-		additionalWordsCache.clear();
-		return this;
+	public void add(String word) {
+		if (word==null){
+			return;
+		}
+		if (! allWordsCache.isEmpty()){
+			allWordsCache.clear(); // reset the all words cache so rebuild will be triggered 
+		}
+		additionalWordsCache.add(word.trim());
 	}
 
 	/**
@@ -43,32 +45,6 @@ public class SimpleWordCodeCompletion {
 		return filteredSet(allWordsCache, wanted);
 	}
 
-	SortedSet<String> filteredSet(SortedSet<String> set, String wanted) {
-		if (wanted==null || wanted.isEmpty()){
-			return set;
-		}
-		TreeSet<String> filtered = new TreeSet<>();
-		for (String data: set){
-			if (data.startsWith(wanted)){
-				filtered.add(data);
-			}
-		}
-		/* remove wanted itself*/
-		filtered.remove(wanted);
-		return filtered;
-	}
-
-	/**
-	 * Adds an additional word - will be removed on all of {@link #reset()}
-	 * @param word
-	 */
-	public void add(String word) {
-		if (word==null){
-			return;
-		}
-		allWordsCache.clear(); // reset the all words cache so rebuild will be triggered 
-		additionalWordsCache.add(word.trim());
-	}
 	/**
 	 * Resolves text before given offset
 	 * @param source
@@ -82,7 +58,8 @@ public class SimpleWordCodeCompletion {
 		if (offset <= 0) {
 			return "";
 		}
-		if (offset >= source.length()) {
+		int sourceLength = source.length();
+		if (offset > sourceLength) {
 			return "";
 		}
 		StringBuilder sb = new StringBuilder();
@@ -102,22 +79,43 @@ public class SimpleWordCodeCompletion {
 		return sb.toString();
 	}
 
+	/**
+	 * Reset allWordsCache
+	 * 
+	 * @return completion
+	 */
+	public SimpleWordCodeCompletion reset() {
+		allWordsCache.clear();
+		additionalWordsCache.clear();
+		return this;
+	}
+	SortedSet<String> filteredSet(SortedSet<String> set, String wanted) {
+		if (wanted==null || wanted.isEmpty()){
+			return set;
+		}
+		TreeSet<String> filtered = new TreeSet<>();
+		String wantedLowered= wanted.toLowerCase();
+		for (String data: set){
+			if (data.toLowerCase().startsWith(wantedLowered)){
+				filtered.add(data);
+			}else{
+				data.toLowerCase();
+			}
+		}
+		/* remove wanted itself*/
+		filtered.remove(wanted);
+		return filtered;
+	}
+
+	
+
 	private void rebuildCacheIfNecessary(String source) {
 		if (allWordsCache.isEmpty()) {
 			allWordsCache.addAll(additionalWordsCache);
-			allWordsCache.addAll(buildAllWords(source));
+			allWordsCache.addAll(wordListBuilder.build(source));
 			// we do not want the empty String
 			allWordsCache.remove("");
 		}
-	}
-
-	private List<String> buildAllWords(String source) {
-		if (source == null) {
-			return Collections.emptyList();
-		}
-		String[] allWords = source.split("\\s");
-		List<String> list = Arrays.asList(allWords);
-		return list;
 	}
 
 }

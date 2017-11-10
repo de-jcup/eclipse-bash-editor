@@ -26,7 +26,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.URLHyperlinkDetector;
@@ -97,7 +96,7 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 	
 	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
-		/* currently we avoid the default quick assitence parts (spell checking etc.)*/
+		/* currently we avoid the default quick assistence parts (spell checking etc.)*/
 		return null;
 	}
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {

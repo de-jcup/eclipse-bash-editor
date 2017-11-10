@@ -13,9 +13,33 @@ public class SimpleWordCodeCompletionTest {
 	private SimpleWordCodeCompletion completionToTest;
 
 	@Test
-	public void add_alpha__source_x_space_space_albert__calculate_albert_alpha_x_on_index_2(){
+	public void source_empty__calculate_nothing_on_index_0(){
 		/* execute */
+		Set<String> result = completionToTest.calculate("", 0);
+		
+		/* test */
+		assertResult(result).hasNoResults();
+	}
+	
+	@Test
+	public void add_alpha__source_empty__calculate_alpha_on_index_0(){
+		/* prepare */
 		completionToTest.add("alpha");
+		
+		/* execute */
+		Set<String> result = completionToTest.calculate("", 0);
+		
+		/* test */
+		assertResult(result).hasResults("alpha");
+	}
+	
+	
+	@Test
+	public void add_alpha__source_x_space_space_albert__calculate_albert_alpha_x_on_index_2(){
+		/* prepare */
+		completionToTest.add("alpha");
+
+		/* execute */
 		Set<String> result = completionToTest.calculate("x   albert", 2);
 		
 		/* test */
@@ -24,8 +48,10 @@ public class SimpleWordCodeCompletionTest {
 	
 	@Test
 	public void add_alpha_space_space__source_x_space_space_albert__calculate_albert_alpha_x_on_index_2(){
-		/* execute */
+		/* prepare */
 		completionToTest.add("alpha  ");
+		
+		/* execute */
 		Set<String> result = completionToTest.calculate("x   albert", 2);
 		
 		/* test */
@@ -34,9 +60,11 @@ public class SimpleWordCodeCompletionTest {
 	
 	@Test
 	public void add_alpha_and_y__source_x_space_space_albert__calculate_albert_alpha_x_on_index_2(){
-		/* execute */
+		/* prepare */
 		completionToTest.add("alpha  ");
 		completionToTest.add("y");
+
+		/* execute */
 		Set<String> result = completionToTest.calculate("x   albert", 2);
 		
 		/* test */
@@ -50,6 +78,15 @@ public class SimpleWordCodeCompletionTest {
 		
 		/* test */
 		assertResult(result).hasResults("albert","automated");
+	}
+	
+	@Test
+	public void a_space_Albert_likes_automated_testing__offset_1_calculates_albert__automated__so_caseinsensitive_proposals() {
+		/* execute */
+		Set<String> result = completionToTest.calculate("a Albert likes automated testing", 1);
+		
+		/* test */
+		assertResult(result).hasResults("Albert","automated");
 		
 	}
 	

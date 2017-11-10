@@ -28,6 +28,13 @@ public class AssertSimpleWordCodeCompletionResult{
 		}
 		return this;
 	}
+	
+	public AssertSimpleWordCodeCompletionResult hasNoResults() {
+		if (! result.isEmpty()){
+			fail("Did not expect results, but found!\n"+createDiffText(new String[]{}));
+		}
+		return this;
+	}
 
 	private String createDiffText(String[] expected) {
 		StringBuilder sb = new StringBuilder();
@@ -37,4 +44,6 @@ public class AssertSimpleWordCodeCompletionResult{
 		sb.append(result.toString());
 		return sb.toString();
 	}
+
+
 }
