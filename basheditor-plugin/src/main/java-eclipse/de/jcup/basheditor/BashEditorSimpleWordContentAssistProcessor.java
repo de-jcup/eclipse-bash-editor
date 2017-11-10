@@ -14,9 +14,18 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import de.jcup.basheditor.document.keywords.BashGnuCommandKeyWords;
+import de.jcup.basheditor.document.keywords.BashIncludeKeyWords;
+import de.jcup.basheditor.document.keywords.BashLanguageKeyWords;
+import de.jcup.basheditor.document.keywords.BashSpecialVariableKeyWords;
+import de.jcup.basheditor.document.keywords.BashSystemKeyWords;
+import de.jcup.basheditor.document.keywords.DocumentKeyWord;
+
 public class BashEditorSimpleWordContentAssistProcessor implements IContentAssistProcessor, ICompletionListener{
 
 	private String errorMessage;
+	
+	private SimpleWordCodeCompletion simpleWordCompletion = new SimpleWordCodeCompletion();
 
 	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
@@ -26,7 +35,7 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		}
 		String source = document.get();
 		
-		SimpleWordCodeCompletion simpleWordCompletion = new SimpleWordCodeCompletion();
+		
 		Set<String> words = simpleWordCompletion.calculate(source,offset);
 		
 		ICompletionProposal[] result = new ICompletionProposal[words.size()];
@@ -47,6 +56,7 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 
 		private int offset;
 		private String word;
+		private int nextSelection;
 
 		SimpleWordProposal(int offset, String word){
 			this.offset=offset;
@@ -55,8 +65,18 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		
 		@Override
 		public void apply(IDocument document) {
+			// the proposal shall enter always a space after applyment...
+			String proposal = word;
+			if (isAddingSpaceAtEnd()){
+				proposal+=" ";
+			}
+			
+			String source = document.get();
+			String textBefore = simpleWordCompletion.getTextbefore(source, offset);
+			String missingPart = proposal.substring(textBefore.length());
 			try {
-				document.replace(offset, 0, word);
+				document.replace(offset, 0, missingPart);
+				nextSelection = offset+missingPart.length();
 			} catch (BadLocationException e) {
 				/* ignore*/
 			}
@@ -65,7 +85,8 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 
 		@Override
 		public Point getSelection(IDocument document) {
-			return null;
+			Point point = new Point(nextSelection, 0);
+			return point;
 		}
 
 		@Override
@@ -95,6 +116,10 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		return null;
 	}
 
+	public boolean isAddingSpaceAtEnd() {
+		return true;
+	}
+
 	@Override
 	public char[] getContextInformationAutoActivationCharacters() {
 		return null;
@@ -118,12 +143,36 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 	
 	@Override
 	public void assistSessionStarted(ContentAssistEvent event) {
-		
+		simpleWordCompletion.reset();
+		addAllBashKeyWords();
 	}
 
+	protected void addAllBashKeyWords() {
+		for (DocumentKeyWord keyword: BashGnuCommandKeyWords.values()){
+			addKeyWord(keyword);
+		}
+		for (DocumentKeyWord keyword: BashIncludeKeyWords.values()){
+			addKeyWord(keyword);
+		}
+		for (DocumentKeyWord keyword: BashLanguageKeyWords.values()){
+			addKeyWord(keyword);
+		}
+		for (DocumentKeyWord keyword: BashSpecialVariableKeyWords.values()){
+			addKeyWord(keyword);
+		}	
+		for (DocumentKeyWord keyword: BashSystemKeyWords.values()){
+			addKeyWord(keyword);
+		}
+	}
+
+	protected void addKeyWord(DocumentKeyWord keyword) {
+		simpleWordCompletion.add(keyword.getText());
+	}
+
+	
+	
 	@Override
 	public void assistSessionEnded(ContentAssistEvent event) {
-		
 	}
 
 	@Override
