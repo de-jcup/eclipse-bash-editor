@@ -13,7 +13,7 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor;
+package de.jcup.basheditor;
 
 import static de.jcup.basheditor.BashEditorUtil.*;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
@@ -40,40 +40,78 @@ class BashBracketInsertionCompleter extends KeyAdapter {
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		if (e.character != '[') {
+		InsertClosingBracketsSupport insertClosingBracketsSupport = getInsertionSupport(e);
+		if (insertClosingBracketsSupport == null) {
 			return;
 		}
 		/*
-		 * do not use last caret start - because the listener ordering
-		 * could be different
+		 * do not use last caret start - because the listener ordering could be
+		 * different
 		 */
 		ISelectionProvider selectionProvider = this.bashEditor.getSelectionProvider();
-		if (selectionProvider==null){
+		if (selectionProvider == null) {
 			return;
 		}
 		ISelection selection = selectionProvider.getSelection();
-		if (! (selection instanceof ITextSelection)) {
+		if (!(selection instanceof ITextSelection)) {
 			return;
 		}
 		boolean enabled = getPreferences().getBooleanPreference(P_EDITOR_AUTO_CREATE_END_BRACKETSY);
-		if (!enabled){
+		if (!enabled) {
 			return;
 		}
 		ITextSelection textSelection = (ITextSelection) selection;
 		int offset = textSelection.getOffset();
-		
-		
+
 		try {
 			IDocument document = this.bashEditor.getDocument();
-			if (document==null){
+			if (document == null) {
 				return;
 			}
-			document.replace(offset-1, 1, "[ ]");
-			selectionProvider.setSelection(new TextSelection(offset+1, 0));
+			insertClosingBracketsSupport.insertClosingBrackets(document, selectionProvider, offset);
 		} catch (BadLocationException e1) {
-			/* ignore*/
+			/* ignore */
 			return;
 		}
-		
+
+	}
+
+	protected InsertClosingBracketsSupport getInsertionSupport(KeyEvent e) {
+		if (e.character == '[') {
+			return new EdgeBracketInsertionSupport();
+		}
+		if (e.character == '{') {
+			return new CurlyBracketInsertionSupport();
+		}
+		return null;
+	}
+
+	private abstract class InsertClosingBracketsSupport {
+		protected abstract void insertClosingBrackets(IDocument document, ISelectionProvider selectionProvider, int offset)
+				throws BadLocationException;
+	}
+
+	private class EdgeBracketInsertionSupport extends InsertClosingBracketsSupport {
+
+		@Override
+		protected void insertClosingBrackets(IDocument document, ISelectionProvider selectionProvider, int offset)
+				throws BadLocationException {
+			document.replace(offset - 1, 1, "[ ]");
+			selectionProvider.setSelection(new TextSelection(offset + 1, 0));
+
+		}
+
+	}
+	
+	private class CurlyBracketInsertionSupport extends InsertClosingBracketsSupport {
+
+		@Override
+		protected void insertClosingBrackets(IDocument document, ISelectionProvider selectionProvider, int offset)
+				throws BadLocationException {
+			document.replace(offset - 1, 1, "{ }");
+			selectionProvider.setSelection(new TextSelection(offset + 1, 0));
+
+		}
+
 	}
 }
