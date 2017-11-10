@@ -25,6 +25,8 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.URLHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
@@ -60,6 +62,9 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 	private TextAttribute defaultTextAttribute;
 	private BashEditorAnnotationHoover annotationHoover;
 	private IAdaptable adaptable;
+	private ContentAssistant contentAssistant;
+	private BashEditorSimpleWordContentAssistProcessor contentAssistProcessor;
+	
 	/**
 	 * Creates configuration by given adaptable
 	 * 
@@ -73,6 +78,11 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 		Assert.isNotNull(adaptable, "adaptable may not be null!");
 		this.annotationHoover = new BashEditorAnnotationHoover();
+		
+		this.contentAssistant = new ContentAssistant();
+		contentAssistProcessor = new BashEditorSimpleWordContentAssistProcessor();
+		contentAssistant.setContentAssistProcessor(contentAssistProcessor, IDocument.DEFAULT_CONTENT_TYPE);
+		contentAssistant.addCompletionListener(contentAssistProcessor.getCompletionListener());
 
 		this.colorManager = adaptable.getAdapter(ColorManager.class);
 		Assert.isNotNull(colorManager, " adaptable must support color manager");
@@ -80,10 +90,13 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 				colorManager.getColor(getPreferences().getColor(COLOR_NORMAL_TEXT)));
 		this.adaptable=adaptable;
 	}
+	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+		return contentAssistant;
+	}
 	
 	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
-		/* currently we avoid the default quick assitence parts (spell checking etc.)*/
+		/* currently we avoid the default quick assistence parts (spell checking etc.)*/
 		return null;
 	}
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
