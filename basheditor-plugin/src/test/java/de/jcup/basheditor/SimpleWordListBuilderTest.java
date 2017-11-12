@@ -20,6 +20,76 @@ public class SimpleWordListBuilderTest {
 	}
 	
 	@Test
+	public void a_colon_b_results_in_a_b() {
+		assertEquals(expect("a","b").listExpected, builderToTest.build("a:b"));
+	}
+	
+	@Test
+	public void comment_results_in_empty_result() {
+		assertEquals(expect().listExpected, builderToTest.build("#"));
+	}
+	
+	@Test
+	public void comment_alpha_is_reduced_to_alpha() {
+		assertEquals(expect("alpha").listExpected, builderToTest.build("#alpha'"));
+	}
+	
+	@Test
+	public void single_quote_single_quote_results_in_empty_result() {
+		assertEquals(expect().listExpected, builderToTest.build("''"));
+	}
+	
+	@Test
+	public void double_quote_double_quote_results_in_empty_result() {
+		assertEquals(expect().listExpected, builderToTest.build("\"\""));
+	}
+	
+	@Test
+	public void double_quote_a_double_quote_results_in_a() {
+		assertEquals(expect("a").listExpected, builderToTest.build("\"a\""));
+	}
+	
+	@Test
+	public void single_quote_a_single_quote_results_in_a() {
+		assertEquals(expect("a").listExpected, builderToTest.build("'a'"));
+	}
+	
+	@Test
+	public void double_quote_a_space_b_double_quote_results_in_a_b() {
+		assertEquals(expect("a","b").listExpected, builderToTest.build("\"a b\""));
+	}
+	
+	@Test
+	public void single_quote_a_space_b_single_quote_results_in_a_b() {
+		assertEquals(expect("a","b").listExpected, builderToTest.build("'a b'"));
+	}
+	
+	@Test
+	public void a_space_666_results_in_a_666() {
+		assertEquals(expect("a","666").listExpected, builderToTest.build("a 666"));
+	}
+	
+	@Test
+	public void var_equals_1__results_in_var_1() {
+		assertEquals(expect("var","1").listExpected, builderToTest.build("var=1"));
+	}
+	
+	@Test
+	public void var_space_equals_1__results_in_var_1() {
+		assertEquals(expect("var","1").listExpected, builderToTest.build("var =1"));
+	}
+	
+	@Test
+	public void var_equals_space_1__results_in_var_1() {
+		assertEquals(expect("var","1").listExpected, builderToTest.build("var= 1"));
+	}
+	
+	@Test
+	public void var_space_equals_space_1__results_in_var_1() {
+		assertEquals(expect("var","1").listExpected, builderToTest.build("var = 1"));
+	}
+	
+	@Test
 	public void albert_space_sarah__results_in_albert_sarah_in_list() {
 		assertEquals(expect("albert","sarah").listExpected, builderToTest.build("albert sarah"));
 	}

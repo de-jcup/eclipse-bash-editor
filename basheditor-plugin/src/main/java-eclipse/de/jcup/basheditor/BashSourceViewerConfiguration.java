@@ -47,6 +47,8 @@ import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
+import de.jcup.basheditor.document.BashDocumentIdentifier;
+import de.jcup.basheditor.document.BashDocumentIdentifiers;
 import de.jcup.basheditor.presentation.BashDefaultTextScanner;
 import de.jcup.basheditor.presentation.PresentationSupport;
 /**
@@ -81,7 +83,12 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 		
 		this.contentAssistant = new ContentAssistant();
 		contentAssistProcessor = new BashEditorSimpleWordContentAssistProcessor();
+		
 		contentAssistant.setContentAssistProcessor(contentAssistProcessor, IDocument.DEFAULT_CONTENT_TYPE);
+		for (BashDocumentIdentifier identifier: BashDocumentIdentifiers.values()){
+			contentAssistant.setContentAssistProcessor(contentAssistProcessor, identifier.getId());
+		}
+		
 		contentAssistant.addCompletionListener(contentAssistProcessor.getCompletionListener());
 
 		this.colorManager = adaptable.getAdapter(ColorManager.class);

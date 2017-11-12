@@ -21,29 +21,28 @@ import de.jcup.basheditor.document.keywords.BashSpecialVariableKeyWords;
 import de.jcup.basheditor.document.keywords.BashSystemKeyWords;
 import de.jcup.basheditor.document.keywords.DocumentKeyWord;
 
-public class BashEditorSimpleWordContentAssistProcessor implements IContentAssistProcessor, ICompletionListener{
+public class BashEditorSimpleWordContentAssistProcessor implements IContentAssistProcessor, ICompletionListener {
 
 	private String errorMessage;
-	
+
 	private SimpleWordCodeCompletion simpleWordCompletion = new SimpleWordCodeCompletion();
 
 	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		IDocument document = viewer.getDocument();
-		if (document==null) {
+		if (document == null) {
 			return null;
 		}
 		String source = document.get();
-		
-		
-		Set<String> words = simpleWordCompletion.calculate(source,offset);
-		
+
+		Set<String> words = simpleWordCompletion.calculate(source, offset);
+
 		ICompletionProposal[] result = new ICompletionProposal[words.size()];
-		int i=0;
-		for (String word: words){
+		int i = 0;
+		for (String word : words) {
 			result[i++] = new SimpleWordProposal(offset, word);
 		}
-		
+
 		return result;
 	}
 
@@ -51,36 +50,36 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
 		return null;
 	}
-	
-	private class SimpleWordProposal implements ICompletionProposal{
+
+	private class SimpleWordProposal implements ICompletionProposal {
 
 		private int offset;
 		private String word;
 		private int nextSelection;
 
-		SimpleWordProposal(int offset, String word){
-			this.offset=offset;
-			this.word=word;
+		SimpleWordProposal(int offset, String word) {
+			this.offset = offset;
+			this.word = word;
 		}
-		
+
 		@Override
 		public void apply(IDocument document) {
 			// the proposal shall enter always a space after applyment...
 			String proposal = word;
-			if (isAddingSpaceAtEnd()){
-				proposal+=" ";
+			if (isAddingSpaceAtEnd()) {
+				proposal += " ";
 			}
-			
+
 			String source = document.get();
 			String textBefore = simpleWordCompletion.getTextbefore(source, offset);
 			String missingPart = proposal.substring(textBefore.length());
 			try {
 				document.replace(offset, 0, missingPart);
-				nextSelection = offset+missingPart.length();
+				nextSelection = offset + missingPart.length();
 			} catch (BadLocationException e) {
-				/* ignore*/
+				/* ignore */
 			}
-			
+
 		}
 
 		@Override
@@ -108,7 +107,7 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		public IContextInformation getContextInformation() {
 			return null;
 		}
-		
+
 	}
 
 	@Override
@@ -139,8 +138,8 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		return this;
 	}
 
-	/* completion listener parts:*/
-	
+	/* completion listener parts: */
+
 	@Override
 	public void assistSessionStarted(ContentAssistEvent event) {
 		simpleWordCompletion.reset();
@@ -148,19 +147,19 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 	}
 
 	protected void addAllBashKeyWords() {
-		for (DocumentKeyWord keyword: BashGnuCommandKeyWords.values()){
+		for (DocumentKeyWord keyword : BashGnuCommandKeyWords.values()) {
 			addKeyWord(keyword);
 		}
-		for (DocumentKeyWord keyword: BashIncludeKeyWords.values()){
+		for (DocumentKeyWord keyword : BashIncludeKeyWords.values()) {
 			addKeyWord(keyword);
 		}
-		for (DocumentKeyWord keyword: BashLanguageKeyWords.values()){
+		for (DocumentKeyWord keyword : BashLanguageKeyWords.values()) {
 			addKeyWord(keyword);
 		}
-		for (DocumentKeyWord keyword: BashSpecialVariableKeyWords.values()){
+		for (DocumentKeyWord keyword : BashSpecialVariableKeyWords.values()) {
 			addKeyWord(keyword);
-		}	
-		for (DocumentKeyWord keyword: BashSystemKeyWords.values()){
+		}
+		for (DocumentKeyWord keyword : BashSystemKeyWords.values()) {
 			addKeyWord(keyword);
 		}
 	}
@@ -169,15 +168,13 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		simpleWordCompletion.add(keyword.getText());
 	}
 
-	
-	
 	@Override
 	public void assistSessionEnded(ContentAssistEvent event) {
 	}
 
 	@Override
 	public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
-		
+
 	}
 
 }
