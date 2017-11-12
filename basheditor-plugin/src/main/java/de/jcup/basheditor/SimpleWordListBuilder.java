@@ -9,14 +9,12 @@ import java.util.List;
  * @author albert
  *
  */
-public class SimpleWordListBuilder {
+public class SimpleWordListBuilder implements WordListBuilder {
 
-	/**
-	 * Build words from source
-	 * @param source
-	 * @return words from given source. Separators are ,;.!?= If there are single or double quotes
-	 * at end or start those are removed
+	/* (non-Javadoc)
+	 * @see de.jcup.basheditor.WordListBuilder#build(java.lang.String)
 	 */
+	@Override
 	public List<String> build(String source) {
 		if (source == null  || source.isEmpty()) {
 			return Collections.emptyList();

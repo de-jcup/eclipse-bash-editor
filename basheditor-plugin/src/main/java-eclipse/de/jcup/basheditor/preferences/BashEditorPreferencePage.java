@@ -33,6 +33,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -48,6 +49,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class BashEditorPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	protected static final int INDENT = 20;
+	
 
 	protected static void indent(Control control) {
 		((GridData) control.getLayoutData()).horizontalIndent += INDENT;
@@ -67,6 +69,8 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 	private boolean highlightBracketAtCaretLocation;
 	private boolean matchingBrackets;
 	private BooleanFieldEditor autoCreateEndBrackets;
+	private BooleanFieldEditor codeAssistWithBashKeywords;
+	private BooleanFieldEditor codeAssistWithSimpleWords;
 
 	public BashEditorPreferencePage() {
 		super(GRID);
@@ -124,6 +128,11 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		.setToolTipText("Via this setting the default behaviour for new opened outlines is set");
 		addField(linkEditorWithOutline);
 		
+		Label spacer = new Label(appearanceComposite, SWT.LEFT);
+		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan = 2;
+		gd.heightHint = convertHeightInCharsToPixels(1) / 2;
+		spacer.setLayoutData(gd);
 
 		/* BRACKETS */
 		/*
@@ -132,26 +141,28 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		 * its job, so this preference doing must be same as on Java editor
 		 * preferences.
 		 */
-		Label spacer = new Label(appearanceComposite, SWT.LEFT);
-		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan = 2;
-		gd.heightHint = convertHeightInCharsToPixels(1) / 2;
-		spacer.setLayoutData(gd);
+		GridData bracketsGroupLayoutData = new GridData();
+		bracketsGroupLayoutData.horizontalSpan=2;
+		
+		Group bracketsGroup = new Group(appearanceComposite,SWT.BORDER);
+		bracketsGroup.setText("Brackets");
+		bracketsGroup.setLayout(new GridLayout());
+		bracketsGroup.setLayoutData(bracketsGroupLayoutData);
 
 		autoCreateEndBrackets = new BooleanFieldEditor(P_EDITOR_AUTO_CREATE_END_BRACKETSY.getId(),
-				"Auto create ending brackets", appearanceComposite);
+				"Auto create ending brackets", bracketsGroup);
 		addField(autoCreateEndBrackets);
 
 		String label = "Bracket highlighting";
 
-		bracketHighlightingCheckbox = addButton(appearanceComposite, SWT.CHECK, label, 0, new SelectionAdapter() {
+		bracketHighlightingCheckbox = addButton(bracketsGroup, SWT.CHECK, label, 0, new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				matchingBrackets = bracketHighlightingCheckbox.getSelection();
 			}
 		});
 
-		Composite radioComposite = new Composite(appearanceComposite, SWT.NONE);
+		Composite radioComposite = new Composite(bracketsGroup, SWT.NONE);
 		GridLayout radioLayout = new GridLayout();
 		radioLayout.marginWidth = 0;
 		radioLayout.marginHeight = 0;
@@ -200,6 +211,29 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		createDependency(bracketHighlightingCheckbox, matchingBracketsColor.getLabelControl(radioComposite));
 		createDependency(bracketHighlightingCheckbox, matchingBracketsColor.getColorSelector().getButton());
 
+		GridData codeAssistGroupLayoutData = new GridData();
+		codeAssistGroupLayoutData.horizontalSpan=2;
+		
+		
+		/* --------------------------- */
+		
+		Group codeAssistGroup = new Group(appearanceComposite,SWT.BORDER);
+		codeAssistGroup.setText("Code assistence");
+		codeAssistGroup.setLayout(new GridLayout());
+		codeAssistGroup.setLayoutData(codeAssistGroupLayoutData);
+		
+		
+		codeAssistWithBashKeywords = new BooleanFieldEditor(P_CODE_ASSIST_ADD_KEYWORDS.getId(),
+				"Bash and GNU keywords", codeAssistGroup);
+		codeAssistWithBashKeywords.getDescriptionControl(codeAssistGroup)
+		.setToolTipText("When enabled the standard keywords supported by bash editor are always automatically available as code proposals");
+		addField(codeAssistWithBashKeywords);
+		
+		codeAssistWithSimpleWords = new BooleanFieldEditor(P_CODE_ASSIST_ADD_SIMPLEWORDS.getId(),
+				"Existing words", codeAssistGroup);
+		codeAssistWithSimpleWords.getDescriptionControl(codeAssistGroup)
+		.setToolTipText("When enabled the current source will be scanned for words. The existing words will be available as code proposals");
+		addField(codeAssistWithSimpleWords);
 		
 	}
 

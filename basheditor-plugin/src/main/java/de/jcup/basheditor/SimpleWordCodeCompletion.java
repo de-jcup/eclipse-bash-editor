@@ -13,7 +13,7 @@ public class SimpleWordCodeCompletion {
 	
 	private SortedSet<String> allWordsCache = new TreeSet<>();
 
-	SimpleWordListBuilder wordListBuilder = new SimpleWordListBuilder();
+	private WordListBuilder wordListBuilder;
 	
 	/**
 	 * Adds an additional word - will be removed on all of {@link #reset()}
@@ -112,10 +112,20 @@ public class SimpleWordCodeCompletion {
 	private void rebuildCacheIfNecessary(String source) {
 		if (allWordsCache.isEmpty()) {
 			allWordsCache.addAll(additionalWordsCache);
-			allWordsCache.addAll(wordListBuilder.build(source));
+			allWordsCache.addAll(getWordListBuilder().build(source));
 			// we do not want the empty String
 			allWordsCache.remove("");
 		}
 	}
 
+	public WordListBuilder getWordListBuilder(){
+		if (wordListBuilder==null){
+			wordListBuilder=new SimpleWordListBuilder();
+		}
+		return wordListBuilder;
+	}
+	
+	public void setWordListBuilder(WordListBuilder wordListBuilder) {
+		this.wordListBuilder = wordListBuilder;
+	}
 }

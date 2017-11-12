@@ -1,5 +1,9 @@
 package de.jcup.basheditor;
 
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -20,11 +24,15 @@ import de.jcup.basheditor.document.keywords.BashLanguageKeyWords;
 import de.jcup.basheditor.document.keywords.BashSpecialVariableKeyWords;
 import de.jcup.basheditor.document.keywords.BashSystemKeyWords;
 import de.jcup.basheditor.document.keywords.DocumentKeyWord;
+import de.jcup.basheditor.preferences.BashEditorPreferences;
 
 public class BashEditorSimpleWordContentAssistProcessor implements IContentAssistProcessor, ICompletionListener {
 
-	private String errorMessage;
+	private static final SimpleWordListBuilder WORD_LIST_BUILDER = new SimpleWordListBuilder();
+	private static final NoWordListBuilder NO_WORD_BUILDER = new NoWordListBuilder();
 
+	private String errorMessage;
+	
 	private SimpleWordCodeCompletion simpleWordCompletion = new SimpleWordCodeCompletion();
 
 	@Override
@@ -143,7 +151,19 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 	@Override
 	public void assistSessionStarted(ContentAssistEvent event) {
 		simpleWordCompletion.reset();
-		addAllBashKeyWords();
+		
+		BashEditorPreferences preferences = BashEditorPreferences.getInstance();
+		boolean addKeyWords = preferences.getBooleanPreference(P_CODE_ASSIST_ADD_KEYWORDS);
+		boolean addSimpleWords = preferences.getBooleanPreference(P_CODE_ASSIST_ADD_SIMPLEWORDS);
+		
+		if (addSimpleWords){
+			simpleWordCompletion.setWordListBuilder(WORD_LIST_BUILDER);
+		}else{
+			simpleWordCompletion.setWordListBuilder(NO_WORD_BUILDER);
+		}
+		if (addKeyWords){
+			addAllBashKeyWords();
+		}
 	}
 
 	protected void addAllBashKeyWords() {
@@ -170,6 +190,7 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 
 	@Override
 	public void assistSessionEnded(ContentAssistEvent event) {
+		simpleWordCompletion.reset();// clean up...
 	}
 
 	@Override
@@ -177,4 +198,17 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 
 	}
 
+	private static class NoWordListBuilder implements WordListBuilder{
+
+		private NoWordListBuilder(){
+			
+		}
+		private List<String> list = new ArrayList<>(0);
+
+		@Override
+		public List<String> build(String source) {
+			return list;
+		}
+		
+	}
 }
