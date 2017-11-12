@@ -72,10 +72,10 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 
 			String source = document.get();
 			String textBefore = simpleWordCompletion.getTextbefore(source, offset);
-			String missingPart = proposal.substring(textBefore.length());
+			int zeroOffset = offset-textBefore.length();
 			try {
-				document.replace(offset, 0, missingPart);
-				nextSelection = offset + missingPart.length();
+				document.replace(zeroOffset, textBefore.length(), proposal);
+				nextSelection = zeroOffset + proposal.length();
 			} catch (BadLocationException e) {
 				/* ignore */
 			}
