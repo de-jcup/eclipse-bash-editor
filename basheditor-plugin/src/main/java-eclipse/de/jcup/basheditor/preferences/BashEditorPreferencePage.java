@@ -143,8 +143,9 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		 */
 		GridData bracketsGroupLayoutData = new GridData();
 		bracketsGroupLayoutData.horizontalSpan=2;
+		bracketsGroupLayoutData.widthHint=400;
 		
-		Group bracketsGroup = new Group(appearanceComposite,SWT.BORDER);
+		Group bracketsGroup = new Group(appearanceComposite,SWT.NONE);
 		bracketsGroup.setText("Brackets");
 		bracketsGroup.setLayout(new GridLayout());
 		bracketsGroup.setLayoutData(bracketsGroupLayoutData);
@@ -211,13 +212,15 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		createDependency(bracketHighlightingCheckbox, matchingBracketsColor.getLabelControl(radioComposite));
 		createDependency(bracketHighlightingCheckbox, matchingBracketsColor.getColorSelector().getButton());
 
+		/* --------------------- */
+		/* -- Code assistance -- */
+		/* --------------------- */
+
 		GridData codeAssistGroupLayoutData = new GridData();
 		codeAssistGroupLayoutData.horizontalSpan=2;
+		codeAssistGroupLayoutData.widthHint=400;
 		
-		
-		/* --------------------------- */
-		
-		Group codeAssistGroup = new Group(appearanceComposite,SWT.BORDER);
+		Group codeAssistGroup = new Group(appearanceComposite,SWT.NONE);
 		codeAssistGroup.setText("Code assistence");
 		codeAssistGroup.setLayout(new GridLayout());
 		codeAssistGroup.setLayoutData(codeAssistGroupLayoutData);
