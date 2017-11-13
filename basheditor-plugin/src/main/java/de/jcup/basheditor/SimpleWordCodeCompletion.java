@@ -3,6 +3,7 @@ package de.jcup.basheditor;
 import static java.util.Collections.*;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -10,21 +11,23 @@ import java.util.TreeSet;
 public class SimpleWordCodeCompletion {
 
 	private Set<String> additionalWordsCache = new HashSet<>();
-	
+
 	private SortedSet<String> allWordsCache = new TreeSet<>();
 
 	private WordListBuilder wordListBuilder;
-	
+
 	/**
 	 * Adds an additional word - will be removed on all of {@link #reset()}
+	 * 
 	 * @param word
 	 */
 	public void add(String word) {
-		if (word==null){
+		if (word == null) {
 			return;
 		}
-		if (! allWordsCache.isEmpty()){
-			allWordsCache.clear(); // reset the all words cache so rebuild will be triggered 
+		if (!allWordsCache.isEmpty()) {
+			allWordsCache.clear(); // reset the all words cache so rebuild will
+									// be triggered
 		}
 		additionalWordsCache.add(word.trim());
 	}
@@ -42,11 +45,12 @@ public class SimpleWordCodeCompletion {
 			return unmodifiableSet(allWordsCache);
 		}
 		String wanted = getTextbefore(source, offset);
-		return filteredSet(allWordsCache, wanted);
+		return filter(allWordsCache, wanted);
 	}
 
 	/**
 	 * Resolves text before given offset
+	 * 
 	 * @param source
 	 * @param offset
 	 * @return text, never <code>null</code>
@@ -63,7 +67,7 @@ public class SimpleWordCodeCompletion {
 			return "";
 		}
 		StringBuilder sb = new StringBuilder();
-		int current = offset-1; //-1 because we want the char before
+		int current = offset - 1; // -1 because we want the char before
 		boolean ongoing = false;
 		do {
 			if (current < 0) {
@@ -72,10 +76,10 @@ public class SimpleWordCodeCompletion {
 			char c = source.charAt(current--);
 			ongoing = !Character.isWhitespace(c);
 			if (ongoing) {
-				sb.insert(0,c);
+				sb.insert(0, c);
 			}
 		} while (ongoing);
-		
+
 		return sb.toString();
 	}
 
@@ -89,25 +93,28 @@ public class SimpleWordCodeCompletion {
 		additionalWordsCache.clear();
 		return this;
 	}
-	SortedSet<String> filteredSet(SortedSet<String> set, String wanted) {
-		if (wanted==null || wanted.isEmpty()){
-			return set;
+
+	Set<String> filter(SortedSet<String> allWords, String wanted) {
+		if (wanted == null || wanted.isEmpty()) {
+			return allWords;
 		}
-		TreeSet<String> filtered = new TreeSet<>();
-		String wantedLowered= wanted.toLowerCase();
-		for (String data: set){
-			if (data.toLowerCase().startsWith(wantedLowered)){
-				filtered.add(data);
-			}else{
-				data.toLowerCase();
+		LinkedHashSet<String> filtered = new LinkedHashSet<>();
+		LinkedHashSet<String> addAfterEnd = new LinkedHashSet<>();
+		String wantedLowerCase = wanted.toLowerCase();
+
+		for (String word : allWords) {
+			String wordLowerCase = word.toLowerCase();
+			if (wordLowerCase.startsWith(wantedLowerCase)) {
+				filtered.add(word);
+			} else if (wordLowerCase.indexOf(wantedLowerCase) != -1) {
+				addAfterEnd.add(word);
 			}
 		}
-		/* remove wanted itself*/
+		filtered.addAll(addAfterEnd);
+		/* remove wanted itself */
 		filtered.remove(wanted);
 		return filtered;
 	}
-
-	
 
 	private void rebuildCacheIfNecessary(String source) {
 		if (allWordsCache.isEmpty()) {
@@ -118,13 +125,13 @@ public class SimpleWordCodeCompletion {
 		}
 	}
 
-	public WordListBuilder getWordListBuilder(){
-		if (wordListBuilder==null){
-			wordListBuilder=new SimpleWordListBuilder();
+	public WordListBuilder getWordListBuilder() {
+		if (wordListBuilder == null) {
+			wordListBuilder = new SimpleWordListBuilder();
 		}
 		return wordListBuilder;
 	}
-	
+
 	public void setWordListBuilder(WordListBuilder wordListBuilder) {
 		this.wordListBuilder = wordListBuilder;
 	}

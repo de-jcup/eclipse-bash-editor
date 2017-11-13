@@ -83,6 +83,7 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 		
 		this.contentAssistant = new ContentAssistant();
 		contentAssistProcessor = new BashEditorSimpleWordContentAssistProcessor();
+		contentAssistant.enableColoredLabels(true);
 		
 		contentAssistant.setContentAssistProcessor(contentAssistProcessor, IDocument.DEFAULT_CONTENT_TYPE);
 		for (BashDocumentIdentifier identifier: BashDocumentIdentifiers.values()){

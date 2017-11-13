@@ -9,12 +9,15 @@ import java.util.Set;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension7;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -32,7 +35,7 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 	private static final NoWordListBuilder NO_WORD_BUILDER = new NoWordListBuilder();
 
 	private String errorMessage;
-	
+
 	private SimpleWordCodeCompletion simpleWordCompletion = new SimpleWordCodeCompletion();
 
 	@Override
@@ -48,7 +51,7 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		ICompletionProposal[] result = new ICompletionProposal[words.size()];
 		int i = 0;
 		for (String word : words) {
-			result[i++] = new SimpleWordProposal(offset, word);
+			result[i++] = new SimpleWordProposal(document, offset, word);
 		}
 
 		return result;
@@ -59,15 +62,20 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		return null;
 	}
 
-	private class SimpleWordProposal implements ICompletionProposal {
+	private class SimpleWordProposal implements ICompletionProposal, ICompletionProposalExtension7 {
 
 		private int offset;
 		private String word;
 		private int nextSelection;
+		private StyledString styledString;
+		private String textBefore;
 
-		SimpleWordProposal(int offset, String word) {
+		SimpleWordProposal(IDocument document, int offset, String word) {
 			this.offset = offset;
 			this.word = word;
+
+			String source = document.get();
+			textBefore = simpleWordCompletion.getTextbefore(source, offset);
 		}
 
 		@Override
@@ -77,15 +85,12 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 			if (isAddingSpaceAtEnd()) {
 				proposal += " ";
 			}
-
-			String source = document.get();
-			String textBefore = simpleWordCompletion.getTextbefore(source, offset);
-			int zeroOffset = offset-textBefore.length();
+			int zeroOffset = offset - textBefore.length();
 			try {
 				document.replace(zeroOffset, textBefore.length(), proposal);
 				nextSelection = zeroOffset + proposal.length();
 			} catch (BadLocationException e) {
-				/* ignore */
+				BashEditorUtil.logError("Not able to replace by proposal:" + word +", zero offset:"+zeroOffset+", textBefore:"+textBefore, e);
 			}
 
 		}
@@ -114,6 +119,28 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		@Override
 		public IContextInformation getContextInformation() {
 			return null;
+		}
+
+		@Override
+		public StyledString getStyledDisplayString(IDocument document, int offset,
+				BoldStylerProvider boldStylerProvider) {
+			if (styledString != null) {
+				return styledString;
+			}
+			styledString = new StyledString();
+			styledString.append(word);
+			try {
+
+				int enteredTextLength = textBefore.length();
+				int indexOfTextBefore = word.toLowerCase().indexOf(textBefore.toLowerCase());
+
+				if (indexOfTextBefore != -1) {
+					styledString.setStyle(indexOfTextBefore, enteredTextLength, boldStylerProvider.getBoldStyler());
+				}
+			} catch (RuntimeException e) {
+				BashEditorUtil.logError("Not able to set styles for proposal:" + word, e);
+			}
+			return styledString;
 		}
 
 	}
@@ -151,17 +178,17 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 	@Override
 	public void assistSessionStarted(ContentAssistEvent event) {
 		simpleWordCompletion.reset();
-		
+
 		BashEditorPreferences preferences = BashEditorPreferences.getInstance();
 		boolean addKeyWords = preferences.getBooleanPreference(P_CODE_ASSIST_ADD_KEYWORDS);
 		boolean addSimpleWords = preferences.getBooleanPreference(P_CODE_ASSIST_ADD_SIMPLEWORDS);
-		
-		if (addSimpleWords){
+
+		if (addSimpleWords) {
 			simpleWordCompletion.setWordListBuilder(WORD_LIST_BUILDER);
-		}else{
+		} else {
 			simpleWordCompletion.setWordListBuilder(NO_WORD_BUILDER);
 		}
-		if (addKeyWords){
+		if (addKeyWords) {
 			addAllBashKeyWords();
 		}
 	}
@@ -198,17 +225,18 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 
 	}
 
-	private static class NoWordListBuilder implements WordListBuilder{
+	private static class NoWordListBuilder implements WordListBuilder {
 
-		private NoWordListBuilder(){
-			
+		private NoWordListBuilder() {
+
 		}
+
 		private List<String> list = new ArrayList<>(0);
 
 		@Override
 		public List<String> build(String source) {
 			return list;
 		}
-		
+
 	}
 }

@@ -11,6 +11,21 @@ import org.junit.Test;
 public class SimpleWordCodeCompletionTest {
 
 	private SimpleWordCodeCompletion completionToTest;
+	
+	
+	@Test
+	public void add_eva_valentin_adam__v_typed_index_1__returns_valentin_eva(){
+		/* prepare */
+		completionToTest.add("eva");
+		completionToTest.add("valentin");
+		completionToTest.add("adam");
+		
+		/* execute */
+		Set<String> result = completionToTest.calculate("v", 1);
+		
+		/* test */
+		assertResult(result).hasResults("valentin","eva");
+	}
 
 	@Test
 	public void source_empty__calculate_nothing_on_index_0(){
@@ -169,11 +184,11 @@ public class SimpleWordCodeCompletionTest {
 		expected.add("albert");
 		
 		/* execute +test */
-		assertEquals(expected, completionToTest.filteredSet(origin,"a"));
+		assertEquals(expected, completionToTest.filter(origin,"a"));
 	}
 	
 	@Test
-	public void set_albert_nicole_sarah_andreas__wanted_a_filters_set_to_albert_andreas(){
+	public void set_albert_nicole_sarah_andreas__wanted_a_filters_set_to_albert_andreas_sarah(){
 		/* prepare */
 		TreeSet<String> origin = new TreeSet<>();
 		origin.add("albert");
@@ -184,9 +199,27 @@ public class SimpleWordCodeCompletionTest {
 		TreeSet<String> expected = new TreeSet<>();
 		expected.add("albert");
 		expected.add("andreas");
+		expected.add("sarah");
 		
 		/* execute +test */
-		assertEquals(expected, completionToTest.filteredSet(origin,"a"));
+		assertEquals(expected, completionToTest.filter(origin,"a"));
+	}
+	
+	@Test
+	public void set_albert_nicole_conni_andreas__wanted_a_filters_set_to_albert_andreas(){
+		/* prepare */
+		TreeSet<String> origin = new TreeSet<>();
+		origin.add("albert");
+		origin.add("nicole");
+		origin.add("conni");
+		origin.add("andreas");
+		
+		TreeSet<String> expected = new TreeSet<>();
+		expected.add("albert");
+		expected.add("andreas");
+		
+		/* execute +test */
+		assertEquals(expected, completionToTest.filter(origin,"a"));
 	}
 	
 	@Test
