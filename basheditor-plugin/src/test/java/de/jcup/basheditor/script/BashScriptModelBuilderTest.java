@@ -33,36 +33,50 @@ public class BashScriptModelBuilderTest {
 	public void before() {
 		builderToTest = new BashScriptModelBuilder();
 	}
-	
+
 	@Test
-	public void none_of_the_testscripts_contains_any_failure() throws Exception{
+	public void none_of_the_testscripts_contains_any_failure() throws Exception {
 		/* prepare */
 		StringBuilder errorCollector = new StringBuilder();
 		List<String> scriptNames = TestScriptLoader.fetchAllTestScriptNames();
-		for (String scriptName: scriptNames){
-			
+		for (String scriptName : scriptNames) {
+
 			String script = TestScriptLoader.loadScriptFromTestScripts(scriptName);
-			
+
 			/* execute */
-			BashScriptModel bashScriptModel = builderToTest.build(script);
-			
-			/* test */
-			if (bashScriptModel.hasErrors()){
-				errorCollector.append("script file:").append(scriptName).append(" contains errors:\n");
-				for (BashError error: bashScriptModel.getErrors()){
-					errorCollector.append("-");
-					errorCollector.append(error.getMessage());
-					errorCollector.append("\n");
+			try {
+				BashScriptModel bashScriptModel = builderToTest.build(script);
+				/* test */
+				if (bashScriptModel.hasErrors()) {
+					errorCollector.append("script file:").append(scriptName).append(" contains errors:\n");
+					for (BashError error : bashScriptModel.getErrors()) {
+						errorCollector.append("-");
+						errorCollector.append(error.getMessage());
+						errorCollector.append("\n");
+					}
 				}
+			} catch (BashScriptModelException e) {
+				/* test */
+				errorCollector.append("script file:").append(scriptName).append(" contains errors:\n");
+				errorCollector.append("-");
+				Throwable root = e;
+				while (root.getCause()!=null){
+					root=root.getCause();
+				}
+				errorCollector.append("Root cause:"+root.getMessage());
+				errorCollector.append("\n");
+				
+				root.printStackTrace();
 			}
+
 		}
-		if (errorCollector.length()>0){
+		if (errorCollector.length() > 0) {
 			fail(errorCollector.toString());
 		}
 	}
-	
+
 	@Test
-	public void has_no_debugtoken_list__when_debug_is_turned_off_means_default(){
+	public void has_no_debugtoken_list__when_debug_is_turned_off_means_default() throws Exception {
 		/* prepare */
 		String script = "a b";
 
@@ -72,13 +86,13 @@ public class BashScriptModelBuilderTest {
 		/* test */
 		assertThat(bashScriptModel).hasNoDebugTokens();
 	}
-	
+
 	@Test
-	public void has_debugtoken_list___when_debug_is_turned_on(){
+	public void has_debugtoken_list___when_debug_is_turned_on() throws Exception {
 		/* prepare */
 		String script = "a b";
 		builderToTest.setDebug(true);
-		
+
 		/* execute */
 		BashScriptModel bashScriptModel = builderToTest.build(script);
 
@@ -86,9 +100,8 @@ public class BashScriptModelBuilderTest {
 		assertThat(bashScriptModel).hasDebugTokens(2);
 	}
 
-	
 	@Test
-	public void bugfix_52_$x_followed_by_comment_line_with_if_results_in_no_error(){
+	public void bugfix_52_$x_followed_by_comment_line_with_if_results_in_no_error() throws Exception {
 		/* prepare */
 		String script = "a=$x\n# check if the host is pingable";
 
@@ -146,7 +159,7 @@ public class BashScriptModelBuilderTest {
 		/* test */
 		assertThat(bashScriptModel).hasErrors(0);
 	}
-	
+
 	@Test
 	public void bugfix_41_3_handle_arrays_simplified() throws Exception {
 		/* prepare */
@@ -160,7 +173,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void bugfix_39__variable_with_hash_do_not_result_errors() {
+	public void bugfix_39__variable_with_hash_do_not_result_errors() throws Exception {
 		/* prepare */
 		String code = "declare -A TitleMap\nif [ ${#TitleMap[*]} -eq 0 ]\nthen\n   displayerr \"Map is empty\"\n    exit 1\nfi";
 
@@ -172,7 +185,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void function_a_open_bracket_open_bracket_close_bracket_has_error() {
+	public void function_a_open_bracket_open_bracket_close_bracket_has_error() throws Exception {
 		/* prepare */
 		String code = "function a {{}";
 
@@ -184,7 +197,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void usage_space_x_msg_space_y_fatal_space_z() {
+	public void usage_space_x_msg_space_y_fatal_space_z() throws Exception {
 		/* prepare */
 		String code = "Usage () {x} Msg () {y} Fatal () {z}";
 
@@ -196,7 +209,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void usage_x_msg_y_fatal_z() {
+	public void usage_x_msg_y_fatal_z() throws Exception {
 		/* prepare */
 		String code = "Usage() {x} Msg() {y} Fatal() {z}";
 
@@ -208,7 +221,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void semicolon_function_xy_is_recognized_as_function_xy() {
+	public void semicolon_function_xy_is_recognized_as_function_xy() throws Exception {
 		/* prepare */
 		String code = ";function xy{}";
 
@@ -220,7 +233,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void method_Usage_space_open_close_brackets__is_recognized_as_function_Usage() {
+	public void method_Usage_space_open_close_brackets__is_recognized_as_function_Usage() throws Exception {
 		/* prepare */
 		String code = "Usage () {}";
 
@@ -232,7 +245,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void space_semicolon_function_xy_is_recognized_as_function_xy() {
+	public void space_semicolon_function_xy_is_recognized_as_function_xy() throws Exception {
 		/* prepare */
 		String code = " ;function xy{}";
 
@@ -244,7 +257,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void space_semicolon_space_function_xy_is_recognized_as_function_xy() {
+	public void space_semicolon_space_function_xy_is_recognized_as_function_xy() throws Exception {
 		/* prepare */
 		String code = " ; function xy{}";
 
@@ -256,7 +269,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void semicolon_space_function_xy_is_recognized_as_function_xy() {
+	public void semicolon_space_function_xy_is_recognized_as_function_xy() throws Exception {
 		/* prepare */
 		String code = "; function xy{}";
 
@@ -268,7 +281,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void a_comments_with_function_is_not_handled_as_function() {
+	public void a_comments_with_function_is_not_handled_as_function() throws Exception {
 		/* prepare */
 		String code = "#\n# this function displays...\nfunction display {\n}";
 
@@ -284,7 +297,7 @@ public class BashScriptModelBuilderTest {
 	 * Bash does not support functions inside functions - so if somebody such
 	 * things it's not allowed
 	 */
-	public void function_f1_has_only_open_bracket__must_have_no_function_but_two_error() {
+	public void function_f1_has_only_open_bracket__must_have_no_function_but_two_error() throws Exception {
 		/* prepare */
 		String code = "function f1(){";
 
@@ -306,7 +319,8 @@ public class BashScriptModelBuilderTest {
 	 * Bash does not support functions inside functions - so if somebody such
 	 * things it's not allowed
 	 */
-	public void function_f1_containing_illegal_child_function_f1b__followed_by_function_f2__results_in_functions_f1_f2__only() {
+	public void function_f1_containing_illegal_child_function_f1b__followed_by_function_f2__results_in_functions_f1_f2__only()
+			throws Exception {
 		/* prepare */
 		String code = "function f1(){function f1b() {}} function f2 {}";
 
@@ -318,7 +332,7 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void function_xyz_no_curly_brackets_is_not_recognized_as_function_and_has_an_error() {
+	public void function_xyz_no_curly_brackets_is_not_recognized_as_function_and_has_an_error() throws Exception {
 		/* prepare */
 		String code = "function xy";
 
@@ -330,7 +344,8 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void function_read_hyphen_file__curlyBrackets_open_close__is_recognized_as_function_read_hyphen_file__and_has_no_errors() {
+	public void function_read_hyphen_file__curlyBrackets_open_close__is_recognized_as_function_read_hyphen_file__and_has_no_errors()
+			throws Exception {
 		/* prepare */
 		String code = "function read-file{}";
 
@@ -342,7 +357,8 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void function_read_hyphen_file_curlyBraceOpen_NewLine__content_NewLine_curlybraceClose_is_recognized_as_function_read_hyphen_file() {
+	public void function_read_hyphen_file_curlyBraceOpen_NewLine__content_NewLine_curlybraceClose_is_recognized_as_function_read_hyphen_file()
+			throws Exception {
 		/* prepare */
 		String code = "function read-file{\n#something\n}";
 
@@ -354,7 +370,8 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void function_read_hyphen_file_hypen_format_followed_with_brackets_is_recognized_as_function_read_hyphen_file_hypen_format() {
+	public void function_read_hyphen_file_hypen_format_followed_with_brackets_is_recognized_as_function_read_hyphen_file_hypen_format()
+			throws Exception {
 		/* prepare */
 		String code = "function read-file-format()\n{\n}";
 
@@ -366,7 +383,8 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void function_read_hyphen_file_hypen_format_space_followed_with_brackets_is_recognized_as_function_read_hyphen_file_hypen_format() {
+	public void function_read_hyphen_file_hypen_format_space_followed_with_brackets_is_recognized_as_function_read_hyphen_file_hypen_format()
+			throws Exception {
 		/* prepare */
 		String code = "function read-file-format (){}";
 
@@ -378,13 +396,13 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void an_empty_line_returns_not_null_AST() {
+	public void an_empty_line_returns_not_null_AST() throws Exception {
 		BashScriptModel bashScriptModel = builderToTest.build("");
 		assertNotNull(bashScriptModel);
 	}
 
 	@Test
-	public void a_line_with_Xfunction_test_is_NOT_recognized() {
+	public void a_line_with_Xfunction_test_is_NOT_recognized() throws Exception {
 		BashScriptModel bashScriptModel = builderToTest.build("Xfunction test {}");
 		/* test */
 		assertThat(bashScriptModel).hasNoFunctions();
@@ -392,21 +410,22 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void a_line_with_method_having_underscores_is_correct_parsed() {
+	public void a_line_with_method_having_underscores_is_correct_parsed() throws Exception {
 		BashScriptModel bashScriptModel = builderToTest.build("function show_something_else{}");
 		/* test */
 		assertThat(bashScriptModel).hasFunctions(1).hasFunction("show_something_else");
 	}
 
 	@Test
-	public void a_line_with_function_test_is_recognized_and_returns_function_with_name_test() {
+	public void a_line_with_function_test_is_recognized_and_returns_function_with_name_test() throws Exception {
 		BashScriptModel bashScriptModel = builderToTest.build("function test {}");
 		/* test */
 		assertThat(bashScriptModel).hasFunctions(1).hasFunction("test");
 	}
 
 	@Test
-	public void two_lines_with_functions_test1_and_test2_are_recognized_and_returns_2_function_with_name_test1_and_teset2() {
+	public void two_lines_with_functions_test1_and_test2_are_recognized_and_returns_2_function_with_name_test1_and_teset2()
+			throws Exception {
 		BashScriptModel bashScriptModel = builderToTest
 				.build("function test1 {\n#something\n}\n #other line\n\nfunction test2 {\n#something else\n}\n");
 		/* test */
@@ -414,7 +433,8 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void two_lines_with_functions_test1_and_test2_are_recognized_and_returns_2_function_with_name_test1_and_teset2__but_with_backslash_r() {
+	public void two_lines_with_functions_test1_and_test2_are_recognized_and_returns_2_function_with_name_test1_and_teset2__but_with_backslash_r()
+			throws Exception {
 		/* prepare */
 		String bashScript = "function test1 {\n#something\n}\n #other line\n\nfunction test2 {\r\n#something else\r\n}\r\n";
 
@@ -425,7 +445,8 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void a_line_with_function_test_is_recognized_and_returns_function_with_pos_0_and_has_no_errors() {
+	public void a_line_with_function_test_is_recognized_and_returns_function_with_pos_0_and_has_no_errors()
+			throws Exception {
 		BashScriptModel bashScriptModel = builderToTest.build("function test {}");
 		assertNotNull(bashScriptModel);
 
@@ -434,21 +455,23 @@ public class BashScriptModelBuilderTest {
 	}
 
 	@Test
-	public void a_line_with_function_test_is_recognized_and_returns_function_with_pos_1_when_first_line_empty() {
+	public void a_line_with_function_test_is_recognized_and_returns_function_with_pos_1_when_first_line_empty()
+			throws Exception {
 		BashScriptModel bashScriptModel = builderToTest.build("\nfunction test {}");
 		/* test */
 		assertThat(bashScriptModel).hasFunctions(1).hasFunctionWithPosition("test", 1);
 	}
 
 	@Test
-	public void a_line_with_5_spaces_and_function_test_is_recognized_and_returns_function_with_pos_5() {
+	public void a_line_with_5_spaces_and_function_test_is_recognized_and_returns_function_with_pos_5()
+			throws Exception {
 		BashScriptModel bashScriptModel = builderToTest.build("     function test {}");
 		/* test */
 		assertThat(bashScriptModel).hasFunctions(1).hasFunctionWithPosition("test", 5);
 	}
 
 	@Test
-	public void a_line_with_5_spaces_and_Xfunction_test_is_NOT_recognized() {
+	public void a_line_with_5_spaces_and_Xfunction_test_is_NOT_recognized() throws Exception {
 		BashScriptModel bashScriptModel = builderToTest.build("     Xfunction test {}");
 		/* test */
 		assertThat(bashScriptModel).hasNoFunctions();

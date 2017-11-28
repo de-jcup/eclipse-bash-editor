@@ -20,6 +20,7 @@ import java.util.List;
 
 import de.jcup.basheditor.script.parser.ParseToken;
 import de.jcup.basheditor.script.parser.TokenParser;
+import de.jcup.basheditor.script.parser.TokenParserException;
 import de.jcup.basheditor.script.parser.validator.ClosedBlocksValidator;
 import de.jcup.basheditor.script.parser.validator.DoEndsWithDoneValidator;
 import de.jcup.basheditor.script.parser.validator.IfEndsWithFiValidator;
@@ -42,13 +43,18 @@ public class BashScriptModelBuilder {
 	 * 
 	 * @param bashScript
 	 * @return a simple model with some information about bash script
+	 * @throws BashScriptModelException 
 	 */
-	public BashScriptModel build(String bashScript) {
+	public BashScriptModel build(String bashScript) throws BashScriptModelException{
 		BashScriptModel model = new BashScriptModel();
 
 		TokenParser parser = new TokenParser();
-		List<ParseToken> tokens = parser.parse(bashScript);
-		
+		List<ParseToken> tokens;
+		try {
+			tokens = parser.parse(bashScript);
+		} catch (TokenParserException e) {
+			throw new BashScriptModelException("Was not able to build bashscript", e);
+		}
 
 		buildFunctionsByTokens(model, tokens);
 

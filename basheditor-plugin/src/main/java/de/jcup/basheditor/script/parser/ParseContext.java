@@ -132,6 +132,10 @@ class ParseContext {
 
 		resetText();
 	}
+	
+	void addToken(ParseToken token){
+		tokens.add(token);
+	}
 
 	void appendCharToText() {
 		getSb().append(getCharAtPos());
@@ -140,15 +144,32 @@ class ParseContext {
 	char getCharAtPos() {
 		return chars[pos];
 	}
-
+	
+	public int getPos() {
+		return pos;
+	}
+	
 	char getCharBefore() {
-		int posBefore = pos - 1;
-		if (posBefore >= 0) {
-			if (chars.length > 0) {
-				return chars[posBefore];
+		Character c = getCharacterAtPosOrNull(pos-1);
+		if (c==null){
+			return 0;
+		}
+		return c.charValue();
+	}
+	
+	/**
+	 * Get character from wanted position
+	 * @param wantedPos
+	 * @return character or <code>null</code> if not available
+	 */
+	Character getCharacterAtPosOrNull(int wantedPos) {
+		if (wantedPos >= 0) {
+			int length = chars.length;
+			if (length > wantedPos) {
+				return chars[wantedPos];
 			}
 		}
-		return 0;
+		return null;
 	}
 
 	boolean insideString() {
@@ -245,6 +266,10 @@ class ParseContext {
 	public void moveBackWard() {
 		pos--;
 		
+	}
+
+	public void moveToPos(int pos) {
+		this.pos=pos;
 	}
 
 	

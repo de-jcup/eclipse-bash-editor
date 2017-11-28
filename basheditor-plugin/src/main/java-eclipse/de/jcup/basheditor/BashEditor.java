@@ -70,6 +70,7 @@ import de.jcup.basheditor.script.BashError;
 import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.script.BashScriptModel;
 import de.jcup.basheditor.script.BashScriptModelBuilder;
+import de.jcup.basheditor.script.BashScriptModelException;
 
 @AdaptedFromEGradle
 public class BashEditor extends TextEditor implements StatusMessageSupport, IResourceChangeListener {
@@ -88,7 +89,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	private Object monitor = new Object();
 	private boolean quickOutlineOpened;
 	private int lastCaretPosition;
-	
+	private static final BashScriptModel FALLBACK_MODEL = new BashScriptModel();
+
 	public BashEditor() {
 		setSourceViewerConfiguration(new BashSourceViewerConfiguration(this));
 		this.modelBuilder = new BashScriptModelBuilder();
@@ -101,7 +103,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			setTitleImageDependingOnSeverity(severity);
 		}
 	}
-	
+
 	/**
 	 * Opens quick outline
 	 */
@@ -120,7 +122,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		BashScriptModel model = buildModelWithoutValidation();
 		BashQuickOutlineDialog dialog = new BashQuickOutlineDialog(this, shell, "Quick outline");
 		dialog.setInput(model);
-		
+
 		dialog.open();
 		synchronized (monitor) {
 			quickOutlineOpened = false;
@@ -129,14 +131,20 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
 	private BashScriptModel buildModelWithoutValidation() {
 		String text = getDocumentText();
-		
+
 		/* for quick outline create own model and ignore any validations */
 		modelBuilder.setIgnoreBlockValidation(true);
 		modelBuilder.setIgnoreDoValidation(true);
 		modelBuilder.setIgnoreIfValidation(true);
 		modelBuilder.setIgnoreFunctionValidation(true);
-		
-		BashScriptModel model = modelBuilder.build(text);
+
+		BashScriptModel model;
+		try {
+			model = modelBuilder.build(text);
+		} catch (BashScriptModelException e) {
+			BashEditorUtil.logError("Was not able to build script model", e);
+			model = FALLBACK_MODEL;
+		}
 		return model;
 	}
 
@@ -171,7 +179,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			return;
 		}
 		IDocument document = getDocument();
-		if (document==null){
+		if (document == null) {
 			return;
 		}
 		Collection<BashError> errors = model.getErrors();
@@ -207,7 +215,6 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			text.addCaretListener(new BashEditorCaretListener());
 		}
 
-		
 		activateBashEditorContext();
 
 		installAdditionalSourceViewerSupport();
@@ -335,7 +342,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			return (T) this;
 		}
 		if (ITreeContentProvider.class.equals(adapter) || BashEditorTreeContentProvider.class.equals(adapter)) {
-			if (outlinePage==null){
+			if (outlinePage == null) {
 				return null;
 			}
 			return (T) outlinePage.getContentProvider();
@@ -383,30 +390,36 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	 */
 	public void rebuildOutline() {
 		String text = getDocumentText();
-		
+
 		IPreferenceStore store = BashEditorUtil.getPreferences().getPreferenceStore();
 
-		boolean validateBlocks=store.getBoolean(VALIDATE_BLOCK_STATEMENTS.getId());
-		boolean validateDo=store.getBoolean(VALIDATE_DO_STATEMENTS.getId());
-		boolean validateIf=store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
-		boolean validateFunctions=store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
-		
+		boolean validateBlocks = store.getBoolean(VALIDATE_BLOCK_STATEMENTS.getId());
+		boolean validateDo = store.getBoolean(VALIDATE_DO_STATEMENTS.getId());
+		boolean validateIf = store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
+		boolean validateFunctions = store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
+
 		boolean debugMode = Boolean.parseBoolean(System.getProperty("basheditor.debug.enabled"));
-		
-		modelBuilder.setIgnoreBlockValidation(! validateBlocks);
-		modelBuilder.setIgnoreDoValidation(! validateDo);
-		modelBuilder.setIgnoreIfValidation(! validateIf);
-		modelBuilder.setIgnoreFunctionValidation(! validateFunctions);
+
+		modelBuilder.setIgnoreBlockValidation(!validateBlocks);
+		modelBuilder.setIgnoreDoValidation(!validateDo);
+		modelBuilder.setIgnoreIfValidation(!validateIf);
+		modelBuilder.setIgnoreFunctionValidation(!validateFunctions);
 
 		modelBuilder.setDebug(debugMode);
-		
+
 		EclipseUtil.safeAsyncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				BashEditorUtil.removeScriptErrors(BashEditor.this);
-				
-				BashScriptModel model = modelBuilder.build(text);
+
+				BashScriptModel model;
+				try {
+					model = modelBuilder.build(text);
+				} catch (BashScriptModelException e) {
+					BashEditorUtil.logError("Was not able to build validation model", e);
+					model = FALLBACK_MODEL;
+				}
 
 				getOutlinePage().rebuild(model);
 
@@ -623,7 +636,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	}
 
 	public Item getItemAt(int offset) {
-		if (outlinePage==null){
+		if (outlinePage == null) {
 			return null;
 		}
 		BashEditorTreeContentProvider contentProvider = outlinePage.getContentProvider();
@@ -634,30 +647,29 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		return item;
 	}
 
-
 	public void selectFunction(String text) {
-		System.out.println("should select functin:"+text);
-		
+		System.out.println("should select functin:" + text);
+
 	}
 
 	public BashFunction findBashFunction(String functionName) {
-		if (functionName==null){
+		if (functionName == null) {
 			return null;
 		}
 		BashScriptModel model = buildModelWithoutValidation();
 		Collection<BashFunction> functions = model.getFunctions();
-		for (BashFunction function:functions){
-			if (functionName.equals(function.getName())){
+		for (BashFunction function : functions) {
+			if (functionName.equals(function.getName())) {
 				return function;
 			}
 		}
 		return null;
 	}
-	
-	public BashEditorPreferences getPreferences(){
+
+	public BashEditorPreferences getPreferences() {
 		return BashEditorPreferences.getInstance();
 	}
-	
+
 	private class BashEditorCaretListener implements CaretListener {
 
 		@Override

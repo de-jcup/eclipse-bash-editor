@@ -25,29 +25,213 @@ import de.jcup.basheditor.script.parser.ParseContext.VariableType;
 
 public class TokenParser {
 
-	public List<ParseToken> parse(String bashScript) {
+	public List<ParseToken> parse(String bashScript) throws TokenParserException {
 		if (bashScript == null) {
 			return new ArrayList<>();
 		}
 		ParseContext context = new ParseContext();
 		context.chars = bashScript.toCharArray();
+		try {
+			for (; context.hasValidPos(); context.moveForward()) {
 
-		for (; context.hasValidPos(); context.moveForward()) {
+				if (isVariableStateHandled(context)) {
+					continue;
+				}
+				if (isCommentStateHandled(context)) {
+					continue;
+				}
+				if (isStringStateHandled(context)) {
+					continue;
+				}
 
-			if (isVariableStateHandled(context)) {
-				continue;
+				if (isHereDocStateHandled(context)) {
+					continue;
+				}
+
+				handleNotVariableNorCommentOrString(context);
 			}
-			if (isCommentStateHandled(context)) {
-				continue;
-			}
-			if (isStringStateHandled(context)) {
-				continue;
-			}
-			handleNotVariableNorCommentOrString(context);
+			// add last token if existing
+			context.addTokenAndResetText();
+		} catch (RuntimeException e) {
+			throw new TokenParserException("Was not able to parse script because of runtime error", e);
 		}
-		// add last token if existing
-		context.addTokenAndResetText();
+
 		return context.tokens;
+	}
+
+	private boolean isHereDocStateHandled(ParseContext context) {
+		char c = context.getCharAtPos();
+		if (c != '<') {
+			return false;
+		}
+
+		int hereDocTokenStart = context.getPos();
+		/*
+		 * CHECKPOINT 0: check if next is "<" as well. If so this is a
+		 * here-doc...
+		 */
+		int pos = hereDocTokenStart + 1;
+		Character ca = context.getCharacterAtPosOrNull(pos++);
+		if (ca == null) {
+			return false;
+		}
+		if (ca.charValue() != '<') {
+			return false;
+		}
+		/* CHECKPOINT 1:<< found */
+		ca = context.getCharacterAtPosOrNull(pos++);
+		if (ca == null) {
+			return false;
+		}
+		StringBuilder literal = new StringBuilder();
+		if (Character.isWhitespace(ca.charValue())) {
+			/* CHECKPOINT 2a:<<.. found so get literal */
+			ca.charValue();
+		} else {
+			/* CHECKPOINT 2b:<< .. found so get literal */
+			literal.append(ca.charValue());
+		}
+		do {
+			Character literalChar = context.getCharacterAtPosOrNull(pos++);
+			if (literalChar == null) {
+				/* end reached but no literal - so ignore */
+				return false;
+			}
+			if (Character.isWhitespace(literalChar.charValue())) {
+				break;
+			}
+			literal.append(literalChar.charValue());
+
+		} while (true);
+
+		/* CHECKPOINT 3: <<literal now defined */
+		int hereDocTokenEnd = pos - 1;
+		boolean endliteralFound = false;
+		String literalToFind = literal.toString();
+
+		// scan for content
+		StringBuilder partScan = new StringBuilder();
+		StringBuilder content = new StringBuilder();
+		int contentTokenStart = pos;
+		int contentTokenEnd = -1;
+		int closingLiteralTokenStart = -1;
+		int closingLiteralTokenEnd = -1;
+		do {
+			if (isEndLiteralFound(literalToFind, partScan)) {
+				endliteralFound = true;
+				closingLiteralTokenEnd = pos;
+				break;
+			}
+			Character contentChar = context.getCharacterAtPosOrNull(pos++);
+			if (contentChar == null) {
+				break;
+			}
+			if (Character.isWhitespace(contentChar.charValue())) {
+				/* not found - so add part scan to content */
+				content.append(partScan);
+				if (content.length() > 0) {
+					content.append(contentChar
+							.charValue()); /*
+											 * add current whitespace too, when
+											 * not at start
+											 */
+				}
+				contentTokenEnd = pos - 1;
+
+				/* reset part scan */
+				closingLiteralTokenStart = pos;
+				partScan = new StringBuilder();
+			} else {
+				partScan.append(contentChar.charValue());
+			}
+
+		} while (true);
+
+		if (!endliteralFound) {
+			return false;
+		}
+		if (content.length() == 0) {
+			return false;
+		}
+		ParseToken hereDocToken = new ParseToken();
+		hereDocToken.start = hereDocTokenStart;
+		hereDocToken.end = hereDocTokenEnd;
+		hereDocToken.text = "<<" + literalToFind;
+
+		context.addToken(hereDocToken);
+
+		ParseToken contentToken = new ParseToken();
+		contentToken.start = contentTokenStart;
+		contentToken.end = contentTokenEnd;
+		char lastContentChar = content.charAt(content.length() - 1);
+
+		if (Character.isWhitespace(lastContentChar)) {
+			/* remove last whitespace */
+			int contentLength = content.length() - 1;
+			contentToken.text = content.substring(0, contentLength);
+		} else {
+			contentToken.text = content.toString();
+		}
+
+		context.addToken(contentToken);
+
+		ParseToken closingLiteralToken = new ParseToken();
+		closingLiteralToken.start = closingLiteralTokenStart;
+		closingLiteralToken.end = closingLiteralTokenEnd;
+		closingLiteralToken.text = partScan.toString();
+
+		context.addToken(closingLiteralToken);
+
+		context.moveToPos(pos);
+
+		return true;
+
+	}
+
+	protected boolean isEndLiteralFound(String literalToFind, StringBuilder partScan) {
+		if (partScan == null || partScan.length() == 0) {
+			return false;
+		}
+		String partScanString = partScan.toString();
+		if (partScanString.equals(literalToFind)) {
+			return true;
+		}
+		/* handle tabs suppressed */
+		if (literalToFind.startsWith("-")) {
+			return isLiteralWhenFirstCharRemoved(literalToFind, partScanString);
+		}
+
+		/* handle Parameter substitution turned off */
+		if (partScanString.length() < 3) {
+			/* no possibility for 'a' or "a" ... */
+			return false;
+		}
+		if (literalToFind.indexOf("'") == 0) {
+			if (!literalToFind.endsWith("'")) {
+				return false;
+			}
+			return isLiteralWhenFirstAndLastCharsRemoved(literalToFind, partScanString);
+		}
+		if (literalToFind.indexOf("\"") == 0) {
+			if (!literalToFind.endsWith("\"")) {
+				return false;
+			}
+			return isLiteralWhenFirstAndLastCharsRemoved(literalToFind, partScanString);
+		}
+		return false;
+
+	}
+
+	private boolean isLiteralWhenFirstAndLastCharsRemoved(String literalToFind, String partScanString) {
+		String literalShrinked = literalToFind.substring(1, literalToFind.length() - 1);
+		boolean isLiteral = partScanString.equals(literalShrinked);
+		return isLiteral;
+	}
+
+	private boolean isLiteralWhenFirstCharRemoved(String literalToFind, String partScanString) {
+		String literalShrinked = literalToFind.substring(1, literalToFind.length());
+		boolean isLiteral = partScanString.equals(literalShrinked);
+		return isLiteral;
 	}
 
 	private boolean isStringStateHandled(ParseContext context) {
@@ -195,8 +379,11 @@ public class TokenParser {
 		 */
 		if (context.inState(CODE) || context.inState(INIT)) {
 			if (c == '$') {
-				context.addTokenAndResetText(); //$ is NOT appended at this moment, so only stuff before is inside new token
-				// current token is now at wrong position because $ was ignored (necessary but ugly)
+				context.addTokenAndResetText(); // $ is NOT appended at this
+												// moment, so only stuff before
+												// is inside new token
+				// current token is now at wrong position because $ was ignored
+				// (necessary but ugly)
 				// so fix this now:
 				context.currentToken.start--;
 				context.appendCharToText();
@@ -229,22 +416,24 @@ public class TokenParser {
 	}
 
 	private boolean handleInitialVariableTypeDetermination(ParseContext context, char c) {
-		/* the state setting to VARIABLE is done on another method - this
-		 * does only handle initial way
+		/*
+		 * the state setting to VARIABLE is done on another method - this does
+		 * only handle initial way
 		 */
 		if (!context.inState(ParserState.VARIABLE)) {
 			return false;
 		}
 		VariableContext variableContext = context.getVariableContext();
-		if (variableContext.getType()!=VariableType.INITIAL) {
+		if (variableContext.getType() != VariableType.INITIAL) {
 			return false;
 		}
 		context.appendCharToText();
-		if (c == '$' || c =='?') {
-			/* c is the NEXT char after the $ was recognized!
-			 * as described at http://tldp.org/LDP/abs/html/special-chars.html
-			 * "$$" is a special variable holding the process id so in this case
-			 * it terminates the variable!
+		if (c == '$' || c == '?') {
+			/*
+			 * c is the NEXT char after the $ was recognized! as described at
+			 * http://tldp.org/LDP/abs/html/special-chars.html "$$" is a special
+			 * variable holding the process id so in this case it terminates the
+			 * variable!
 			 */
 			context.addTokenAndResetText();
 			context.switchTo(CODE);
@@ -264,13 +453,13 @@ public class TokenParser {
 	}
 
 	private boolean handleStandardVariables(ParseContext context, char c, VariableContext variableContext) {
-		if (variableContext.getType()!=VariableType.STANDARD){
+		if (variableContext.getType() != VariableType.STANDARD) {
 			return false;
 		}
 		if (c == '[') {
 			variableContext.variableArrayOpened();
 			context.appendCharToText();
-			if (context.canMoveForward()){
+			if (context.canMoveForward()) {
 				context.moveForward();
 			}
 			moveUntilNextCharWillBeNoStringContent(context);
@@ -301,7 +490,7 @@ public class TokenParser {
 				context.appendCharToText();
 				return true;
 			}
-		}else if (isStringChar(c) && isBalanced(variableContext)) {
+		} else if (isStringChar(c) && isBalanced(variableContext)) {
 			/* this is a string char - means end of variable def */
 			context.addTokenAndResetText();
 			context.switchTo(ParserState.CODE);
@@ -316,12 +505,12 @@ public class TokenParser {
 	}
 
 	private boolean handleCurlyBracedVariable(ParseContext context, char c, VariableContext variableContext) {
-		if (variableContext.getType()!=VariableType.CURLY_BRACED){
+		if (variableContext.getType() != VariableType.CURLY_BRACED) {
 			return false;
 		}
-		
+
 		moveUntilNextCharWillBeNoStringContent(context);
-		
+
 		if (c == '{' || c == '}') {
 			if (c == '{') {
 				variableContext.incrementVariableOpenCurlyBraces();
@@ -340,12 +529,12 @@ public class TokenParser {
 
 	private boolean handleGroupedVariable(ParseContext context) {
 		VariableContext variableContext = context.getVariableContext();
-		if (variableContext.getType()!=VariableType.GROUPED){
+		if (variableContext.getType() != VariableType.GROUPED) {
 			return false;
 		}
 		moveUntilNextCharWillBeNoStringContent(context);
 		char c = context.getCharAtPos();
-		
+
 		if (c == '(') {
 			variableContext.variableGroupOpened();
 			return true;
@@ -400,51 +589,59 @@ public class TokenParser {
 		return true;
 
 	}
-	
+
 	/**
 	 * Situation: <br>
+	 * 
 	 * <pre>
 	 * $('hello' a'x')
-         ^------  
+	     ^------  
 	 * 012345678
 	 * </pre>
-	 * Cursor is at a position after "$(". means index:2.<br><br>
 	 * 
-	 * The method will now check if this is a string start, if so the complete content of string will be fetched and appended and pos changed.
-	 * In the example above the postion will be 8 after execution and string of context will be <code>"$('hello'"</code>.
+	 * Cursor is at a position after "$(". means index:2.<br>
+	 * <br>
+	 * 
+	 * The method will now check if this is a string start, if so the complete
+	 * content of string will be fetched and appended and pos changed. In the
+	 * example above the postion will be 8 after execution and string of context
+	 * will be <code>"$('hello'"</code>.
 	 * 
 	 */
 	void moveUntilNextCharWillBeNoStringContent(ParseContext context) {
 		context.appendCharToText();
-		
+
 		char c = context.getCharAtPos();
-		if (!isStringChar(c)){
-			/* no string - do nothing, pos increment/move forward is done outside in for next loop!*/
+		if (!isStringChar(c)) {
+			/*
+			 * no string - do nothing, pos increment/move forward is done
+			 * outside in for next loop!
+			 */
 			return;
 		}
-		if (context.isCharBeforeEscapeSign()){
+		if (context.isCharBeforeEscapeSign()) {
 			return;
 		}
 		char stringCharToScan = c;
-		moveToNextCharNotInStringAndAppendMovements(context,stringCharToScan);
-		
-		
+		moveToNextCharNotInStringAndAppendMovements(context, stringCharToScan);
+
 	}
+
 	private void moveToNextCharNotInStringAndAppendMovements(ParseContext context, char stringCharToScan) {
-		if (!context.canMoveForward()){
+		if (!context.canMoveForward()) {
 			return;
 		}
 		context.moveForward();
 		context.appendCharToText();
-		
+
 		char c = context.getCharAtPos();
-		if (c==stringCharToScan){
-			if (! context.isCharBeforeEscapeSign()){
+		if (c == stringCharToScan) {
+			if (!context.isCharBeforeEscapeSign()) {
 				/* found ending of string - so simply return */
 				return;
 			}
 		}
-		moveToNextCharNotInStringAndAppendMovements(context,stringCharToScan);
+		moveToNextCharNotInStringAndAppendMovements(context, stringCharToScan);
 	}
 
 }
