@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
@@ -152,6 +153,10 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
 
 		TreeViewer treeViewer = getTreeViewer();
 		if (treeViewer != null) {
+			Control control = treeViewer.getControl();
+			if (control == null || control.isDisposed()){
+				return;
+			}
 			treeViewer.setInput(model);
 		}
 	}
