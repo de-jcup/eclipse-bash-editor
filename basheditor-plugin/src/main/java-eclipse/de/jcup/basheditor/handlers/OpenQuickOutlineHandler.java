@@ -19,7 +19,7 @@ import de.jcup.basheditor.BashEditor;
 
 public class OpenQuickOutlineHandler extends AbstractBashEditorHandler {
 
-	public static final String COMMAND_ID = "egradle.editor.commands.quickoutline";
+	public static final String COMMAND_ID = "basheditor.editor.commands.quickoutline";
 
 	@Override
 	protected void executeOnBashEditor(BashEditor bashEditor) {
