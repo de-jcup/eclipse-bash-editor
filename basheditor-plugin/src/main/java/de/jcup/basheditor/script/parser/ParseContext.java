@@ -18,7 +18,7 @@ package de.jcup.basheditor.script.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-class ParseContext {
+class ParseContext implements CodePosSupport{
 
 	char[] chars;
 	int pos;
@@ -145,7 +145,7 @@ class ParseContext {
 		return chars[pos];
 	}
 	
-	public int getPos() {
+	public int getInitialStartPos() {
 		return pos;
 	}
 	
@@ -162,7 +162,7 @@ class ParseContext {
 	 * @param wantedPos
 	 * @return character or <code>null</code> if not available
 	 */
-	Character getCharacterAtPosOrNull(int wantedPos) {
+	public Character getCharacterAtPosOrNull(int wantedPos) {
 		if (wantedPos >= 0) {
 			int length = chars.length;
 			if (length > wantedPos) {

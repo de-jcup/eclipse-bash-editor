@@ -39,7 +39,7 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 	private VariableDefKeyWordDetector variableDefKeyWordDetector = new VariableDefKeyWordDetector();
 
 	public BashDocumentPartitionScanner() {
-
+		IToken hereDocument = createToken(HERE_DOCUMENT);
 		IToken parameters = createToken(PARAMETER);
 		IToken comment = createToken(COMMENT);
 		IToken simpleString = createToken(SINGLE_STRING);
@@ -55,6 +55,7 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		IToken bashCommand = createToken(BASH_COMMAND);
 
 		List<IPredicateRule> rules = new ArrayList<>();
+		rules.add(new HereDocumentRule(hereDocument));
 		buildWordRules(rules, systemKeyword, BashSystemKeyWords.values());
 		rules.add(new BashVariableRule(variables));
 		rules.add(new SingleLineRule("#", "", comment, (char) -1, true));

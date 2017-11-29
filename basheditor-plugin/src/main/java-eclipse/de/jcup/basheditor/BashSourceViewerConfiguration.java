@@ -149,7 +149,9 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 		PresentationReconciler reconciler = new PresentationReconciler();
 
 		addDefaultPresentation(reconciler);
-
+		
+		addPresentation(reconciler, HERE_DOCUMENT.getId(), getPreferences().getColor(COLOR_HEREDOCS),SWT.ITALIC);
+		
 		addPresentation(reconciler, BASH_KEYWORD.getId(), getPreferences().getColor(COLOR_BASH_KEYWORD),SWT.BOLD);
 		addPresentation(reconciler, BASH_SYSTEM_KEYWORD.getId(), getPreferences().getColor(COLOR_BASH_KEYWORD),SWT.BOLD);
 

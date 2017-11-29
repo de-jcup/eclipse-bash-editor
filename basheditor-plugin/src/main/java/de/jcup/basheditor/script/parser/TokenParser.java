@@ -24,6 +24,12 @@ import de.jcup.basheditor.script.parser.ParseContext.VariableContext;
 import de.jcup.basheditor.script.parser.ParseContext.VariableType;
 
 public class TokenParser {
+	
+	private HereDocParserSupport hereDocParserSupport;
+
+	public TokenParser() {
+		hereDocParserSupport = new HereDocParserSupport();
+	}
 
 	public List<ParseToken> parse(String bashScript) throws TokenParserException {
 		if (bashScript == null) {
@@ -58,180 +64,9 @@ public class TokenParser {
 
 		return context.tokens;
 	}
-
+	
 	private boolean isHereDocStateHandled(ParseContext context) {
-		char c = context.getCharAtPos();
-		if (c != '<') {
-			return false;
-		}
-
-		int hereDocTokenStart = context.getPos();
-		/*
-		 * CHECKPOINT 0: check if next is "<" as well. If so this is a
-		 * here-doc...
-		 */
-		int pos = hereDocTokenStart + 1;
-		Character ca = context.getCharacterAtPosOrNull(pos++);
-		if (ca == null) {
-			return false;
-		}
-		if (ca.charValue() != '<') {
-			return false;
-		}
-		/* CHECKPOINT 1:<< found */
-		ca = context.getCharacterAtPosOrNull(pos++);
-		if (ca == null) {
-			return false;
-		}
-		StringBuilder literal = new StringBuilder();
-		if (Character.isWhitespace(ca.charValue())) {
-			/* CHECKPOINT 2a:<<.. found so get literal */
-			ca.charValue();
-		} else {
-			/* CHECKPOINT 2b:<< .. found so get literal */
-			literal.append(ca.charValue());
-		}
-		do {
-			Character literalChar = context.getCharacterAtPosOrNull(pos++);
-			if (literalChar == null) {
-				/* end reached but no literal - so ignore */
-				return false;
-			}
-			if (Character.isWhitespace(literalChar.charValue())) {
-				break;
-			}
-			literal.append(literalChar.charValue());
-
-		} while (true);
-
-		/* CHECKPOINT 3: <<literal now defined */
-		int hereDocTokenEnd = pos - 1;
-		boolean endliteralFound = false;
-		String literalToFind = literal.toString();
-
-		// scan for content
-		StringBuilder partScan = new StringBuilder();
-		StringBuilder content = new StringBuilder();
-		int contentTokenStart = pos;
-		int contentTokenEnd = -1;
-		int closingLiteralTokenStart = -1;
-		int closingLiteralTokenEnd = -1;
-		do {
-			if (isEndLiteralFound(literalToFind, partScan)) {
-				endliteralFound = true;
-				closingLiteralTokenEnd = pos;
-				break;
-			}
-			Character contentChar = context.getCharacterAtPosOrNull(pos++);
-			if (contentChar == null) {
-				break;
-			}
-			if (Character.isWhitespace(contentChar.charValue())) {
-				/* not found - so add part scan to content */
-				content.append(partScan);
-				if (content.length() > 0) {
-					content.append(contentChar
-							.charValue()); /*
-											 * add current whitespace too, when
-											 * not at start
-											 */
-				}
-				contentTokenEnd = pos - 1;
-
-				/* reset part scan */
-				closingLiteralTokenStart = pos;
-				partScan = new StringBuilder();
-			} else {
-				partScan.append(contentChar.charValue());
-			}
-
-		} while (true);
-
-		if (!endliteralFound) {
-			return false;
-		}
-		if (content.length() == 0) {
-			return false;
-		}
-		ParseToken hereDocToken = new ParseToken();
-		hereDocToken.start = hereDocTokenStart;
-		hereDocToken.end = hereDocTokenEnd;
-		hereDocToken.text = "<<" + literalToFind;
-
-		context.addToken(hereDocToken);
-
-		ParseToken contentToken = new ParseToken();
-		contentToken.start = contentTokenStart;
-		contentToken.end = contentTokenEnd;
-		char lastContentChar = content.charAt(content.length() - 1);
-
-		if (Character.isWhitespace(lastContentChar)) {
-			/* remove last whitespace */
-			int contentLength = content.length() - 1;
-			contentToken.text = content.substring(0, contentLength);
-		} else {
-			contentToken.text = content.toString();
-		}
-
-		context.addToken(contentToken);
-
-		ParseToken closingLiteralToken = new ParseToken();
-		closingLiteralToken.start = closingLiteralTokenStart;
-		closingLiteralToken.end = closingLiteralTokenEnd;
-		closingLiteralToken.text = partScan.toString();
-
-		context.addToken(closingLiteralToken);
-
-		context.moveToPos(pos);
-
-		return true;
-
-	}
-
-	protected boolean isEndLiteralFound(String literalToFind, StringBuilder partScan) {
-		if (partScan == null || partScan.length() == 0) {
-			return false;
-		}
-		String partScanString = partScan.toString();
-		if (partScanString.equals(literalToFind)) {
-			return true;
-		}
-		/* handle tabs suppressed */
-		if (literalToFind.startsWith("-")) {
-			return isLiteralWhenFirstCharRemoved(literalToFind, partScanString);
-		}
-
-		/* handle Parameter substitution turned off */
-		if (partScanString.length() < 3) {
-			/* no possibility for 'a' or "a" ... */
-			return false;
-		}
-		if (literalToFind.indexOf("'") == 0) {
-			if (!literalToFind.endsWith("'")) {
-				return false;
-			}
-			return isLiteralWhenFirstAndLastCharsRemoved(literalToFind, partScanString);
-		}
-		if (literalToFind.indexOf("\"") == 0) {
-			if (!literalToFind.endsWith("\"")) {
-				return false;
-			}
-			return isLiteralWhenFirstAndLastCharsRemoved(literalToFind, partScanString);
-		}
-		return false;
-
-	}
-
-	private boolean isLiteralWhenFirstAndLastCharsRemoved(String literalToFind, String partScanString) {
-		String literalShrinked = literalToFind.substring(1, literalToFind.length() - 1);
-		boolean isLiteral = partScanString.equals(literalShrinked);
-		return isLiteral;
-	}
-
-	private boolean isLiteralWhenFirstCharRemoved(String literalToFind, String partScanString) {
-		String literalShrinked = literalToFind.substring(1, literalToFind.length());
-		boolean isLiteral = partScanString.equals(literalShrinked);
-		return isLiteral;
+		return hereDocParserSupport.isHereDocStateHandled(context);
 	}
 
 	private boolean isStringStateHandled(ParseContext context) {

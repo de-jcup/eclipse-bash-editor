@@ -40,6 +40,8 @@ public enum BashDocumentIdentifiers implements BashDocumentIdentifier {
 	VARIABLES,
 	
 	PARAMETER,
+	
+	HERE_DOCUMENT,
 	;
 
 
