@@ -76,7 +76,7 @@ import de.jcup.basheditor.script.BashScriptModelException;
 public class BashEditor extends TextEditor implements StatusMessageSupport, IResourceChangeListener {
 
 	/** The COMMAND_ID of this editor as defined in plugin.xml */
-	public static final String EDITOR_ID = "org.basheditor.editors.BashEditor";
+	public static final String EDITOR_ID = "basheditor.editors.BashEditor";
 	/** The COMMAND_ID of the editor context menu */
 	public static final String EDITOR_CONTEXT_MENU_ID = EDITOR_ID + ".context";
 	/** The COMMAND_ID of the editor ruler context menu */

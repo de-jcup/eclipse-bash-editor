@@ -38,6 +38,56 @@
       </editor>
    </extension>
    
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!--                          PROPERTY TESTERS                            -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <extension point="org.eclipse.core.expressions.propertyTesters">
+  	  <!-- see https://wiki.eclipse.org/Platform_Expression_Framework -->
+  	  <!-- see http://help.eclipse.org/neon/index.jsp?topic=/org.eclipse.platform.doc.isv/guide/workbench_cmd_expressions.htm -->
+  	  <!-- see http://www.robertwloch.net/2011/01/eclipse-tips-tricks-property-testers-with-command-core-expressions/ -->
+      <propertyTester
+          class="de.jcup.basheditor.BashFileWithoutExtensionPropertyTester"
+          id="de.jcup.basheditor.BashFileWithoutExtensionPropertyTester"
+          namespace="de.jcup.basheditor"
+          properties="isBashFileWithoutExtension"
+          type="org.eclipse.core.resources.IResource">
+      </propertyTester>
+   </extension>
+   
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!--        POPUP                                                         -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   
+    <extension point="org.eclipse.ui.menus">
+        <!-- http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2Fworkbench_cmd_menus.htm -->
+        <menuContribution locationURI="popup:org.eclipse.ui.popup.any?before=additions">
+                <!-- Detect new root project --> 
+                <command
+            	  commandId="basheditor.command.openWithBashEditor"
+                  icon="icons/bash-editor.png"
+                  id="basheditor.maintoolbar.openWithBashEditor"
+                  label="Open with Bash Editor"
+                  tooltip="Opens bash file with Bash Editor."
+                  style="push">
+                        <visibleWhen 
+                              checkEnabled="false">
+                              <with
+                                    variable="activeMenuSelection">
+                                    <and>
+				         				<count value="1"/>
+	                                    <iterate ifEmpty="false">
+	                                    	 <adapt type="org.eclipse.core.resources.IFile">
+			         							<test property="de.jcup.basheditor.isBashFileWithoutExtension" value="true"/>
+				         					</adapt>
+				         				</iterate>
+                                    </and>
+                              </with>
+                        </visibleWhen>
+                </command>
+                
+        </menuContribution>
+   </extension>
+   
     <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          MARKER                          			 -->
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ --> 
@@ -65,16 +115,20 @@
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          COMMANDS                                    -->
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->^
-   <extension
-         point="org.eclipse.ui.commands">
-      <category
+   
+   <extension point="org.eclipse.ui.commands">
+       <category
             description="Bash editor"
             id="basheditor.commands.category"
             name="Bash editor">
-      </category>
-   </extension>
-   
-   <extension point="org.eclipse.ui.commands">
+       </category>
+      
+       <command
+      		name="Open with bash editor"
+      		description="Open file with bash editor"
+      		categoryId="basheditor.commands.category"
+      		id="basheditor.command.openWithBashEditor">
+       </command>
    	   <command
             name="Quick outline"
             description="Show quick outline dialog"
@@ -94,6 +148,10 @@
             id="basheditor.editor.commands.gotomatchingbracket">
       </command>
 	</extension>
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!--                          HANDLERS                                    -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->^
+	
 	<extension point="org.eclipse.ui.handlers">
 	 <handler
             commandId="basheditor.editor.commands.quickoutline"
@@ -103,9 +161,17 @@
             commandId="basheditor.editor.commands.source.toggleComment"
             class="de.jcup.basheditor.handlers.ToggleCommentHandler">
       </handler>
-       <handler
+      <handler
             commandId="basheditor.editor.commands.gotomatchingbracket"
             class="de.jcup.basheditor.handlers.GotoMatchingBracketHandler">
+      </handler>
+      <handler
+            commandId="basheditor.editor.commands.gotomatchingbracket"
+            class="de.jcup.basheditor.handlers.GotoMatchingBracketHandler">
+      </handler>
+      <handler
+            commandId="basheditor.command.openWithBashEditor"
+            class="de.jcup.basheditor.handlers.OpenWithBashEditor">
       </handler>
     </extension> 
     

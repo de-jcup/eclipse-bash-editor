@@ -15,10 +15,18 @@
  */
 package de.jcup.basheditor;
 
+import java.io.File;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -27,12 +35,39 @@ import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.script.BashError;
 
 public class BashEditorUtil {
-
+	private static final IProgressMonitor NULL_MONITOR = new NullProgressMonitor();
+	
 	private static UnpersistedMarkerHelper scriptProblemMarkerHelper = new UnpersistedMarkerHelper(
 			"de.jcup.basheditor.script.problem");
 
 	public static BashEditorPreferences getPreferences() {
 		return BashEditorPreferences.getInstance();
+	}
+	
+	/**
+	 * Returns the file or <code>null</code>
+	 * @param path
+	 * @return file or <code>null</code>
+	 * @throws CoreException
+	 */
+	public static File toFile(IPath path) throws CoreException {
+		if (path==null){
+			return null;
+		}
+		IFileStore fileStore = FileBuffers.getFileStoreAtLocation(path);
+		if (fileStore==null){
+			return null;
+		}
+		File file = null;
+		file = fileStore.toLocalFile(EFS.NONE, NULL_MONITOR);
+		return file;
+	}
+
+	public static File toFile(IResource resource) throws CoreException {
+		if (resource==null){
+			return toFile((IPath)null);
+		}
+		return toFile(resource.getLocation());
 	}
 
 	public static void logInfo(String info) {
