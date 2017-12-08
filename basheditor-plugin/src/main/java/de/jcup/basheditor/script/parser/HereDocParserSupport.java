@@ -163,31 +163,31 @@ public class HereDocParserSupport {
 		return;
 	}
 
-	private boolean isEndLiteralFound(String literalToFind, StringBuilder partScan) {
+	private boolean isEndLiteralFound(String originLiteralToFind, StringBuilder partScan) {
 		if (partScan == null || partScan.length() == 0) {
 			return false;
+		}
+		String literalToFind= originLiteralToFind;
+		if (originLiteralToFind.startsWith("-")) {
+			literalToFind=originLiteralToFind.substring(1);
 		}
 		String partScanString = partScan.toString();
 		if (partScanString.equals(literalToFind)) {
 			return true;
 		}
-		/* handle tabs suppressed */
-		if (literalToFind.startsWith("-")) {
-			return isLiteralWhenFirstCharRemoved(literalToFind, partScanString);
-		}
-
+		
 		/* handle Parameter substitution turned off */
 		if (partScanString.length() < 3) {
 			/* no possibility for 'a' or "a" ... */
 			return false;
 		}
-		if (literalToFind.indexOf("'") == 0) {
+		if (literalToFind.indexOf('\'') == 0) {
 			if (!literalToFind.endsWith("'")) {
 				return false;
 			}
 			return isLiteralWhenFirstAndLastCharsRemoved(literalToFind, partScanString);
 		}
-		if (literalToFind.indexOf("\"") == 0) {
+		if (literalToFind.indexOf('\"') == 0) {
 			if (!literalToFind.endsWith("\"")) {
 				return false;
 			}
@@ -202,11 +202,4 @@ public class HereDocParserSupport {
 		boolean isLiteral = partScanString.equals(literalShrinked);
 		return isLiteral;
 	}
-
-	private boolean isLiteralWhenFirstCharRemoved(String literalToFind, String partScanString) {
-		String literalShrinked = literalToFind.substring(1, literalToFind.length());
-		boolean isLiteral = partScanString.equals(literalShrinked);
-		return isLiteral;
-	}
-
 }

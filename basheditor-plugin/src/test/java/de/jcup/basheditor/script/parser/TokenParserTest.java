@@ -37,6 +37,55 @@ public class TokenParserTest {
 	}
 
 	@Test
+	public void heredoc_found_when_a_heredoc_EOF_nl_b_space_hyphen_x_nl_EOF()
+			throws Exception {
+		/* prepare */
+		String string = "a <<EOF\nb 'x\nEOF";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"a", "<<EOF","b 'x","EOF"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void heredoc_found_when_a_heredoc_negative_hyphen_EOF_hyphen_nl_b_space_hyphen_x_nl_EOF()
+			throws Exception {
+		/* prepare */
+		String string = "a <<-'EOF'\nb 'x\nEOF";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"a", "<<-'EOF'","b 'x","EOF"
+						);	/* @formatter:on*/
+	}
+	
+	
+	@Test
+	public void bug_86_heredocs_found_when_cat_gt_ampersand2_space_heredoc_negative_hyphen_EOF_hyphen_nl_echo_hyphen_one_hyphen_but_no_problem_nlEOF()
+			throws Exception {
+		/* prepare */
+		String string = "cat >&2 <<-'EOF'\necho 'one hyphen but no problem\nEOF";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"cat", ">&2", "<<-'EOF'","echo 'one hyphen but no problem","EOF"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
 	public void bug_78_heredocs_xyz_bla_space_curlybracket_xyz_newline_test__contains_also_token_test_at_end()
 			throws Exception {
 		/* prepare */
