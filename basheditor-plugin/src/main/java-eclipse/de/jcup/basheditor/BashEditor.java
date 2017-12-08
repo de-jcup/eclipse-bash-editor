@@ -71,6 +71,7 @@ import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.script.BashScriptModel;
 import de.jcup.basheditor.script.BashScriptModelBuilder;
 import de.jcup.basheditor.script.BashScriptModelException;
+import de.jcup.basheditor.script.parser.validator.BashEditorValidationErrorLevel;
 
 @AdaptedFromEGradle
 public class BashEditor extends TextEditor implements StatusMessageSupport, IResourceChangeListener {
@@ -174,7 +175,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		return IMarker.SEVERITY_INFO;
 	}
 
-	private void addErrorMarkers(BashScriptModel model) {
+	private void addErrorMarkers(BashScriptModel model, int severity) {
 		if (model == null) {
 			return;
 		}
@@ -192,7 +193,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 				EclipseUtil.logError("Cannot get line offset for " + startPos, e);
 				line = 0;
 			}
-			BashEditorUtil.addScriptError(this, line, error);
+			BashEditorUtil.addScriptError(this, line, error, severity);
 		}
 
 	}
@@ -396,7 +397,9 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		boolean validateBlocks = store.getBoolean(VALIDATE_BLOCK_STATEMENTS.getId());
 		boolean validateDo = store.getBoolean(VALIDATE_DO_STATEMENTS.getId());
 		boolean validateIf = store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
-		boolean validateFunctions = store.getBoolean(VALIDATE_IF_STATEMENTS.getId());
+		boolean validateFunctions = store.getBoolean(VALIDATE_FUNCTION_STATEMENTS.getId());
+		String errorLevelId = store.getString(VALIDATE_ERROR_LEVEL.getId());
+		BashEditorValidationErrorLevel errorLevel = BashEditorValidationErrorLevel.fromId(errorLevelId);
 
 		boolean debugMode = Boolean.parseBoolean(System.getProperty("basheditor.debug.enabled"));
 
@@ -424,7 +427,15 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 				getOutlinePage().rebuild(model);
 
 				if (model.hasErrors()) {
-					addErrorMarkers(model);
+					int severity;
+					if (BashEditorValidationErrorLevel.INFO.equals(errorLevel)) {
+						severity = IMarker.SEVERITY_INFO;
+					} else if (BashEditorValidationErrorLevel.WARNING.equals(errorLevel)) {
+						severity = IMarker.SEVERITY_WARNING;
+					} else {
+						severity = IMarker.SEVERITY_ERROR;
+					}
+					addErrorMarkers(model, severity);
 				}
 			}
 		});

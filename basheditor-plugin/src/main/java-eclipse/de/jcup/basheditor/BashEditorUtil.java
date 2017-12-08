@@ -97,7 +97,7 @@ public class BashEditorUtil {
 		scriptProblemMarkerHelper.removeMarkers(editorResource);
 	}
 
-	public static void addScriptError(IEditorPart editor, int line, BashError error) {
+	public static void addScriptError(IEditorPart editor, int line, BashError error, int severity) {
 		if (editor == null) {
 			return;
 		}
@@ -114,7 +114,7 @@ public class BashEditorUtil {
 			return;
 		}
 		try {
-			scriptProblemMarkerHelper.createErrorMarker(editorResource, error.getMessage(), line, error.getStart(),
+			scriptProblemMarkerHelper.createScriptMarker(severity, editorResource, error.getMessage(), line, error.getStart(),
 					+ error.getEnd());
 		} catch (CoreException e) {
 			logError("Was not able to add error markers", e);

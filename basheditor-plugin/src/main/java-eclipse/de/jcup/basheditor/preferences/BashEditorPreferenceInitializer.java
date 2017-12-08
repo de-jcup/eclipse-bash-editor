@@ -14,7 +14,6 @@ package de.jcup.basheditor.preferences;
  * and limitations under the License.
  *
  */
- 
 
 import static de.jcup.basheditor.BashEditorColorConstants.*;
 import static de.jcup.basheditor.BashEditorUtil.*;
@@ -25,6 +24,8 @@ import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConst
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import de.jcup.basheditor.script.parser.validator.BashEditorValidationErrorLevel;
+
 /**
  * Class used to initialize default preference values.
  */
@@ -33,28 +34,28 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 	public void initializeDefaultPreferences() {
 		BashEditorPreferences preferences = getPreferences();
 		IPreferenceStore store = preferences.getPreferenceStore();
-		
+
 		/* Outline */
 		store.setDefault(P_LINK_OUTLINE_WITH_EDITOR.getId(), true);
-		
+
 		/* ++++++++++++ */
 		/* + Brackets + */
 		/* ++++++++++++ */
 		/* bracket rendering configuration */
-		store.setDefault(P_EDITOR_MATCHING_BRACKETS_ENABLED.getId(), true); // per default matching is enabled, but without the two other special parts
+		store.setDefault(P_EDITOR_MATCHING_BRACKETS_ENABLED.getId(), true);
 		store.setDefault(P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION.getId(), false);
 		store.setDefault(P_EDITOR_ENCLOSING_BRACKETS.getId(), false);
 		store.setDefault(P_EDITOR_AUTO_CREATE_END_BRACKETSY.getId(), true);
-		
+
 		/* bracket color */
 		preferences.setDefaultColor(P_EDITOR_MATCHING_BRACKETS_COLOR, GRAY_JAVA);
-		
+
 		/* +++++++++++++++++++ */
 		/* + Code Assistence + */
 		/* +++++++++++++++++++ */
 		store.setDefault(P_CODE_ASSIST_ADD_KEYWORDS.getId(), true);
 		store.setDefault(P_CODE_ASSIST_ADD_SIMPLEWORDS.getId(), true);
-		
+
 		/* +++++++++++++++++ */
 		/* + Editor Colors + */
 		/* +++++++++++++++++ */
@@ -62,28 +63,27 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 
 		preferences.setDefaultColor(COLOR_BASH_KEYWORD, KEYWORD_DEFAULT_PURPLE);
 		preferences.setDefaultColor(COLOR_NORMAL_STRING, STRING_DEFAULT_BLUE);
-		
-		
+
 		preferences.setDefaultColor(COLOR_GSTRING, ROYALBLUE);
 		preferences.setDefaultColor(COLOR_BSTRING, CADET_BLUE);
 		preferences.setDefaultColor(COLOR_COMMENT, GREEN_JAVA);
-		
+
 		preferences.setDefaultColor(COLOR_INCLUDE_KEYWORD, LINK_DEFAULT_BLUE);
-		
+
 		preferences.setDefaultColor(COLOR_BASH_COMMAND, TASK_DEFAULT_RED);
 		preferences.setDefaultColor(COLOR_KNOWN_VARIABLES, DARK_GRAY);
 		preferences.setDefaultColor(COLOR_PARAMETERS, DARK_BLUE);
 		preferences.setDefaultColor(COLOR_HEREDOCS, GRAY);
-		
+
 		/* ++++++++++++++ */
 		/* + Validation + */
 		/* ++++++++++++++ */
-		store.setDefault(VALIDATE_BLOCK_STATEMENTS.getId(),true);
-		store.setDefault(VALIDATE_DO_STATEMENTS.getId(),true);
-		store.setDefault(VALIDATE_IF_STATEMENTS.getId(),true);
-		store.setDefault(VALIDATE_FUNCTION_STATEMENTS.getId(),true);
+		store.setDefault(VALIDATE_BLOCK_STATEMENTS.getId(), true);
+		store.setDefault(VALIDATE_DO_STATEMENTS.getId(), true);
+		store.setDefault(VALIDATE_IF_STATEMENTS.getId(), true);
+		store.setDefault(VALIDATE_FUNCTION_STATEMENTS.getId(), true);
+
+		store.setDefault(VALIDATE_ERROR_LEVEL.getId(), BashEditorValidationErrorLevel.ERROR.getId());
 	}
-	
-	
-	
+
 }
