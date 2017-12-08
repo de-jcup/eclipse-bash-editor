@@ -27,6 +27,8 @@ public enum BashEditorValidationPreferenceConstants implements PreferenceIdentif
 	
 	VALIDATE_FUNCTION_STATEMENTS("validateIf","Functions"),
 	
+	VALIDATE_ERROR_LEVEL("validateErrorLevel","Error level"),
+	
 	;
 
 	private String id;
