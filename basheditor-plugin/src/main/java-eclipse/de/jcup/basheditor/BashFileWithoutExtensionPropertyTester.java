@@ -15,6 +15,8 @@ public class BashFileWithoutExtensionPropertyTester extends PropertyTester {
 	public static final String PROPERTY_NAMESPACE = "de.jcup.basheditor";
 	public static final String PROPERTY_IS_BASHFILE_WITHOUT_EXTENSION = "isBashFileWithoutExtension";
 
+	private static final LineIsBashSheBangValidator SHEBANG_VALIDATOR = new LineIsBashSheBangValidator();
+
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
 		if (!PROPERTY_IS_BASHFILE_WITHOUT_EXTENSION.equals(property)) {
@@ -37,24 +39,23 @@ public class BashFileWithoutExtensionPropertyTester extends PropertyTester {
 		try {
 			theFile = BashEditorUtil.toFile(file);
 		} catch (CoreException e) {
-			BashEditorUtil.logError("Was not able to test if file is a bash file:"+file.getName(), e);
+			BashEditorUtil.logError("Was not able to test if file is a bash file:" + file.getName(), e);
 			return false;
 		}
-		if (theFile==null || !theFile.exists()){
+		if (theFile == null || !theFile.exists()) {
 			return false;
 		}
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(theFile)))) {
 			String line = br.readLine();
-			if (line.startsWith("#!/bin/bash")) {
+			if (SHEBANG_VALIDATOR.isValid(line)) {
 				return true;
 			}
 			return false;
 
-		}catch(IOException e){
-			BashEditorUtil.logError("Was not able to test if file is a bash file:"+file.getName(), e);
+		} catch (IOException e) {
+			BashEditorUtil.logError("Was not able to test if file is a bash file:" + file.getName(), e);
 			return false;
 		}
-
 
 	}
 
