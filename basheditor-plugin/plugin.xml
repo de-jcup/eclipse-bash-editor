@@ -265,6 +265,9 @@
          class="de.jcup.basheditor.preferences.BashEditorValidationPreferencePage"
          name="Validation"
          category="basheditor.eclipse.gradleeditor.preferences.BashEditorEditorPreferencePage">
+          <keywordReference
+               id="basheditor.preferences.keyword.bash">
+         </keywordReference>
          <keywordReference
                id="basheditor.preferences.keyword.validation">
          </keywordReference>
