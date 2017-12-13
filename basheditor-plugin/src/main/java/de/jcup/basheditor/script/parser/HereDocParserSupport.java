@@ -6,6 +6,18 @@ public class HereDocParserSupport {
 
 		HereDocContext context= createContext(codePosSupport);
 		
+		if (context.isHereStringFound()){
+			if (codePosSupport instanceof ParseContext){
+				context.moveToNewEndPosition(context.hereDocPos);
+				/* when the support is a parse context we additional add 
+				 * new tokens into
+				 */
+				ParseContext parseContext = (ParseContext) codePosSupport;
+				addHereStringToken(parseContext, context);
+			}
+			return false;
+		}
+		
 		if (context.isNoHereDocFound()){
 			return false;
 		}
@@ -26,12 +38,12 @@ public class HereDocParserSupport {
 			 * new tokens into
 			 */
 			ParseContext parseContext = (ParseContext) codePosSupport;
-			addtokens(parseContext, context);
+			addHereDocTokens(parseContext, context);
 		}
 		return true;
 	}
 
-	private void addtokens(ParseContext parseContext, HereDocContext context) {
+	private void addHereDocTokens(ParseContext parseContext, HereDocContext context) {
 		ParseToken hereDocToken = new ParseToken();
 		hereDocToken.start = context.hereDocTokenStart;
 		hereDocToken.end = context.hereDocTokenEnd;
@@ -52,6 +64,15 @@ public class HereDocParserSupport {
 		closingLiteralToken.text = context.partScan.toString();
 
 		parseContext.addToken(closingLiteralToken);
+	}
+	
+	private void addHereStringToken(ParseContext parseContext, HereDocContext context) {
+		ParseToken hereStringToken = new ParseToken();
+		hereStringToken.start = context.hereDocTokenStart;
+		hereStringToken.end = context.hereDocTokenEnd;
+		hereStringToken.text = "<<<" ;
+
+		parseContext.addToken(hereStringToken);
 	}
 
 	private void setp2_scanForContent(HereDocContext context) {
@@ -124,6 +145,10 @@ public class HereDocParserSupport {
 		/* CHECKPOINT 1:<< found */
 		ca = context.getCharacterAtPosOrNull(context.hereDocPos++);
 		if (ca == null) {
+			return context;
+		}
+		if (ca.charValue()=='<'){
+			context.hereStringFound=true;
 			return context;
 		}
 		// next line will mark also as initialized!

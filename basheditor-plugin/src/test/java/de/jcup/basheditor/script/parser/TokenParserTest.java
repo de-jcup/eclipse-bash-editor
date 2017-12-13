@@ -35,6 +35,38 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
+	
+	@Test
+	public void heredoc_not_found_when_a_herestring_$text_nl_b_x()
+			throws Exception {
+		/* prepare */
+		String string = "a <<<$text\nb x";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"a", "<<<","$text","b","x"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void heredoc_not_found_when_a_herestring_space_$text_nl_b()
+			throws Exception {
+		/* prepare */
+		String string = "a <<< $text\nb";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"a", "<<<","$text","b"
+						);	/* @formatter:on*/
+	}
 
 	@Test
 	public void heredoc_found_when_a_heredoc_EOF_nl_b_space_hyphen_x_nl_EOF()
@@ -49,6 +81,22 @@ public class TokenParserTest {
 			assertThat(tokens).
 				containsTokens(
 						"a", "<<EOF","b 'x","EOF"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void heredoc_not_found_when_a_herestring_EOF_nl_b_space_hyphen_x_nl_EOF()
+			throws Exception {
+		/* prepare */
+		String string = "a <<<EOF\nb 'x\nEOF";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"a", "<<<","EOF","b","'x\nEOF"
 						);	/* @formatter:on*/
 	}
 	
