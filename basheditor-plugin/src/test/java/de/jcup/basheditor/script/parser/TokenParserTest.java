@@ -35,9 +35,168 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
+	@Test
+	public void herestring_found_when_herestring_a()
+			throws Exception {
+		/* prepare */
+		String string = "<<<a";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"<<<a"
+						);	/* @formatter:on*/
+	}
 	
 	@Test
-	public void heredoc_not_found_when_a_herestring_$text_nl_b_x()
+	public void herestring_found_when_herestring_a_nl_b()
+			throws Exception {
+		/* prepare */
+		String string = "<<<a\nb";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"<<<a","b"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void herestring_found_when_herestring_a_space_b()
+			throws Exception {
+		/* prepare */
+		String string = "<<<a b";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"<<<a","b"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void herestring_found_when_herestring_space_a()
+			throws Exception {
+		/* prepare */
+		String string = "<<< a";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"<<<a"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void herestring_found_when_herestring_double_quote_a_double_quote()
+			throws Exception {
+		/* prepare */
+		String string = "<<<\"a\"";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"<<<\"a\""
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void herestring_found_when_herestring_double_quote_a_double_quote_space_X()
+			throws Exception {
+		/* prepare */
+		String string = "<<<\"a\" X";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"<<<\"a\"","X"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void herestring_found_when_a_herestring_$text()
+			throws Exception {
+		/* prepare */
+		String string = "a <<<$text";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"a", "<<<$text"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void herestring_found_when_a_herestring_space_$text()
+			throws Exception {
+		/* prepare */
+		String string = "a <<< $text";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"a", "<<<$text"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void herestring_found_when_a_herestring_space_text_multilined_string_x()
+			throws Exception {
+		/* prepare */
+		String string = "a <<< \"text\nmultilined\" x";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"a", "<<<\"text\nmultilined\"", "x"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void herestring_found_when_a_herestring_text_multilined_string_x()
+			throws Exception {
+		/* prepare */
+		String string = "a <<<\"text\nmultilined\" x";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+			assertThat(tokens).
+				containsTokens(
+						"a", "<<<\"text\nmultilined\"", "x"
+						);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void herestring_found_when_a_herestring_$text_nl_b_x()
 			throws Exception {
 		/* prepare */
 		String string = "a <<<$text\nb x";
@@ -48,12 +207,12 @@ public class TokenParserTest {
 		/* test */ /* @formatter:off*/
 			assertThat(tokens).
 				containsTokens(
-						"a", "<<<","$text","b","x"
+						"a", "<<<$text","b","x"
 						);	/* @formatter:on*/
 	}
 	
 	@Test
-	public void heredoc_not_found_when_a_herestring_space_$text_nl_b()
+	public void herestring_found_when_a_herestring_space_$text_nl_b()
 			throws Exception {
 		/* prepare */
 		String string = "a <<< $text\nb";
@@ -64,7 +223,7 @@ public class TokenParserTest {
 		/* test */ /* @formatter:off*/
 			assertThat(tokens).
 				containsTokens(
-						"a", "<<<","$text","b"
+						"a", "<<<$text","b"
 						);	/* @formatter:on*/
 	}
 
@@ -85,7 +244,7 @@ public class TokenParserTest {
 	}
 	
 	@Test
-	public void heredoc_not_found_when_a_herestring_EOF_nl_b_space_hyphen_x_nl_EOF()
+	public void herestring_found_when_a_herestring_EOF_nl_b_space_hyphen_x_nl_EOF()
 			throws Exception {
 		/* prepare */
 		String string = "a <<<EOF\nb 'x\nEOF";
@@ -96,7 +255,7 @@ public class TokenParserTest {
 		/* test */ /* @formatter:off*/
 			assertThat(tokens).
 				containsTokens(
-						"a", "<<<","EOF","b","'x\nEOF"
+						"a", "<<<EOF","b","'x\nEOF"
 						);	/* @formatter:on*/
 	}
 	
@@ -280,8 +439,8 @@ public class TokenParserTest {
 		List<ParseToken> tokens = parserToTest.parse(string);
 
 		ParseToken token = assertThat(tokens).resolveToken("$1");
-		assertEquals(0, token.start);
-		assertEquals(2, token.end);
+		assertEquals(0, token.getStart());
+		assertEquals(2, token.getEnd());
 	}
 
 	@Test
@@ -984,9 +1143,9 @@ public class TokenParserTest {
 		ParseToken token2 = it.next();
 		ParseToken token3 = it.next();
 
-		assertEquals("abc", token1.text);
-		assertEquals("def", token2.text);
-		assertEquals("ghji", token3.text);
+		assertEquals("abc", token1.getText());
+		assertEquals("def", token2.getText());
+		assertEquals("ghji", token3.getText());
 	}
 
 	@Test
@@ -1004,9 +1163,9 @@ public class TokenParserTest {
 		ParseToken token2 = it.next();
 		ParseToken token3 = it.next();
 
-		assertEquals("abc", token1.text);
-		assertEquals("def", token2.text);
-		assertEquals("ghji", token3.text);
+		assertEquals("abc", token1.getText());
+		assertEquals("def", token2.getText());
+		assertEquals("ghji", token3.getText());
 	}
 
 	@Test

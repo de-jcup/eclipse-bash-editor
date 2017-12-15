@@ -189,4 +189,12 @@ public class ParseToken {
 	public boolean isFi() {
 		return getSafeText().equals("fi");
 	}
+
+	public boolean isHereDoc() {
+		return ! isHereString() && getSafeText().startsWith("<<");
+	}
+
+	public boolean isHereString() {
+		return getSafeText().startsWith("<<<");
+	}
 }

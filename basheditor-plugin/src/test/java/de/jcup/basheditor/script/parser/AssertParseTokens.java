@@ -52,7 +52,7 @@ public class AssertParseTokens {
 	public AssertParseTokens containsToken(String text, int expectedAmount){
 		int count =0;
 		for (ParseToken token: parseTokens){
-			if (text.equals(token.text)){
+			if (text.equals(token.getText())){
 				count++;
 			}
 		}
@@ -74,7 +74,7 @@ public class AssertParseTokens {
 	public AssertParseToken token(String token, int tokenNumber){
 		int nr=0;
 		for (ParseToken found: parseTokens){
-			if (token.equals(found.text)){
+			if (token.equals(found.getText())){
 				nr++;
 				if (tokenNumber==nr){
 					return AssertParseToken.assertThat(found);
@@ -88,7 +88,7 @@ public class AssertParseTokens {
 	public AssertParseTokens containsTokens(String ...tokens){
 		List<String> found = new ArrayList<String>();
 		for (ParseToken token: parseTokens){
-			found.add(token.text);
+			found.add(token.getText());
 		} 
 		if (tokens.length != found.size()){
 			fail("Tokens length differ!\nexpected tokens:\n"+Arrays.asList(tokens)+"\nfound tokens:\n"+found);
@@ -101,7 +101,7 @@ public class AssertParseTokens {
 
 	public ParseToken resolveToken(String string) {
 		for (ParseToken token: parseTokens){
-			if (token.text.equals(string)){
+			if (token.getText().equals(string)){
 				return token;
 			}
 		} 

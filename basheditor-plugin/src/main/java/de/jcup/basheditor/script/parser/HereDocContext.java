@@ -21,8 +21,6 @@ class HereDocContext{
 	int hereDocPos;
 	int hereDocTokenEnd;
 	
-	boolean hereStringFound;
-	
 	public HereDocContext(CodePosSupport codePosSupport){
 		if (codePosSupport==null){
 			throw new IllegalArgumentException("codePosSupport may not be null!");
@@ -73,10 +71,6 @@ class HereDocContext{
 		return hereDocTokenStart == -1;
 	}
 	
-	public boolean isHereStringFound(){
-		return hereStringFound;
-	}
-
 	public String getLiteral() {
 		return literal.toString();
 	}

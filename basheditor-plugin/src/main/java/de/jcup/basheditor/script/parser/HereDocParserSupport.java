@@ -6,18 +6,6 @@ public class HereDocParserSupport {
 
 		HereDocContext context= createContext(codePosSupport);
 		
-		if (context.isHereStringFound()){
-			if (codePosSupport instanceof ParseContext){
-				context.moveToNewEndPosition(context.hereDocPos);
-				/* when the support is a parse context we additional add 
-				 * new tokens into
-				 */
-				ParseContext parseContext = (ParseContext) codePosSupport;
-				addHereStringToken(parseContext, context);
-			}
-			return false;
-		}
-		
 		if (context.isNoHereDocFound()){
 			return false;
 		}
@@ -27,7 +15,7 @@ public class HereDocParserSupport {
 			return false;
 		}
 
-		setp2_scanForContent(context);
+		step2_scanForContent(context);
 		if (! context.isHereDocValid()){
 			return false;
 		}
@@ -66,16 +54,7 @@ public class HereDocParserSupport {
 		parseContext.addToken(closingLiteralToken);
 	}
 	
-	private void addHereStringToken(ParseContext parseContext, HereDocContext context) {
-		ParseToken hereStringToken = new ParseToken();
-		hereStringToken.start = context.hereDocTokenStart;
-		hereStringToken.end = context.hereDocTokenEnd;
-		hereStringToken.text = "<<<" ;
-
-		parseContext.addToken(hereStringToken);
-	}
-
-	private void setp2_scanForContent(HereDocContext context) {
+	private void step2_scanForContent(HereDocContext context) {
 		/* CHECKPOINT 3: <<literal now defined */
 		context.endliteralFound = false;
 
@@ -147,8 +126,8 @@ public class HereDocParserSupport {
 		if (ca == null) {
 			return context;
 		}
-		if (ca.charValue()=='<'){
-			context.hereStringFound=true;
+		if (ca.charValue() == '<') {
+			/* no here-doc but here-string - so break */
 			return context;
 		}
 		// next line will mark also as initialized!
@@ -165,10 +144,9 @@ public class HereDocParserSupport {
 		}
 		StringBuilder literal = new StringBuilder();
 		if (Character.isWhitespace(ca.charValue())) {
-			/* CHECKPOINT 2a:<<.. found so get literal */
-			ca.charValue();
+			/* CHECKPOINT 2a:<< .. found so ignore and keep on getting literal */
 		} else {
-			/* CHECKPOINT 2b:<< .. found so get literal */
+			/* CHECKPOINT 2b:<<.. found so get literal */
 			literal.append(ca.charValue());
 		}
 		do {

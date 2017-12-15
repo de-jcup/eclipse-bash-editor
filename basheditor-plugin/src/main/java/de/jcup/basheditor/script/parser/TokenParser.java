@@ -25,10 +25,15 @@ import de.jcup.basheditor.script.parser.ParseContext.VariableType;
 
 public class TokenParser {
 	
+	static final char CHAR_STRING_SINGLE_APOSTROPHE = '\'';
+	static final char CHAR_STRING_DOUBLE_APOSTROPHE = '\"';
+	static final char CHAR_STRING_DOUBLE_TICKED = '`';
 	private HereDocParserSupport hereDocParserSupport;
+	private HereStringParserSupport hereStringParserSupport;
 
 	public TokenParser() {
 		hereDocParserSupport = new HereDocParserSupport();
+		hereStringParserSupport = new HereStringParserSupport();
 	}
 
 	public List<ParseToken> parse(String bashScript) throws TokenParserException {
@@ -49,7 +54,9 @@ public class TokenParser {
 				if (isStringStateHandled(context)) {
 					continue;
 				}
-
+				if (isHereStringStateHandled(context)) {
+					continue;
+				}
 				if (isHereDocStateHandled(context)) {
 					continue;
 				}
@@ -65,6 +72,10 @@ public class TokenParser {
 		return context.tokens;
 	}
 	
+	private boolean isHereStringStateHandled(ParseContext context) {
+		return hereStringParserSupport.isHereStringStateHandled(context);
+	}
+	
 	private boolean isHereDocStateHandled(ParseContext context) {
 		return hereDocParserSupport.isHereDocStateHandled(context);
 	}
@@ -72,15 +83,15 @@ public class TokenParser {
 	private boolean isStringStateHandled(ParseContext context) {
 		char c = context.getCharAtPos();
 
-		if (c == '\'') {
+		if (c == CHAR_STRING_SINGLE_APOSTROPHE) {
 			return handleString(INSIDE_SINGLE_STRING, context, INSIDE_DOUBLE_TICKED, INSIDE_DOUBLE_STRING);
 		}
 		/* handle double string */
-		if (c == '\"') {
+		if (c == CHAR_STRING_DOUBLE_APOSTROPHE) {
 			return handleString(INSIDE_DOUBLE_STRING, context, INSIDE_DOUBLE_TICKED, INSIDE_SINGLE_STRING);
 		}
 		/* handle double ticked string */
-		if (c == '`') {
+		if (c == CHAR_STRING_DOUBLE_TICKED) {
 			return handleString(INSIDE_DOUBLE_TICKED, context, INSIDE_SINGLE_STRING, INSIDE_DOUBLE_STRING);
 		}
 		if (context.insideString()) {
