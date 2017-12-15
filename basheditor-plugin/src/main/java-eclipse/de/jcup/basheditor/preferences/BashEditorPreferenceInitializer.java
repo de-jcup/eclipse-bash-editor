@@ -74,6 +74,7 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		preferences.setDefaultColor(COLOR_KNOWN_VARIABLES, DARK_GRAY);
 		preferences.setDefaultColor(COLOR_PARAMETERS, DARK_BLUE);
 		preferences.setDefaultColor(COLOR_HEREDOCS, GRAY);
+		preferences.setDefaultColor(COLOR_HERESTRINGS, LIGHT_THEME_HERESTRING);
 
 		/* ++++++++++++++ */
 		/* + Validation + */

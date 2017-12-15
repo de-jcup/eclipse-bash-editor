@@ -96,6 +96,21 @@ public interface BashEditorColorConstants {
 	 */
 	public static final RGB DARK_THEME_HEREDOC = rgb(49,98,98);
 
+	/**
+	 * A special dark cyan color for here string on dark themes
+	 */
+	public static final RGB DARK_THEME_HERESTRING = rgb(88,98,98);
+	
+	
+	/**
+	 * A special light blue color for here string on white themes
+	 */
+	public static final RGB LIGHT_THEME_HERESTRING = rgb(108,163,253);
+	
+	
+
+	
+	
 	public static RGB rgb(int r, int g, int b) {
 		return new RGB(r, g, b);
 	}

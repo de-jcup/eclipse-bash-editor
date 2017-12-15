@@ -30,6 +30,7 @@ public enum BashEditorSyntaxColorPreferenceConstants implements PreferenceIdenti
 	COLOR_KNOWN_VARIABLES("colorKnownVariables","Known variables"),
 	COLOR_PARAMETERS("colorParameters","Parameters"),
 	COLOR_HEREDOCS("colorHereDocs","Here documents"),
+	COLOR_HERESTRINGS("colorHereStrings","Here strings"),
 	
 	;
 

@@ -73,6 +73,7 @@ public class BashEditorSyntaxColorPreferencePage extends FieldEditorPreferencePa
 				changeColor(editorMap, COLOR_KNOWN_VARIABLES, BashEditorColorConstants.DARK_THEME_GRAY);
 				changeColor(editorMap, COLOR_PARAMETERS, BashEditorColorConstants.BRIGHT_CYAN);
 				changeColor(editorMap, COLOR_HEREDOCS, BashEditorColorConstants.DARK_THEME_HEREDOC);
+				changeColor(editorMap, COLOR_HERESTRINGS, BashEditorColorConstants.DARK_THEME_HERESTRING);
 				
 			}
 
