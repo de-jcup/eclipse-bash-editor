@@ -166,10 +166,6 @@
             class="de.jcup.basheditor.handlers.GotoMatchingBracketHandler">
       </handler>
       <handler
-            commandId="basheditor.editor.commands.gotomatchingbracket"
-            class="de.jcup.basheditor.handlers.GotoMatchingBracketHandler">
-      </handler>
-      <handler
             commandId="basheditor.command.openWithBashEditor"
             class="de.jcup.basheditor.handlers.OpenWithBashEditor">
       </handler>
