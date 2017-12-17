@@ -327,10 +327,15 @@ public class TokenParser {
 			return true;
 		}
 		/* normal variable or array closed */
-		if (Character.isWhitespace(c) || c == ';') {
+		if (Character.isWhitespace(c) || c == ';' || c=='}') {
 			if (isBalanced(variableContext)) {
 				context.addTokenAndResetText();
 				context.switchTo(ParserState.CODE);
+				
+				if (c=='}'){
+					context.moveBackWard(); // so { will be scanned again and so be a token...
+				}
+				
 				return true;
 			} else {
 				context.appendCharToText();

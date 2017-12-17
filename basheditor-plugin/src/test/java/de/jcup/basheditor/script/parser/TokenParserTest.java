@@ -35,9 +35,39 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
+
 	@Test
-	public void herestring_found_when_herestring_a()
-			throws Exception {
+	public void bug_92_$x_space_CurlyBrace_recognized_as_token_$x_and_token_curly_brace() throws Exception {
+		/* prepare */
+		String string = "$x }";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+				assertThat(tokens).
+					containsTokens(
+							"$x","}"
+							);	/* @formatter:on*/
+	}
+	
+	@Test
+	public void bug_92_$xCurlyBrace_recognized_as_token_$x_and_token_curly_brace() throws Exception {
+		/* prepare */
+		String string = "$x}";
+
+		/* execute */
+		List<ParseToken> tokens = parserToTest.parse(string);
+
+		/* test */ /* @formatter:off*/
+				assertThat(tokens).
+					containsTokens(
+							"$x","}"
+							);	/* @formatter:on*/
+	}
+
+	@Test
+	public void herestring_found_when_herestring_a() throws Exception {
 		/* prepare */
 		String string = "<<<a";
 
@@ -50,10 +80,9 @@ public class TokenParserTest {
 						"<<<a"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_herestring_a_nl_b()
-			throws Exception {
+	public void herestring_found_when_herestring_a_nl_b() throws Exception {
 		/* prepare */
 		String string = "<<<a\nb";
 
@@ -66,10 +95,9 @@ public class TokenParserTest {
 						"<<<a","b"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_herestring_a_space_b()
-			throws Exception {
+	public void herestring_found_when_herestring_a_space_b() throws Exception {
 		/* prepare */
 		String string = "<<<a b";
 
@@ -82,10 +110,9 @@ public class TokenParserTest {
 						"<<<a","b"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_herestring_space_a()
-			throws Exception {
+	public void herestring_found_when_herestring_space_a() throws Exception {
 		/* prepare */
 		String string = "<<< a";
 
@@ -98,10 +125,9 @@ public class TokenParserTest {
 						"<<<a"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_herestring_double_quote_a_double_quote()
-			throws Exception {
+	public void herestring_found_when_herestring_double_quote_a_double_quote() throws Exception {
 		/* prepare */
 		String string = "<<<\"a\"";
 
@@ -114,10 +140,9 @@ public class TokenParserTest {
 						"<<<\"a\""
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_herestring_double_quote_a_double_quote_space_X()
-			throws Exception {
+	public void herestring_found_when_herestring_double_quote_a_double_quote_space_X() throws Exception {
 		/* prepare */
 		String string = "<<<\"a\" X";
 
@@ -130,10 +155,9 @@ public class TokenParserTest {
 						"<<<\"a\"","X"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_a_herestring_$text()
-			throws Exception {
+	public void herestring_found_when_a_herestring_$text() throws Exception {
 		/* prepare */
 		String string = "a <<<$text";
 
@@ -146,10 +170,9 @@ public class TokenParserTest {
 						"a", "<<<$text"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_a_herestring_space_$text()
-			throws Exception {
+	public void herestring_found_when_a_herestring_space_$text() throws Exception {
 		/* prepare */
 		String string = "a <<< $text";
 
@@ -162,10 +185,9 @@ public class TokenParserTest {
 						"a", "<<<$text"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_a_herestring_space_text_multilined_string_x()
-			throws Exception {
+	public void herestring_found_when_a_herestring_space_text_multilined_string_x() throws Exception {
 		/* prepare */
 		String string = "a <<< \"text\nmultilined\" x";
 
@@ -178,10 +200,9 @@ public class TokenParserTest {
 						"a", "<<<\"text\nmultilined\"", "x"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_a_herestring_text_multilined_string_x()
-			throws Exception {
+	public void herestring_found_when_a_herestring_text_multilined_string_x() throws Exception {
 		/* prepare */
 		String string = "a <<<\"text\nmultilined\" x";
 
@@ -194,10 +215,9 @@ public class TokenParserTest {
 						"a", "<<<\"text\nmultilined\"", "x"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_a_herestring_$text_nl_b_x()
-			throws Exception {
+	public void herestring_found_when_a_herestring_$text_nl_b_x() throws Exception {
 		/* prepare */
 		String string = "a <<<$text\nb x";
 
@@ -210,10 +230,9 @@ public class TokenParserTest {
 						"a", "<<<$text","b","x"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_a_herestring_space_$text_nl_b()
-			throws Exception {
+	public void herestring_found_when_a_herestring_space_$text_nl_b() throws Exception {
 		/* prepare */
 		String string = "a <<< $text\nb";
 
@@ -228,8 +247,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void heredoc_found_when_a_heredoc_EOF_nl_b_space_hyphen_x_nl_EOF()
-			throws Exception {
+	public void heredoc_found_when_a_heredoc_EOF_nl_b_space_hyphen_x_nl_EOF() throws Exception {
 		/* prepare */
 		String string = "a <<EOF\nb 'x\nEOF";
 
@@ -242,10 +260,9 @@ public class TokenParserTest {
 						"a", "<<EOF","b 'x","EOF"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void herestring_found_when_a_herestring_EOF_nl_b_space_hyphen_x_nl_EOF()
-			throws Exception {
+	public void herestring_found_when_a_herestring_EOF_nl_b_space_hyphen_x_nl_EOF() throws Exception {
 		/* prepare */
 		String string = "a <<<EOF\nb 'x\nEOF";
 
@@ -258,10 +275,9 @@ public class TokenParserTest {
 						"a", "<<<EOF","b","'x\nEOF"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
-	public void heredoc_found_when_a_heredoc_negative_hyphen_EOF_hyphen_nl_b_space_hyphen_x_nl_EOF()
-			throws Exception {
+	public void heredoc_found_when_a_heredoc_negative_hyphen_EOF_hyphen_nl_b_space_hyphen_x_nl_EOF() throws Exception {
 		/* prepare */
 		String string = "a <<-'EOF'\nb 'x\nEOF";
 
@@ -274,8 +290,7 @@ public class TokenParserTest {
 						"a", "<<-'EOF'","b 'x","EOF"
 						);	/* @formatter:on*/
 	}
-	
-	
+
 	@Test
 	public void bug_86_heredocs_found_when_cat_gt_ampersand2_space_heredoc_negative_hyphen_EOF_hyphen_nl_echo_hyphen_one_hyphen_but_no_problem_nlEOF()
 			throws Exception {
@@ -291,7 +306,7 @@ public class TokenParserTest {
 						"cat", ">&2", "<<-'EOF'","echo 'one hyphen but no problem","EOF"
 						);	/* @formatter:on*/
 	}
-	
+
 	@Test
 	public void bug_78_heredocs_xyz_bla_space_curlybracket_xyz_newline_test__contains_also_token_test_at_end()
 			throws Exception {
@@ -513,7 +528,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_variable_array_with_string_inside_and_escaped_string_char_having_bracket() throws Exception{
+	public void a_variable_array_with_string_inside_and_escaped_string_char_having_bracket() throws Exception {
 		/* prepare */
 		String string = "$abc['\\\'nonsense]']";
 
@@ -528,7 +543,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_variable_array_with_string_inside_having_bracket() throws Exception{
+	public void a_variable_array_with_string_inside_having_bracket() throws Exception {
 		/* prepare */
 		String string = "$abc['nonsense]']";
 
@@ -543,7 +558,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_variable_curly_braced_with_string_inside_having_curly_bracket() throws Exception{
+	public void a_variable_curly_braced_with_string_inside_having_curly_bracket() throws Exception {
 		/* prepare */
 		String string = "${'nonsense }'}";
 
@@ -558,7 +573,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_variable_group_with_string_inside_having_close_bracket_like_group() throws Exception{
+	public void a_variable_group_with_string_inside_having_close_bracket_like_group() throws Exception {
 		/* prepare */
 		String string = "$('nonsense ;-)')";
 
@@ -573,7 +588,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void complex_variable_with_group() throws Exception{
+	public void complex_variable_with_group() throws Exception {
 		/* prepare */
 		String string = "DIST=$(grep \"DISTRIB_ID\" /etc/lsb-release|awk -F \"=\" '{print $2}'|tr -d \"\\\"', \\n\")";
 
@@ -589,7 +604,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void bugfix_54_a_variable_having_braces_and_a_string_inside_is_closed_by_braces() throws Exception{
+	public void bugfix_54_a_variable_having_braces_and_a_string_inside_is_closed_by_braces() throws Exception {
 
 		/* prepare */
 		String string = "BLACK=$(tput setaf 0 'STRING')";
@@ -606,7 +621,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void bugfix_54_a_variable_having_braces_is_closed_by_braces() throws Exception{
+	public void bugfix_54_a_variable_having_braces_is_closed_by_braces() throws Exception {
 
 		/* prepare */
 		String string = "BLACK=$(tput setaf 0)";
@@ -623,7 +638,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void bugfix_41_3__variable_with_array_having_string_containing_space_recognized_correct() throws Exception{
+	public void bugfix_41_3__variable_with_array_having_string_containing_space_recognized_correct() throws Exception {
 
 		/* prepare */
 		String string = "x=${y[`z1 z2`]}";
@@ -640,7 +655,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void bugfix_47__$$_is_no_longer_a_problem() throws Exception{
+	public void bugfix_47__$$_is_no_longer_a_problem() throws Exception {
 		/* prepare */
 		String string = "export DB2CLP=**$$**";
 
@@ -659,7 +674,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void bugfix_46__variable_containing_multiple_curly_end_brackets_are_supported() throws Exception{
+	public void bugfix_46__variable_containing_multiple_curly_end_brackets_are_supported() throws Exception {
 		/* prepare */
 		String string = "${NAWK:=${awk:=awk}}";
 
@@ -753,7 +768,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void $bracketPIDbracket_create_databaseDOTsql_is_recognizedas_two_tokens() throws Exception{
+	public void $bracketPIDbracket_create_databaseDOTsql_is_recognizedas_two_tokens() throws Exception {
 
 		/* prepare */
 		String string = "${PID}_create_database.sql";
@@ -766,7 +781,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void echo_$myVar1_echo_$myVar2_parsed_correctly() throws Exception{
+	public void echo_$myVar1_echo_$myVar2_parsed_correctly() throws Exception {
 		/* prepare */
 		String string = "echo $myVar1 echo $myVar2";
 
@@ -778,7 +793,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void bugfix_39__a_variable_containing_hash_is_not_recognized_as_comment()throws Exception {
+	public void bugfix_39__a_variable_containing_hash_is_not_recognized_as_comment() throws Exception {
 		/* prepare */
 		String string = "if [ ${#TitleMap[*]} -eq 0 ]";
 
@@ -791,7 +806,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void for_abc_10_newlines_x_token_x_has_position_13()throws Exception {
+	public void for_abc_10_newlines_x_token_x_has_position_13() throws Exception {
 		/* prepare */
 		String string = "abc\n\n\n\n\n\n\n\n\n\nx";
 
@@ -804,7 +819,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void for_a_cariage_return_newline_x__token_x_has_position_3() throws Exception{
+	public void for_a_cariage_return_newline_x__token_x_has_position_3() throws Exception {
 		/* prepare */
 		String string = "a\r\nx";
 		System.out.println(string);
@@ -817,7 +832,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void for_ab_cariage_return_newline_x__token_x_has_position_4() throws Exception{
+	public void for_ab_cariage_return_newline_x__token_x_has_position_4() throws Exception {
 		/* prepare */
 		String string = "ab\r\nx";
 		System.out.println(string);
@@ -1060,7 +1075,8 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_double_ticked_do_string_followed_by_space_and_ESCAPE_and_do_does_result_in_NO_do_token() throws Exception {
+	public void a_double_ticked_do_string_followed_by_space_and_ESCAPE_and_do_does_result_in_NO_do_token()
+			throws Exception {
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse("`do\\` do `");
 
@@ -1100,7 +1116,8 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_double_string_containing_double_ticked_string_has_token_with_singlestring_contained() throws Exception {
+	public void a_double_string_containing_double_ticked_string_has_token_with_singlestring_contained()
+			throws Exception {
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse("\" This is the `way` it is \"");
 
@@ -1120,7 +1137,8 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_single_string_containing_double_ticked_string_has_token_with_singlestring_contained() throws Exception {
+	public void a_single_string_containing_double_ticked_string_has_token_with_singlestring_contained()
+			throws Exception {
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse("' This is the `way` it is '");
 
@@ -1206,7 +1224,8 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void comment1_new_line_function_space_name_directly_followed_by_brackets_returns_3_tokens_comment1_function_and_name() throws Exception {
+	public void comment1_new_line_function_space_name_directly_followed_by_brackets_returns_3_tokens_comment1_function_and_name()
+			throws Exception {
 		List<ParseToken> tokens = parserToTest.parse("#comment1\nfunction name()");
 
 		assertThat(tokens).containsTokens("#comment1", "function", "name()");
