@@ -108,7 +108,7 @@
 	        name="Bash context"
 	        description="Editing bash files"
 	        parentId="org.eclipse.ui.textEditorScope"
-	        id="org.basheditor.editors.BashEditor.context">
+	        id="basheditor.editors.BashEditor.context">
 	        
 	  </context>
    </extension>
@@ -177,19 +177,19 @@
    <extension point="org.eclipse.ui.bindings">
    		<key
             sequence="M1+O"
-            contextId="org.basheditor.editors.BashEditor.context"
+            contextId="basheditor.editors.BashEditor.context"
             commandId="basheditor.editor.commands.quickoutline"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">	  
 		</key>
 		<key
             sequence="M1+7"
-            contextId="org.basheditor.editors.BashEditor.context"
+            contextId="basheditor.editors.BashEditor.context"
             commandId="basheditor.editor.commands.source.toggleComment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">	  
 		</key>
 		<key
             sequence="M1+M2+P"
-            contextId="org.basheditor.editors.BashEditor.context"
+            contextId="basheditor.editors.BashEditor.context"
             commandId="basheditor.editor.commands.gotomatchingbracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">	  
 		</key>
@@ -200,7 +200,7 @@
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
     <extension point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="popup:org.basheditor.editors.BashEditor.context?after=additions">
+            locationURI="popup:basheditor.editors.BashEditor.context?after=additions">
          <command
                commandId="basheditor.editor.commands.quickoutline"
                >
