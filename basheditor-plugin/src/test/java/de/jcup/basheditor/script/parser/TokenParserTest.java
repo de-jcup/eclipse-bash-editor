@@ -38,22 +38,29 @@ public class TokenParserTest {
 
 	@Test
 	public void bug_91_$v_slash_$_curlyb_x_array_$y_array_curly__returns_three_tokens() throws Exception {
-		assertParsing("$v/${x[$y]}").resultsIn("$v", "/", "{x[$y]}");
+		assertParsing("$v/${x[$y]}").resultsIn("$v", "/", "${x[$y]}");
 	}
 
 	@Test
 	public void bug_91_$v_space_slash_space_$_curlyb_x_array_$y_array_space_curly__returns_three_tokens()
 			throws Exception {
-		assertParsing("$v / ${x[$y] }").resultsIn("$v", "/", "{x[$y] }");
+		assertParsing("$v / ${x[$y] }").resultsIn("$v", "/", "${x[$y] }");
 	}
-
+	
 	@Test
-	public void bug_92_$x_space_CurlyBrace_recognized_as_token_$x_and_token_curly_brace() throws Exception {
+	public void bug_91_$x_space_CurlyBrace_recognized_as_token_$x_and_token_curly_brace() throws Exception {
 		assertParsing("$x }").resultsIn("$x", "}");
 	}
+	
+	@Test
+	public void bug_91_variable_with_slash_and_ending_curly_brace_results_in_three_tokens() throws Exception{
+		assertParsing("$_retVals[${pair/=*/}]=${pair/*=/}").resultsIn("$_retVals[${pair/=*/}]","=","${pair/*=/}");
+	}
 
 	@Test
-	public void bug_92_$xCurlyBrace_recognized_as_token_$x_and_token_curly_brace() throws Exception {
+	public void bug_91_$xCurlyBrace_recognized_as_token_$x_and_token_curly_brace() throws Exception {
+		// Origin problem was:
+		// lm -'%.s-' {1..$x} # <-- this the reason! "$x}" makes the problem ->"$x }" did make no problems!"
 		assertParsing("$x}").resultsIn("$x", "}");
 	}
 

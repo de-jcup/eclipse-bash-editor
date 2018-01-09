@@ -24,7 +24,7 @@ import de.jcup.basheditor.script.parser.ParseContext.VariableContext;
 import de.jcup.basheditor.script.parser.ParseContext.VariableType;
 
 public class TokenParser {
-	
+
 	static final char CHAR_STRING_SINGLE_APOSTROPHE = '\'';
 	static final char CHAR_STRING_DOUBLE_APOSTROPHE = '\"';
 	static final char CHAR_STRING_DOUBLE_TICKED = '`';
@@ -71,11 +71,11 @@ public class TokenParser {
 
 		return context.tokens;
 	}
-	
+
 	private boolean isHereStringStateHandled(ParseContext context) {
 		return hereStringParserSupport.isHereStringStateHandled(context);
 	}
-	
+
 	private boolean isHereDocStateHandled(ParseContext context) {
 		return hereDocParserSupport.isHereDocStateHandled(context);
 	}
@@ -327,22 +327,37 @@ public class TokenParser {
 			return true;
 		}
 		/* normal variable or array closed */
-		if (Character.isWhitespace(c) || c == ';' || c=='}') {
-			if (isBalanced(variableContext)) {
+		boolean balanced = isBalanced(variableContext);
+		
+		if (c == '}') {
+			if (balanced || variableContext.hasNoOpenedCurlyBraces()) {
+				/* this is a var separator - means end of variable def */
 				context.addTokenAndResetText();
 				context.switchTo(ParserState.CODE);
-				
-				if (c=='}'){
-					context.moveBackWard(); // so { will be scanned again and so be a token...
-				}
-				
+				/* no return, handle normal! */
+				return false;
+			}else{
+				context.appendCharToText();
+				return true;
+			}
+		}else if (Character.isWhitespace(c) || c == ';') {
+			if (balanced) {
+				context.addTokenAndResetText();
+				context.switchTo(ParserState.CODE);
 				return true;
 			} else {
 				context.appendCharToText();
 				return true;
 			}
-		} else if (isStringChar(c) && isBalanced(variableContext)) {
+		} else if (balanced && isStringChar(c)) {
 			/* this is a string char - means end of variable def */
+			context.addTokenAndResetText();
+			context.switchTo(ParserState.CODE);
+			/* no return, handle normal! */
+			return false;
+
+		} else if (balanced && isVarSeparator(c)) {
+			/* this is a var separator - means end of variable def */
 			context.addTokenAndResetText();
 			context.switchTo(ParserState.CODE);
 			/* no return, handle normal! */
@@ -353,6 +368,10 @@ public class TokenParser {
 			return true;
 		}
 
+	}
+
+	private boolean isVarSeparator(char c) {
+		return c=='/' || c=='=';
 	}
 
 	private boolean handleCurlyBracedVariable(ParseContext context, char c, VariableContext variableContext) {

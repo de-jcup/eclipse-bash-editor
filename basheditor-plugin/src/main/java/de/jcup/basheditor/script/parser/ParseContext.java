@@ -115,6 +115,10 @@ class ParseContext implements CodePosSupport{
 		public boolean areVariableGroupsBalanced() {
 			return variableGroupOpen == variableGroupClosed;
 		}
+
+		public boolean hasNoOpenedCurlyBraces() {
+			return variableOpenCurlyBraces==0;
+		}
 	}
 	
 	void addTokenAndResetText() {
