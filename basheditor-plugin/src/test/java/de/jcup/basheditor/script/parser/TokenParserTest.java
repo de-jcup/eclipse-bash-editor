@@ -35,309 +35,135 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
+
 	@Test
-	public void herestring_found_when_herestring_a()
-			throws Exception {
-		/* prepare */
-		String string = "<<<a";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"<<<a"
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_herestring_a_nl_b()
-			throws Exception {
-		/* prepare */
-		String string = "<<<a\nb";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"<<<a","b"
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_herestring_a_space_b()
-			throws Exception {
-		/* prepare */
-		String string = "<<<a b";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"<<<a","b"
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_herestring_space_a()
-			throws Exception {
-		/* prepare */
-		String string = "<<< a";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"<<<a"
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_herestring_double_quote_a_double_quote()
-			throws Exception {
-		/* prepare */
-		String string = "<<<\"a\"";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"<<<\"a\""
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_herestring_double_quote_a_double_quote_space_X()
-			throws Exception {
-		/* prepare */
-		String string = "<<<\"a\" X";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"<<<\"a\"","X"
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_a_herestring_$text()
-			throws Exception {
-		/* prepare */
-		String string = "a <<<$text";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"a", "<<<$text"
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_a_herestring_space_$text()
-			throws Exception {
-		/* prepare */
-		String string = "a <<< $text";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"a", "<<<$text"
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_a_herestring_space_text_multilined_string_x()
-			throws Exception {
-		/* prepare */
-		String string = "a <<< \"text\nmultilined\" x";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"a", "<<<\"text\nmultilined\"", "x"
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_a_herestring_text_multilined_string_x()
-			throws Exception {
-		/* prepare */
-		String string = "a <<<\"text\nmultilined\" x";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"a", "<<<\"text\nmultilined\"", "x"
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_a_herestring_$text_nl_b_x()
-			throws Exception {
-		/* prepare */
-		String string = "a <<<$text\nb x";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"a", "<<<$text","b","x"
-						);	/* @formatter:on*/
-	}
-	
-	@Test
-	public void herestring_found_when_a_herestring_space_$text_nl_b()
-			throws Exception {
-		/* prepare */
-		String string = "a <<< $text\nb";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"a", "<<<$text","b"
-						);	/* @formatter:on*/
+	public void bug_91_$v_slash_$_curlyb_x_array_$y_array_curly__returns_three_tokens() throws Exception {
+		assertParsing("$v/${x[$y]}").resultsIn("$v", "/", "${x[$y]}");
 	}
 
 	@Test
-	public void heredoc_found_when_a_heredoc_EOF_nl_b_space_hyphen_x_nl_EOF()
+	public void bug_91_$v_space_slash_space_$_curlyb_x_array_$y_array_space_curly__returns_three_tokens()
 			throws Exception {
-		/* prepare */
-		String string = "a <<EOF\nb 'x\nEOF";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"a", "<<EOF","b 'x","EOF"
-						);	/* @formatter:on*/
+		assertParsing("$v / ${x[$y] }").resultsIn("$v", "/", "${x[$y] }");
 	}
 	
 	@Test
-	public void herestring_found_when_a_herestring_EOF_nl_b_space_hyphen_x_nl_EOF()
-			throws Exception {
-		/* prepare */
-		String string = "a <<<EOF\nb 'x\nEOF";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"a", "<<<EOF","b","'x\nEOF"
-						);	/* @formatter:on*/
+	public void bug_91_$x_space_CurlyBrace_recognized_as_token_$x_and_token_curly_brace() throws Exception {
+		assertParsing("$x }").resultsIn("$x", "}");
 	}
 	
 	@Test
-	public void heredoc_found_when_a_heredoc_negative_hyphen_EOF_hyphen_nl_b_space_hyphen_x_nl_EOF()
-			throws Exception {
-		/* prepare */
-		String string = "a <<-'EOF'\nb 'x\nEOF";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"a", "<<-'EOF'","b 'x","EOF"
-						);	/* @formatter:on*/
+	public void bug_91_variable_with_slash_and_ending_curly_brace_results_in_three_tokens() throws Exception{
+		assertParsing("$_retVals[${pair/=*/}]=${pair/*=/}").resultsIn("$_retVals[${pair/=*/}]","=","${pair/*=/}");
 	}
-	
-	
+
+	@Test
+	public void bug_91_$xCurlyBrace_recognized_as_token_$x_and_token_curly_brace() throws Exception {
+		// Origin problem was:
+		// lm -'%.s-' {1..$x} # <-- this the reason! "$x}" makes the problem ->"$x }" did make no problems!"
+		assertParsing("$x}").resultsIn("$x", "}");
+	}
+
+	@Test
+	public void herestring_found_when_herestring_a() throws Exception {
+		assertParsing("<<<a").resultsIn("<<<a");
+	}
+
+	@Test
+	public void herestring_found_when_herestring_a_nl_b() throws Exception {
+		assertParsing("<<<a\nb").resultsIn("<<<a", "b");
+	}
+
+	@Test
+	public void herestring_found_when_herestring_a_space_b() throws Exception {
+		assertParsing("<<<a b").resultsIn("<<<a", "b");
+	}
+
+	@Test
+	public void herestring_found_when_herestring_space_a() throws Exception {
+		assertParsing("<<< a").resultsIn("<<<a");
+	}
+
+	@Test
+	public void herestring_found_when_herestring_double_quote_a_double_quote() throws Exception {
+		assertParsing("<<<\"a\"").resultsIn("<<<\"a\"");
+	}
+
+	@Test
+	public void herestring_found_when_herestring_double_quote_a_double_quote_space_X() throws Exception {
+		assertParsing("<<<\"a\" X").resultsIn("<<<\"a\"", "X");
+	}
+
+	@Test
+	public void herestring_found_when_a_herestring_$text() throws Exception {
+		assertParsing("a <<<$text").resultsIn("a", "<<<$text");
+	}
+
+	@Test
+	public void herestring_found_when_a_herestring_space_$text() throws Exception {
+		assertParsing("a <<< $text").resultsIn("a", "<<<$text");
+	}
+
+	@Test
+	public void herestring_found_when_a_herestring_space_text_multilined_string_x() throws Exception {
+		assertParsing("a <<< \"text\nmultilined\" x").resultsIn("a", "<<<\"text\nmultilined\"", "x");
+	}
+
+	@Test
+	public void herestring_found_when_a_herestring_text_multilined_string_x() throws Exception {
+		assertParsing("a <<<\"text\nmultilined\" x").resultsIn("a", "<<<\"text\nmultilined\"", "x");
+	}
+
+	@Test
+	public void herestring_found_when_a_herestring_$text_nl_b_x() throws Exception {
+		assertParsing("a <<<$text\nb x").resultsIn("a", "<<<$text", "b", "x");
+	}
+
+	@Test
+	public void herestring_found_when_a_herestring_space_$text_nl_b() throws Exception {
+		assertParsing("a <<< $text\nb").resultsIn("a", "<<<$text", "b");
+	}
+
+	@Test
+	public void heredoc_found_when_a_heredoc_EOF_nl_b_space_hyphen_x_nl_EOF() throws Exception {
+		assertParsing("a <<EOF\nb 'x\nEOF").resultsIn("a", "<<EOF", "b 'x", "EOF");
+	}
+
+	@Test
+	public void herestring_found_when_a_herestring_EOF_nl_b_space_hyphen_x_nl_EOF() throws Exception {
+		assertParsing("a <<<EOF\nb 'x\nEOF").resultsIn("a", "<<<EOF", "b", "'x\nEOF");
+	}
+
+	@Test
+	public void heredoc_found_when_a_heredoc_negative_hyphen_EOF_hyphen_nl_b_space_hyphen_x_nl_EOF() throws Exception {
+		assertParsing("a <<-'EOF'\nb 'x\nEOF").resultsIn("a", "<<-'EOF'", "b 'x", "EOF");
+	}
+
 	@Test
 	public void bug_86_heredocs_found_when_cat_gt_ampersand2_space_heredoc_negative_hyphen_EOF_hyphen_nl_echo_hyphen_one_hyphen_but_no_problem_nlEOF()
 			throws Exception {
-		/* prepare */
-		String string = "cat >&2 <<-'EOF'\necho 'one hyphen but no problem\nEOF";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"cat", ">&2", "<<-'EOF'","echo 'one hyphen but no problem","EOF"
-						);	/* @formatter:on*/
+		/* @formatter:off*/
+		assertParsing("cat >&2 <<-'EOF'\necho 'one hyphen but no problem\nEOF").
+		    resultsIn("cat", ">&2", "<<-'EOF'","echo 'one hyphen but no problem","EOF");
+		/* @formatter:on*/
 	}
-	
+
 	@Test
 	public void bug_78_heredocs_xyz_bla_space_curlybracket_xyz_newline_test__contains_also_token_test_at_end()
 			throws Exception {
-		/* prepare */
-		String string = "cat <<xyz\nbla {\nxyz\ntest";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"cat", "<<xyz","bla {","xyz","test"
-						);	/* @formatter:on*/
+		assertParsing("cat <<xyz\nbla {\nxyz\ntest").resultsIn("cat", "<<xyz", "bla {", "xyz", "test");
 	}
 
 	@Test
 	public void bug_78_heredocs_space_xyz_bla_space_curlybracket_xyz__recognized_that_bla_space_curlybracket_is_one_single_token_only()
 			throws Exception {
-		/* prepare */
-		String string = "cat << xyz\nbla {\nxyz";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"cat", "<<xyz","bla {","xyz"
-						);	/* @formatter:on*/
+		assertParsing("cat << xyz\nbla {\nxyz").resultsIn("cat", "<<xyz", "bla {", "xyz");
 	}
 
 	@Test
 	public void bug_78_heredocs_xyz_bla_space_curlybracket_xyz__recognized_that_bla_space_curlybracket_is_one_single_token_only()
 			throws Exception {
-		/* prepare */
-		String string = "cat <<xyz\nbla {\nxyz";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"cat", "<<xyz","bla {","xyz"
-						);	/* @formatter:on*/
+		assertParsing("cat <<xyz\nbla {\nxyz").resultsIn("cat", "<<xyz", "bla {", "xyz");
 	}
 
 	/*
@@ -347,17 +173,7 @@ public class TokenParserTest {
 	@Test
 	public void bug_78_heredocs_single_quote_xyz_single_quote_bla_space_curlybracket_xyz__recognized_that_bla_space_curlybracket_is_one_single_token_only()
 			throws Exception {
-		/* prepare */
-		String string = "cat <<'xyz'\nbla {\nxyz";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"cat", "<<'xyz'","bla {","xyz"
-						);	/* @formatter:on*/
+		assertParsing("cat <<'xyz'\nbla {\nxyz").resultsIn("cat", "<<'xyz'", "bla {", "xyz");
 	}
 
 	/*
@@ -367,17 +183,7 @@ public class TokenParserTest {
 	@Test
 	public void bug_78_heredocs_double_quote_xyz_double_quote_bla_space_curlybracket_xyz__recognized_that_bla_space_curlybracket_is_one_single_token_only()
 			throws Exception {
-		/* prepare */
-		String string = "cat <<\"xyz\"\nbla {\nxyz";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"cat", "<<\"xyz\"","bla {","xyz"
-						);	/* @formatter:on*/
+		assertParsing("cat <<\"xyz\"\nbla {\nxyz").resultsIn("cat", "<<\"xyz\"", "bla {", "xyz");
 	}
 
 	/*
@@ -387,47 +193,17 @@ public class TokenParserTest {
 	@Test
 	public void bug_78_heredocs_hyphen_xyz_double_quote_bla_space_curlybracket_xyz__recognized_that_bla_space_curlybracket_is_one_single_token_only()
 			throws Exception {
-		/* prepare */
-		String string = "cat <<-xyz\nbla {\nxyz";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"cat", "<<-xyz","bla {","xyz"
-						);	/* @formatter:on*/
+		assertParsing("cat <<-xyz\nbla {\nxyz").resultsIn("cat", "<<-xyz", "bla {", "xyz");
 	}
 
 	@Test
 	public void bracket_bracket_1_plus_1_bracket_close_close__recognized() throws Exception {
-		/* prepare */
-		String string = "echo $((1+1))";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"echo", "$((1+1))"
-						);	/* @formatter:on*/
+		assertParsing("echo $((1+1))").resultsIn("echo", "$((1+1))");
 	}
 
 	@Test
 	public void sbracket_sbracket_1_plus_1_sbracket_close_close__recognized() throws Exception {
-		/* prepare */
-		String string = "echo $[[1+1]]";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-			assertThat(tokens).
-				containsTokens(
-						"echo", "$[[1+1]]"
-						);	/* @formatter:on*/
+		assertParsing("echo $[[1+1]]").resultsIn("echo", "$[[1+1]]");
 	}
 
 	@Test
@@ -513,272 +289,105 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_variable_array_with_string_inside_and_escaped_string_char_having_bracket() throws Exception{
-		/* prepare */
-		String string = "$abc['\\\'nonsense]']";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"$abc['\\\'nonsense]']"
-					);	/* @formatter:on*/
+	public void a_variable_array_with_string_inside_and_escaped_string_char_having_bracket() throws Exception {
+		assertParsing("$abc['\\\'nonsense]']").resultsIn("$abc['\\\'nonsense]']");
 	}
 
 	@Test
-	public void a_variable_array_with_string_inside_having_bracket() throws Exception{
-		/* prepare */
-		String string = "$abc['nonsense]']";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"$abc['nonsense]']"
-					);	/* @formatter:on*/
+	public void a_variable_array_with_string_inside_having_bracket() throws Exception {
+		assertParsing("$abc['nonsense]']").resultsIn("$abc['nonsense]']");
 	}
 
 	@Test
-	public void a_variable_curly_braced_with_string_inside_having_curly_bracket() throws Exception{
-		/* prepare */
-		String string = "${'nonsense }'}";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"${'nonsense }'}"
-					);	/* @formatter:on*/
+	public void a_variable_curly_braced_with_string_inside_having_curly_bracket() throws Exception {
+		assertParsing("${'nonsense }'}").resultsIn("${'nonsense }'}");
 	}
 
 	@Test
-	public void a_variable_group_with_string_inside_having_close_bracket_like_group() throws Exception{
-		/* prepare */
-		String string = "$('nonsense ;-)')";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"$('nonsense ;-)')"
-					);	/* @formatter:on*/
+	public void a_variable_group_with_string_inside_having_close_bracket_like_group() throws Exception {
+		assertParsing("$('nonsense ;-)')").resultsIn("$('nonsense ;-)')");
 	}
 
 	@Test
-	public void complex_variable_with_group() throws Exception{
-		/* prepare */
-		String string = "DIST=$(grep \"DISTRIB_ID\" /etc/lsb-release|awk -F \"=\" '{print $2}'|tr -d \"\\\"', \\n\")";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"DIST=",
+	public void complex_variable_with_group() throws Exception {
+		/* @formatter:off*/
+		assertParsing("DIST=$(grep \"DISTRIB_ID\" /etc/lsb-release|awk -F \"=\" '{print $2}'|tr -d \"\\\"', \\n\")").
+		    resultsIn(
+		    		"DIST=",
 					"$(grep \"DISTRIB_ID\" /etc/lsb-release|awk -F \"=\" '{print $2}'|tr -d \"\\\"', \\n\")"
-					);	/* @formatter:on*/
-	}
-
-	@Test
-	public void bugfix_54_a_variable_having_braces_and_a_string_inside_is_closed_by_braces() throws Exception{
-
-		/* prepare */
-		String string = "BLACK=$(tput setaf 0 'STRING')";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"BLACK=",
-					"$(tput setaf 0 'STRING')"
-					);	/* @formatter:on*/
-	}
-
-	@Test
-	public void bugfix_54_a_variable_having_braces_is_closed_by_braces() throws Exception{
-
-		/* prepare */
-		String string = "BLACK=$(tput setaf 0)";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-					assertThat(tokens).
-						containsTokens(
-								"BLACK=",
-								"$(tput setaf 0)"
-								);	/* @formatter:on*/
-	}
-
-	@Test
-	public void bugfix_41_3__variable_with_array_having_string_containing_space_recognized_correct() throws Exception{
-
-		/* prepare */
-		String string = "x=${y[`z1 z2`]}";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"x=",
-					"${y[`z1 z2`]}"
-					);	/* @formatter:on*/
-	}
-
-	@Test
-	public void bugfix_47__$$_is_no_longer_a_problem() throws Exception{
-		/* prepare */
-		String string = "export DB2CLP=**$$**";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"export",
-					"DB2CLP=",
-					"**",
-					"$$",
-					"**");
+		    		);
 		/* @formatter:on*/
 	}
 
 	@Test
-	public void bugfix_46__variable_containing_multiple_curly_end_brackets_are_supported() throws Exception{
-		/* prepare */
-		String string = "${NAWK:=${awk:=awk}}";
+	public void bugfix_54_a_variable_having_braces_and_a_string_inside_is_closed_by_braces() throws Exception {
+		assertParsing("BLACK=$(tput setaf 0 'STRING')").resultsIn("BLACK=", "$(tput setaf 0 'STRING')");
+	}
 
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
+	@Test
+	public void bugfix_54_a_variable_having_braces_is_closed_by_braces() throws Exception {
+		assertParsing("BLACK=$(tput setaf 0)").resultsIn("BLACK=", "$(tput setaf 0)");
+	}
 
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"${NAWK:=${awk:=awk}}");
-		/* @formatter:on*/
+	@Test
+	public void bugfix_41_3__variable_with_array_having_string_containing_space_recognized_correct() throws Exception {
+		assertParsing("x=${y[`z1 z2`]}").resultsIn("x=", "${y[`z1 z2`]}");
+	}
+
+	@Test
+	public void bugfix_47__$$_is_no_longer_a_problem() throws Exception {
+		assertParsing("export DB2CLP=**$$**").resultsIn("export", "DB2CLP=", "**", "$$", "**");
+	}
+
+	@Test
+	public void bugfix_46__variable_containing_multiple_curly_end_brackets_are_supported() throws Exception {
+		assertParsing("${NAWK:=${awk:=awk}}").resultsIn("${NAWK:=${awk:=awk}}");
 	}
 
 	@Test
 	public void bugfix_45() throws Exception {
-		/* prepare */
-		String string = "cd \"$(dirname \"$BASH_SOURCE\")\"\n\n# Check if the database exists";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"cd",
+		/* @formatter:off*/
+		assertParsing("cd \"$(dirname \"$BASH_SOURCE\")\"\n\n# Check if the database exists").
+		    resultsIn(
+		    		"cd",
 					"\"$(dirname \"",
 					"$BASH_SOURCE",
 					"\")\"",
-					"# Check if the database exists");
+					"# Check if the database exists"
+		    		);
 		/* @formatter:on*/
 	}
 
 	@Test
 	public void bugfix_45_simplified() throws Exception {
-		/* prepare "a"$z"b" # x */
-		String string = "\"a\"$z\"b\" # x";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens( 
-					"\"a\"", //"a"
-					"$z",    //$z
-					"\"b\"", //"b"
-					"# x");  //"#x"
-		/* @formatter:on*/
+		assertParsing("\"a\"$z\"b\" # x").resultsIn("\"a\"", "$z", "\"b\"", "# x");
 	}
 
 	@Test
 	public void bugfix_43() throws Exception {
-		/* prepare */
-		String string = "alpha() { eval  \"a\"=${_e#*=} }";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"alpha()",
-					"{",
-						"eval",
-						"\"a\"=",
-						"${_e#*=}",
-					"}");
-		/* @formatter:on*/
+		assertParsing("alpha() { eval  \"a\"=${_e#*=} }").resultsIn("alpha()", "{", "eval", "\"a\"=", "${_e#*=}", "}");
 	}
 
 	@Test
 	public void bugfix_41_2_handle_arrays() throws Exception {
-		/* prepare */
-		String string = "alpha() { a=${b[`id`]} } beta(){ }";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */ /* @formatter:off*/
-		assertThat(tokens).
-			containsTokens(
-					"alpha()",
-					"{",
-					"a=",
-					"${b[`id`]}",
-					"}",
-					"beta()",
-					"{",
-					"}");
+		/* @formatter:off*/
+		assertParsing("alpha() { a=${b[`id`]} } beta(){ }").
+			resultsIn("alpha()", "{", "a=", "${b[`id`]}", "}", "beta()", "{", "}");
 		/* @formatter:on*/
 	}
 
 	@Test
-	public void $bracketPIDbracket_create_databaseDOTsql_is_recognizedas_two_tokens() throws Exception{
-
-		/* prepare */
-		String string = "${PID}_create_database.sql";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */
-		assertThat(tokens).containsTokens("${PID}", "_create_database.sql");
+	public void $bracketPIDbracket_create_databaseDOTsql_is_recognizedas_two_tokens() throws Exception {
+		assertParsing("${PID}_create_database.sql").resultsIn("${PID}", "_create_database.sql");
 	}
 
 	@Test
-	public void echo_$myVar1_echo_$myVar2_parsed_correctly() throws Exception{
-		/* prepare */
-		String string = "echo $myVar1 echo $myVar2";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */
-		assertThat(tokens).containsTokens("echo", "$myVar1", "echo", "$myVar2");
+	public void echo_$myVar1_echo_$myVar2_parsed_correctly() throws Exception {
+		assertParsing("echo $myVar1 echo $myVar2").resultsIn("echo", "$myVar1", "echo", "$myVar2");
 	}
 
 	@Test
-	public void bugfix_39__a_variable_containing_hash_is_not_recognized_as_comment()throws Exception {
+	public void bugfix_39__a_variable_containing_hash_is_not_recognized_as_comment() throws Exception {
 		/* prepare */
 		String string = "if [ ${#TitleMap[*]} -eq 0 ]";
 
@@ -791,7 +400,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void for_abc_10_newlines_x_token_x_has_position_13()throws Exception {
+	public void for_abc_10_newlines_x_token_x_has_position_13() throws Exception {
 		/* prepare */
 		String string = "abc\n\n\n\n\n\n\n\n\n\nx";
 
@@ -804,7 +413,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void for_a_cariage_return_newline_x__token_x_has_position_3() throws Exception{
+	public void for_a_cariage_return_newline_x__token_x_has_position_3() throws Exception {
 		/* prepare */
 		String string = "a\r\nx";
 		System.out.println(string);
@@ -817,7 +426,7 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void for_ab_cariage_return_newline_x__token_x_has_position_4() throws Exception{
+	public void for_ab_cariage_return_newline_x__token_x_has_position_4() throws Exception {
 		/* prepare */
 		String string = "ab\r\nx";
 		System.out.println(string);
@@ -909,74 +518,32 @@ public class TokenParserTest {
 
 	@Test
 	public void token_abc_followed_by_open_curly_brace_results_in_two_tokens() throws Exception {
-		/* prepare */
-		String string = "abc{";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */
-		assertThat(tokens).containsTokens("abc", "{");
+		assertParsing("abc{").resultsIn("abc", "{");
 	}
 
 	@Test
 	public void token_abc_followed_by_close_curly_brace_results_in_two_tokens() throws Exception {
-		/* prepare */
-		String string = "abc}";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */
-		assertThat(tokens).containsTokens("abc", "}");
+		assertParsing("abc}").resultsIn("abc", "}");
 	}
 
 	@Test
 	public void token_abc_followed_by_open_and_close_curly_brace_results_in_three_tokens() throws Exception {
-		/* prepare */
-		String string = "abc{}";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */
-		assertThat(tokens).containsTokens("abc", "{", "}");
+		assertParsing("abc{}").resultsIn("abc", "{", "}");
 	}
 
 	@Test
 	public void semicolon_abc_results_in_token_abc_only() throws Exception {
-		/* prepare */
-		String string = ";abc";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */
-		assertThat(tokens).containsTokens("abc");
+		assertParsing(";abc").resultsIn("abc");
 	}
 
 	@Test
 	public void semicolon_abc_semicolon_def_results_in_tokens_abc_and_def() throws Exception {
-		/* prepare */
-		String string = ";abc;def";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */
-		assertThat(tokens).containsTokens("abc", "def");
+		assertParsing(";abc;def").resultsIn("abc", "def");
 	}
 
 	@Test
 	public void semicolon_abc_space_def_results_in_tokens_abc_and_def() throws Exception {
-		/* prepare */
-		String string = ";abc def";
-
-		/* execute */
-		List<ParseToken> tokens = parserToTest.parse(string);
-
-		/* test */
-		assertThat(tokens).containsTokens("abc", "def");
+		assertParsing(";abc def").resultsIn("abc", "def");
 	}
 
 	@Test
@@ -1060,7 +627,8 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_double_ticked_do_string_followed_by_space_and_ESCAPE_and_do_does_result_in_NO_do_token() throws Exception {
+	public void a_double_ticked_do_string_followed_by_space_and_ESCAPE_and_do_does_result_in_NO_do_token()
+			throws Exception {
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse("`do\\` do `");
 
@@ -1100,7 +668,8 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_double_string_containing_double_ticked_string_has_token_with_singlestring_contained() throws Exception {
+	public void a_double_string_containing_double_ticked_string_has_token_with_singlestring_contained()
+			throws Exception {
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse("\" This is the `way` it is \"");
 
@@ -1120,7 +689,8 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void a_single_string_containing_double_ticked_string_has_token_with_singlestring_contained() throws Exception {
+	public void a_single_string_containing_double_ticked_string_has_token_with_singlestring_contained()
+			throws Exception {
 		/* execute */
 		List<ParseToken> tokens = parserToTest.parse("' This is the `way` it is '");
 
@@ -1206,10 +776,33 @@ public class TokenParserTest {
 	}
 
 	@Test
-	public void comment1_new_line_function_space_name_directly_followed_by_brackets_returns_3_tokens_comment1_function_and_name() throws Exception {
+	public void comment1_new_line_function_space_name_directly_followed_by_brackets_returns_3_tokens_comment1_function_and_name()
+			throws Exception {
 		List<ParseToken> tokens = parserToTest.parse("#comment1\nfunction name()");
 
 		assertThat(tokens).containsTokens("#comment1", "function", "name()");
+	}
+
+	/* -------------------------------------------------------------------- */
+	/* --------------------------- Helpers -------------------------------- */
+	/* -------------------------------------------------------------------- */
+	private class AssertTokenParser {
+		private String code;
+
+		public AssertTokenParser(String code) {
+			this.code = code;
+		}
+
+		public void resultsIn(String... expectedTokens) throws TokenParserException {
+			List<ParseToken> tokens = parserToTest.parse(code);
+
+			assertThat(tokens).containsTokens(expectedTokens);
+		}
+
+	}
+
+	private AssertTokenParser assertParsing(String code) {
+		return new AssertTokenParser(code);
 	}
 
 }
