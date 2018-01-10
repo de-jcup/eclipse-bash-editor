@@ -40,8 +40,8 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getElements(Object inputElement) {
 		synchronized (monitor) {
-			if (inputElement!=null && !(inputElement instanceof BashScriptModel)) {
-				return new Object[] { "Unsupported input element:"+inputElement };
+			if (inputElement != null && !(inputElement instanceof BashScriptModel)) {
+				return new Object[] { "Unsupported input element:" + inputElement };
 			}
 			if (items != null && items.length > 0) {
 				return items;
@@ -73,7 +73,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.type = ItemType.FUNCTION;
 			item.offset = function.getPosition();
 			item.length = function.getLengthToNameEnd();
-			item.endOffset=function.getEnd();
+			item.endOffset = function.getEnd();
 			list.add(item);
 		}
 		if (list.isEmpty()) {
@@ -82,27 +82,28 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.type = ItemType.META_INFO;
 			item.offset = 0;
 			item.length = 0;
-			item.endOffset=0;
+			item.endOffset = 0;
 			list.add(item);
 		}
-		if (model.hasErrors()) {
-			Item item = new Item();
-			item.name = BASH_SCRIPT_CONTAINS_ERRORS;
-			item.type = ItemType.META_ERROR;
-			item.offset = 0;
-			item.length = 0;
-			item.endOffset=0;
-			list.add(0, item);
-		}
-		/* debug part*/
-		if (model.hasDebugTokens()){
-			for(ParseToken token: model.getDebugTokens()){
+		/* debug part */
+		if (model.hasDebugTokens()) {
+			if (model.hasErrors()) {
 				Item item = new Item();
-				item.name = SimpleStringUtils.shortString(token.getText(),40)+" :<- "+token.createTypeDescription();
+				item.name = BASH_SCRIPT_CONTAINS_ERRORS;
+				item.type = ItemType.META_ERROR;
+				item.offset = 0;
+				item.length = 0;
+				item.endOffset = 0;
+				list.add(0, item);
+			}
+			for (ParseToken token : model.getDebugTokens()) {
+				Item item = new Item();
+				item.name = SimpleStringUtils.shortString(token.getText(), 40) + " :<- "
+						+ token.createTypeDescription();
 				item.type = ItemType.META_DEBUG;
 				item.offset = token.getStart();
 				item.length = token.getText().length();
-				item.endOffset=token.getEnd();
+				item.endOffset = token.getEnd();
 				list.add(item);
 			}
 		}
@@ -122,21 +123,22 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 
 	public Item tryToFindByOffset(int offset) {
 		synchronized (monitor) {
-			if (items==null){
+			if (items == null) {
 				return null;
 			}
-			for (Object oitem: items){
-				if (!(oitem instanceof Item)){
+			for (Object oitem : items) {
+				if (!(oitem instanceof Item)) {
 					continue;
 				}
 				Item item = (Item) oitem;
 				int itemStart = item.getOffset();
-				int itemEnd = item.getEndOffset();// old: itemStart+item.getLength();
-				if (offset >= itemStart && offset<=itemEnd ){
+				int itemEnd = item.getEndOffset();// old:
+													// itemStart+item.getLength();
+				if (offset >= itemStart && offset <= itemEnd) {
 					return item;
 				}
 			}
-			
+
 		}
 		return null;
 	}

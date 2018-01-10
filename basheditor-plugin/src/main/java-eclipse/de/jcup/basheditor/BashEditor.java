@@ -150,10 +150,19 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	}
 
 	void setTitleImageDependingOnSeverity(int severity) {
-		if (severity == IMarker.SEVERITY_ERROR) {
-			setTitleImage(EclipseUtil.getImage("icons/bash-editor-with-error.png", BashEditorActivator.PLUGIN_ID));
-		} else {
-			setTitleImage(EclipseUtil.getImage("icons/bash-editor.png", BashEditorActivator.PLUGIN_ID));
+		setTitleImage(EclipseUtil.getImage("icons/" + getTitleImageName(severity), BashEditorActivator.PLUGIN_ID));
+	}
+
+	private String getTitleImageName(int severity) {
+		switch (severity) {
+		case IMarker.SEVERITY_ERROR:
+			return "bash-editor-with-error.png";
+		case IMarker.SEVERITY_WARNING:
+			return "bash-editor-with-warning.png";
+		case IMarker.SEVERITY_INFO:
+			return "bash-editor-with-info.png";
+		default:
+			return "bash-editor.png";
 		}
 	}
 
