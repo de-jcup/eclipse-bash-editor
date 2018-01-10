@@ -709,4 +709,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		}
 
 	}
+
+	public void validate() {
+		rebuildOutline();
+	}
 }

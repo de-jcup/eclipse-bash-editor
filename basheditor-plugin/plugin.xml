@@ -141,6 +141,12 @@
             categoryId="basheditor.commands.category"
             id="basheditor.editor.commands.source.toggleComment">
       </command>
+       <command
+            name="Validate bash script"
+            description="Validate bash script"
+            categoryId="basheditor.commands.category"
+            id="basheditor.editor.commands.source.validate">
+      </command>
       <command
             name="Goto matching bracket"
             description="Goto matching bracket inside gradle document"
@@ -160,6 +166,10 @@
       <handler
             commandId="basheditor.editor.commands.source.toggleComment"
             class="de.jcup.basheditor.handlers.ToggleCommentHandler">
+      </handler>
+      <handler
+            commandId="basheditor.editor.commands.source.validate"
+            class="de.jcup.basheditor.handlers.ValidateHandler">
       </handler>
       <handler
             commandId="basheditor.editor.commands.gotomatchingbracket"
@@ -202,8 +212,12 @@
       <menuContribution
             locationURI="popup:basheditor.editors.BashEditor.context?after=additions">
          <command
+               commandId="basheditor.editor.commands.source.validate" icon="icons/bash-editor.png"
+               >
+         <command
                commandId="basheditor.editor.commands.quickoutline"
                >
+         </command>
          </command>
       </menuContribution>
       
@@ -221,7 +235,10 @@
                             value="de.jcup.basheditor.BashEditor"/>
                      </with>
                </visibleWhen>
-            <command commandId="basheditor.editor.commands.source.toggleComment">
+            <command commandId="basheditor.editor.commands.source.toggleComment" />
+            <command 
+            	commandId="basheditor.editor.commands.source.validate" 
+            	icon="icons/bash-editor.png">
             </command>
          </menu>
       </menuContribution>
