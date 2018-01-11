@@ -13,49 +13,25 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.script.parser.validator;
+package de.jcup.basheditor.script.parser.validator;
 
-import java.util.List;
-
-import de.jcup.basheditor.script.BashError;
-import de.jcup.basheditor.script.ValidationResult;
 import de.jcup.basheditor.script.parser.ParseToken;
 
-public class IfEndsWithFiValidator extends AbstractParseTokenListValidator {
+public class IfEndsWithFiValidator extends AbstractFindMissingEndStatementsValidator {
 
 	@Override
-	protected void doValidation(List<ParseToken> tokens, List<ValidationResult> result) {
-		ParseToken inspectedUnchainedIfToken = null;
-		int countOfIf = 0;
-		int countOfFi = 0;
-		for (ParseToken token : tokens) {
-			if (token==null){
-				continue;
-			}
-			if (inspectedUnchainedIfToken == null) {
-				inspectedUnchainedIfToken = token;
-			}
-			if (token.isIf()) {
-				if (countOfIf == countOfFi) {
-					/*
-					 * former if was closed - so set this token as last
-					 * inspected unchained token
-					 */
-					inspectedUnchainedIfToken = token;
-				}
-				countOfIf++;
-			} else if (token.isFi()) {
-				if (countOfIf > 0) {
-					countOfFi++;
-				}
-			}
-		}
-		if (countOfIf!=countOfFi){
-			if (inspectedUnchainedIfToken!=null){
-				BashError error = new BashError(inspectedUnchainedIfToken.getStart(),inspectedUnchainedIfToken.getEnd(),"This 'if' statement is not correct closed. A 'fi' is missing");
-				result.add(error);
-			}
-		}
+	protected boolean isStartToken(ParseToken token) {
+		return token.isIf();
+	}
+
+	@Override
+	protected boolean isCloseToken(ParseToken token) {
+		return token.isFi();
+	}
+
+	@Override
+	protected String createMissingCloseTokenMessage() {
+		return "This 'if' statement is not correct closed. A 'fi' is missing";
 	}
 
 }

@@ -17,17 +17,18 @@ package de.jcup.basheditor.script.parser.validator;
 
 import de.jcup.basheditor.script.parser.ParseToken;
 
-public class DoEndsWithDoneValidator extends AbstractFindMissingEndStatementsValidator{
+public class CaseEndsWithEsacValidator extends AbstractFindMissingEndStatementsValidator{
 	
 	protected String createMissingCloseTokenMessage() {
-		return "This 'do' is not correct closed. A 'done' is missing";
-	}
-
-	protected boolean isCloseToken(ParseToken token) {
-		return token.isDone();
+		return "This 'case' is not correct closed. A 'esac' is missing";
 	}
 
 	protected boolean isStartToken(ParseToken token) {
-		return token.isDo();
+		return token.isCase();
 	}
+
+	protected boolean isCloseToken(ParseToken token) {
+		return token.isEsac();
+	}
+
 }

@@ -21,6 +21,7 @@ import java.util.List;
 import de.jcup.basheditor.script.parser.ParseToken;
 import de.jcup.basheditor.script.parser.TokenParser;
 import de.jcup.basheditor.script.parser.TokenParserException;
+import de.jcup.basheditor.script.parser.validator.CaseEndsWithEsacValidator;
 import de.jcup.basheditor.script.parser.validator.ClosedBlocksValidator;
 import de.jcup.basheditor.script.parser.validator.DoEndsWithDoneValidator;
 import de.jcup.basheditor.script.parser.validator.IfEndsWithFiValidator;
@@ -107,6 +108,7 @@ public class BashScriptModelBuilder {
 		}
 		if (!ignoreIfValidation) {
 			validators.add(new IfEndsWithFiValidator());
+			validators.add(new CaseEndsWithEsacValidator());
 		}
 		return validators;
 	}

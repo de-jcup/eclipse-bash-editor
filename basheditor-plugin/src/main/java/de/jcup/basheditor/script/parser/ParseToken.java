@@ -81,6 +81,12 @@ public class ParseToken {
 		if (isFi()){
 			sb.append("FI");
 		}
+		if (isCase()){
+			sb.append("CASE");
+		}
+		if (isEsac()){
+			sb.append("ESAC");
+		}
 		if (isDo()){
 			sb.append("DO");
 		}
@@ -196,5 +202,13 @@ public class ParseToken {
 
 	public boolean isHereString() {
 		return getSafeText().startsWith("<<<");
+	}
+
+	public boolean isCase() {
+		return getSafeText().equals("case");
+	}
+	
+	public boolean isEsac() {
+		return getSafeText().equals("esac");
 	}
 }
