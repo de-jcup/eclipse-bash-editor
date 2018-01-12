@@ -26,183 +26,114 @@ import org.junit.Test;
 import de.jcup.basheditor.script.ValidationResult;
 import de.jcup.basheditor.script.parser.ParseToken;
 import de.jcup.basheditor.script.parser.TestParseToken;
-
+import static de.jcup.basheditor.script.parser.validator.AssertTokenValidator.*;
 public class CaseEndsWithEsacValidatorTest {
 
 	private CaseEndsWithEsacValidator validatorToTest;
-	private ArrayList<ParseToken> tokens;
 	
 	@Before
 	public void before(){
 		validatorToTest = new CaseEndsWithEsacValidator();
-		tokens = new ArrayList<>();
 	}
 	
 	@Test
 	public void esac_case_has_problem() {
-		/* prepare */
-		tokens.add(new TestParseToken("esac"));
-		tokens.add(new TestParseToken("case"));
-		
-		/* execute */
-		List<ValidationResult> results = validatorToTest.validate(tokens);
-		
-		/* test */
-		assertEquals(1,results.size());
+		/* @formatter:off*/
+		assertThat(validatorToTest).
+			withTokens("esac","case").
+		isNotValid().
+		hasValidationErrors(1);
+		/* @formatter:on*/
 	}
 	
 	@Test
 	public void case_esac_esac_has_problem() {
-		/* prepare */
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("esac"));
-		tokens.add(new TestParseToken("case"));
-		
-		/* execute */
-		List<ValidationResult> results = validatorToTest.validate(tokens);
-		
-		/* test */
-		assertEquals(1,results.size());
+		/* @formatter:off*/
+		assertThat(validatorToTest).
+			withTokens("case","esac","case").
+		isNotValid().
+		hasValidationErrors(1);
+		/* @formatter:on*/
 	}
 	
 	@Test
 	public void case_something_esac__has_no_problems() {
-		/* prepare */
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("something"));
-		tokens.add(new TestParseToken("esac"));
-		
-		/* execute */
-		List<ValidationResult> results = validatorToTest.validate(tokens);
-		
-		/* test */
-		assertEquals(0,results.size());
+		/* @formatter:off*/
+		assertThat(validatorToTest).
+			withTokens("case","something","esac").
+		isValid();
+		/* @formatter:on*/
 	}
 	
 	@Test
 	public void case_something_casexne__has_problem() {
-		/* prepare */
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("something"));
-		tokens.add(new TestParseToken("casexne"));
-		
-		/* execute */
-		List<ValidationResult> results = validatorToTest.validate(tokens);
-		
-		/* test */
-		assertEquals(1,results.size());
-		ValidationResult validationResult = results.iterator().next();
-		assertEquals(ValidationResult.Type.ERROR, validationResult.getType());
+		/* @formatter:off*/
+		assertThat(validatorToTest).
+			withTokens("case","something","casexne").
+		isNotValid().
+		hasValidationErrors(1);
+		/* @formatter:on*/
 	}
 
 	
 	@Test
 	public void case_something_has_problem() {
-		/* prepare */
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("something"));
-		
-		/* execute */
-		List<ValidationResult> results = validatorToTest.validate(tokens);
-		
-		/* test */
-		assertEquals(1,results.size());
-		ValidationResult validationResult = results.iterator().next();
-		assertEquals(ValidationResult.Type.ERROR, validationResult.getType());
+		/* @formatter:off*/
+		assertThat(validatorToTest).
+			withTokens("case","something").
+		isNotValid().
+		hasValidationErrors(1);
+		/* @formatter:on*/
 	}
 	
 	
 	@Test
 	public void case_something_case_something2_esac_has_problem() {
-		/* prepare */
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("something"));
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("something2"));
-		tokens.add(new TestParseToken("esac"));
-		
-		/* execute */
-		List<ValidationResult> results = validatorToTest.validate(tokens);
-		
-		/* test */
-		assertEquals(1,results.size());
-		ValidationResult validationResult = results.iterator().next();
-		assertEquals(ValidationResult.Type.ERROR, validationResult.getType());
+		/* @formatter:off*/
+		assertThat(validatorToTest).
+			withTokens("case","something","case","something2","esac").
+		isNotValid().
+		hasValidationErrors(1);
+		/* @formatter:on*/
 	}
 	
 	@Test
 	public void case_something_esac_something2_esac_has_problem() {
-		/* prepare */
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("something"));
-		tokens.add(new TestParseToken("esac"));
-		tokens.add(new TestParseToken("something2"));
-		tokens.add(new TestParseToken("esac"));
-		
-		/* execute */
-		List<ValidationResult> results = validatorToTest.validate(tokens);
-		
-		/* test */
-		assertEquals(1,results.size());
-		ValidationResult validationResult = results.iterator().next();
-		assertEquals(ValidationResult.Type.ERROR, validationResult.getType());
+		/* @formatter:off*/
+		assertThat(validatorToTest).
+			withTokens("case","something","esac","something2","esac").
+		isNotValid().
+		hasValidationErrors(1);
+		/* @formatter:on*/
 	}
 	
 	@Test
 	public void case_x_esac_case_y_esac_case_esac_esac_case__has_problem() {
-		/* prepare */
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("x"));
-		tokens.add(new TestParseToken("esac"));
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("y"));
-		tokens.add(new TestParseToken("esac"));
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("esac"));
-		tokens.add(new TestParseToken("case"));
-		/* execute */
-		List<ValidationResult> results = validatorToTest.validate(tokens);
-		
-		/* test */
-		assertEquals(1,results.size());
-		ValidationResult validationResult = results.iterator().next();
-		assertEquals(ValidationResult.Type.ERROR, validationResult.getType());
+		/* @formatter:off*/
+		assertThat(validatorToTest).
+			withTokens("case","x","esac","case","y","esac","case","esac","case").
+		isNotValid().
+		hasValidationErrors(1);
+		/* @formatter:on*/
 	}
 	
 	@Test
 	public void case_something_case_something2_esac_esac_has_no_problems() {
-		/* prepare */
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("something"));
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("something2"));
-		tokens.add(new TestParseToken("esac"));
-		tokens.add(new TestParseToken("esac"));
-		
-		/* execute */
-		List<ValidationResult> results = validatorToTest.validate(tokens);
-		
-		/* test */
-		assertEquals(0,results.size());
+		/* @formatter:off*/
+		assertThat(validatorToTest).
+			withTokens("case","something","case","something2","esac","esac").
+		isValid();
+		/* @formatter:on*/
 	}
 	
 	@Test
 	public void case_something_simple_string_with_case_something2_esac_esac_has_problems() {
-		/* prepare */
-		tokens.add(new TestParseToken("case"));
-		tokens.add(new TestParseToken("something"));
-		tokens.add(new TestParseToken("'case'"));
-		tokens.add(new TestParseToken("something2"));
-		tokens.add(new TestParseToken("esac"));
-		tokens.add(new TestParseToken("esac"));
-		
-		/* execute */
-		List<ValidationResult> results = validatorToTest.validate(tokens);
-		
-		/* test */
-		assertEquals(1,results.size());
-		ValidationResult validationResult = results.iterator().next();
-		assertEquals(ValidationResult.Type.ERROR, validationResult.getType());
+		/* @formatter:off*/
+		assertThat(validatorToTest).
+			withTokens("case","something","'case'","something2","esac","esac").
+		isNotValid().
+			hasValidationErrors(1);
+		/* @formatter:on*/
 	}
 	
 }
