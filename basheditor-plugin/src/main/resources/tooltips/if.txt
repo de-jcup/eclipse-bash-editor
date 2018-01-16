@@ -1,0 +1,43 @@
+The syntax of the if command is:
+
+	if test-commands; then
+	  consequent-commands;
+	[elif more-test-commands; then
+	  more-consequents;]
+	[else alternate-consequents;]
+	fi
+
+The test-commands list is executed, and if its return status is zero, the consequent-commands list is executed. If test-commands returns a non-zero status, each elif list is executed in turn, and if its exit status is zero, the corresponding more-consequents is executed and the command completes. If ‘else alternate-consequents’ is present, and the final command in the final if or elif clause has a non-zero exit status, then alternate-consequents is executed. The return status is the exit status of the last command executed, or zero if no condition tested true.
+
+Example:
+========
+(from http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_07_02.html)
+
+Inside the if statement, you can use another if statement. You may use as many levels of nested ifs as you can logically manage.
+
+This is an example testing leap years:
+
+
+anny ~/testdir> cat testleap.sh
+	#!/bin/bash
+	# This script will test if we're in a leap year or not.
+	
+	year=`date +%Y`
+	
+	if [ $[$year % 400] -eq "0" ]; then
+	  echo "This is a leap year.  February has 29 days."
+	elif [ $[$year % 4] -eq 0 ]; then
+	        if [ $[$year % 100] -ne 0 ]; then
+	          echo "This is a leap year, February has 29 days."
+	        else
+	          echo "This is not a leap year.  February has 28 days."
+	        fi
+	else
+	  echo "This is not a leap year.  February has 28 days."
+	fi
+
+anny ~/testdir> date
+Tue Jan 14 20:37:55 CET 2003
+
+anny ~/testdir> testleap.sh
+This is not a leap year.

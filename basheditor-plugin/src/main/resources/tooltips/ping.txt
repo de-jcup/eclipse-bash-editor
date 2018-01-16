@@ -1,0 +1,11 @@
+The ping command (named after the sound of an active sonar system) sends echo requests to the host you specify on the command line, and lists the responses received their round trip time.
+
+You simply use ping as:
+
+ping ip_or_host_name
+Note to stop ping (otherwise it goes forever) use CTRL-C (break).
+
+Please note: Using ping/smbmount/ssh or other UNIX system programs with a computer name rather than IP address will only work if you have the computer listed in your /etc/hosts file. Here is an example:
+
+192.168.1.100 new 
+This line says that their is a computer called “new” with IP address 192.168.1.100. Now that it exists in the /etc/hosts file I don't have to type the IP address anymore, just the name “new”.

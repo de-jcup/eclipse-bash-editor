@@ -1,0 +1,10 @@
+Runs a command as root (or another user). This may be used in a script, thus permitting a regular user to run the script.
+
+Example:
+========
+
+#!/bin/bash
+
+# Some commands.
+sudo cp /root/secretfile /home/bozo/secret
+# Some more commands.

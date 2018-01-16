@@ -1,0 +1,39 @@
+Awk is a full-featured text processing language with a syntax reminiscent of C. While it possesses an extensive set of operators and capabilities, we will cover only a few of these here - the ones most useful in shell scripts.
+
+Awk breaks each line of input passed to it into fields. By default, a field is a string of consecutive characters delimited by whitespace, though there are options for changing this. Awk parses and operates on each separate field. This makes it ideal for handling structured text files -- especially tables -- data organized into consistent chunks, such as rows and columns.
+
+Strong quoting and curly brackets enclose blocks of awk code within a shell script.
+
+# $1 is field #1, $2 is field #2, etc.
+
+echo one two | awk '{print $1}'
+# one
+
+echo one two | awk '{print $2}'
+# two
+
+# But what is field #0 ($0)?
+echo one two | awk '{print $0}'
+# one two
+# All the fields!
+
+
+awk '{print $3}' $filename
+# Prints field #3 of file $filename to stdout.
+
+awk '{print $1 $5 $6}' $filename
+# Prints fields #1, #5, and #6 of file $filename.
+
+awk '{print $0}' $filename
+# Prints the entire file!
+# Same effect as:   cat $filename . . . or . . . sed '' $filename
+
+We have just seen the awk print command in action. The only other feature of awk we need to deal with here is variables. Awk handles variables similarly to shell scripts, though a bit more flexibly.
+
+{ total += ${column_number} }
+This adds the value of column_number to the running total of total>. Finally, to print "total", there is an END command block, executed after the script has processed all its input.
+END { print total }
+
+Corresponding to the END, there is a BEGIN, for a code block to be performed before awk starts processing its input.
+
+The following example illustrates how awk can add text-parsing tools to a shell script.

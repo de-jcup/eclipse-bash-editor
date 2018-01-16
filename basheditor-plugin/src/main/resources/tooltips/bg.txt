@@ -1,0 +1,119 @@
+NAME
+       bg - run jobs in the background
+
+SYNOPSIS
+       bg [job_id ...]
+
+DESCRIPTION
+       If  job	control  is  enabled (see the description of set -m), the bg utility shall resume
+       suspended jobs from the current environment (see Shell Execution Environment ) by  running
+       them  as  background  jobs. If the job specified by job_id is already a running background
+       job, the bg utility shall have no effect and shall exit successfully.
+
+       Using bg to place a job into the background shall cause its process ID to become "known in
+       the  current  shell  execution  environment", as if it had been started as an asynchronous
+       list; see Asynchronous Lists .
+
+OPTIONS
+       None.
+
+OPERANDS
+       The following operand shall be supported:
+
+       job_id Specify the job to be resumed as a background job. If no job_id operand  is  given,
+	      the most recently suspended job shall be used. The format of job_id is described in
+	      the Base Definitions volume of IEEE Std 1003.1-2001, Section 3.203, Job Control Job
+	      ID.
+
+STDIN
+       Not used.
+
+INPUT FILES
+       None.
+
+ENVIRONMENT VARIABLES
+       The following environment variables shall affect the execution of bg:
+
+       LANG   Provide  a  default  value for the internationalization variables that are unset or
+	      null. (See the Base Definitions volume of IEEE Std 1003.1-2001, Section 8.2, Inter-
+	      nationalization Variables for the precedence of internationalization variables used
+	      to determine the values of locale categories.)
+
+       LC_ALL If set to a non-empty string value, override the values of all the  other  interna-
+	      tionalization variables.
+
+       LC_CTYPE
+	      Determine  the  locale for the interpretation of sequences of bytes of text data as
+	      characters (for example, single-byte as opposed to multi-byte characters	in  argu-
+	      ments).
+
+       LC_MESSAGES
+	      Determine the locale that should be used to affect the format and contents of diag-
+	      nostic messages written to standard error.
+
+       NLSPATH
+	      Determine the location of message catalogs for the processing of LC_MESSAGES .
+
+ASYNCHRONOUS EVENTS
+       Default.
+
+STDOUT
+       The output of bg shall consist of a line in the format:
+
+	      "[%d] %s\n", <job-number>, <command>
+
+       where the fields are as follows:
+
+       <job-number>
+	      A number that can be used to identify the job to the wait, fg, and kill  utilities.
+	      Using  these  utilities, the job can be identified by prefixing the job number with
+	      '%' .
+
+       <command>
+	      The associated command that was given to the shell.
+
+STDERR
+       The standard error shall be used only for diagnostic messages.
+
+OUTPUT FILES
+       None.
+
+EXTENDED DESCRIPTION
+       None.
+
+EXIT STATUS
+       The following exit values shall be returned:
+
+	0     Successful completion.
+
+       >0     An error occurred.
+
+CONSEQUENCES OF ERRORS
+       If job control is disabled, the bg utility shall exit with an error and no  job	shall  be
+       placed in the background.
+
+       The following sections are informative.
+
+APPLICATION USAGE
+       A  job  is generally suspended by typing the SUSP character (<control>-Z on most systems);
+       see the Base Definitions volume of  IEEE Std 1003.1-2001,  Chapter  11,	General  Terminal
+       Interface.   At that point, bg can put the job into the background. This is most effective
+       when the job is expecting no terminal input and its output has been redirected to non-ter-
+       minal files. A background job can be forced to stop when it has terminal output by issuing
+       the command:
+
+	      stty tostop
+
+       A background job can be stopped with the command:
+
+	      kill -s stop job ID
+
+       The bg utility does not work as expected when it is operating in its own utility execution
+       environment because that environment has no suspended jobs. In the following examples:
+
+	      ... | xargs bg
+	      (bg)
+
+       each  bg  operates in a different environment and does not share its parent shell's under-
+       standing of jobs. For this reason, bg is generally implemented as a shell  regular  built-
+       in.

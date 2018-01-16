@@ -1,0 +1,25 @@
+The syntax of the case command is:
+
+	case word in [ [(] pattern [| pattern]…) command-list ;;]… esac
+
+case will selectively execute the command-list corresponding to the first pattern that matches word. If the nocasematch shell option (see the description of shopt in The Shopt Builtin) is enabled, the match is performed without regard to the case of alphabetic characters. The ‘|’ is used to separate multiple patterns, and the ‘)’ operator terminates a pattern list. A list of patterns and an associated command-list is known as a clause.
+
+Each clause must be terminated with ‘;;’, ‘;&’, or ‘;;&’. The word undergoes tilde expansion, parameter expansion, command substitution, arithmetic expansion, and quote removal before matching is attempted. Each pattern undergoes tilde expansion, parameter expansion, command substitution, and arithmetic expansion.
+
+There may be an arbitrary number of case clauses, each terminated by a ‘;;’, ‘;&’, or ‘;;&’. The first pattern that matches determines the command-list that is executed. It’s a common idiom to use ‘*’ as the final pattern to define the default case, since that pattern will always match.
+
+Here is an example using case in a script that could be used to describe one interesting feature of an animal:
+
+	echo -n "Enter the name of an animal: "
+	read ANIMAL
+	echo -n "The $ANIMAL has "
+	case $ANIMAL in
+	  horse | dog | cat) echo -n "four";;
+	  man | kangaroo ) echo -n "two";;
+	  *) echo -n "an unknown number of";;
+	esac
+	echo " legs."
+	
+If the ‘;;’ operator is used, no subsequent matches are attempted after the first pattern match. Using ‘;&’ in place of ‘;;’ causes execution to continue with the command-list associated with the next clause, if any. Using ‘;;&’ in place of ‘;;’ causes the shell to test the patterns in the next clause, if any, and execute any associated command-list on a successful match.
+
+The return status is zero if no pattern is matched. Otherwise, the return status is the exit status of the command-list executed.

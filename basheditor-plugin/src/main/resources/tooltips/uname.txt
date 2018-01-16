@@ -1,0 +1,20 @@
+Output system specifications (OS, kernel version, etc.) to stdout.
+
+Options:
+======== 
+Invoked with the -a option, gives verbose system info. 
+The -s option shows only the OS type.
+
+
+Examples:
+=========
+bash$ uname
+Linux
+
+bash$ uname -s
+Linux
+
+bash$ uname -a
+Linux iron.bozo 2.6.15-1.2054_FC5 #1 Tue Mar 14 15:48:33 EST 2006
+ i686 i686 i386 GNU/Linux
+ 

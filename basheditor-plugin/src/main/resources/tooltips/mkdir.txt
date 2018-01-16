@@ -1,0 +1,10 @@
+Make directory, creates a new directory. 
+
+Example:
+========
+mkdir -p project/programs/December 
+creates the named directory "December" inside relative path "project/programs". 
+
+Options:
+========
+The -p option automatically creates any necessary parent directories.

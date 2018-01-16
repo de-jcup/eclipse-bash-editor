@@ -1,0 +1,62 @@
+Sed is a non-interactive stream editor. It receives text input, whether from stdin or from a file, performs certain operations on specified lines of the input, one line at a time, then outputs the result to stdout or to a file. Within a shell script, sed is usually one of several tool components in a pipe.
+
+Sed determines which lines of its input that it will operate on from the address range passed to it. [2] Specify this address range either by line number or by a pattern to match. For example, 3d signals sed to delete line 3 of the input, and /Windows/d tells sed that you want every line of the input containing a match to "Windows" deleted.
+
+Of all the operations in the sed toolkit, we will focus primarily on the three most commonly used ones. These are printing (to stdout), deletion, and substitution.
+
+
+Example:
+========
+sed -e '/^$/d' $filename
+# The -e option causes the next string to be interpreted as an editing instruction.
+#  (If passing only a single instruction to sed, the "-e" is optional.)
+#  The "strong" quotes ('') protect the RE characters in the instruction
+#+ from reinterpretation as special characters by the body of the script.
+# (This reserves RE expansion of the instruction for sed.)
+#
+# Operates on the text contained in file $filename.
+
+In certain cases, a sed editing command will not work with single quotes.
+
+filename=file1.txt
+pattern=BEGIN
+
+  sed "/^$pattern/d" "$filename"  # Works as specified.
+# sed '/^$pattern/d' "$filename"    has unexpected results.
+#        In this instance, with strong quoting (' ... '),
+#+      "$pattern" will not expand to "BEGIN".
+
+Note	
+====
+Sed uses the -e option to specify that the following string is an instruction or set of instructions. If there is only a single instruction contained in the string, then this may be omitted.
+
+Example:
+========
+sed -n '/xzy/p' $filename
+# The -n option tells sed to print only those lines matching the pattern.
+# Otherwise all input lines would print.
+# The -e option not necessary here since there is only a single editing instruction.
+
+Substituting a zero-length string for another is equivalent to deleting that string within a line of input. This leaves the remainder of the line intact. Applying s/GUI// to the line
+The most important parts of any application are its GUI and sound effects
+results in
+The most important parts of any application are its  and sound effects
+
+A backslash forces the sed replacement command to continue on to the next line. This has the effect of using the newline at the end of the first line as the replacement string.
+s/^  */\
+/g
+This substitution replaces line-beginning spaces with a newline. The net result is to replace paragraph indents with a blank line between paragraphs.
+
+An address range followed by one or more operations may require open and closed curly brackets, with appropriate newlines.
+/[0-9A-Za-z]/,/^$/{
+/^$/d
+}
+This deletes only the first of each set of consecutive blank lines. That might be useful for single-spacing a text file, but retaining the blank line(s) between paragraphs.
+
+Note:	
+=====
+The usual delimiter that sed uses is /. However, sed allows other delimiters, such as %. This is useful when / is part of a replacement string, as in a file pathname. See Example 11-10 and Example 16-32.
+
+
+Tip	
+A quick way to double-space a text file is sed G filename.

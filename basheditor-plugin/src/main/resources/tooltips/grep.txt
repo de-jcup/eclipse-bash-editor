@@ -1,0 +1,6 @@
+grep prints lines that contain a match for a pattern. 
+
+The general synopsis of the grep command line is 
+
+	grep options pattern input_file_names
+

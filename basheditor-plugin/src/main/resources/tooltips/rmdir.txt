@@ -1,0 +1,1 @@
+Remove directory. The directory must be empty of all files -- including "invisible" dotfiles -- for this command to succeed.

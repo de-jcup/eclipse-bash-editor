@@ -73,7 +73,8 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		buildWordRules(rules, bashKeyword, BashLanguageKeyWords.values());
 		buildWordRules(rules, bashCommand, BashGnuCommandKeyWords.values());
 
-		buildVarDefRules(rules, knownVariables, BashSpecialVariableKeyWords.values());
+//		buildVarDefRules(rules, knownVariables, BashSpecialVariableKeyWords.values());
+		buildWordRules(rules, knownVariables, BashSpecialVariableKeyWords.values());
 
 		setPredicateRules(rules.toArray(new IPredicateRule[rules.size()]));
 	}

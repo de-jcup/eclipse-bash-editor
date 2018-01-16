@@ -1,0 +1,1 @@
+The break and continue loop control commands correspond exactly to their counterparts in other programming languages. The break command terminates the loop (breaks out of it), while continue causes a jump to the next iteration of the loop, skipping all the remaining commands in that particular loop cycle.

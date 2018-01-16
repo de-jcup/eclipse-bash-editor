@@ -20,5 +20,16 @@ public interface DocumentKeyWord{
 	String getText();
 
 	boolean isBreakingOnEof();
-
+	
+	/**
+	 * 
+	 * @return tool tip text or <code>null</code> if none defined
+	 */
+	String getTooltip();
+	
+	/**
+	 * @return link to documentation or <code>null</code> if none defined
+	 */
+	String getLinkToDocumentation();
+	
 }

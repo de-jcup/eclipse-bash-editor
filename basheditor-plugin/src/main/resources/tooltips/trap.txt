@@ -1,0 +1,10 @@
+Specifies an action on receipt of a signal; also useful for debugging.
+
+A signal is a message sent to a process, either by the kernel or another process, telling it to take some specified action (usually to terminate). For example, hitting a Control-C sends a user interrupt, an INT signal, to a running program.
+
+A simple instance:
+trap '' 2
+# Ignore interrupt 2 (Control-C), with no action specified. 
+
+trap 'echo "Control-C disabled."' 2
+# Message when Control-C pressed.

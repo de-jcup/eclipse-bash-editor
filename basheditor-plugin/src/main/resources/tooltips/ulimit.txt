@@ -1,0 +1,23 @@
+Sets an upper limit on use of system resources. Usually invoked with the -f option, which sets a limit on file size (ulimit -f 1000 limits files to 1 meg maximum). [7] The -t option limits the coredump size (ulimit -c 0 eliminates coredumps). Normally, the value of ulimit would be set in /etc/profile and/or ~/.bash_profile (see Appendix H).
+
+Examples:
+=========
+
+Important	
+---------
+Judicious use of ulimit can protect a system against the dreaded fork bomb.
+
+	#!/bin/bash
+	# This script is for illustrative purposes only.
+	# Run it at your own peril -- it WILL freeze your system.
+	
+	while true  #  Endless loop.
+	do
+	  $0 &      #  This script invokes itself . . .
+	            #+ forks an infinite number of times . . .
+	            #+ until the system freezes up because all resources exhausted.
+	done        #  This is the notorious "sorcerer's appentice" scenario.
+	
+	exit 0      #  Will not exit here, because this script will never terminate.
+	
+A ulimit -Hu XX (where XX is the user process limit) in /etc/profile would abort this script when it exceeded the preset limit.

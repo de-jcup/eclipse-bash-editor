@@ -1,0 +1,37 @@
+The basic file "list" command. It is all too easy to underestimate the power of this humble command. 
+
+Examples:
+=========
+For example, using the -R, recursive option, ls provides a tree-like listing of a directory structure. Other useful options are -S, sort listing by file size, -t, sort by file modification time, -v, sort by (numerical) version numbers embedded in the filenames, [1] -b, show escape characters, and -i, show file inodes (see Example 16-4).
+
+	bash$ ls -l
+	-rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter10.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter11.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter12.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter1.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter2.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter3.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:49 Chapter_headings.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:49 Preface.txt
+	
+	
+	bash$ ls -lv
+	 total 0
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:49 Chapter_headings.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:49 Preface.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter1.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter2.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter3.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter10.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter11.txt
+	 -rw-rw-r-- 1 bozo bozo 0 Sep 14 18:44 chapter12.txt
+
+Tip	
+===
+The ls command returns a non-zero exit status when attempting to list a non-existent file.
+	bash$ ls abc
+	ls: abc: No such file or directory
+	
+	
+	bash$ echo $?
+	2

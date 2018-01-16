@@ -1,0 +1,18 @@
+This is the file move command. It is equivalent to a combination of cp and rm. It may be used to move multiple files to a directory, or even to rename a directory. For some examples of using mv in a script, see Example 10-11 and Example A-2.
+
+Note:
+=====
+When used in a non-interactive script, mv takes the -f (force) option to bypass user input.
+
+When a directory is moved to a preexisting directory, it becomes a subdirectory of the destination directory.
+
+
+bash$ mv source_directory target_directory
+
+bash$ ls -lF target_directory
+total 1
+ drwxrwxr-x    2 bozo  bozo      1024 May 28 19:20 source_directory/
+	      
+ 
+
+ 

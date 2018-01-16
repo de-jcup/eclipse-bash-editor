@@ -1,0 +1,17 @@
+cat, an acronym for concatenate, lists a file to stdout. 
+When combined with redirection (> or >>), it is commonly used to concatenate files.
+
+Options:
+========
+The -n option to cat inserts consecutive numbers before all lines of the target file(s). 
+The -b option numbers only the non-blank lines. 
+The -v option echoes nonprintable characters, using ^ notation. 
+The -s option squeezes multiple consecutive blank lines into a single blank line.
+
+Examples:
+=========  
+# Uses of 'cat'
+cat filename                          # Lists the file.
+
+cat file.1 file.2 file.3 > file.123   # Combines three files into one.
+ 

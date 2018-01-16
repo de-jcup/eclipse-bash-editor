@@ -1,0 +1,5 @@
+The syntax of the while command is:
+
+	while test-commands; do consequent-commands; done
+
+Execute consequent-commands as long as test-commands has an exit status of zero. The return status is the exit status of the last command executed in consequent-commands, or zero if none was executed.

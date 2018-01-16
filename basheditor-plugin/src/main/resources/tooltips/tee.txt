@@ -1,0 +1,21 @@
+Name:
+=====
+tee - read from standard input and write to standard output and files
+
+Synopsis:
+=========
+tee [OPTION]... [FILE]...
+
+Description:
+============
+Copy standard input to each FILE, and also to standard output.
+
+-a, --append
+append to the given FILEs, do not overwrite
+-i, --ignore-interrupts
+ignore interrupt signals
+--help
+display this help and exit
+--version
+output version information and exit
+If a FILE is -, copy again to standard output.

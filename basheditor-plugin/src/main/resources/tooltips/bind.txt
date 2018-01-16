@@ -1,0 +1,88 @@
+NAME         top
+       bind - bind a name to a socket
+SYNOPSIS         top
+       #include <sys/types.h>          /* See NOTES */
+       #include <sys/socket.h>
+
+       int bind(int sockfd, const struct sockaddr *addr,
+                socklen_t addrlen);
+DESCRIPTION         top
+       When a socket is created with socket(2), it exists in a name space
+       (address family) but has no address assigned to it.  bind() assigns
+       the address specified by addr to the socket referred to by the file
+       descriptor sockfd.  addrlen specifies the size, in bytes, of the
+       address structure pointed to by addr.  Traditionally, this operation
+       is called “assigning a name to a socket”.
+
+       It is normally necessary to assign a local address using bind()
+       before a SOCK_STREAM socket may receive connections (see accept(2)).
+
+       The rules used in name binding vary between address families.
+       Consult the manual entries in Section 7 for detailed information.
+       For AF_INET, see ip(7); for AF_INET6, see ipv6(7); for AF_UNIX, see
+       packet(7);
+       for AF_X25, see x25(7); and for AF_NETLINK, see netlink(7).
+
+       The actual structure passed for the addr argument will depend on the
+       address family.  The sockaddr structure is defined as something like:
+
+           struct sockaddr {
+               sa_family_t sa_family;
+               char        sa_data[14];
+           }
+
+       The only purpose of this structure is to cast the structure pointer
+       passed in addr in order to avoid compiler warnings.  See EXAMPLE
+       below.
+RETURN VALUE         top
+       On success, zero is returned.  On error, -1 is returned, and errno is
+       set appropriately.
+ERRORS         top
+       EACCES The address is protected, and the user is not the superuser.
+
+       EADDRINUSE
+              The given address is already in use.
+
+       EADDRINUSE
+              (Internet domain sockets) The port number was specified as
+              zero in the socket address structure, but, upon attempting to
+              bind to an ephemeral port, it was determined that all port
+              numbers in the ephemeral port range are currently in use.  See
+              the discussion of /proc/sys/net/ipv4/ip_local_port_range
+              ip(7).
+
+       EBADF  sockfd is not a valid file descriptor.
+
+       EINVAL The socket is already bound to an address.
+
+       EINVAL addrlen is wrong, or addr is not a valid address for this
+              socket's domain.
+
+       ENOTSOCK
+              The file descriptor sockfd does not refer to a socket.
+
+       The following errors are specific to UNIX domain (AF_UNIX) sockets:
+
+       EACCES Search permission is denied on a component of the path prefix.
+              (See also path_resolution(7).)
+
+       EADDRNOTAVAIL
+              A nonexistent interface was requested or the requested address
+              was not local.
+
+       EFAULT addr points outside the user's accessible address space.
+
+       ELOOP  Too many symbolic links were encountered in resolving addr.
+
+       ENAMETOOLONG
+              addr is too long.
+
+       ENOENT A component in the directory prefix of the socket pathname
+              does not exist.
+
+       ENOMEM Insufficient kernel memory was available.
+
+       ENOTDIR
+              A component of the path prefix is not a directory.
+
+       EROFS  The socket inode would reside on a read-only filesystem.

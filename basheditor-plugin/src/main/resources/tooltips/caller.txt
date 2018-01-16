@@ -1,0 +1,22 @@
+Putting a caller command inside a function echoes to stdout information about the caller of that function.
+
+#!/bin/bash
+
+function1 ()
+{
+  # Inside function1 ().
+  caller 0   # Tell me about it.
+}
+
+function1    # Line 9 of script.
+
+# 9 main test.sh
+# ^                 Line number that the function was called from.
+#   ^^^^            Invoked from "main" part of script.
+#        ^^^^^^^    Name of calling script.
+
+caller 0     # Has no effect because it's not inside a function.
+
+A caller command can also return caller information from a script sourced within another script. Analogous to a function, this is a "subroutine call."
+
+You may find this command useful in debugging.

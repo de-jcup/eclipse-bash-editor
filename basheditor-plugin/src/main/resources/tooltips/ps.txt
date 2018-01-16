@@ -1,0 +1,9 @@
+Process Statistics: lists currently executing processes by owner and PID (process ID). 
+This is usually invoked with ax or aux options, and may be piped to grep or sed to search for a specific process.
+
+Examples:
+=========
+	bash$  ps ax | grep sendmail
+	295 ?	   S	  0:00 sendmail: accepting connections on port 25
+
+To display system processes in graphical "tree" format: ps afjx or ps ax --forest.

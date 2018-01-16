@@ -13,11 +13,11 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor;
+package de.jcup.basheditor;
 
 public class SimpleStringUtils {
 	private static final String EMPTY = "";
-	
+
 	public static boolean equals(String text1, String text2) {
 		if (text1 == null) {
 			if (text2 == null) {
@@ -32,28 +32,70 @@ public class SimpleStringUtils {
 	}
 
 	public static String shortString(String string, int max) {
-		if (max==0){
+		if (max == 0) {
 			return EMPTY;
 		}
-		if (string ==null){
+		if (string == null) {
 			return EMPTY;
 		}
-		if (string.length()<=max){
+		if (string.length() <= max) {
 			return string;
 		}
 		/* length > max */
-		if (max==1){
+		if (max == 1) {
 			return ".";
 		}
-		if (max==2){
+		if (max == 2) {
 			return "..";
 		}
-		if (max==3){
+		if (max == 3) {
 			return "...";
 		}
-		StringBuilder sb  =new StringBuilder();
-		sb.append( string.substring(0, max-3));
+		StringBuilder sb = new StringBuilder();
+		sb.append(string.substring(0, max - 3));
 		sb.append("...");
+		return sb.toString();
+	}
+
+	/**
+	 * Returns next word until whitespace from given offset
+	 * 
+	 * @param string
+	 * @param offset
+	 * @return word, or empty string, never <code>null</code>
+	 */
+	public static String nextWordUntilWhitespace(String string, int offset) {
+		if (string == null) {
+			return EMPTY;
+		}
+		if (offset < 0) {
+			return EMPTY;
+		}
+		if (offset >= string.length()) {
+			return EMPTY;
+		}
+		char c2 = string.charAt(offset);
+		if (Character.isWhitespace(c2)){
+			return EMPTY;
+		}
+		/* go to word start (offset == 0 or whitespace)*/
+		int start=offset;
+		for (;start>0;start--){
+			char c = string.charAt(start);
+			if (Character.isWhitespace(c)){
+				start+=1;
+				break;
+			}
+		}
+		/* start defined so scan for word */
+		StringBuilder sb = new StringBuilder();
+		for (int i=start;i<string.length();i++){
+			char c = string.charAt(i);
+			if (Character.isWhitespace(c)){
+				break;
+			}
+			sb.append(c);
+		}
 		return sb.toString();
 	}
 }

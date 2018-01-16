@@ -15,74 +15,41 @@
  */
  package de.jcup.basheditor.document.keywords;
 
-public enum BashGnuCommandKeyWords implements DocumentKeyWord{
-
-	CP,
+public enum BashSystemKeyWords implements DocumentKeyWord {
 	
-	CHMOD,
+	SHA_BANG("#!/bin/bash"), 
 	
-	SUDO,
-	
-	GREP,
-	
-	CAT,
-	
-	FILTER,
-	
-	UNAME,
-	
-	RM,
-	
-	MKDIR,
-	
-	
-	
-	TPUT,
-	
-	TERMINFO,
-	
-	PS,
-	
-	LS,
-	
-	AWK,
-	
-	SED,
-	
-	WC,
-	
-	TR,
-	
-	
-	MV,
-	
-	TAR,
-	
-	SSH,
-	
-	PING,
-	
-	TOUCH,
-	
-	GZIP,
-	
-	TEE,
 	
 	;
 
 	private String text;
 
-	private BashGnuCommandKeyWords() {
-		this.text = name().toLowerCase();
+	private BashSystemKeyWords(String text) {
+		this.text = text;
 	}
-	
+
+
 	@Override
 	public String getText() {
 		return text;
 	}
-	
+
+
 	@Override
 	public boolean isBreakingOnEof() {
-		return true;
+		return false;
+	}
+	
+	private String tooltip;
+	private String linkToDocumentation;
+
+	@Override
+	public String getTooltip() {
+		return tooltip;
+	}
+	
+	@Override
+	public String getLinkToDocumentation() {
+		return linkToDocumentation;
 	}
 }

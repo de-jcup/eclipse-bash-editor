@@ -1,0 +1,35 @@
+The standard UNIX archiving utility. [1] Originally a Tape ARchiving program, it has developed into a general purpose package that can handle all manner of archiving with all types of destination devices, ranging from tape drives to regular files to even stdout (see Example 3-4). GNU tar has been patched to accept various compression filters, for example: tar czvf archive_name.tar.gz *, which recursively archives and gzips all files in a directory tree except dotfiles in the current working directory ($PWD). [2]
+
+Some useful tar options:
+========================
+-c create (a new archive)
+
+-x extract (files from existing archive)
+
+--delete delete (files from existing archive)
+
+	Caution:
+	========
+	This option will not work on magnetic tape devices.
+
+-r append (files to existing archive)
+
+-A append (tar files to existing archive)
+
+-t list (contents of existing archive)
+
+-u update archive
+
+-d compare archive with specified filesystem
+
+--after-date only process files with a date stamp after specified date
+
+-z gzip the archive
+
+(compress or uncompress, depending on whether combined with the -c or -x) option
+
+-j bzip2 the archive
+
+	Caution:
+	========
+	It may be difficult to recover data from a corrupted gzipped tar archive. When archiving important files, make multiple backups.

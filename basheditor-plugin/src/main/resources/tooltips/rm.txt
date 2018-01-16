@@ -1,0 +1,21 @@
+Delete (remove) a file or files. The -f option forces removal of even readonly files, 
+and is useful for bypassing user input in a script.
+
+Note	
+====
+The rm command will, by itself, fail to remove filenames beginning with a dash. 
+Why? Because rm sees a dash-prefixed filename as an option.
+
+bash$ rm -badname
+rm: invalid option -- b
+ Try `rm --help' for more information.
+One clever workaround is to precede the filename with a " -- " (the end-of-options flag).
+bash$ rm -- -badname
+Another method to is to preface the filename to be removed with a dot-slash .
+bash$ rm ./-badname
+
+Warning
+=======	
+When used with the recursive flag -r, this command removes files all the way down the directory 
+tree from the current directory. A careless rm -rf * can wipe out a big chunk of a directory structure.
+

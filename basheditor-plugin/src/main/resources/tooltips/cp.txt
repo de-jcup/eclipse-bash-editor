@@ -1,0 +1,12 @@
+This is the file copy command. cp file1 file2 copies file1 to file2, overwriting file2 if it already exists.
+
+Tip	
+===
+Particularly useful are  
+	- the -a archive flag (for copying an entire directory tree), 
+	- the -u update flag (which prevents overwriting identically-named newer files), and 
+	- the -r and -R recursive flags.
+
+cp -u source_dir/* dest_dir
+#  "Synchronize" dest_dir to source_dir
+#+  by copying over all newer and not previously existing files.

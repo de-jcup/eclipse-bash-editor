@@ -1,0 +1,19 @@
+OpenSSH SSH client (remote login program)
+ 
+Synopsis:
+=========
+ssh [-1246AaCfgKkMNnqsTtVvXxYy] [-b bind_address] [-c cipher_spec] [-D[bind_address:]port] [-e escape_char] [-F configfile][-i identity_file] [-L [bind_address:]port:host:hostport][-l login_name] [-m mac_spec] [-O ctl_cmd] [-o option] [-p port] [-R [bind_address:]port:host:hostport] [-S ctl_path] [-W host:port][-w local_tun[:remote_tun]] [user@]hostname [command]
+
+Description:
+============
+ssh (SSH client) is a program for logging into a remote machine and for executing commands on a remote machine. It is intended to replace rlogin and rsh, and provide secure encrypted communications between two untrusted hosts over an insecure network. X11 connections and arbitrary TCP ports can also be forwarded over the secure channel.
+
+ssh connects and logs into the specified hostname (with optional user name). The user must prove his/her identity to the remote machine using one of several methods depending on the protocol version used (see below).
+
+If command is specified, it is executed on the remote host instead of a login shell.
+
+...
+
+INFO:
+====
+There are so many options available for ssh which would be too much for a tooltip here - if you search for a detailed option, please look into online documentation (see link above).

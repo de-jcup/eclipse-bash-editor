@@ -36,4 +36,17 @@ public enum BashIncludeKeyWords implements DocumentKeyWord {
 	public boolean isBreakingOnEof() {
 		return true;
 	}
+	
+	private String tooltip;
+	private String linkToDocumentation;
+
+	@Override
+	public String getTooltip() {
+		return tooltip;
+	}
+	
+	@Override
+	public String getLinkToDocumentation() {
+		return linkToDocumentation;
+	}
 }
