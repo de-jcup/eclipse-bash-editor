@@ -1,5 +1,7 @@
 package de.jcup.basheditor;
 
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
@@ -13,6 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import de.jcup.basheditor.document.keywords.DocumentKeyWord;
 import de.jcup.basheditor.document.keywords.DocumentKeyWords;
+import de.jcup.basheditor.preferences.BashEditorPreferences;
 
 public class BashTextHover implements ITextHover, ITextHoverExtension {
 
@@ -28,6 +31,11 @@ public class BashTextHover implements ITextHover, ITextHoverExtension {
 
 	@Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+		BashEditorPreferences preferences = BashEditorPreferences.getInstance();
+		boolean tooltipsEnabled = preferences.getBooleanPreference(P_TOOLTIPS_ENABLED);
+		if (!tooltipsEnabled){
+			return null;
+		}
 		IDocument document = textViewer.getDocument();
 		if (document == null) {
 			return "";

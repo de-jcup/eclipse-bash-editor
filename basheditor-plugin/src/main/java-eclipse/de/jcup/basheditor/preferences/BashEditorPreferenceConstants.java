@@ -34,6 +34,8 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable{
 	P_CODE_ASSIST_ADD_KEYWORDS("codeAssistAddsKeyWords"),
 	P_CODE_ASSIST_ADD_SIMPLEWORDS("codeAssistAddsSimpleWords"),
 	
+	P_TOOLTIPS_ENABLED("toolTipsEnabled"),
+	
 	;
 
 	private String id;

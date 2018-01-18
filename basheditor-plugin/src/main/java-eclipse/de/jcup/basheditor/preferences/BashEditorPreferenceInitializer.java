@@ -50,11 +50,13 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		/* bracket color */
 		preferences.setDefaultColor(P_EDITOR_MATCHING_BRACKETS_COLOR, GRAY_JAVA);
 
-		/* +++++++++++++++++++ */
-		/* + Code Assistence + */
-		/* +++++++++++++++++++ */
 		store.setDefault(P_CODE_ASSIST_ADD_KEYWORDS.getId(), true);
 		store.setDefault(P_CODE_ASSIST_ADD_SIMPLEWORDS.getId(), true);
+		
+		/* +++++++++++++++++++ */
+		/* + Tooltips        + */
+		/* +++++++++++++++++++ */
+		store.setDefault(P_TOOLTIPS_ENABLED.getId(), true);
 
 		/* +++++++++++++++++ */
 		/* + Editor Colors + */

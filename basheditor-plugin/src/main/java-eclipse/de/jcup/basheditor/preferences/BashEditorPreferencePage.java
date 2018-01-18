@@ -71,6 +71,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 	private BooleanFieldEditor autoCreateEndBrackets;
 	private BooleanFieldEditor codeAssistWithBashKeywords;
 	private BooleanFieldEditor codeAssistWithSimpleWords;
+	private BooleanFieldEditor toolTipsEnabled;
 
 	public BashEditorPreferencePage() {
 		super(GRID);
@@ -237,6 +238,14 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		codeAssistWithSimpleWords.getDescriptionControl(codeAssistGroup)
 		.setToolTipText("When enabled the current source will be scanned for words. The existing words will be available as code proposals");
 		addField(codeAssistWithSimpleWords);
+		
+		
+		toolTipsEnabled = new BooleanFieldEditor(P_TOOLTIPS_ENABLED.getId(),
+				"Tooltips for keywords", codeAssistGroup);
+		toolTipsEnabled.getDescriptionControl(codeAssistGroup)
+		.setToolTipText("When enabled tool tips will occure for keywords");
+		addField(toolTipsEnabled);
+		
 		
 	}
 
