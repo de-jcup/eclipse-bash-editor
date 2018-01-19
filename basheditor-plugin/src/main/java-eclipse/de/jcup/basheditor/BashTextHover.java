@@ -11,15 +11,21 @@ import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Shell;
 
 import de.jcup.basheditor.document.keywords.DocumentKeyWord;
 import de.jcup.basheditor.document.keywords.DocumentKeyWords;
+import de.jcup.basheditor.document.keywords.TooltipTextSupport;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
+import de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants;
 
 public class BashTextHover implements ITextHover, ITextHoverExtension {
 
 	private IInformationControlCreator creator;
+	private String bgColor;
+	private String fgColor;
+	private String commentColorWeb;
 
 	@Override
 	public IInformationControlCreator getHoverControlCreator() {
@@ -36,6 +42,27 @@ public class BashTextHover implements ITextHover, ITextHoverExtension {
 		if (!tooltipsEnabled){
 			return null;
 		}
+		
+		if (bgColor == null || fgColor == null) {
+
+			StyledText textWidget = textViewer.getTextWidget();
+			if (textWidget != null) {
+
+				EclipseUtil.getSafeDisplay().syncExec(new Runnable() {
+
+					@Override
+					public void run() {
+						bgColor = ColorUtil.convertToHexColor(textWidget.getBackground());
+						fgColor = ColorUtil.convertToHexColor(textWidget.getForeground());
+					}
+				});
+			}
+
+		}
+		if (commentColorWeb == null) {
+			commentColorWeb = preferences.getWebColor(BashEditorSyntaxColorPreferenceConstants.COLOR_COMMENT);
+		}
+		
 		IDocument document = textViewer.getDocument();
 		if (document == null) {
 			return "";
@@ -71,7 +98,8 @@ public class BashTextHover implements ITextHover, ITextHoverExtension {
 		sb.append("<html>");
 		sb.append("<head>");
 		sb.append("<style>");
-		addCSStoMakePreWrappingWhenTooLong(sb);
+		sb.append(TooltipTextSupport.getTooltipCSS());
+		addCSStoBackgroundTheme(sb);
 		sb.append("</style>");
 		sb.append("</head>");
 		sb.append("<body>");
@@ -79,28 +107,42 @@ public class BashTextHover implements ITextHover, ITextHoverExtension {
 			sb.append("Detailed information available at: <a href='" + link + "' target='_blank'>" + link
 					+ "</a><br><br>");
 		}
+		
 		sb.append("<u>Offline description:</u>");
-		sb.append("<pre style='font-size:small'>");
 		if (isEmpty(tooltip)) {
-			sb.append("Not available");
+			sb.append("<b>Not available</b>");
 		} else {
-			sb.append(tooltip);
+			if (TooltipTextSupport.isHTMLToolTip(tooltip)){
+				/* it's already a HTML variant - so just keep as is*/
+				sb.append(tooltip);
+			}else{
+				/* plain text */
+				sb.append("<pre class='preWrapEnabled'>");
+				sb.append(tooltip);
+				sb.append("</pre>");
+			}
+			
 		}
-		sb.append("</pre>");
 		sb.append("</body>");
 		return sb.toString();
 	}
 
-	protected void addCSStoMakePreWrappingWhenTooLong(StringBuilder sb) {
-		sb.append("pre {");
-		sb.append("white-space: pre-wrap;       /* Since CSS 2.1 */");
-		sb.append("white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */");
-		sb.append("white-space: -pre-wrap;      /* Opera 4-6 */");
-		sb.append("white-space: -o-pre-wrap;    /* Opera 7 */");
-		sb.append("word-wrap: break-word;       /* Internet Explorer 5.5+ */");
+	private void addCSStoBackgroundTheme(StringBuilder sb) {
+		if (bgColor==null){
+			return;
+		}
+		if (fgColor==null){
+			return;
+		}
+		sb.append("body {");
+		sb.append("background-color:").append(bgColor).append(";");
+		sb.append("color:").append(fgColor).append(";");
 		sb.append("}");
+		
 	}
 
+	
+	
 	private boolean isEmpty(String string) {
 		if (string == null) {
 			return true;

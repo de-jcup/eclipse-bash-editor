@@ -1,0 +1,61 @@
+$UID
+<br><br>
+User ID number
+<br><br>
+Current user's user identification number, as recorded in /etc/passwd
+<br><br>
+This is the current user's real id, even if she has temporarily assumed another identity through su. $UID is a readonly variable, not subject to change from the command line or within a script, and is the counterpart to the id builtin.
+<br><br>
+<h4>Examples</h4>
+<div class='example'>
+#!/bin/bash
+# am-i-root.sh:   Am I root or not?
+
+ROOT_UID=0   # Root has $UID 0.
+
+if [ "$UID" -eq "$ROOT_UID" ]  # Will the real "root" please stand up?
+then
+  echo "You are root."
+else
+  echo "You are just an ordinary user (but mom loves you just the same)."
+fi
+
+exit 0
+</div>
+<br>
+<div class='example'>
+# ============================================================= #
+# Code below will not execute, because the script already exited.
+
+# An alternate method of getting to the root of matters:
+
+ROOTUSER_NAME=root
+
+username=`id -nu`              # Or...   username=`whoami`
+if [ "$username" = "$ROOTUSER_NAME" ]
+then
+  echo "Rooty, toot, toot. You are root."
+else
+  echo "You are just a regular fella."
+fi
+</div>
+<br>
+
+<h4>Note</h4>	
+The variables $ENV, $LOGNAME, $MAIL, $TERM, $USER, and $USERNAME are not Bash builtins. These are, however, often set as environmental variables in one of the Bash or login startup files. $SHELL, the name of the user's login shell, may be set from /etc/passwd or in an "init" script, and it is likewise not a Bash builtin.
+<div class='example'>
+tcsh% echo $LOGNAME
+bozo
+tcsh% echo $SHELL
+/bin/tcsh
+tcsh% echo $TERM
+rxvt
+
+bash$ echo $LOGNAME
+bozo
+bash$ echo $SHELL
+/bin/tcsh
+bash$ echo $TERM
+rxvt
+</div>
+	      

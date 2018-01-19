@@ -1,0 +1,3 @@
+$PS1
+	
+	This is the main prompt, seen at the command-line.

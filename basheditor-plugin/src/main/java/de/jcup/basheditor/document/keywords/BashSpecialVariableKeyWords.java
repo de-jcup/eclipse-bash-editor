@@ -13,70 +13,79 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.document.keywords;
+package de.jcup.basheditor.document.keywords;
 
 public enum BashSpecialVariableKeyWords implements DocumentKeyWord {
 
 	// http://tldp.org/LDP/abs/html/internalvariables.html
 	BASH,
+
 	BASH_ENV,
-	BASH_SUBSHELL,
-	BASHPID,
-	BASH_VERSINFO,
-	CDPATH,
-	DIRSTACK,
-	EDITOR,
-	EUID,
-	FUNCNAME,
-	GLOBIGNORE,
-	GROUPS,
-	HOME,
-	HOSTNAME,
-	HOSTTYPE,
-	IFS,
-	IGNOREEOF,
-	LC_COLLATE,
-	LC_CTYPE,
-	LINENO,
-	MACHTYPE,
-	OLDPWD,
-	OSTYPE,
-	PATH,
-	PIPESTATUS,
-	PPID,
-	PROMPT_COMMAND,
-	PS1,
-	PS2,
-	PS3,
-	PS4,
-	PWD,
-	REPLY,
-	SECONDS,
-	SHELLOPTS,
-	SHLVL,
-	TMOUT,
-	UID,
-	;
+
+	BASH_SUBSHELL, 
+	
+	BASHPID, 
+	
+	BASH_VERSINFO, 
+	
+	BASH_VERSION,
+	
+	CDPATH, 
+	
+	DIRSTACK, 
+	
+	EDITOR, 
+	
+	EUID, 
+	
+	FUNCNAME, 
+	
+	GLOBIGNORE, 
+	
+	GROUPS, 
+	
+	HOME, 
+	
+	HOSTNAME, 
+	
+	HOSTTYPE, 
+	
+	IFS, IGNOREEOF, LC_COLLATE, LC_CTYPE, LINENO, MACHTYPE, 
+	
+	OLDPWD, OSTYPE, PATH, PIPESTATUS, PPID, PROMPT_COMMAND, 
+	
+	PS1, PS2, PS3, PS4, PWD("PWD-variable"), 
+	
+	REPLY, SECONDS, SHELLOPTS, SHLVL, TMOUT, UID,;
 
 	private String text;
 
 	private BashSpecialVariableKeyWords() {
-		this.text = "$"+name();
-		this.tooltip="An internal bash variable";
-		this.linkToDocumentation="http://tldp.org/LDP/abs/html/internalvariables.html"; 
+		this(null);
 	}
 
+	private BashSpecialVariableKeyWords(String tooltipId) {
+		this.text = "$" + name();
+		if (tooltipId == null) {
+			tooltipId = name();
+		}
+		tooltip = TooltipTextSupport.getTooltipText(tooltipId);
+		if (tooltip == null || tooltip.isEmpty()) {
+			tooltip = "An internal bash variable. See online documentation for mor information.";
+		}
+		this.linkToDocumentation = "http://tldp.org/LDP/abs/html/internalvariables.html";
+	}
 
 	@Override
 	public String getText() {
 		return text;
 	}
-	
+
 	@Override
 	public boolean isBreakingOnEof() {
 		return false;
 	}
-	
+
 	private String tooltip;
 	private String linkToDocumentation;
 
@@ -84,7 +93,7 @@ public enum BashSpecialVariableKeyWords implements DocumentKeyWord {
 	public String getTooltip() {
 		return tooltip;
 	}
-	
+
 	@Override
 	public String getLinkToDocumentation() {
 		return linkToDocumentation;

@@ -1,30 +1,31 @@
 Shell functions are a way to group commands for later execution using a single name for the group. They are executed just like a "regular" command. When the name of a shell function is used as a simple command name, the list of commands associated with that function name is executed. Shell functions are executed in the current shell context; no new process is created to interpret them.
 
 Functions are declared using this syntax:
-
-	name () compound-command [ redirections ]
+<div class='example'>
+name () compound-command [ redirections ]
+</div>
 or
-
-	function name [()] compound-command [ redirections ]
-	
+<div class='example'>
+function name [()] compound-command [ redirections ]
+</div>
 This defines a shell function named name. The reserved word function is optional. If the function reserved word is supplied, the parentheses are optional. The body of the function is the compound command compound-command (see Compound Commands). That command is usually a list enclosed between { and }, but may be any compound command listed above, with one exception: If the function reserved word is used, but the parentheses are not supplied, the braces are required. compound-command is executed whenever name is specified as the name of a command. When the shell is in POSIX mode (see Bash POSIX Mode), name may not be the same as one of the special builtins (see Special Builtins). Any redirections (see Redirections) associated with the shell function are performed when the function is executed.
-
+<br><br>
 A function definition may be deleted using the -f option to the unset builtin (see Bourne Shell Builtins).
-
+<br><br>
 The exit status of a function definition is zero unless a syntax error occurs or a readonly function with the same name already exists. When executed, the exit status of a function is the exit status of the last command executed in the body.
-
+<br><br>
 Note that for historical reasons, in the most common usage the curly braces that surround the body of the function must be separated from the body by blanks or newlines. This is because the braces are reserved words and are only recognized as such when they are separated from the command list by whitespace or another shell metacharacter. Also, when using the braces, the list must be terminated by a semicolon, a ‘&’, or a newline.
-
+<br><br>
 When a function is executed, the arguments to the function become the positional parameters during its execution (see Positional Parameters). The special parameter ‘#’ that expands to the number of positional parameters is updated to reflect the change. Special parameter 0 is unchanged. The first element of the FUNCNAME variable is set to the name of the function while the function is executing.
-
+<br><br>
 All other aspects of the shell execution environment are identical between a function and its caller with these exceptions: the DEBUG and RETURN traps are not inherited unless the function has been given the trace attribute using the declare builtin or the -o functrace option has been enabled with the set builtin, (in which case all functions inherit the DEBUG and RETURN traps), and the ERR trap is not inherited unless the -o errtrace shell option has been enabled. See Bourne Shell Builtins, for the description of the trap builtin.
-
+<br><br>
 The FUNCNEST variable, if set to a numeric value greater than 0, defines a maximum function nesting level. Function invocations that exceed the limit cause the entire command to abort.
-
+<br><br>
 If the builtin command return is executed in a function, the function completes and execution resumes with the next command after the function call. Any command associated with the RETURN trap is executed before execution resumes. When a function completes, the values of the positional parameters and the special parameter ‘#’ are restored to the values they had prior to the function’s execution. If a numeric argument is given to return, that is the function’s return status; otherwise the function’s return status is the exit status of the last command executed before the return.
-
+<br><br>
 Variables local to the function may be declared with the local builtin. These variables are visible only to the function and the commands it invokes.
-
+<br><br>
 Function names and definitions may be listed with the -f option to the declare (typeset) builtin command (see Bash Builtins). The -F option to declare or typeset will list the function names only (and optionally the source file and line number, if the extdebug shell option is enabled). Functions may be exported so that subshells automatically have them defined with the -f option to the export builtin (see Bourne Shell Builtins). Note that shell functions and variables with the same name may result in multiple identically-named entries in the environment passed to the shell’s children. Care should be taken in cases where this may cause a problem.
-
+<br><br>
 Functions may be recursive. The FUNCNEST variable may be used to limit the depth of the function call stack and restrict the number of function invocations. By default, no limit is placed on the number of recursive calls.

@@ -1,0 +1,13 @@
+$PATH
+<br><br>
+Path to binaries, usually <code>/usr/bin/, /usr/X11R6/bin/, /usr/local/bin, </code> etc.
+<br><br>
+When given a command, the shell automatically does a hash table search on the directories listed in the path for the executable. The path is stored in the environmental variable, $PATH, a list of directories, separated by colons. Normally, the system stores the $PATH definition in /etc/profile and/or ~/.bashrc (see Appendix H).
+<br><br>
+<div class='example'>
+bash$ echo $PATH
+/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:/sbin:/usr/sbin
+</div>
+<code>PATH=${PATH}:/opt/bin</code> appends the <code>/opt/bin</code> directory to the current path. In a script, it may be expedient to temporarily add a directory to the path in this way. When the script exits, this restores the original $PATH (a child process, such as a script, may not change the environment of the parent process, the shell).
+<h4>Note</h4>	
+The current "working directory", ./, is usually omitted from the $PATH as a security measure.

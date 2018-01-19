@@ -1,0 +1,3 @@
+$PS2
+
+	The secondary prompt, seen when additional input is expected. It displays as ">".

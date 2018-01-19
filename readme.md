@@ -14,7 +14,7 @@ You can find this plugin at https://marketplace.eclipse.org/content/bash-editor
 
 ## Developing
 
-To change what word are to be highlighted, check inside `basheditor-plugin/src/main/java-eclipse/de/jcup/basheditor/document/keywords` 
+To change what words are to be highlighted, check inside `basheditor-plugin/src/main/java/de/jcup/basheditor/document/keywords`.
 
 ## License
 Bash Editor is under Apache 2.0 license (http://www.apache.org/licenses/LICENSE-2.0)

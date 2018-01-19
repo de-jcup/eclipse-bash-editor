@@ -1,0 +1,21 @@
+$CDPATH
+<br><br>
+A colon-separated list of search paths available to the cd command, similar in function to the $PATH variable for binaries. The $CDPATH variable may be set in the local ~/.bashrc file.
+<h4>Examples:</h4>
+<div class='example'>
+bash$ cd bash-doc
+bash: cd: bash-doc: No such file or directory
+</div>
+<br>
+<div class='example'>
+bash$ CDPATH=/usr/share/doc
+bash$ cd bash-doc
+/usr/share/doc/bash-doc
+</div>
+<br>
+
+<div class='example'>
+bash$ echo $PWD
+/usr/share/doc/bash-doc
+</div>
+	      

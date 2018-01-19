@@ -1,8 +1,72 @@
 Changes the attributes of an existing file or directory.
-
-Some exammples:
-===============
-
+<br>
+<h3>Command syntax</h3>
+<p><code>chmod [options] mode[,mode] file1 [file2 ...]</code></p>
+<p>Usual implemented options include:</p>
+<ul>
+<li><tt>-R</tt> recursive, i.e. include objects in subdirectories</li>
+<li><tt>-f</tt> force, forge ahead with all objects even if errors occur</li>
+<li><tt>-v</tt> verbose, show objects processed</li>
+</ul>
+<h3>Octal notation of file system permissions</h3>
+<p>The main parts of the chmod permissions:</p>
+<p>Example: drwxrwx---</p>
+<p>To the right of the "d":</p>
+<p>the left three characters rwx define permissions of the OWNER.</p>
+<p>the middle three characters rwx define permissions of the GROUP.</p>
+<p>the right three characters --- define permissions of EVERYONE ELSE. In this example EVERYONE ELSE has no permissions.</p>
+<p><br/>
+The <tt>chmod</tt> numerical format accepts up to four octal digits. The three rightmost digits refer to permissions for the file owner, the group, and other users. The optional leading digit, when 4 digits are given, specifies the special <tt>setuid</tt>, <tt>setgid,</tt> and <tt>sticky</tt> flags.</p>
+<h4>Numerical permissions</h4>
+<table class="tooltiptable">
+<tr>
+<th>Nr.</th>
+<th>Permission</th>
+<th>rwx</th>
+</tr>
+<tr>
+<td>7</td>
+<td>read, write and execute</td>
+<td>rwx</td>
+</tr>
+<tr>
+<td>6</td>
+<td>read and write</td>
+<td>rw-</td>
+</tr>
+<tr>
+<td>5</td>
+<td>read and execute</td>
+<td>r-x</td>
+</tr>
+<tr>
+<td>4</td>
+<td>read only</td>
+<td>r--</td>
+</tr>
+<tr>
+<td>3</td>
+<td>write and execute</td>
+<td>-wx</td>
+</tr>
+<tr>
+<td>2</td>
+<td>write only</td>
+<td>-w-</td>
+</tr>
+<tr>
+<td>1</td>
+<td>execute only</td>
+<td>--x</td>
+</tr>
+<tr>
+<td>0</td>
+<td>none</td>
+<td>---</td>
+</tr>
+</table>
+<h3>Some examples:</h3>
+<div class='example'>
 chmod +x filename
 # Makes "filename" executable for all users.
 
@@ -23,9 +87,6 @@ chmod 444 filename
 #+ and even the file owner must force a file-save
 #+ if she modifies the file.
 #  Same restrictions apply for deleting the file.
- 
-
-
 
 chmod 1777 directory-name
 #  Gives everyone read, write, and execute permission in directory,
@@ -51,5 +112,4 @@ chmod 000 directory-name
 #  You can even symlink to files in the directory,
 #+ but you can't read, write, or execute the symlinks.
 #  These restrictions do not apply to root.
- 
-
+</div>

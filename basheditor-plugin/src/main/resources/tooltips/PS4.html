@@ -1,0 +1,11 @@
+$PS4
+<br><br>
+The quartenary prompt, shown at the beginning of each line of output when invoking a script with the -x [verbose trace] option. It displays as "+".
+<br><br>
+As a debugging aid, it may be useful to embed diagnostic information in $PS4.
+<div class='example'>
+P4='$(read time junk < /proc/$$/schedstat; echo "@@@ $time @@@ " )'
+# Per suggestion by Erik Brandsberg.
+set -x
+# Various commands follow ...
+</div>

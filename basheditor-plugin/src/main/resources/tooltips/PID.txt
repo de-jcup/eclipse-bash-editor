@@ -1,0 +1,3 @@
+$PPID
+
+The $PPID of a process is the process ID (pid) of its parent process.

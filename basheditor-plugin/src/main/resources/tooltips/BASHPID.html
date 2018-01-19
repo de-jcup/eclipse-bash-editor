@@ -1,0 +1,33 @@
+$BASHPID
+<br><br>
+Process ID of the current instance of Bash. This is not the same as the $$ variable, but it often gives the same result.
+<br><br>
+<div class='example'>
+bash4$ echo $$
+11015
+
+
+bash4$ echo $BASHPID
+11015
+
+
+bash4$ ps ax | grep bash4
+11015 pts/2    R      0:00 bash4
+</div>
+	      
+But ...
+
+<div class='example'>
+#!/bin/bash4
+
+echo "\$\$ outside of subshell = $$"                              # 9602
+echo "\$BASH_SUBSHELL  outside of subshell = $BASH_SUBSHELL"      # 0
+echo "\$BASHPID outside of subshell = $BASHPID"                   # 9602
+
+echo
+
+( echo "\$\$ inside of subshell = $$"                             # 9602
+  echo "\$BASH_SUBSHELL inside of subshell = $BASH_SUBSHELL"      # 1
+  echo "\$BASHPID inside of subshell = $BASHPID" )                # 9603
+  # Note that $$ returns PID of parent process.
+</div>

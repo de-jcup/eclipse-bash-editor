@@ -1,0 +1,14 @@
+$BASH_VERSION
+<br><br>
+The version of Bash installed on the system
+<div class='example'>
+bash$ echo $BASH_VERSION
+3.2.25(1)-release
+</div>
+But on another shell - e.g. TCSH:	      
+<div class='example'>
+tcsh% echo $BASH_VERSION
+BASH_VERSION: Undefined variable.
+</div>
+	      
+Checking $BASH_VERSION is a good method of determining which shell is running. $SHELL does not necessarily give the correct answer.
