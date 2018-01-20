@@ -23,7 +23,7 @@ public enum BashEditorValidationPreferenceConstants implements PreferenceIdentif
 	
 	VALIDATE_DO_STATEMENTS("validateDo","Do statements"), 
 	
-	VALIDATE_IF_STATEMENTS("validateIf","If statements"),
+	VALIDATE_IF_STATEMENTS("validateIf","If and case statements"),
 	
 	VALIDATE_FUNCTION_STATEMENTS("validateIf","Functions"),
 	
