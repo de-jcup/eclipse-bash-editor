@@ -4,10 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
+
+import de.jcup.basheditor.ResourceInputStreamProvider;
 
 public class TooltipTextSupport {
 	/**
@@ -21,9 +21,19 @@ public class TooltipTextSupport {
 	}
 	private Map<String, String> idToTooltipCache = new TreeMap<>();
 	private String _tooltip_css;
+	private ResourceInputStreamProvider resourceInputStreamProvider;
 
 	TooltipTextSupport(){
 		
+	}
+	
+	public static void setTooltipInputStreamProvider(ResourceInputStreamProvider resourceInputStreamProvider) {
+		INSTANCE.setResourceInputStreamProvider(resourceInputStreamProvider);
+	}
+		
+	
+	public void setResourceInputStreamProvider(ResourceInputStreamProvider resourceInputStreamProvider) {
+		this.resourceInputStreamProvider = resourceInputStreamProvider;
 	}
 	
 	public static boolean isHTMLToolTip(String tooltip){
@@ -106,13 +116,8 @@ public class TooltipTextSupport {
 	}
 	
 	private String loadFrom(String path) {
-		URL url = null;
-		try{
-			url = new URL("platform:/plugin/de.jcup.basheditor"+path);
-		}catch(MalformedURLException e){
-			return null;
-		}
-		try (InputStream inputStream = url.openConnection().getInputStream();) {
+	
+		try (InputStream inputStream = getInputStream(path)) {
 			return loadFromStream(inputStream);
 		} catch (IOException e) {
 			/* should not happen - but if there are errors
@@ -120,6 +125,13 @@ public class TooltipTextSupport {
 			 */
 			return null;
 		}
+	}
+
+	private InputStream getInputStream(String path) throws IOException {
+		if (resourceInputStreamProvider==null){
+			return null;
+		}
+		return resourceInputStreamProvider.getStreamFor(path);
 	}
 
 	private String loadFromStream(InputStream stream) throws IOException {
