@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -104,13 +106,19 @@ public class TooltipTextSupport {
 	}
 	
 	private String loadFrom(String path) {
-		try (InputStream stream = TooltipTextSupport.class.getResourceAsStream(path)) {
-			return loadFromStream(stream);
+		URL url = null;
+		try{
+			url = new URL("platform:/plugin/de.jcup.basheditor"+path);
+		}catch(MalformedURLException e){
+			return null;
+		}
+		try (InputStream inputStream = url.openConnection().getInputStream();) {
+			return loadFromStream(inputStream);
 		} catch (IOException e) {
 			/* should not happen - but if there are errors
 			 * we just return an empty string
 			 */
-			return "";
+			return null;
 		}
 	}
 

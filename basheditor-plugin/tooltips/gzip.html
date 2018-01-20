@@ -1,0 +1,10 @@
+gzip
+<br><br>
+The standard GNU/UNIX compression utility, replacing the inferior and proprietary compress. The corresponding decompression command is gunzip, which is the equivalent of <code>gzip -d</code>.
+<h4>Note</h4>
+The <code>-c</code> option sends the output of gzip to stdout. This is useful when piping to other commands.
+<br><br>
+The zcat filter decompresses a gzipped file to stdout, as possible input to a pipe or redirection. This is, in effect, a cat command that works on compressed files (including files processed with the older compress utility). The <code>zcat</code> command is equivalent to <code>gzip -dc</code>.
+<h4>Caution</h4>
+On some commercial UNIX systems, zcat is a synonym for uncompress -c, and will not work on gzipped files.
+ 
