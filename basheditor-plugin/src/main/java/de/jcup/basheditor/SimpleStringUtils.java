@@ -56,15 +56,28 @@ public class SimpleStringUtils {
 		sb.append("...");
 		return sb.toString();
 	}
-
+	
 	/**
-	 * Returns next word until whitespace from given offset
+	 * Returns next reduced variable from given offset.
+	 * Reduced means a variable array like $BASH_VERSIN[0] will be reduced to $BASH_VERSIN!
 	 * 
 	 * @param string
 	 * @param offset
 	 * @return word, or empty string, never <code>null</code>
 	 */
-	public static String nextWordUntilWhitespace(String string, int offset) {
+	public static String nextReducedVariableWord(String string, int offset) {
+		return nextWord(string, offset, new ReducedVariableWordEndDetector());
+	}
+
+	/**
+	 * Returns next word until word end detected from given offset
+	 * 
+	 * @param string
+	 * @param offset
+	 * @param wordEndDetector - if null {@link WhitespaceWordEndDetector} will be used automatically
+	 * @return word, or empty string, never <code>null</code>
+	 */
+	public static String nextWord(String string, int offset, WordEndDetector wordEndDetector) {
 		if (string == null) {
 			return EMPTY;
 		}
@@ -78,11 +91,15 @@ public class SimpleStringUtils {
 		if (Character.isWhitespace(c2)){
 			return EMPTY;
 		}
+		if (wordEndDetector==null){
+			/* back to fall back impl */
+			wordEndDetector=new WhitespaceWordEndDetector();
+		}
 		/* go to word start (offset == 0 or whitespace)*/
 		int start=offset;
 		for (;start>0;start--){
 			char c = string.charAt(start);
-			if (Character.isWhitespace(c)){
+			if (wordEndDetector.isWordEnd(c)){
 				start+=1;
 				break;
 			}
@@ -91,7 +108,7 @@ public class SimpleStringUtils {
 		StringBuilder sb = new StringBuilder();
 		for (int i=start;i<string.length();i++){
 			char c = string.charAt(i);
-			if (Character.isWhitespace(c)){
+			if (wordEndDetector.isWordEnd(c)){
 				break;
 			}
 			sb.append(c);

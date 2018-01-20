@@ -72,7 +72,7 @@ public class BashTextHover implements ITextHover, ITextHoverExtension {
 			return "";
 		}
 		int offset = hoverRegion.getOffset();
-		String word = SimpleStringUtils.nextWordUntilWhitespace(text, offset);
+		String word = SimpleStringUtils.nextReducedVariableWord(text, offset);
 		if (word.isEmpty()) {
 			return "";
 		}

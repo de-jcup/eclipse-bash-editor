@@ -22,68 +22,78 @@ import org.junit.Test;
 public class SimpleStringUtilsTest {
 
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_0_is_alpha() {
-		assertEquals("alpha", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma", 0));
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_0_is_alpha() {
+		assertEquals("alpha", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma", 0));
 	}
 	
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_n1_is_empty() {
-		assertEquals("", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma",-1));
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_n1_is_empty() {
+		assertEquals("", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma",-1));
 	}
 	
 	@Test
-	public void nextWord_from_null_is_empty() {
-		assertEquals("", SimpleStringUtils.nextWordUntilWhitespace(null,0));
+	public void nextReducedVariable_from_null_is_empty() {
+		assertEquals("", SimpleStringUtils.nextReducedVariableWord(null,0));
 	}
 	
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_1_is_alpha() {
-		assertEquals("alpha", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma", 1));
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_1_is_alpha() {
+		assertEquals("alpha", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma", 1));
 	}
 
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_4_is_alpha() {
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_4_is_alpha() {
 		//--------------------------------------------------------------0123456789012345
-		assertEquals("alpha", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma", 4));
+		assertEquals("alpha", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma", 4));
 	}
 	
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_6_is_beta() {
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_6_is_beta() {
 		//--------------------------------------------------------------0123456789012345
-		assertEquals("beta", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma", 6));
+		assertEquals("beta", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma", 6));
 	}
 	
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_5_is_empty() {
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_5_is_empty() {
 		//--------------------------------------------------------------0123456789012345
-		assertEquals("", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma", 5));
+		assertEquals("", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma", 5));
 	}
 	
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_9_is_beta() {
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_9_is_beta() {
 		//--------------------------------------------------------------0123456789012345
-		assertEquals("beta", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma", 9));
+		assertEquals("beta", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma", 9));
 	}
 	
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_10_is_empty() {
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_10_is_empty() {
 		//----------------------------------------------------------0123456789012345
-		assertEquals("", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma", 10));
+		assertEquals("", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma", 10));
 	}
 	
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_13_is_gamma() {
-		assertEquals("gamma", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma", 13));
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_13_is_gamma() {
+		assertEquals("gamma", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma", 13));
 	}
 	
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_15_is_gamma() {
-		assertEquals("gamma", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma", 15));
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_15_is_gamma() {
+		assertEquals("gamma", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma", 15));
 	}
 	
 	@Test
-	public void nextWord_from_string_alpha_beta_gamma_offset_16_is_empty() {
-		assertEquals("", SimpleStringUtils.nextWordUntilWhitespace("alpha beta gamma", 10));
+	public void nextReducedVariable_from_string_alpha_beta_gamma_offset_16_is_empty() {
+		assertEquals("", SimpleStringUtils.nextReducedVariableWord("alpha beta gamma", 10));
+	}
+	
+	@Test
+	public void _ith_reducedVariableWordEndDetector_from_string_$PS1_is_double_quote_x_double_quote_offset_0_returns_$PS1() {
+		assertEquals("$PS1", SimpleStringUtils.nextReducedVariableWord("$PS1=\"x\"", 0));
+	}
+	
+	@Test
+	public void _ith_reducedVariableWordEndDetector_from_string_$BASH_VERSIN_ARRAY_returns_$BASH_VERSIN() {
+		assertEquals("$BASH_VERSIN", SimpleStringUtils.nextReducedVariableWord("$BASH_VERSIN[0]", 0));
 	}
 	
 	@Test
