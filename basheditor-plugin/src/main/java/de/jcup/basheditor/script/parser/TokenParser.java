@@ -273,6 +273,16 @@ public class TokenParser {
 		if (variableContext.getType() != VariableType.INITIAL) {
 			return false;
 		}
+		
+		/* at this point we are at INITIAL variable state - so if we got a string identifier as next 
+		 * this means we must end the "variable" here (see bug 105)
+		 */
+		if (isStringChar(c)){
+			context.addTokenAndResetText();
+			context.switchTo(ParserState.CODE);
+			return false;
+		}
+		
 		context.appendCharToText();
 		if (c == '$' || c == '?') {
 			/*
