@@ -216,7 +216,13 @@ public class HereDocParserSupport {
 	}
 
 	private boolean isLiteralWhenFirstAndLastCharsRemoved(String literalToFind, String partScanString) {
-		String literalShrinked = literalToFind.substring(1, literalToFind.length() - 1);
+		int beginIndex = 1;
+		int endIndex = literalToFind.length() - beginIndex;
+		if (endIndex<=beginIndex){
+			return false;
+		}
+		
+		String literalShrinked = literalToFind.substring(beginIndex, endIndex);
 		boolean isLiteral = partScanString.equals(literalShrinked);
 		return isLiteral;
 	}
