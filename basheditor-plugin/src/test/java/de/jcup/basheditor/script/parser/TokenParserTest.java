@@ -45,7 +45,6 @@ public class TokenParserTest {
 	public void bug_106_cat_with_heredoc_followed_by_negative_and_string_has_expected_tokens() throws Exception{
 		assertParsing("cat <<-\" OF\"").resultsIn("cat","<<-\" OF\"");
 	}
-
 	
 	@Test
 	public void bug_105_$_directly_followed_by_simple_string() throws Exception {

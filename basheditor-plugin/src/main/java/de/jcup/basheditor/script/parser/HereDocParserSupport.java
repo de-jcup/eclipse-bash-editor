@@ -218,6 +218,7 @@ public class HereDocParserSupport {
 	private boolean isLiteralWhenFirstAndLastCharsRemoved(String literalToFind, String partScanString) {
 		int beginIndex = 1;
 		int endIndex = literalToFind.length() - beginIndex;
+
 		if (endIndex<=beginIndex){
 			return false;
 		}
