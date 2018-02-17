@@ -37,6 +37,17 @@ public class TokenParserTest {
 	}
 
 	@Test
+	public void bug_106_cat_with_heredoc_followed_by_negative_and_string_throws_no_exception() throws Exception{
+		assertParsing("cat <<-\" OF\"").simplyDoesNotFail();;
+	}
+	
+	@Test
+	public void bug_106_cat_with_heredoc_followed_by_negative_and_string_has_expected_tokens() throws Exception{
+		assertParsing("cat <<-\" OF\"").resultsIn("cat","<<-\" OF\"");
+	}
+
+	
+	@Test
 	public void bug_105_$_directly_followed_by_simple_string() throws Exception {
 		assertParsing("IFS=$'\n'").resultsIn("IFS=", "$","'\n'");
 	}
@@ -823,6 +834,10 @@ public class TokenParserTest {
 			List<ParseToken> tokens = parserToTest.parse(code);
 
 			assertThat(tokens).containsTokens(expectedTokens);
+		}
+		
+		public void simplyDoesNotFail() throws TokenParserException {
+			parserToTest.parse(code);
 		}
 
 	}
