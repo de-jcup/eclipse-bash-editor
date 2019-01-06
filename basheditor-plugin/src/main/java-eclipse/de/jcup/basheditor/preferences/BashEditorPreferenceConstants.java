@@ -20,8 +20,7 @@ package de.jcup.basheditor.preferences;
 /**
  * Constant definitions for plug-in preferences
  */
-public enum BashEditorPreferenceConstants implements PreferenceIdentifiable{
-
+public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	
 	P_EDITOR_MATCHING_BRACKETS_ENABLED("matchingBrackets"),
 	P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION("highlightBracketAtCaretLocation"),
@@ -36,6 +35,8 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable{
 	
 	P_TOOLTIPS_ENABLED("toolTipsEnabled"),
 	
+	P_SAVE_ACTION_ENABLED("saveActionEnabled"),
+	P_SAVE_ACTION("saveAction"),
 	;
 
 	private String id;
