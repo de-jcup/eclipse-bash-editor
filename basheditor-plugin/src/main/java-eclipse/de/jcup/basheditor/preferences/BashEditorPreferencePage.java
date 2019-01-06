@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
+import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -72,7 +74,9 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 	private BooleanFieldEditor codeAssistWithBashKeywords;
 	private BooleanFieldEditor codeAssistWithSimpleWords;
 	private BooleanFieldEditor toolTipsEnabled;
-
+	private BooleanFieldEditor saveActionEnabled;
+	private StringFieldEditor saveActionFieldEditor;
+	
 	public BashEditorPreferencePage() {
 		super(GRID);
 		setPreferenceStore(getPreferences().getPreferenceStore());
@@ -222,10 +226,9 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		codeAssistGroupLayoutData.widthHint=400;
 		
 		Group codeAssistGroup = new Group(appearanceComposite,SWT.NONE);
-		codeAssistGroup.setText("Code assistence");
+		codeAssistGroup.setText("Code assistance");
 		codeAssistGroup.setLayout(new GridLayout());
 		codeAssistGroup.setLayoutData(codeAssistGroupLayoutData);
-		
 		
 		codeAssistWithBashKeywords = new BooleanFieldEditor(P_CODE_ASSIST_ADD_KEYWORDS.getId(),
 				"Bash and GNU keywords", codeAssistGroup);
@@ -245,8 +248,28 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		toolTipsEnabled.getDescriptionControl(codeAssistGroup)
 		.setToolTipText("When enabled tool tips will occure for keywords");
 		addField(toolTipsEnabled);
+
+		/* --------------------- */
+		/* --   Save action   -- */
+		/* --------------------- */
+
+		GridData saveActionGroupLayoutData = new GridData();
+		saveActionGroupLayoutData.horizontalSpan = 2;
+		saveActionGroupLayoutData.widthHint = 400;
+
+		Group saveActionGroup = new Group(appearanceComposite, SWT.NONE);
+		saveActionGroup.setText("Save action");
+		saveActionGroup.setLayout(new GridLayout());
+		saveActionGroup.setLayoutData(saveActionGroupLayoutData);
 		
-		
+		saveActionEnabled = new BooleanFieldEditor(P_SAVE_ACTION_ENABLED.getId(),
+				"Enable action on save", saveActionGroup);
+		saveActionEnabled.getDescriptionControl(saveActionGroup)
+		.setToolTipText("External program to run every time a script file is saved");
+		addField(saveActionEnabled);
+
+		saveActionFieldEditor = new StringFieldEditor(P_SAVE_ACTION.getId(), "Run:", saveActionGroup);
+		addField(saveActionFieldEditor);
 	}
 
 	@Override
