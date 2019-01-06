@@ -28,7 +28,7 @@ public class ExternalToolCommandArrayBuilderTest {
 		assertEquals(3, result.length);
 		assertEquals("beautysh.py",result[0]);
 		assertEquals("-f",result[1]);
-		assertEquals("strings.sh",result[2]);
+		assertEquals("./../basheditor-other/testscripts/strings.sh",result[2]);
 	}
 
 }

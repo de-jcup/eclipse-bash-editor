@@ -9,7 +9,7 @@ public class ExternalToolCommandArrayBuilder {
 		
 		// detect special placeholder(s):
 		for (int i=0; i < ret.length; i++)
-			if (ret[i] == "$filename")
+			if (ret[i].equalsIgnoreCase("$filename"))
 				ret[i] = editorFile.toPath().toString();
 		
 		return ret;
