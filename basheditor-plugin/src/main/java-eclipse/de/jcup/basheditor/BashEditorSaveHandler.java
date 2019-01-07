@@ -24,11 +24,9 @@ import de.jcup.basheditor.process.BashEditorFileProcessContext;
 import de.jcup.basheditor.process.OutputHandler;
 import de.jcup.basheditor.process.SimpleProcessExecutor;
 
+/*
 public class BashEditorSaveHandler extends AbstractSaveHandler {
 
-	/**
-	 * The constructor.
-	 */
 	public BashEditorSaveHandler() {
 		//registerEnablement();
 		BashEditorUtil.logInfo("TEST ctor");
@@ -45,10 +43,6 @@ public class BashEditorSaveHandler extends AbstractSaveHandler {
 		return null;
 	}
 
-	/**
-	 * the command has been executed, so extract extract the needed information
-	 * from the application context.
-	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
@@ -78,7 +72,7 @@ public class BashEditorSaveHandler extends AbstractSaveHandler {
 		String[] cmd_args = externalTool.build("beautysh.py -f $filename", file);
 
 		// now run external tool
-		SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.NO_OUTPUT, false, 10 /* max 10 secs */);
+		SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.NO_OUTPUT, false, 10);
 		try {
 			if (executor.execute(ctx, ctx, ctx, cmd_args) == 0) {
 				
@@ -126,5 +120,5 @@ public class BashEditorSaveHandler extends AbstractSaveHandler {
 
 		return EvaluationResult.FALSE;
 	}
-
 }
+*/
