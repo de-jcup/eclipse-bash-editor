@@ -270,6 +270,21 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 
 		saveActionFieldEditor = new StringFieldEditor(P_SAVE_ACTION.getId(), "Run:", saveActionGroup);
 		addField(saveActionFieldEditor);
+		
+		/*
+		Label lbl = new Label(saveActionGroup, SWT.LEFT);
+		lbl.setText("NOTE: you can use the special $filename placeholder to\nindicate currently open file");
+		//addField(lbl);
+		spacer.setLayoutData(saveActionGroupLayoutData);*/
+		//createLabel(saveActionGroup, "NOTE: you can use the special $filename placeholder to\nindicate currently open file.", 1);
+		
+		Composite labelGroup = new Composite(saveActionGroup, SWT.NONE);
+		labelGroup.setLayout(new GridLayout());
+		GridData labelGroupLayoutData = new GridData();
+		labelGroupLayoutData.horizontalSpan = 2;
+		labelGroup.setLayoutData(labelGroupLayoutData);
+		createNoteComposite(labelGroup.getFont(), labelGroup, 
+				"Note:", "The special $filename placeholder can be used to indicate\ncurrently open file.");
 	}
 
 	@Override
@@ -290,6 +305,24 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		button.addSelectionListener(listener);
 
 		return button;
+	}
+
+	private Label createLabel(Composite parent, String title, int spacer) {
+		GridData data;
+		
+		Label l = new Label(parent, SWT.WRAP);
+		l.setFont(parent.getFont());
+		data = new GridData();
+		data.horizontalSpan = 2;
+		if(spacer != 0) {
+			data.verticalSpan = spacer;
+		}
+		data.horizontalAlignment = GridData.FILL;
+		l.setLayoutData(data);
+		if(title != null) {
+			l.setText(title);
+		}
+		return l;
 	}
 
 	private void setBoolean(BashEditorPreferenceConstants id, boolean value) {
