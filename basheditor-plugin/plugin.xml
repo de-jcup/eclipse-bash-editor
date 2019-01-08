@@ -37,26 +37,6 @@
             id="basheditor.editors.BashEditor">
       </editor>
    </extension>
-   
-   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-   <!--                          EDITOR SAVE                                 -->
-   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            commandId="org.eclipse.ui.file.save"
-            class="de.jcup.basheditor.BashEditorSaveHandler">
-            <activeWhen>
-            <with
-                  variable="activeEditor">
-               <instanceof
-                     value="org.eclipse.cdt.ui.ICEditor">
-               </instanceof>
-            </with>
-         </activeWhen>
-      </handler>
-   </extension>
-   -->
             
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          PROPERTY TESTERS                            -->

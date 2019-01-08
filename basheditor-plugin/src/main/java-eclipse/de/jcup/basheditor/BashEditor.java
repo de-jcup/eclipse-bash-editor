@@ -749,23 +749,28 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		BashEditorPreferences preferences = BashEditorPreferences.getInstance();
 		boolean runExternalTool = preferences.getBooleanPreference(P_SAVE_ACTION_ENABLED);
 		if (!runExternalTool)
-			return;
+			return; // no need to perform any further action
 		
-		BashEditorUtil.logInfo("Starting re-formatting via external tool");
+		//BashEditorUtil.logInfo("Starting re-formatting via external tool"); // debug only
 		
 		// we will run the external tool from the directory where the current file is located:
 		File bashFile = resolveResourceAsFile();
+		if (bashFile == null)
+			return; // cannot reformat
+		
 		BashEditorFileProcessContext ctx = new BashEditorFileProcessContext(bashFile);
 
 		// substitute in the external tool cmd line the special placeholders:
+		String externalToolString = preferences.getStringPreference(P_SAVE_ACTION_REFORMATTER_TOOL);
 		ExternalToolCommandArrayBuilder externalTool = new ExternalToolCommandArrayBuilder();
-		String[] cmd_args = externalTool.build(preferences.getStringPreference(P_SAVE_ACTION), bashFile);
+		String[] cmd_args = externalTool.build(externalToolString, bashFile);
 		
 		// now run external tool
-		BashEditorUtil.logInfo("Running external tool with following cmds args: " + String.join(",", cmd_args));
+		//BashEditorUtil.logInfo("Running external re-formatting tool with following cmds args: " + String.join(",", cmd_args)); // debug only
 		SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.NO_OUTPUT, false, EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS);
 		try {
-			if (executor.execute(ctx, ctx, ctx, cmd_args) == 0) {
+			int exitCode = executor.execute(ctx, ctx, ctx, cmd_args);
+			if (exitCode == 0) {
 				
 				// refreshing does not seem to work:
 				//resolveResourceAsIFile().refreshLocal(IResource.DEPTH_INFINITE, progressMonitor);
@@ -787,12 +792,16 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 				int loc = textWidget.getCaretOffset();
 				textWidget.replaceTextRange(0, textWidget.getCharCount(), external_tool_result);
 				
-				// hackish way to try to restore the caret position BEFORE content was overwritten
+				// hackish way to try to restore the caret to the position it had BEFORE content was reformatted
 				textWidget.setCaretOffset(loc);
 				textWidget.showSelection();
 			}
+			else
+			{
+				BashEditorUtil.logInfo("External re-formatting tool '" + externalToolString + "' failed with exit code " + exitCode);
+			}
 		} catch (IOException e) {
-			BashEditorUtil.logError("Running external tool", e);
+			BashEditorUtil.logError("Failed running external re-formatting tool '" + externalToolString + "'", e);
 		}
 	}
 	
@@ -815,5 +824,4 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		
 		return tempFile.getAbsolutePath();
 	}
-	
 }
