@@ -96,8 +96,8 @@ class BashBracketInsertionCompleter extends KeyAdapter {
 		@Override
 		protected void insertClosingBrackets(IDocument document, ISelectionProvider selectionProvider, int offset)
 				throws BadLocationException {
-			document.replace(offset - 1, 1, "[ ]");
-			selectionProvider.setSelection(new TextSelection(offset + 1, 0));
+			document.replace(offset - 1, 1, "[]");
+			selectionProvider.setSelection(new TextSelection(offset, 0));
 
 		}
 
@@ -108,8 +108,8 @@ class BashBracketInsertionCompleter extends KeyAdapter {
 		@Override
 		protected void insertClosingBrackets(IDocument document, ISelectionProvider selectionProvider, int offset)
 				throws BadLocationException {
-			document.replace(offset - 1, 1, "{ }");
-			selectionProvider.setSelection(new TextSelection(offset + 1, 0));
+			document.replace(offset - 1, 1, "{}");
+			selectionProvider.setSelection(new TextSelection(offset, 0));
 
 		}
 
