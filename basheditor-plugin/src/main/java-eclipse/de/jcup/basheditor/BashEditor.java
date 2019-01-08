@@ -18,6 +18,13 @@ package de.jcup.basheditor;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.*;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
@@ -29,6 +36,8 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -66,6 +75,9 @@ import de.jcup.basheditor.outline.BashEditorTreeContentProvider;
 import de.jcup.basheditor.outline.BashQuickOutlineDialog;
 import de.jcup.basheditor.outline.Item;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
+import de.jcup.basheditor.process.BashEditorFileProcessContext;
+import de.jcup.basheditor.process.OutputHandler;
+import de.jcup.basheditor.process.SimpleProcessExecutor;
 import de.jcup.basheditor.script.BashError;
 import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.script.BashScriptModel;
@@ -82,6 +94,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	public static final String EDITOR_CONTEXT_MENU_ID = EDITOR_ID + ".context";
 	/** The COMMAND_ID of the editor ruler context menu */
 	public static final String EDITOR_RULER_CONTEXT_MENU_ID = EDITOR_CONTEXT_MENU_ID + ".ruler";
+	/** Max execution time for external tool to run on save action */
+	public static final int EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS = 10;
 
 	private BashBracketsSupport bracketMatcher = new BashBracketsSupport();
 	private SourceViewerDecorationSupport additionalSourceViewerSupport;
@@ -472,12 +486,22 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	 * 
 	 * @return file resource or <code>null</code>
 	 */
-	private IResource resolveResource() {
+	private IFile resolveResourceAsIFile() {
 		IEditorInput input = getEditorInput();
 		if (!(input instanceof IFileEditorInput)) {
 			return null;
 		}
 		return ((IFileEditorInput) input).getFile();
+	}
+	private File resolveResourceAsFile() {
+		IFile ifile = resolveResourceAsIFile();
+		IPath location = ifile.getLocation();
+		if (location == null)
+			return null;
+		return location.toFile();
+	}
+	private IResource resolveResource() {
+		return resolveResourceAsIFile();
 	}
 
 	private boolean isMarkerChangeForThisEditor(IResourceChangeEvent event) {
@@ -713,4 +737,83 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	public void validate() {
 		rebuildOutline();
 	}
+	
+
+	@Override	
+	protected void performSave(boolean overwrite, IProgressMonitor progressMonitor) {
+		
+		// first of all do save the changes to disk (without external tool pass):
+		super.performSave(overwrite, progressMonitor);
+
+		// should we run the external formatter tool?
+		BashEditorPreferences preferences = BashEditorPreferences.getInstance();
+		boolean runExternalTool = preferences.getBooleanPreference(P_SAVE_ACTION_ENABLED);
+		if (!runExternalTool)
+			return;
+		
+		BashEditorUtil.logInfo("Starting re-formatting via external tool");
+		
+		// we will run the external tool from the directory where the current file is located:
+		File bashFile = resolveResourceAsFile();
+		BashEditorFileProcessContext ctx = new BashEditorFileProcessContext(bashFile);
+
+		// substitute in the external tool cmd line the special placeholders:
+		ExternalToolCommandArrayBuilder externalTool = new ExternalToolCommandArrayBuilder();
+		String[] cmd_args = externalTool.build(preferences.getStringPreference(P_SAVE_ACTION), bashFile);
+		
+		// now run external tool
+		BashEditorUtil.logInfo("Running external tool with following cmds args: " + String.join(",", cmd_args));
+		SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.NO_OUTPUT, false, EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS);
+		try {
+			if (executor.execute(ctx, ctx, ctx, cmd_args) == 0) {
+				
+				// refreshing does not seem to work:
+				//resolveResourceAsIFile().refreshLocal(IResource.DEPTH_INFINITE, progressMonitor);
+				
+				// reload changes performed on disk by external reformatter:
+				String external_tool_result = readFile(bashFile.getAbsolutePath(), StandardCharsets.UTF_8);
+
+				//int caretPositionBeforeReload = lastCaretPosition;
+				/*getDocument().set(external_tool_result);
+				BashEditorUtil.logInfo("Moving the caret at: " + caretPositionBeforeReload);
+				ISourceViewer sourceViewer = getSourceViewer();
+				StyledText textWidget = sourceViewer.getTextWidget();
+				textWidget.setCaretOffset(caretPositionBeforeReload);
+				textWidget.showCaret();*/
+
+				// replace text in our text widget:
+				ISourceViewer sourceViewer = getSourceViewer();
+				StyledText textWidget = sourceViewer.getTextWidget();
+				int loc = textWidget.getCaretOffset();
+				textWidget.replaceTextRange(0, textWidget.getCharCount(), external_tool_result);
+				
+				// hackish way to try to restore the caret position BEFORE content was overwritten
+				textWidget.setCaretOffset(loc);
+				textWidget.showSelection();
+			}
+		} catch (IOException e) {
+			BashEditorUtil.logError("Running external tool", e);
+		}
+	}
+	
+	static String readFile(String path, Charset encoding) 
+			  throws IOException 
+	{
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		return new String(encoded, encoding);
+	}
+	
+	String writeDocumentInTempFile() throws IOException
+	{
+		File tempFile;
+		tempFile = File.createTempFile("eclipse-basheditor", ".tmp");
+		
+		// put the current contents in the temp file
+		FileWriter fw = new FileWriter(tempFile);
+		fw.write(getDocumentText());
+		fw.close();
+		
+		return tempFile.getAbsolutePath();
+	}
+	
 }

@@ -58,7 +58,7 @@ public class BashFileDocumentProvider extends FileDocumentProvider {
 		return document;
 	}
 	
-	
+	/*
 	@Override
 	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite) throws CoreException
 	{
@@ -90,10 +90,10 @@ public class BashFileDocumentProvider extends FileDocumentProvider {
 		ExternalToolCommandArrayBuilder externalTool = new ExternalToolCommandArrayBuilder();
 		String[] cmd_args = externalTool.build(preferences.getStringPreference(P_SAVE_ACTION), tempFile);
 		
-		BashEditorUtil.logInfo("Running external tool with " + tempFileAbsPath);
+		BashEditorUtil.logInfo("Running external tool with following cmds args: " + String.join(",", cmd_args));
 
 		// now run external tool
-		SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.NO_OUTPUT, false, 10 /* max 10 secs */);
+		SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.NO_OUTPUT, false, );
 		try {
 			if (executor.execute(ctx, ctx, ctx, cmd_args) == 0) {
 				
@@ -101,7 +101,7 @@ public class BashFileDocumentProvider extends FileDocumentProvider {
 				document.set(external_tool_result);
 			}
 		} catch (IOException e) {
-			BashEditorUtil.logError("Failed running external tool with $filename=" + tempFileAbsPath, e);
+			BashEditorUtil.logError("Running external tool", e);
 			// save the document anyway
 		}
 		
@@ -127,4 +127,5 @@ public class BashFileDocumentProvider extends FileDocumentProvider {
 		
 		return tempFile.getAbsolutePath();
 	}
+	*/
 }

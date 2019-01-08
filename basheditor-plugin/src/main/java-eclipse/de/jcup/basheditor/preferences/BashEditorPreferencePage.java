@@ -263,28 +263,22 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		saveActionGroup.setLayoutData(saveActionGroupLayoutData);
 		
 		saveActionEnabled = new BooleanFieldEditor(P_SAVE_ACTION_ENABLED.getId(),
-				"Enable action on save", saveActionGroup);
+				"Enable re-formatting on save", saveActionGroup);
 		saveActionEnabled.getDescriptionControl(saveActionGroup)
-		.setToolTipText("External program to run every time a script file is saved");
+		.setToolTipText("External program to run every time a script file is saved; its output will replace current document.");
 		addField(saveActionEnabled);
 
-		saveActionFieldEditor = new StringFieldEditor(P_SAVE_ACTION.getId(), "Run:", saveActionGroup);
+		saveActionFieldEditor = new StringFieldEditor(P_SAVE_ACTION.getId(), "External tool:", saveActionGroup);
 		addField(saveActionFieldEditor);
-		
-		/*
-		Label lbl = new Label(saveActionGroup, SWT.LEFT);
-		lbl.setText("NOTE: you can use the special $filename placeholder to\nindicate currently open file");
-		//addField(lbl);
-		spacer.setLayoutData(saveActionGroupLayoutData);*/
-		//createLabel(saveActionGroup, "NOTE: you can use the special $filename placeholder to\nindicate currently open file.", 1);
-		
+
 		Composite labelGroup = new Composite(saveActionGroup, SWT.NONE);
 		labelGroup.setLayout(new GridLayout());
-		GridData labelGroupLayoutData = new GridData();
+		GridData labelGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		labelGroupLayoutData.horizontalSpan = 2;
 		labelGroup.setLayoutData(labelGroupLayoutData);
 		createNoteComposite(labelGroup.getFont(), labelGroup, 
-				"Note:", "The special $filename placeholder can be used to indicate\ncurrently open file.");
+			"Note:", "The special $filename placeholder can be used to indicate\n"
+					 + "currently open file. External tool output will replace current document.");
 	}
 
 	@Override
@@ -305,24 +299,6 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		button.addSelectionListener(listener);
 
 		return button;
-	}
-
-	private Label createLabel(Composite parent, String title, int spacer) {
-		GridData data;
-		
-		Label l = new Label(parent, SWT.WRAP);
-		l.setFont(parent.getFont());
-		data = new GridData();
-		data.horizontalSpan = 2;
-		if(spacer != 0) {
-			data.verticalSpan = spacer;
-		}
-		data.horizontalAlignment = GridData.FILL;
-		l.setLayoutData(data);
-		if(title != null) {
-			l.setText(title);
-		}
-		return l;
 	}
 
 	private void setBoolean(BashEditorPreferenceConstants id, boolean value) {
