@@ -137,6 +137,16 @@ public class BashScriptModelBuilder {
 				if (token.isLegalFunctionName() && hasPos(currentTokenNr, tokens)) {
 					ParseToken followToken = tokens.get(currentTokenNr++);
 					isFunction = followToken.hasLength(2) && followToken.endsWithFunctionBrackets();
+					
+					if (!isFunction){
+					    /* could be 'MethodName ( )'*/
+					    if (followToken.isFunctionStartBracket()){
+					        if (hasPos(currentTokenNr, tokens)){
+					            followToken=tokens.get(currentTokenNr++);
+					            isFunction = followToken.isFunctionEndBracket();
+					        }
+					    }
+					}
 				}
 			}
 			if (isFunction) {
