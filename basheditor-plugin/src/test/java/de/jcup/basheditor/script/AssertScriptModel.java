@@ -96,6 +96,9 @@ public class AssertScriptModel {
 			sb.append('\'');
 			sb.append(',');
 		}
+		if (sb.length()==0){
+		    sb.append("-- no functions at all!");
+		}
 		return sb;
 	}
 
