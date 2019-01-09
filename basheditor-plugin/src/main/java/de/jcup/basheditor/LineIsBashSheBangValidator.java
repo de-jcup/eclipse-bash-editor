@@ -27,9 +27,12 @@ public class LineIsBashSheBangValidator {
 		if (!line.startsWith("#!")) {
 			return false;
 		}
-		if (line.indexOf("bash") == -1) {
-			return false;
+		if (line.indexOf("bash") != -1 ) {
+			return true;
 		}
-		return true;
+		if (line.endsWith(" sh")) {
+            return true;
+        }
+		return false;
 	}
 }
