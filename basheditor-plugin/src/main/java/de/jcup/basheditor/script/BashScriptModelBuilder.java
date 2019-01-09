@@ -33,200 +33,248 @@ import de.jcup.basheditor.script.parser.validator.IfEndsWithFiValidator;
  *
  */
 public class BashScriptModelBuilder {
-	private boolean ignoreDoValidation;
-	private boolean ignoreBlockValidation;
-	private boolean ignoreIfValidation;
-	private boolean ignoreFunctionValidation;
-	private boolean debugMode;
+    private boolean ignoreDoValidation;
+    private boolean ignoreBlockValidation;
+    private boolean ignoreIfValidation;
+    private boolean ignoreFunctionValidation;
+    private boolean debugMode;
 
-	/**
-	 * Parses given script and creates a bash script model
-	 * 
-	 * @param bashScript
-	 * @return a simple model with some information about bash script
-	 * @throws BashScriptModelException 
-	 */
-	public BashScriptModel build(String bashScript) throws BashScriptModelException{
-		BashScriptModel model = new BashScriptModel();
+    /**
+     * Parses given script and creates a bash script model
+     * 
+     * @param bashScript
+     * @return a simple model with some information about bash script
+     * @throws BashScriptModelException
+     */
+    public BashScriptModel build(String bashScript) throws BashScriptModelException {
+        BashScriptModel model = new BashScriptModel();
 
-		TokenParser parser = new TokenParser();
-		List<ParseToken> tokens;
-		try {
-			tokens = parser.parse(bashScript);
-		} catch (TokenParserException e) {
-			throw new BashScriptModelException("Was not able to build bashscript", e);
-		}
+        TokenParser parser = new TokenParser();
+        List<ParseToken> tokens;
+        try {
+            tokens = parser.parse(bashScript);
+        } catch (TokenParserException e) {
+            throw new BashScriptModelException("Was not able to build bashscript", e);
+        }
 
-		buildFunctionsByTokens(model, tokens);
+        buildFunctionsByTokens(model, tokens);
 
-		List<ValidationResult> results = new ArrayList<>();
-		for (BashScriptValidator<List<ParseToken>> validator : createParseTokenValidators()) {
-			results.addAll(validator.validate(tokens));
-		}
+        List<ValidationResult> results = new ArrayList<>();
+        for (BashScriptValidator<List<ParseToken>> validator : createParseTokenValidators()) {
+            results.addAll(validator.validate(tokens));
+        }
 
-		for (ValidationResult result : results) {
-			if (result instanceof BashError) {
-				model.errors.add((BashError) result);
-			}
-		}
-		
-		if (debugMode){
-			appendDebugTokens(model, tokens);
-		}
-		
-		return model;
-	}
+        for (ValidationResult result : results) {
+            if (result instanceof BashError) {
+                model.errors.add((BashError) result);
+            }
+        }
 
-	private void appendDebugTokens(BashScriptModel model, List<ParseToken> tokens) {
-		model.getDebugTokens().addAll(tokens);
-	}
+        if (debugMode) {
+            appendDebugTokens(model, tokens);
+        }
 
-	public void setIgnoreBlockValidation(boolean ignoreBlockValidation) {
-		this.ignoreBlockValidation = ignoreBlockValidation;
-	}
+        return model;
+    }
 
-	public void setIgnoreDoValidation(boolean ignoreDoValidation) {
-		this.ignoreDoValidation = ignoreDoValidation;
-	}
+    private void appendDebugTokens(BashScriptModel model, List<ParseToken> tokens) {
+        model.getDebugTokens().addAll(tokens);
+    }
 
-	public void setIgnoreIfValidation(boolean ignoreIfValidation) {
-		this.ignoreIfValidation = ignoreIfValidation;
-	}
-	
-	public void setIgnoreFunctionValidation(boolean ignoreFunctionValidation) {
-		this.ignoreFunctionValidation = ignoreFunctionValidation;
-	}
-	
+    public void setIgnoreBlockValidation(boolean ignoreBlockValidation) {
+        this.ignoreBlockValidation = ignoreBlockValidation;
+    }
 
-	private List<BashScriptValidator<List<ParseToken>>> createParseTokenValidators() {
-		List<BashScriptValidator<List<ParseToken>>> validators = new ArrayList<>();
-		if (!ignoreDoValidation) {
-			validators.add(new DoEndsWithDoneValidator());
-		}
-		if (!ignoreBlockValidation) {
-			validators.add(new ClosedBlocksValidator());
-		}
-		if (!ignoreIfValidation) {
-			validators.add(new IfEndsWithFiValidator());
-			validators.add(new CaseEndsWithEsacValidator());
-		}
-		return validators;
-	}
+    public void setIgnoreDoValidation(boolean ignoreDoValidation) {
+        this.ignoreDoValidation = ignoreDoValidation;
+    }
 
-	private void buildFunctionsByTokens(BashScriptModel model, List<ParseToken> tokens) {
+    public void setIgnoreIfValidation(boolean ignoreIfValidation) {
+        this.ignoreIfValidation = ignoreIfValidation;
+    }
 
-		for (int tokenNr = 0; tokenNr < tokens.size(); tokenNr++) {
-			int currentTokenNr = tokenNr;
-			ParseToken token = tokens.get(currentTokenNr++);
-			boolean isFunction = false;
-			Integer functionStart = null;
-			int functionEnd = 0;
-			/* ++++++++++++++++++++++ */
-			/* + Scan for functions + */
-			/* ++++++++++++++++++++++ */
-			/* could be 'function MethodName()' or 'function MethodName()' */
-			if (token.isFunctionKeyword() && hasPos(currentTokenNr, tokens)) {
-				isFunction = true;
-				functionStart = Integer.valueOf(token.getStart());
-				token = tokens.get(currentTokenNr++);
-			}
-			/* could be 'MethodName()' */
-			isFunction = isFunction || token.isFunction();
-			if (!isFunction) {
-				/* could be 'MethodName ()' but NOT something like params=()*/
-				if (token.isLegalFunctionName() && hasPos(currentTokenNr, tokens)) {
-					ParseToken followToken = tokens.get(currentTokenNr++);
-					isFunction = followToken.hasLength(2) && followToken.endsWithFunctionBrackets();
-					
-					if (!isFunction){
-					    /* could be 'MethodName ( )'*/
-					    if (followToken.isFunctionStartBracket()){
-					        if (hasPos(currentTokenNr, tokens)){
-					            followToken=tokens.get(currentTokenNr++);
-					            isFunction = followToken.isFunctionEndBracket();
-					        }
-					    }
-					}
-				}
-			}
-			if (isFunction) {
-				if (functionStart == null) {
-					functionStart = Integer.valueOf(token.getStart());
-				}
-				String functionName = token.getTextAsFunctionName();
-				functionEnd = token.getEnd();
-				/* ++++++++++++++++++++++++++++++ */
-				/* + Scan for curly braces open + */
-				/* ++++++++++++++++++++++++++++++ */
+    public void setIgnoreFunctionValidation(boolean ignoreFunctionValidation) {
+        this.ignoreFunctionValidation = ignoreFunctionValidation;
+    }
 
-				if (!hasPos(currentTokenNr, tokens)) {
-					if (!ignoreFunctionValidation){
-						model.errors.add(createBashErrorFunctionMissingCurlyBrace(token, functionName));
-					}
-					break;
-				}
-				ParseToken openCurlyBraceToken = tokens.get(currentTokenNr++);
-				if (!openCurlyBraceToken.isOpenBlock()) {
-					if (!ignoreFunctionValidation){
-						model.errors.add(createBashErrorFunctionMissingCurlyBrace(token, functionName));
-					}
-					continue;
-				}
-				/* +++++++++++++++++++++++++++++++ */
-				/* + Scan for curly braces close + */
-				/* +++++++++++++++++++++++++++++++ */
+    private List<BashScriptValidator<List<ParseToken>>> createParseTokenValidators() {
+        List<BashScriptValidator<List<ParseToken>>> validators = new ArrayList<>();
+        if (!ignoreDoValidation) {
+            validators.add(new DoEndsWithDoneValidator());
+        }
+        if (!ignoreBlockValidation) {
+            validators.add(new ClosedBlocksValidator());
+        }
+        if (!ignoreIfValidation) {
+            validators.add(new IfEndsWithFiValidator());
+            validators.add(new CaseEndsWithEsacValidator());
+        }
+        return validators;
+    }
 
-				BashFunction function = new BashFunction();
-				function.lengthToNameEnd = functionEnd - functionStart.intValue();
-				function.position = functionStart.intValue();
-				function.name = functionName;
-				function.end = -1;
+    private void buildFunctionsByTokens(BashScriptModel model, List<ParseToken> tokens) {
 
-				while (hasPos(currentTokenNr, tokens)) {
-					ParseToken closeCurlyBraceToken = tokens.get(currentTokenNr++);
-					if (closeCurlyBraceToken.isCloseBlock()) {
-						function.end = closeCurlyBraceToken.getEnd();
-						break;
-					}
-				}
-				if (function.end == -1) {
-					/* no close block found - mark this as an error */
-					if (!ignoreFunctionValidation){
-						model.errors.add(createBashErrorCloseFunctionCurlyBraceMissing(functionName, openCurlyBraceToken));
-					}
-					break;
-				}
+        for (int tokenNr = 0; tokenNr < tokens.size(); tokenNr++) {
+            FunctionScope functionScope = inspectAndCreateFunctionScope(tokens, tokenNr);
 
-				model.functions.add(function);
-				/*
-				 * function created - last currentTokenNr++ was too much because
-				 * it will be done by loop to- so reduce with 1
-				 */
-				tokenNr = currentTokenNr - 1;
-			}
-		}
-	}
+            if (functionScope.isFunction()) {
+                String functionName = functionScope.getFunctionName();
 
-	private BashError createBashErrorCloseFunctionCurlyBraceMissing(String functionName,
-			ParseToken openCurlyBraceToken) {
-		return new BashError(openCurlyBraceToken.getStart(), openCurlyBraceToken.getEnd(),
-				"This curly brace is not closed. So function '" + functionName + "' is not valid.");
-	}
+                /* ++++++++++++++++++++++++++++++ */
+                /* + Scan for curly braces open + */
+                /* ++++++++++++++++++++++++++++++ */
 
-	private BashError createBashErrorFunctionMissingCurlyBrace(ParseToken token, String functionName) {
-		return new BashError(token.getStart(), token.getEnd(),
-				"The function '" + functionName + "' is not valid because no opening curly brace found.");
-	}
+                if (!functionScope.hasNextToken()) {
+                    if (!ignoreFunctionValidation) {
+                        model.errors.add(createBashErrorFunctionMissingCurlyBrace(functionScope.getToken(), functionName));
+                    }
+                    break;
+                }
+                ParseToken openCurlyBraceToken = functionScope.nextToken();
+                if (!openCurlyBraceToken.isOpenBlock()) {
+                    if (!ignoreFunctionValidation) {
+                        model.errors.add(createBashErrorFunctionMissingCurlyBrace(functionScope.getToken(), functionName));
+                    }
+                    continue;
+                }
+                /* +++++++++++++++++++++++++++++++ */
+                /* + Scan for curly braces close + */
+                /* +++++++++++++++++++++++++++++++ */
 
-	private boolean hasPos(int pos, List<?> elements) {
-		if (elements == null) {
-			return false;
-		}
-		return pos < elements.size();
-	}
+                BashFunction function = createBashFunction(functionScope, functionName);
+                if (function.end == -1) {
+                    /* no close block found - mark this as an error */
+                    if (!ignoreFunctionValidation) {
+                        model.errors.add(createBashErrorCloseFunctionCurlyBraceMissing(functionName, openCurlyBraceToken));
+                    }
+                    break;
+                }
 
-	public void setDebug(boolean debugMode) {
-		this.debugMode=debugMode;
-	}
+                model.functions.add(function);
+                /*
+                 * function created - last currentTokenNr++ was too much because
+                 * it will be done by loop to- so reduce with 1
+                 */
+                int newTokenNr = functionScope.getCurrentTokenNr() - 1;
+                if (newTokenNr > tokenNr) {
+                    /* avoid infinite loops... shoud not happen, but... */
+                    tokenNr = newTokenNr;
+                }
+            } else {
+                if (functionScope.hasFunctionKeywordPrefix()) {
+                    /*
+                     * function prefix defined but its not really a function, so
+                     * something odd!
+                     */
+                    if (!ignoreFunctionValidation) {
+
+                        model.errors
+                                .add(createBashErrorFunctionPrefixFoundButNotAFunction(functionScope.getFunctionName(), functionScope.getToken()));
+                    }
+                }
+            }
+        }
+    }
+
+    protected FunctionScope inspectAndCreateFunctionScope(List<ParseToken> t, int tokenNr) {
+        FunctionScope functionScope = new FunctionScope(t);
+
+        functionScope.setCurrentTokenNr(tokenNr);
+        functionScope.setToken(functionScope.nextToken());
+
+        /* ++++++++++++++++++++++ */
+        /* + Scan for functions + */
+        /* ++++++++++++++++++++++ */
+        if (functionScope.hasFunctionKeywordPrefix() && functionScope.hasNextToken()) {
+            functionScope.setFunctionStart(functionScope.getToken().getStart());
+            functionScope.setToken(functionScope.nextToken());
+        }
+
+        inspectPotentialFunctionUntilEndingBracketOrNextIsOpenCurly(functionScope);
+        return functionScope;
+    }
+
+    protected BashFunction createBashFunction(FunctionScope functionScope, String functionName) {
+        BashFunction function = new BashFunction();
+        function.lengthToNameEnd = functionScope.getFunctionEnd() - functionScope.getFunctionStart();
+        function.position = functionScope.getFunctionStart();
+        function.name = functionName;
+        function.end = -1;
+
+        scanForFunctionEnd(functionScope, function);
+
+        return function;
+    }
+
+    protected void scanForFunctionEnd(FunctionScope functionScope, BashFunction function) {
+        while (functionScope.hasNextToken()) {
+            ParseToken closeCurlyBraceToken = functionScope.nextToken();
+            if (closeCurlyBraceToken.isCloseBlock()) {
+                function.end = closeCurlyBraceToken.getEnd();
+                break;
+            }
+        }
+    }
+
+    protected void inspectPotentialFunctionUntilEndingBracketOrNextIsOpenCurly(FunctionScope functionScope) {
+        /*
+         * either we come from "function xyz()" or just "xyz()" -> current token
+         * is always methodname
+         */
+        if (!functionScope.hasNextToken()) {
+            return;
+        }
+        if (!functionScope.isTokenHavingLegalFunctionName()) {
+            return;
+        }
+        ParseToken followToken = functionScope.nextToken(); // either () or just
+                                                            // brackets are used
+        boolean tokenWithEndingBrackets = followToken.hasLength(2) && followToken.endsWithFunctionBrackets();
+        if (tokenWithEndingBrackets) {
+            functionScope.setIsFunction(true);
+            return;
+        }
+        if (followToken.isOpenBlock()) {
+            /*
+             * only allowed for "function xyz {}" but not for "xyz {}" - means
+             * without keyword function there must be brackets used!
+             */
+            functionScope.setIsFunction(functionScope.hasFunctionKeywordPrefix());
+            functionScope.backToken();// move back to have access to curly
+                                      // bracket from outside as next token,
+                                      // necessary for validation when function
+            return;
+        }
+        /* could be 'MethodName ( )' <!-- */
+        if (!followToken.isFunctionStartBracket()) {
+            return;
+        }
+
+        if (!functionScope.hasNextToken()) {
+            return;
+        }
+
+        followToken = functionScope.nextToken();
+        functionScope.setIsFunction(followToken.isFunctionEndBracket());
+    }
+
+    private BashError createBashErrorFunctionPrefixFoundButNotAFunction(String functionName, ParseToken token) {
+        return new BashError(token.getStart(), token.getEnd(),
+                "Keyword function used but it's not a valid function definition: '" + functionName + "'.");
+    }
+
+    private BashError createBashErrorCloseFunctionCurlyBraceMissing(String functionName, ParseToken openCurlyBraceToken) {
+        return new BashError(openCurlyBraceToken.getStart(), openCurlyBraceToken.getEnd(),
+                "This curly brace is not closed. So function '" + functionName + "' is not valid.");
+    }
+
+    private BashError createBashErrorFunctionMissingCurlyBrace(ParseToken token, String functionName) {
+        return new BashError(token.getStart(), token.getEnd(),
+                "The function '" + functionName + "' is not valid because no opening curly brace found.");
+    }
+
+    public void setDebug(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
 
 }

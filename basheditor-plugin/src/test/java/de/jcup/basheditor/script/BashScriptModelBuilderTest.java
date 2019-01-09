@@ -35,6 +35,22 @@ public class BashScriptModelBuilderTest {
     }
 
     @Test
+    public void bugfix_115_one_function_with_keyword_and_name_but__space_in_brackets_is_recognized() throws Exception {
+        /* prepare */
+        String script = "function deploy ( ) {\n\n}";
+
+        /* execute */
+        BashScriptModel bashScriptModel = builderToTest.build(script);
+
+        /* test @formatter:off*/
+        assertThat(bashScriptModel).
+            hasFunction("deploy").
+            hasFunctions(1).
+            hasNoErrors();
+        /* @formatter:on */
+    }
+    
+    @Test
     public void bugfix_116_one_function_with_keyword_and_name_but__space_in_brackets_is_recognized() throws Exception {
         /* prepare */
         String script = "function test ( ) {\n\n}";
