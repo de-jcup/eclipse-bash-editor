@@ -164,7 +164,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	}
 
 	void setTitleImageDependingOnSeverity(int severity) {
-		setTitleImage(EclipseUtil.getImage("icons/" + getTitleImageName(severity), BashEditorActivator.PLUGIN_ID));
+	    EclipseUtil.safeAsyncExec( () -> setTitleImage(EclipseUtil.getImage("icons/" + getTitleImageName(severity), BashEditorActivator.PLUGIN_ID)));
 	}
 
 	private String getTitleImageName(int severity) {

@@ -159,6 +159,13 @@ public class ParseToken {
 	public boolean endsWithFunctionBrackets() {
 		return getSafeText().endsWith("()");
 	}
+	
+	public boolean isFunctionStartBracket() {
+        return getSafeText().equals("(");
+    }
+	public boolean isFunctionEndBracket() {
+        return getSafeText().equals(")");
+    }
 
 	public boolean hasLength(int length) {
 		return getSafeText().length() == length;

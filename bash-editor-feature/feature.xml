@@ -2,7 +2,7 @@
 <feature
       id="de.jcup.basheditor"
       label="Bash Editor"
-      version="1.5.3"
+      version="1.5.4"
       provider-name="Albert Tregnaghi">
 
    <description url="https://marketplace.eclipse.org/content/bash-editor">

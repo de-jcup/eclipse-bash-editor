@@ -9,3 +9,9 @@ build/
 bin/
 gen/
 
+!.metadata
+!.classpath
+!.project
+!.settings/
+!*.jar
+
