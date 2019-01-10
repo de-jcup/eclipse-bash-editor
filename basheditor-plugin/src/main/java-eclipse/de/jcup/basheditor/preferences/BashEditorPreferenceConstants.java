@@ -36,7 +36,7 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	P_TOOLTIPS_ENABLED("toolTipsEnabled"),
 	
 	P_SAVE_ACTION_ENABLED("saveActionEnabled"),
-	P_SAVE_ACTION("saveAction"),
+	P_SAVE_ACTION_REFORMATTER_TOOL("saveAction"),
 	;
 
 	private String id;
