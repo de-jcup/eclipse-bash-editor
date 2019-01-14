@@ -34,6 +34,11 @@ public class LineIsBashSheBangValidatorTest {
 	public void shebang_slash_bin_slash_bash_is_valid() {
 		assertTrue(validatorToTest.isValid("#!/bin/bash"));
 	}
+	
+	@Test
+	public void shebang_slash_user_slash_bin_slash_bash_is_valid() {
+		assertTrue(validatorToTest.isValid("#!/usr/bin/bash"));
+	}
 
 	@Test
 	public void shebang_usr_bin_slash_env_space_bash_is_valid() {
