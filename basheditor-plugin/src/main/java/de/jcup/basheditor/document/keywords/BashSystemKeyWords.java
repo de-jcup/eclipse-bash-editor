@@ -19,8 +19,9 @@ import de.jcup.eclipse.commons.keyword.DocumentKeyWord;
 
 public enum BashSystemKeyWords implements DocumentKeyWord {
 	
-	SHA_BANG("#!/bin/bash"), 
+	SHE_BANG_BIN("#!/usr/bin/bash"), 
 	
+	SHE_BANG_PORTABLE("#!/usr/bin/env bash"), 
 	
 	;
 
