@@ -782,7 +782,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		} catch (IOException e) {
 			BashEditorUtil.logError("Failed running external re-formatting tool '" + externalToolString + "'", e);
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
+			BashEditorUtil.logError("Failed refreshing document", e);
 			e.printStackTrace();
 		}
 	}
