@@ -21,20 +21,37 @@ public interface OutputHandler {
 	 * Output outputHandler does nothing
 	 */
 	public static final NoOutputHandler NO_OUTPUT = new NoOutputHandler();
+	public static final StringOutputHandler STRING_OUTPUT = new StringOutputHandler();
 
 	void output(String line);
 
+	
 	public static class NoOutputHandler implements OutputHandler {
 
 		private NoOutputHandler() {
-
 		}
 
 		@Override
 		public void output(String line) {
+		}
+	}
+	
+	public static class StringOutputHandler implements OutputHandler {
+		
+		private String fullOutput;
 
+		private StringOutputHandler() {
+			fullOutput = "";
 		}
 
+		@Override
+		public void output(String line) {
+			fullOutput += line;
+		}
+		
+		public String getFullOutput() {
+			return fullOutput;
+		}
 	}
 
 }
