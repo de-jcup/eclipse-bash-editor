@@ -15,8 +15,8 @@
  */
 package de.jcup.basheditor;
 
-import static de.jcup.basheditor.BashEditorUtil.*;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+import static de.jcup.basheditor.BashEditorUtil.getPreferences;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_AUTO_CREATE_END_BRACKETSY;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;

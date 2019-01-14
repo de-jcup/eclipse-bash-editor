@@ -15,9 +15,8 @@
  */
  package de.jcup.basheditor.script.parser;
 
-import static org.junit.Assert.*;
-
-import de.jcup.basheditor.script.parser.ParseToken;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class AssertParseToken {
 

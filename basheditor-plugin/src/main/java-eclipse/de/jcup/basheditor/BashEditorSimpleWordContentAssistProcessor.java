@@ -15,7 +15,8 @@
  */
 package de.jcup.basheditor;
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_KEYWORDS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_SIMPLEWORDS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +42,8 @@ import de.jcup.basheditor.document.keywords.BashIncludeKeyWords;
 import de.jcup.basheditor.document.keywords.BashLanguageKeyWords;
 import de.jcup.basheditor.document.keywords.BashSpecialVariableKeyWords;
 import de.jcup.basheditor.document.keywords.BashSystemKeyWords;
-import de.jcup.basheditor.document.keywords.DocumentKeyWord;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
+import de.jcup.eclipse.commons.keyword.DocumentKeyWord;
 
 public class BashEditorSimpleWordContentAssistProcessor implements IContentAssistProcessor, ICompletionListener {
 

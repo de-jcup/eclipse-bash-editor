@@ -15,7 +15,7 @@
  */
 package de.jcup.basheditor;
 
-import static org.eclipse.core.runtime.Assert.*;
+import static org.eclipse.core.runtime.Assert.isNotNull;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;

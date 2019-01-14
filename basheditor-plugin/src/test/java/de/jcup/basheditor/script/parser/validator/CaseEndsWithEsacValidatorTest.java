@@ -15,18 +15,10 @@
  */
  package de.jcup.basheditor.script.parser.validator;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import static de.jcup.basheditor.script.parser.validator.AssertTokenValidator.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import de.jcup.basheditor.script.ValidationResult;
-import de.jcup.basheditor.script.parser.ParseToken;
-import de.jcup.basheditor.script.parser.TestParseToken;
-import static de.jcup.basheditor.script.parser.validator.AssertTokenValidator.*;
 public class CaseEndsWithEsacValidatorTest {
 
 	private CaseEndsWithEsacValidator validatorToTest;

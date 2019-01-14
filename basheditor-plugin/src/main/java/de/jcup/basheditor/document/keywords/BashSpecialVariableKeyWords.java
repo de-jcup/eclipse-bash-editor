@@ -15,6 +15,9 @@
  */
 package de.jcup.basheditor.document.keywords;
 
+import de.jcup.eclipse.commons.keyword.DocumentKeyWord;
+import de.jcup.eclipse.commons.keyword.TooltipTextSupport;
+
 public enum BashSpecialVariableKeyWords implements DocumentKeyWord {
 
 	// http://tldp.org/LDP/abs/html/internalvariables.html

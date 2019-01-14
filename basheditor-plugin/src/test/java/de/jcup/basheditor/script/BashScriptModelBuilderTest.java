@@ -16,7 +16,8 @@
 package de.jcup.basheditor.script;
 
 import static de.jcup.basheditor.script.AssertScriptModel.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 

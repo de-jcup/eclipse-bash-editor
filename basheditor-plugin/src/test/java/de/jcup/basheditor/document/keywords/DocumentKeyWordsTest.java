@@ -15,9 +15,11 @@
  */
 package de.jcup.basheditor.document.keywords;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
+
+import de.jcup.eclipse.commons.keyword.DocumentKeyWord;
 
 public class DocumentKeyWordsTest {
 
