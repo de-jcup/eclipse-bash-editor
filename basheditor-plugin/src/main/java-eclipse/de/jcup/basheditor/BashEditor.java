@@ -767,46 +767,23 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		
 		// now run external tool
 		//BashEditorUtil.logInfo("Running external re-formatting tool with following cmds args: " + String.join(",", cmd_args)); // debug only
-		SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.NO_OUTPUT, false, EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS);
+		SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.STRING_OUTPUT, false, EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS);
 		try {
 			int exitCode = executor.execute(ctx, ctx, ctx, cmd_args);
 			if (exitCode == 0) {
-				
-				// refreshing does not seem to work:
-				//resolveResourceAsIFile().refreshLocal(IResource.DEPTH_INFINITE, progressMonitor);
-				ISourceViewer sourceViewer = getSourceViewer();
-				StyledText textWidget = sourceViewer.getTextWidget();
-				int lastCaretPos = textWidget.getCaretOffset();
-				
-				// reload changes performed on disk by external reformatter:
-				String external_tool_result = readFile(bashFile.getAbsolutePath(), StandardCharsets.UTF_8);
-				
-				// SOLUTION #1: change the Document object directly
-				getDocument().set(external_tool_result);
-				
-				// SOLUTION #2: use widget replaceText
-				//textWidget.replaceTextRange(0, textWidget.getCharCount(), external_tool_result);
-				
-				// PROBLEM: WHAT'S THE BEST APPROACH? BOTH REQUIRE RESTORING THE CARET POSITION ANYWAY
-
-				// hackish way to try to restore the caret to the position it had BEFORE content was reformatted
-				textWidget.setCaretOffset(lastCaretPos);
-				BashEditorUtil.logInfo("Moved the caret at: " + textWidget.getCaretOffset());
-				textWidget.showSelection();
-
-				// PROBLEM: IN THIS WAY THE DOCUMENT IS MARKED AS "DIRTY" BY ECLIPSE AND THUS
-				// AN ASTERISK WILL APPEAR IN THAT DOCUMENT TAB AND ECLIPSE WILL ASK TO RELOAD IT
-				// SINCE IT WAS CHANGED ON DISK!!!
-
-				// hackish way to remove the "dirty" status from the document: re-save with overwrite=true
-				super.performSave(true, progressMonitor);
+				// reload external tool output:
+				// see https://wiki.eclipse.org/FAQ_When_should_I_use_refreshLocal%3F
+				resolveResourceAsIFile().refreshLocal(IResource.DEPTH_ZERO, null);
 			}
 			else
 			{
-				BashEditorUtil.logInfo("External re-formatting tool '" + externalToolString + "' failed with exit code " + exitCode);
+				BashEditorUtil.logInfo("External re-formatting tool '" + externalToolString + "' failed with exit code " + exitCode + ": " + OutputHandler.STRING_OUTPUT.getFullOutput());
 			}
 		} catch (IOException e) {
 			BashEditorUtil.logError("Failed running external re-formatting tool '" + externalToolString + "'", e);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
