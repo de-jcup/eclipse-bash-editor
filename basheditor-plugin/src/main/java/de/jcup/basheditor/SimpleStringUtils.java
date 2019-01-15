@@ -115,4 +115,15 @@ public class SimpleStringUtils {
 		}
 		return sb.toString();
 	}
+
+	public static boolean isNotBlank(String wd) {
+		return ! isBlank(wd);
+	}
+	
+	public static boolean isBlank(String wd) {
+		if (wd==null) {
+			return true;
+		}
+		return wd.trim().isEmpty();
+	}
 }

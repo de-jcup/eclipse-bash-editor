@@ -21,6 +21,10 @@
    		id="basheditor.preferences.keyword.validation"
    		label="validation">
      </keyword>
+     <keyword
+   		id="basheditor.preferences.keyword.saveaction"
+   		label="save action">
+     </keyword>
     
    </extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -37,7 +41,7 @@
             id="basheditor.editors.BashEditor">
       </editor>
    </extension>
-   
+            
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          PROPERTY TESTERS                            -->
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -285,6 +289,20 @@
                id="basheditor.preferences.keyword.validation">
          </keywordReference>
       </page>
+      
+      <page
+         id="basheditor.eclipse.gradleeditor.preferences.BashEditorSaveActionsPreferencePage"
+         class="de.jcup.basheditor.preferences.BashEditorSaveActionsPreferencePage"
+         name="Save Actions"
+         category="basheditor.eclipse.gradleeditor.preferences.BashEditorEditorPreferencePage">
+          <keywordReference
+               id="basheditor.preferences.keyword.bash">
+         </keywordReference>
+         <keywordReference
+               id="basheditor.preferences.keyword.saveaction">
+         </keywordReference>
+      </page>
+      
     </extension>
     <extension
          point="org.eclipse.core.runtime.preferences">

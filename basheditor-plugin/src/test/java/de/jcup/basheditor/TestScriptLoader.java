@@ -43,7 +43,7 @@ public class TestScriptLoader {
 	public static String loadScriptFromTestScripts(String testScriptName) throws IOException{
 		assertTestscriptFolderExists();
 		
-		File file = new File(testScriptRootFolder,testScriptName);
+		File file = getTestScriptFile(testScriptName);
 		if (!file.exists()){
 			throw new IllegalArgumentException("Test case corrupt! Test script file does not exist:"+file);
 		}
@@ -56,6 +56,11 @@ public class TestScriptLoader {
 			}
 		}
 		return sb.toString();
+	}
+
+	public static File getTestScriptFile(String testScriptName) {
+		File file = new File(testScriptRootFolder,testScriptName);
+		return file;
 	}
 
 	private static void assertTestscriptFolderExists() {

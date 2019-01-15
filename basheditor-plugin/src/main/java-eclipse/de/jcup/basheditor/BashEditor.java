@@ -19,14 +19,26 @@ import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDI
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_COLOR;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_ENABLED;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_BLOCK_STATEMENTS;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_DO_STATEMENTS;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_ERROR_LEVEL;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_FUNCTION_STATEMENTS;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_IF_STATEMENTS;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -36,6 +48,10 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -62,6 +78,7 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.ide.ResourceUtil;
+
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -73,6 +90,11 @@ import de.jcup.basheditor.outline.BashEditorTreeContentProvider;
 import de.jcup.basheditor.outline.BashQuickOutlineDialog;
 import de.jcup.basheditor.outline.Item;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
+import de.jcup.basheditor.process.BashEditorFileProcessContext;
+import de.jcup.basheditor.process.CancelStateProvider;
+import de.jcup.basheditor.process.OutputHandler;
+import de.jcup.basheditor.process.SimpleProcessExecutor;
+import de.jcup.basheditor.process.TimeStampChangedEnforcer;
 import de.jcup.basheditor.script.BashError;
 import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.script.BashScriptModel;
@@ -89,6 +111,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	public static final String EDITOR_CONTEXT_MENU_ID = EDITOR_ID + ".context";
 	/** The COMMAND_ID of the editor ruler context menu */
 	public static final String EDITOR_RULER_CONTEXT_MENU_ID = EDITOR_CONTEXT_MENU_ID + ".ruler";
+	/** Max execution time for external tool to run on save action */
+	public static final int EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS = 10;
 
 	private BashBracketsSupport bracketMatcher = new BashBracketsSupport();
 	private SourceViewerDecorationSupport additionalSourceViewerSupport;
@@ -98,6 +122,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	private boolean quickOutlineOpened;
 	private int lastCaretPosition;
 	private static final BashScriptModel FALLBACK_MODEL = new BashScriptModel();
+	private ExternalToolCommandArrayBuilder commandArrayBuilder = new ExternalToolCommandArrayBuilder();
+	private TimeStampChangedEnforcer timestampChangeEnforder = new TimeStampChangedEnforcer();
 
 	public BashEditor() {
 		setSourceViewerConfiguration(new BashSourceViewerConfiguration(this));
@@ -119,8 +145,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		synchronized (monitor) {
 			if (quickOutlineOpened) {
 				/*
-				 * already opened - this is in future the anker point for
-				 * ctrl+o+o...
+				 * already opened - this is in future the anker point for ctrl+o+o...
 				 */
 				return;
 			}
@@ -157,7 +182,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	}
 
 	void setTitleImageDependingOnSeverity(int severity) {
-	    EclipseUtil.safeAsyncExec( () -> setTitleImage(EclipseUtil.getImage("icons/" + getTitleImageName(severity), BashEditorActivator.PLUGIN_ID)));
+		EclipseUtil.safeAsyncExec(() -> setTitleImage(EclipseUtil.getImage("icons/" + getTitleImageName(severity), BashEditorActivator.PLUGIN_ID)));
 	}
 
 	private String getTitleImageName(int severity) {
@@ -240,8 +265,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		styledText.addKeyListener(new BashBracketInsertionCompleter(this));
 
 		/*
-		 * register as resource change listener to provide marker change
-		 * listening
+		 * register as resource change listener to provide marker change listening
 		 */
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 
@@ -256,19 +280,17 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	}
 
 	/**
-	 * Installs an additional source viewer support which uses editor
-	 * preferences instead of standard text preferences. If standard source
-	 * viewer support would be set with editor preferences all standard
-	 * preferences would be lost or had to be reimplmented. To avoid this
-	 * another source viewer support is installed...
+	 * Installs an additional source viewer support which uses editor preferences
+	 * instead of standard text preferences. If standard source viewer support would
+	 * be set with editor preferences all standard preferences would be lost or had
+	 * to be reimplmented. To avoid this another source viewer support is
+	 * installed...
 	 */
 	private void installAdditionalSourceViewerSupport() {
 
-		additionalSourceViewerSupport = new SourceViewerDecorationSupport(getSourceViewer(), getOverviewRuler(),
-				getAnnotationAccess(), getSharedColors());
+		additionalSourceViewerSupport = new SourceViewerDecorationSupport(getSourceViewer(), getOverviewRuler(), getAnnotationAccess(), getSharedColors());
 		additionalSourceViewerSupport.setCharacterPairMatcher(bracketMatcher);
-		additionalSourceViewerSupport.setMatchingCharacterPainterPreferenceKeys(
-				P_EDITOR_MATCHING_BRACKETS_ENABLED.getId(), P_EDITOR_MATCHING_BRACKETS_COLOR.getId(),
+		additionalSourceViewerSupport.setMatchingCharacterPainterPreferenceKeys(P_EDITOR_MATCHING_BRACKETS_ENABLED.getId(), P_EDITOR_MATCHING_BRACKETS_COLOR.getId(),
 				P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION.getId(), P_EDITOR_ENCLOSING_BRACKETS.getId());
 
 		IPreferenceStore preferenceStoreForDecorationSupport = BashEditorUtil.getPreferences().getPreferenceStore();
@@ -313,8 +335,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			}
 
 			/*
-			 * TODO ATR, 03.02.2017: there should be an easier approach to get
-			 * editors back and foreground, without syncexec
+			 * TODO ATR, 03.02.2017: there should be an easier approach to get editors back
+			 * and foreground, without syncexec
 			 */
 			EclipseUtil.getSafeDisplay().syncExec(new Runnable() {
 
@@ -458,9 +480,9 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	}
 
 	/**
-	 * Set initial title image dependent on current marker severity. This will
-	 * mark error icon on startup time which is not handled by resource change
-	 * handling, because having no change...
+	 * Set initial title image dependent on current marker severity. This will mark
+	 * error icon on startup time which is not handled by resource change handling,
+	 * because having no change...
 	 */
 	private void setTitleImageInitial() {
 		IResource resource = resolveResource();
@@ -479,12 +501,28 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	 * 
 	 * @return file resource or <code>null</code>
 	 */
-	private IResource resolveResource() {
+	private IFile resolveResourceAsIFile() {
 		IEditorInput input = getEditorInput();
 		if (!(input instanceof IFileEditorInput)) {
 			return null;
 		}
 		return ((IFileEditorInput) input).getFile();
+	}
+
+	private File resolveResourceAsFile() throws CoreException {
+		IFile ifile = resolveResourceAsIFile();
+		IPath location = ifile.getLocation();
+		if (location == null) {
+			return null;
+		}
+		IFileStore fileStore = FileBuffers.getFileStoreAtLocation(location);
+
+		File file = fileStore.toLocalFile(EFS.NONE, null);
+		return file;
+	}
+
+	private IResource resolveResource() {
+		return resolveResourceAsIFile();
 	}
 
 	private boolean isMarkerChangeForThisEditor(IResourceChangeEvent event) {
@@ -719,5 +757,118 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
 	public void validate() {
 		rebuildOutline();
+	}
+
+	@Override
+	protected void performSave(boolean overwrite, IProgressMonitor progressMonitor) {
+
+		// first of all do save the changes to disk (without external tool pass):
+		super.performSave(overwrite, progressMonitor);
+
+		if (!isRunningExternalToolOnSave()) {
+			return;
+		}
+		Job job = new Job("execute bash editor save action") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					callExternalToolAndRefreshEditorContent(monitor);
+				} catch (CoreException e) {
+					return e.getStatus();
+				}
+
+				return Status.OK_STATUS;
+			}
+		};
+		job.setUser(true);
+		job.setSystem(false);
+		job.schedule();
+	}
+
+	private void callExternalToolAndRefreshEditorContent(IProgressMonitor progressMonitor) throws CoreException {
+		// we will run the external tool from the directory where the current file is
+		// located:
+		String externalToolString = getPreferences().getStringPreference(P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND);
+		if (externalToolString == null || externalToolString.trim().isEmpty()) {
+			return;
+		}
+		if (progressMonitor != null) {
+			progressMonitor.beginTask(externalToolString, 1);
+		}
+		try {
+			File bashFile = resolveResourceAsFile();
+			if (bashFile == null) {
+				return; // cannot reformat
+			}
+
+			BashEditorFileProcessContext processContext = new BashEditorFileProcessContext(bashFile);
+			processContext.setCancelStateProvider(new CancelStateProvider() {
+
+				@Override
+				public boolean isCanceled() {
+					if (progressMonitor != null) {
+						return progressMonitor.isCanceled();
+					}
+					return false;
+				}
+			});
+
+			// substitute in the external tool cmd line the special placeholders:
+			String[] cmd_args = commandArrayBuilder.build(externalToolString, bashFile);
+
+			SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.STRING_OUTPUT, false, EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS);
+
+			/* handle potential cancel operation */
+			if (progressMonitor != null) {
+				if (progressMonitor.isCanceled()) {
+					return;
+				}
+			}
+			/*
+			 * we must ensure time stamp will be changed by external - to have
+			 * refreshLocal() call working...
+			 */
+			timestampChangeEnforder.ensureNextWriteChangesFileStamp(bashFile);
+
+			int exitCode = executor.execute(processContext, processContext, processContext, cmd_args);
+			if (exitCode == 0) {
+				// reload external tool output:
+				// see https://wiki.eclipse.org/FAQ_When_should_I_use_refreshLocal%3F
+				IFile file = resolveResourceAsIFile();
+				if (file == null) {
+					/* should not happen ... but... */
+					return;
+				}
+				file.refreshLocal(IResource.DEPTH_ZERO, progressMonitor);
+			} else {
+				throw new CoreException(new Status(Status.ERROR, BashEditorActivator.PLUGIN_ID,
+						"External re-formatting tool '" + externalToolString + "' failed with exit code " + exitCode + ": " + OutputHandler.STRING_OUTPUT.getFullOutput()));
+			}
+		} catch (IOException e) {
+			throw new CoreException(new Status(Status.ERROR, BashEditorActivator.PLUGIN_ID, "Failed running external re-formatting tool '" + externalToolString + "'", e));
+		}
+	}
+
+	private boolean isRunningExternalToolOnSave() {
+		BashEditorPreferences preferences = BashEditorPreferences.getInstance();
+		return preferences.getBooleanPreference(P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED);
+	}
+
+	static String readFile(String path, Charset encoding) throws IOException {
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		return new String(encoded, encoding);
+	}
+
+	String writeDocumentInTempFile() throws IOException {
+		File tempFile;
+		tempFile = File.createTempFile("eclipse-basheditor", ".tmp");
+
+		// put the current contents in the temp file
+		FileWriter fw = new FileWriter(tempFile);
+		fw.write(getDocumentText());
+		fw.close();
+
+		return tempFile.getAbsolutePath();
 	}
 }

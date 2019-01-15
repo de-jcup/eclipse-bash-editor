@@ -16,15 +16,7 @@ package de.jcup.basheditor.preferences;
  */
 
 import static de.jcup.basheditor.BashEditorUtil.getPreferences;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_KEYWORDS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_SIMPLEWORDS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_AUTO_CREATE_END_BRACKETSY;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_ENCLOSING_BRACKETS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_COLOR;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_ENABLED;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_OUTLINE_WITH_EDITOR;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_TOOLTIPS_ENABLED;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 
 import java.util.ArrayList;
 
@@ -81,6 +73,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 	private BooleanFieldEditor codeAssistWithSimpleWords;
 	private BooleanFieldEditor toolTipsEnabled;
 
+	
 	public BashEditorPreferencePage() {
 		super(GRID);
 		setPreferenceStore(getPreferences().getPreferenceStore());
@@ -138,7 +131,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		addField(linkEditorWithOutline);
 		
 		Label spacer = new Label(appearanceComposite, SWT.LEFT);
-		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL|GridData.GRAB_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		gd.heightHint = convertHeightInCharsToPixels(1) / 2;
 		spacer.setLayoutData(gd);
@@ -225,15 +218,14 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		/* -- Code assistance -- */
 		/* --------------------- */
 
-		GridData codeAssistGroupLayoutData = new GridData();
+		GridData codeAssistGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL|GridData.GRAB_HORIZONTAL);
 		codeAssistGroupLayoutData.horizontalSpan=2;
 		codeAssistGroupLayoutData.widthHint=400;
 		
 		Group codeAssistGroup = new Group(appearanceComposite,SWT.NONE);
-		codeAssistGroup.setText("Code assistence");
+		codeAssistGroup.setText("Code assistance");
 		codeAssistGroup.setLayout(new GridLayout());
 		codeAssistGroup.setLayoutData(codeAssistGroupLayoutData);
-		
 		
 		codeAssistWithBashKeywords = new BooleanFieldEditor(P_CODE_ASSIST_ADD_KEYWORDS.getId(),
 				"Bash and GNU keywords", codeAssistGroup);
@@ -253,7 +245,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		toolTipsEnabled.getDescriptionControl(codeAssistGroup)
 		.setToolTipText("When enabled tool tips will occure for keywords");
 		addField(toolTipsEnabled);
-		
+
 		
 	}
 
@@ -345,7 +337,5 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 			boolean state = master.getSelection();
 			slave.setEnabled(state);
 		}
-
 	}
-
 }
