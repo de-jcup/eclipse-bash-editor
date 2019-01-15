@@ -843,10 +843,10 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 				file.refreshLocal(IResource.DEPTH_ZERO, progressMonitor);
 			} else {
 				throw new CoreException(new Status(Status.ERROR, BashEditorActivator.PLUGIN_ID,
-						"External re-formatting tool '" + externalToolString + "' failed with exit code " + exitCode + ": " + OutputHandler.STRING_OUTPUT.getFullOutput()));
+						"Execution of '" + externalToolString + "' failed with exit code " + exitCode + ": " + OutputHandler.STRING_OUTPUT.getFullOutput()));
 			}
 		} catch (IOException e) {
-			throw new CoreException(new Status(Status.ERROR, BashEditorActivator.PLUGIN_ID, "Failed running external re-formatting tool '" + externalToolString + "'", e));
+			throw new CoreException(new Status(Status.ERROR, BashEditorActivator.PLUGIN_ID, "Failed running external tool '" + externalToolString + "'", e));
 		}
 	}
 
