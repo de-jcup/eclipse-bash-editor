@@ -15,7 +15,7 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_OUTLINE_WITH_EDITOR;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;

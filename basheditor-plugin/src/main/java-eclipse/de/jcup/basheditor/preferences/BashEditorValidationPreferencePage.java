@@ -15,7 +15,11 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.*;
+import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_BLOCK_STATEMENTS;
+import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_DO_STATEMENTS;
+import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_ERROR_LEVEL;
+import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_FUNCTION_STATEMENTS;
+import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_IF_STATEMENTS;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;

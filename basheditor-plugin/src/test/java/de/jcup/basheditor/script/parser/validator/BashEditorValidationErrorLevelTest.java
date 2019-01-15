@@ -15,7 +15,7 @@
  */
 package de.jcup.basheditor.script.parser.validator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 

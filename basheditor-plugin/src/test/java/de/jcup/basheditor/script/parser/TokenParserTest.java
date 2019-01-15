@@ -15,17 +15,15 @@
  */
 package de.jcup.basheditor.script.parser;
 
-import static de.jcup.basheditor.script.parser.AssertParseTokens.*;
-import static org.junit.Assert.*;
+import static de.jcup.basheditor.script.parser.AssertParseTokens.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import de.jcup.basheditor.script.parser.ParseToken;
-import de.jcup.basheditor.script.parser.TokenParser;
 
 public class TokenParserTest {
 

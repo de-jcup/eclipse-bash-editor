@@ -78,7 +78,7 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.ide.ResourceUtil;
-import org.eclipse.ui.progress.UIJob;
+
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -182,8 +182,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	}
 
 	void setTitleImageDependingOnSeverity(int severity) {
-		EclipseUtil.safeAsyncExec(() -> setTitleImage(
-				EclipseUtil.getImage("icons/" + getTitleImageName(severity), BashEditorActivator.PLUGIN_ID)));
+		EclipseUtil.safeAsyncExec(() -> setTitleImage(EclipseUtil.getImage("icons/" + getTitleImageName(severity), BashEditorActivator.PLUGIN_ID)));
 	}
 
 	private String getTitleImageName(int severity) {
@@ -289,11 +288,9 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	 */
 	private void installAdditionalSourceViewerSupport() {
 
-		additionalSourceViewerSupport = new SourceViewerDecorationSupport(getSourceViewer(), getOverviewRuler(),
-				getAnnotationAccess(), getSharedColors());
+		additionalSourceViewerSupport = new SourceViewerDecorationSupport(getSourceViewer(), getOverviewRuler(), getAnnotationAccess(), getSharedColors());
 		additionalSourceViewerSupport.setCharacterPairMatcher(bracketMatcher);
-		additionalSourceViewerSupport.setMatchingCharacterPainterPreferenceKeys(
-				P_EDITOR_MATCHING_BRACKETS_ENABLED.getId(), P_EDITOR_MATCHING_BRACKETS_COLOR.getId(),
+		additionalSourceViewerSupport.setMatchingCharacterPainterPreferenceKeys(P_EDITOR_MATCHING_BRACKETS_ENABLED.getId(), P_EDITOR_MATCHING_BRACKETS_COLOR.getId(),
 				P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION.getId(), P_EDITOR_ENCLOSING_BRACKETS.getId());
 
 		IPreferenceStore preferenceStoreForDecorationSupport = BashEditorUtil.getPreferences().getPreferenceStore();
@@ -772,15 +769,15 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			return;
 		}
 		Job job = new Job("execute bash editor save action") {
-			
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					callExternalToolAndRefreshEditorContent(monitor);
-				}catch(CoreException e) {
+				} catch (CoreException e) {
 					return e.getStatus();
 				}
-				
+
 				return Status.OK_STATUS;
 			}
 		};
@@ -796,8 +793,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		if (externalToolString == null || externalToolString.trim().isEmpty()) {
 			return;
 		}
-		if (progressMonitor!=null) {
-			progressMonitor.beginTask(externalToolString,1);
+		if (progressMonitor != null) {
+			progressMonitor.beginTask(externalToolString, 1);
 		}
 		try {
 			File bashFile = resolveResourceAsFile();
@@ -807,7 +804,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
 			BashEditorFileProcessContext processContext = new BashEditorFileProcessContext(bashFile);
 			processContext.setCancelStateProvider(new CancelStateProvider() {
-				
+
 				@Override
 				public boolean isCanceled() {
 					if (progressMonitor != null) {
@@ -820,9 +817,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			// substitute in the external tool cmd line the special placeholders:
 			String[] cmd_args = commandArrayBuilder.build(externalToolString, bashFile);
 
-			SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.STRING_OUTPUT, false,
-					EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS);
-			
+			SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.STRING_OUTPUT, false, EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS);
+
 			/* handle potential cancel operation */
 			if (progressMonitor != null) {
 				if (progressMonitor.isCanceled()) {
@@ -846,12 +842,12 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 				}
 				file.refreshLocal(IResource.DEPTH_ZERO, progressMonitor);
 			} else {
-				throw new CoreException(new Status(Status.ERROR, BashEditorActivator.PLUGIN_ID, "External re-formatting tool '" + externalToolString
-						+ "' failed with exit code " + exitCode + ": " + OutputHandler.STRING_OUTPUT.getFullOutput()));
+				throw new CoreException(new Status(Status.ERROR, BashEditorActivator.PLUGIN_ID,
+						"External re-formatting tool '" + externalToolString + "' failed with exit code " + exitCode + ": " + OutputHandler.STRING_OUTPUT.getFullOutput()));
 			}
 		} catch (IOException e) {
-			throw new CoreException(new Status(Status.ERROR, BashEditorActivator.PLUGIN_ID,"Failed running external re-formatting tool '" + externalToolString + "'", e));
-		} 
+			throw new CoreException(new Status(Status.ERROR, BashEditorActivator.PLUGIN_ID, "Failed running external re-formatting tool '" + externalToolString + "'", e));
+		}
 	}
 
 	private boolean isRunningExternalToolOnSave() {

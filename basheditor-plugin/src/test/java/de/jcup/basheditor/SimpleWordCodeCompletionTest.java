@@ -15,8 +15,8 @@
  */
 package de.jcup.basheditor;
 
-import static de.jcup.basheditor.AssertSimpleWordCodeCompletionResult.*;
-import static org.junit.Assert.*;
+import static de.jcup.basheditor.AssertSimpleWordCodeCompletionResult.assertResult;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Set;
 import java.util.TreeSet;

@@ -15,7 +15,8 @@
  */
 package de.jcup.basheditor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,18 @@ public class LineIsBashSheBangValidatorTest {
 	public void shebang_slash_bin_slash_bash_is_valid() {
 		assertTrue(validatorToTest.isValid("#!/bin/bash"));
 	}
+	
+	@Test
+	public void shebang_slash_user_slash_bin_slash_bash_is_valid() {
+		assertTrue(validatorToTest.isValid("#!/usr/bin/bash"));
+	}
 
+	@Test
+	public void shebang_usr_bin_slash_env_space_bash_is_valid() {
+		assertTrue(validatorToTest.isValid("#!/usr/bin/env bash"));
+	}
+
+	
 	@Test
 	public void shebang_slash_bin_slash_sh_is_not_valid() {
 		assertFalse(validatorToTest.isValid("#!/bin/sh"));

@@ -15,10 +15,15 @@
  */
  package de.jcup.basheditor.document.keywords;
 
+import de.jcup.eclipse.commons.keyword.DocumentKeyWord;
+
 public enum BashSystemKeyWords implements DocumentKeyWord {
 	
-	SHA_BANG("#!/bin/bash"), 
+	SHE_BANG_BIN("#!/bin/bash"), 
 	
+	SHE_BANG_USR_BIN("#!/usr/bin/bash"), 
+	
+	SHE_BANG_USR_PORTABLE("#!/usr/bin/env bash"), 
 	
 	;
 

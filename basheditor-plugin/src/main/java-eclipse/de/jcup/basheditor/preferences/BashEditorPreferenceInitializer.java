@@ -16,7 +16,7 @@ package de.jcup.basheditor.preferences;
  */
 
 import static de.jcup.basheditor.BashEditorColorConstants.*;
-import static de.jcup.basheditor.BashEditorUtil.*;
+import static de.jcup.basheditor.BashEditorUtil.getPreferences;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.*;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.*;

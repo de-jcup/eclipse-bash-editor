@@ -15,6 +15,9 @@
  */
 package de.jcup.basheditor.document.keywords;
 
+import de.jcup.eclipse.commons.keyword.DocumentKeyWord;
+import de.jcup.eclipse.commons.keyword.TooltipTextSupport;
+
 // see http://docs.oracle.com/javase/tutorial/java/nutsandbolts/_keywords.html
 public enum BashLanguageKeyWords implements DocumentKeyWord {
 	/* @formatter:off*/

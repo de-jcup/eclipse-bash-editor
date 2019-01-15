@@ -15,6 +15,8 @@
  */
  package de.jcup.basheditor.document.keywords;
 
+import de.jcup.eclipse.commons.keyword.DocumentKeyWord;
+
 public enum BashIncludeKeyWords implements DocumentKeyWord {
 
 	SOURCE("source"),

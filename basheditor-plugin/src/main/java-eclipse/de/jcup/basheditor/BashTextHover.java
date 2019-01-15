@@ -15,7 +15,7 @@
  */
 package de.jcup.basheditor;
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_TOOLTIPS_ENABLED;
 
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
@@ -29,11 +29,12 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Shell;
 
-import de.jcup.basheditor.document.keywords.DocumentKeyWord;
 import de.jcup.basheditor.document.keywords.DocumentKeyWords;
-import de.jcup.basheditor.document.keywords.TooltipTextSupport;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants;
+import de.jcup.eclipse.commons.keyword.DocumentKeyWord;
+import de.jcup.eclipse.commons.keyword.TooltipTextSupport;
+import de.jcup.eclipse.commons.ui.ReducedBrowserInformationControl;
 
 public class BashTextHover implements ITextHover, ITextHoverExtension {
 

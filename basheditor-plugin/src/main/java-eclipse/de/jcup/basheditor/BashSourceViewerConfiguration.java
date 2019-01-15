@@ -15,9 +15,33 @@
  */
 package de.jcup.basheditor;
 
-import static de.jcup.basheditor.BashEditorUtil.*;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.*;
-import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.*;
+import static de.jcup.basheditor.BashEditorUtil.getPreferences;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.BACKTICK_STRING;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_COMMAND;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_KEYWORD;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_SYSTEM_KEYWORD;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.COMMENT;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.DOUBLE_STRING;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.HERE_DOCUMENT;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.HERE_STRING;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.INCLUDE_KEYWORD;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.KNOWN_VARIABLES;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.PARAMETER;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.SINGLE_STRING;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.VARIABLES;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.allIdsToStringArray;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_BASH_COMMAND;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_BASH_KEYWORD;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_BSTRING;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_COMMENT;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_GSTRING;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_HEREDOCS;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_HERESTRINGS;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_INCLUDE_KEYWORD;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_KNOWN_VARIABLES;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_NORMAL_STRING;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_NORMAL_TEXT;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_PARAMETERS;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;

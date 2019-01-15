@@ -15,7 +15,7 @@
  */
 package de.jcup.basheditor;
 
-import static java.util.Collections.*;
+import static java.util.Collections.unmodifiableSet;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
