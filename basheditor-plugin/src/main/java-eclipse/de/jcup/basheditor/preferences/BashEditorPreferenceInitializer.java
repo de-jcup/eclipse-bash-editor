@@ -87,6 +87,13 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		store.setDefault(VALIDATE_FUNCTION_STATEMENTS.getId(), true);
 
 		store.setDefault(VALIDATE_ERROR_LEVEL.getId(), BashEditorValidationErrorLevel.ERROR.getId());
+		
+		/* ++++++++++++++ */
+		/* + Save action + */
+		/* ++++++++++++++ */
+		store.setDefault(P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED.getId(),false);
+		// we use "beautysh -f $filename" as default - see https://github.com/bemeurer/beautysh for installation
+		store.setDefault(P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND.getId(),"beautysh -f $filename"); 
 	}
 
 }

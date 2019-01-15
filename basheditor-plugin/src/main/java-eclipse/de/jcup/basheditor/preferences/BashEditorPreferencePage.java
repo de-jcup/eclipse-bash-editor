@@ -15,7 +15,7 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.BashEditorUtil.*;
+import static de.jcup.basheditor.BashEditorUtil.getPreferences;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 
 import java.util.ArrayList;
@@ -23,11 +23,7 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
-import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.StringFieldEditor;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -41,8 +37,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-
-import de.jcup.basheditor.BashEditorUtil;
 
 /**
  * Parts are inspired by <a href=
@@ -78,8 +72,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 	private BooleanFieldEditor codeAssistWithBashKeywords;
 	private BooleanFieldEditor codeAssistWithSimpleWords;
 	private BooleanFieldEditor toolTipsEnabled;
-	private BooleanFieldEditor saveActionEnabled;
-	private StringFieldEditor saveActionFieldEditor;
+
 	
 	public BashEditorPreferencePage() {
 		super(GRID);
@@ -253,37 +246,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		.setToolTipText("When enabled tool tips will occure for keywords");
 		addField(toolTipsEnabled);
 
-		/* --------------------- */
-		/* --   Save action   -- */
-		/* --------------------- */
-
-		GridData saveActionGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL|GridData.GRAB_HORIZONTAL);
-		saveActionGroupLayoutData.horizontalSpan = 2;
-		saveActionGroupLayoutData.widthHint = 400;
-
-		Group saveActionGroup = new Group(appearanceComposite, SWT.NONE);
-		saveActionGroup.setText("Save action");
-		saveActionGroup.setLayout(new GridLayout());
-		saveActionGroup.setLayoutData(saveActionGroupLayoutData);
 		
-		saveActionEnabled = new BooleanFieldEditor(P_SAVE_ACTION_ENABLED.getId(),
-				"Enable re-formatting on save", saveActionGroup);
-		saveActionEnabled.getDescriptionControl(saveActionGroup)
-		.setToolTipText("External program to run every time a script file is saved; its output will replace current document.");
-		addField(saveActionEnabled);
-
-		saveActionFieldEditor = new StringFieldEditor(P_SAVE_ACTION_REFORMATTER_TOOL.getId(), "External tool:", 
-				StringFieldEditor.UNLIMITED, StringFieldEditor.VALIDATE_ON_FOCUS_LOST, saveActionGroup);
-		addField(saveActionFieldEditor);
-
-		Composite labelGroup = new Composite(saveActionGroup, SWT.NONE);
-		labelGroup.setLayout(new GridLayout());
-		GridData labelGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL|GridData.GRAB_HORIZONTAL);
-		labelGroupLayoutData.horizontalSpan = 2;
-		labelGroup.setLayoutData(labelGroupLayoutData);
-		createNoteComposite(labelGroup.getFont(), labelGroup, 
-			"Note:", "The special $filename placeholder can be used to indicate\n"
-					 + "currently open file. External tool output will replace current document.");
 	}
 
 	@Override

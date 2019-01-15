@@ -15,29 +15,25 @@ package de.jcup.basheditor.preferences;
  * and limitations under the License.
  *
  */
- 
 
 /**
  * Constant definitions for plug-in preferences
  */
 public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
-	
+
 	P_EDITOR_MATCHING_BRACKETS_ENABLED("matchingBrackets"),
 	P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION("highlightBracketAtCaretLocation"),
-	P_EDITOR_ENCLOSING_BRACKETS("enclosingBrackets"),
-	P_EDITOR_MATCHING_BRACKETS_COLOR("matchingBracketsColor"),
+	P_EDITOR_ENCLOSING_BRACKETS("enclosingBrackets"), P_EDITOR_MATCHING_BRACKETS_COLOR("matchingBracketsColor"),
 	P_EDITOR_AUTO_CREATE_END_BRACKETSY("autoCreateEndBrackets"),
-	
+
 	P_LINK_OUTLINE_WITH_EDITOR("linkOutlineWithEditor"),
-	
-	P_CODE_ASSIST_ADD_KEYWORDS("codeAssistAddsKeyWords"),
-	P_CODE_ASSIST_ADD_SIMPLEWORDS("codeAssistAddsSimpleWords"),
-	
+
+	P_CODE_ASSIST_ADD_KEYWORDS("codeAssistAddsKeyWords"), P_CODE_ASSIST_ADD_SIMPLEWORDS("codeAssistAddsSimpleWords"),
+
 	P_TOOLTIPS_ENABLED("toolTipsEnabled"),
-	
-	P_SAVE_ACTION_ENABLED("saveActionEnabled"),
-	P_SAVE_ACTION_REFORMATTER_TOOL("saveAction"),
-	;
+
+	P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED("saveActionExternalToolEnabled"),
+	P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND("saveActionExternalToolCommand"),;
 
 	private String id;
 
