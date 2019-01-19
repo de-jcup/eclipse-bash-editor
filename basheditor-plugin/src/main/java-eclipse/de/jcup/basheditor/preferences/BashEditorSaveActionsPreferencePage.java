@@ -15,12 +15,13 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -34,6 +35,7 @@ import de.jcup.basheditor.BashEditorUtil;
 public class BashEditorSaveActionsPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	private BooleanFieldEditor saveActionExternalSourceFormatterEnabled;
 	private StringFieldEditor saveActionFieldEditor;
+	private Group externalToolGroup;
 	
 	public BashEditorSaveActionsPreferencePage() {
 		super(GRID);
@@ -56,7 +58,7 @@ public class BashEditorSaveActionsPreferencePage extends FieldEditorPreferencePa
 		externalToolsGroupLayoutData.horizontalSpan = 2;
 		externalToolsGroupLayoutData.widthHint = 400;
 
-		Group externalToolGroup = new Group(getFieldEditorParent(), SWT.NONE);
+		externalToolGroup = new Group(getFieldEditorParent(), SWT.NONE);
 		externalToolGroup.setText("External tool");
 		externalToolGroup.setLayout(new GridLayout());
 		externalToolGroup.setLayoutData(externalToolsGroupLayoutData);
@@ -78,6 +80,22 @@ public class BashEditorSaveActionsPreferencePage extends FieldEditorPreferencePa
 		createNoteComposite(labelGroup.getFont(), labelGroup, 
 			"Note:", "Special $filename placeholder can be used to indicate currently\n"
 					 + "opened file. External tool output will replace current document.");
+
+		enableSaveActionFieldEditor(isSaveActionEnabled());
 	}
 
+	public boolean isSaveActionEnabled() {
+		return saveActionExternalSourceFormatterEnabled.getBooleanValue();
+	}
+	
+	public void enableSaveActionFieldEditor(boolean enable) {
+		saveActionFieldEditor.getTextControl(externalToolGroup).setEnabled(enable);
+	}
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		// if saveAction checkbock is unchecked, disable the text editor to make it clear to the user
+		// that the 2 are connected:
+		enableSaveActionFieldEditor(isSaveActionEnabled());
+	}
 }
