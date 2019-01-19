@@ -33,7 +33,8 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	P_TOOLTIPS_ENABLED("toolTipsEnabled"),
 
 	P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED("saveActionExternalToolEnabled"),
-	P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND("saveActionExternalToolCommand"),;
+	P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND("saveActionExternalToolCommand"),
+	P_SAVE_ACTION_EXTERNAL_TOOL_ARGUMENTS("saveActionExternalToolArguments");
 
 	private String id;
 
