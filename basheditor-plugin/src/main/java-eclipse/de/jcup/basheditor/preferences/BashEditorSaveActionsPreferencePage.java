@@ -48,11 +48,6 @@ public class BashEditorSaveActionsPreferencePage extends FieldEditorPreferencePa
 	@Override
 	protected void createFieldEditors() {
 		
-		Composite appearanceComposite = new Composite(getFieldEditorParent(), SWT.NONE);
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
-		appearanceComposite.setLayout(layout);
-		
 		/* --------------------- */
 		/* --   Save action   -- */
 		/* --------------------- */
@@ -61,7 +56,7 @@ public class BashEditorSaveActionsPreferencePage extends FieldEditorPreferencePa
 		externalToolsGroupLayoutData.horizontalSpan = 2;
 		externalToolsGroupLayoutData.widthHint = 400;
 
-		Group externalToolGroup = new Group(appearanceComposite, SWT.NONE);
+		Group externalToolGroup = new Group(getFieldEditorParent(), SWT.NONE);
 		externalToolGroup.setText("External tool");
 		externalToolGroup.setLayout(new GridLayout());
 		externalToolGroup.setLayoutData(externalToolsGroupLayoutData);
