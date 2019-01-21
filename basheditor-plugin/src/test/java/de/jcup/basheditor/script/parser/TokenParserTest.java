@@ -25,6 +25,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.jcup.basheditor.TestScriptLoader;
+
 public class TokenParserTest {
 
 	private TokenParser parserToTest;
@@ -33,7 +35,44 @@ public class TokenParserTest {
 	public void before() {
 		parserToTest = new TokenParser();
 	}
+	
+	@Test
+	public void bug_130_three_backlashes_are_still_escape_sequence() throws Exception{
+		/* @formatter:off*/
+		assertParsing("a=\"\\\\\\\"\n;;\nesac").
+		resultsIn("a=",   "\"\\\\\\\"\n;;\nesac");
+		/* @formatter:on*/
+	}
+	
+	@Test
+	public void bug_130_four_backlashes_are_nno_escape_sequence() throws Exception{
+		/* @formatter:off*/
+		assertParsing("a=\"\\\\\\\\\"\n;;\nesac").
+		resultsIn("a=","\"\\\\\\\\\"","esac");
+		/* @formatter:on*/
+	}
 
+	@Test
+	public void bug_130_a_is_string_followed_by_newline_2_semicolons_newline_esac_has_string_containing_backslash_only() throws Exception{
+		/* @formatter:off*/
+		assertParsing("a=\"\\\\\"\n;;\nesac").
+		resultsIn("a=","\"\\\\\"","esac");
+		/* @formatter:on*/
+	}
+	
+	@Test
+	public void bug_130_bugfix_130_16_backlsashes_also_correct_handled() throws Exception{
+		/* prepare */
+		StringBuilder sb = new StringBuilder();
+		for (int i=0;i<16;i++) {
+			sb.append("\\");
+		}
+		/* @formatter:off*/
+		assertParsing(TestScriptLoader.loadScriptFromTestScripts("bugfix_130_16_backslashes_also_correct_handled.sh")).
+			resultsIn("SEPARATOR=","\""+sb.toString()+"\"","something-else");
+		/* @formatter:on*/
+	}
+	
 	@Test
 	public void bug_106_cat_with_heredoc_followed_by_negative_and_string_throws_no_exception() throws Exception{
 		assertParsing("cat <<-\" OF\"").simplyDoesNotFail();;

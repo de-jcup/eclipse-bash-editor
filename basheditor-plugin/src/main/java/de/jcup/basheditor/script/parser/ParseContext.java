@@ -264,7 +264,30 @@ class ParseContext implements CodePosSupport{
 	}
 
 	public boolean isCharBeforeEscapeSign() {
-		return getCharBefore() == '\\';
+		int countOfBackslashesBefore=0;
+		boolean wasBackslashBefore= getCharBefore() == '\\';
+		if (! wasBackslashBefore) {
+			return false;
+		}
+		/* next lines will search back to identify current escape state - all backslashes are inspected back*/
+		int cBefore =2;
+		Character beforeBefore = null;
+		do {
+			beforeBefore= getCharacterAtPosOrNull(pos-cBefore);
+			if (beforeBefore!=null) {
+				if (beforeBefore.charValue()!='\\') {
+					break;
+				}
+				cBefore++;
+				countOfBackslashesBefore++;
+			}
+		}while(beforeBefore!=null);
+		
+		
+		/* when already escaped then this is no longer escape!*/
+		int modulo = countOfBackslashesBefore % 2;
+		boolean isEscaping=  modulo == 0;
+		return isEscaping;
 	}
 
 	public void moveBackWard() {
