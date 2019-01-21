@@ -21,7 +21,6 @@ import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDI
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_ENABLED;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_ARGUMENTS;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_BLOCK_STATEMENTS;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_DO_STATEMENTS;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_ERROR_LEVEL;
@@ -791,16 +790,11 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	private void callExternalToolAndRefreshEditorContent(IProgressMonitor progressMonitor) throws CoreException {
 		// we will run the external tool from the directory where the current file is
 		// located:
-		String externalToolCmd = getPreferences().getStringPreference(P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND);
-		if (externalToolCmd == null || externalToolCmd.trim().isEmpty()) {
-			return;
-		}
-		String externalToolArguments = getPreferences().getStringPreference(P_SAVE_ACTION_EXTERNAL_TOOL_ARGUMENTS);
-		if (externalToolArguments == null || externalToolArguments.trim().isEmpty()) {
+		String externalToolString = getPreferences().getStringPreference(P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND);
+		if (externalToolString == null || externalToolString.trim().isEmpty()) {
 			return;
 		}
 		
-		String externalToolString = externalToolCmd + " " + externalToolArguments;
 		if (progressMonitor != null) {
 			progressMonitor.beginTask(externalToolString, 1);
 		}
