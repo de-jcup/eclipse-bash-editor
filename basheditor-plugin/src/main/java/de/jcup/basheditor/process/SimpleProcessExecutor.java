@@ -33,6 +33,7 @@ public class SimpleProcessExecutor implements ProcessExecutor {
 
 	protected OutputHandler outputHandler;
 	private boolean handleProcessOutputStream;
+	private boolean handleProcessErrorStream;
 	private long timeOutInSeconds = ENDLESS_RUNNING;
 
 	/**
@@ -44,12 +45,13 @@ public class SimpleProcessExecutor implements ProcessExecutor {
 	 *                                  {@link OutputHandler} too
 	 * @param timeOutInSeconds          - time out in seconds, 0 = endless running
 	 */
-	public SimpleProcessExecutor(OutputHandler outputHandler, boolean handleProcessOutputStream, int timeOutInSeconds) {
+	public SimpleProcessExecutor(OutputHandler outputHandler, boolean handleProcessOutputStream, boolean handleProcessErrorStream, int timeOutInSeconds) {
 		if (outputHandler == null) {
 			outputHandler = OutputHandler.NO_OUTPUT;
 		}
 		this.outputHandler = outputHandler;
 		this.handleProcessOutputStream = handleProcessOutputStream;
+		this.handleProcessErrorStream = handleProcessErrorStream;
 		this.timeOutInSeconds = timeOutInSeconds;
 	}
 
@@ -171,25 +173,41 @@ public class SimpleProcessExecutor implements ProcessExecutor {
 	 */
 	protected void handleOutputStreams(Process p, ProcessTimeoutTerminator timeoutTerminator,
 			CancelStateProvider cancelStateProvider) throws IOException {
-		if (!handleProcessOutputStream) {
+		if (!handleProcessOutputStream && !handleProcessErrorStream) {
 			return;
 		}
 		if (cancelStateProvider.isCanceled()) {
 			return;
 		}
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-			String line = null;
-			while ((!cancelStateProvider.isCanceled()) && (line = reader.readLine()) != null) {
-				outputHandler.output(line);
-				if (timeoutTerminator != null) {
-					if (isOutputRestartingTimeout()) {
-						timeoutTerminator.reset();
+		if (handleProcessOutputStream)
+		{
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+				String line = null;
+				while ((!cancelStateProvider.isCanceled()) && (line = reader.readLine()) != null) {
+					outputHandler.output(line);
+					if (timeoutTerminator != null) {
+						if (isOutputRestartingTimeout()) {
+							timeoutTerminator.reset();
+						}
 					}
 				}
 			}
 		}
-		;
 
+		if (handleProcessErrorStream)
+		{
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+				String line = null;
+				while ((!cancelStateProvider.isCanceled()) && (line = reader.readLine()) != null) {
+					outputHandler.output(line);
+					if (timeoutTerminator != null) {
+						if (isOutputRestartingTimeout()) {
+							timeoutTerminator.reset();
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**

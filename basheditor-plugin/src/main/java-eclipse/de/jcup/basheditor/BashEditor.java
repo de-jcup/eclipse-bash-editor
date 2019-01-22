@@ -89,6 +89,7 @@ import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
 import de.jcup.basheditor.outline.BashEditorTreeContentProvider;
 import de.jcup.basheditor.outline.BashQuickOutlineDialog;
 import de.jcup.basheditor.outline.Item;
+import de.jcup.basheditor.preferences.BashEditorPreferenceConstants;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.process.BashEditorFileProcessContext;
 import de.jcup.basheditor.process.CancelStateProvider;
@@ -793,6 +794,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		if (externalToolString == null || externalToolString.trim().isEmpty()) {
 			return;
 		}
+		
 		if (progressMonitor != null) {
 			progressMonitor.beginTask(externalToolString, 1);
 		}
@@ -817,7 +819,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 			// substitute in the external tool cmd line the special placeholders:
 			String[] cmd_args = commandArrayBuilder.build(externalToolString, bashFile);
 
-			SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.STRING_OUTPUT, false, EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS);
+			OutputHandler.STRING_OUTPUT.clearOutput();
+			SimpleProcessExecutor executor = new SimpleProcessExecutor(OutputHandler.STRING_OUTPUT, true, true, EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS);
 
 			/* handle potential cancel operation */
 			if (progressMonitor != null) {
