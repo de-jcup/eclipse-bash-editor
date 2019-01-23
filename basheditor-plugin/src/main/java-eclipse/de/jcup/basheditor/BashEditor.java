@@ -19,8 +19,8 @@ import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDI
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_COLOR;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_ENABLED;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_BLOCK_STATEMENTS;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_DO_STATEMENTS;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_ERROR_LEVEL;
@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -63,11 +62,14 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -78,7 +80,6 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.ide.ResourceUtil;
-
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -89,7 +90,6 @@ import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
 import de.jcup.basheditor.outline.BashEditorTreeContentProvider;
 import de.jcup.basheditor.outline.BashQuickOutlineDialog;
 import de.jcup.basheditor.outline.Item;
-import de.jcup.basheditor.preferences.BashEditorPreferenceConstants;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.process.BashEditorFileProcessContext;
 import de.jcup.basheditor.process.CancelStateProvider;
@@ -146,7 +146,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		synchronized (monitor) {
 			if (quickOutlineOpened) {
 				/*
-				 * already opened - this is in future the anker point for ctrl+o+o...
+				 * already opened - this is in future the anker point#117  for ctrl+o+o...
 				 */
 				return;
 			}
@@ -175,7 +175,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		BashScriptModel model;
 		try {
 			model = modelBuilder.build(text);
-		} catch (BashScriptModelException e) {
+		} catch (BashScriptModelException e) { 
 			BashEditorUtil.logError("Was not able to build script model", e);
 			model = FALLBACK_MODEL;
 		}
@@ -280,7 +280,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		return outlinePage;
 	}
 
-	/**
+	/**#117 
 	 * Installs an additional source viewer support which uses editor preferences
 	 * instead of standard text preferences. If standard source viewer support would
 	 * be set with editor preferences all standard preferences would be lost or had
@@ -350,10 +350,10 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		}
 
 	}
-
 	private String bgColor;
 	private String fgColor;
 	private boolean ignoreNextCaretMove;
+	private boolean lastModelBuildHadErrors;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -429,6 +429,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	 * Does rebuild the outline - this is done asynchronous
 	 */
 	public void rebuildOutline() {
+		lastModelBuildHadErrors=false;
+		
 		String text = getDocumentText();
 
 		IPreferenceStore store = BashEditorUtil.getPreferences().getPreferenceStore();
@@ -466,6 +468,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 				getOutlinePage().rebuild(model);
 
 				if (model.hasErrors()) {
+					lastModelBuildHadErrors=true;
 					int severity;
 					if (BashEditorValidationErrorLevel.INFO.equals(errorLevel)) {
 						severity = IMarker.SEVERITY_INFO;
@@ -759,16 +762,42 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	public void validate() {
 		rebuildOutline();
 	}
-
+	
 	@Override
 	protected void performSave(boolean overwrite, IProgressMonitor progressMonitor) {
 
 		// first of all do save the changes to disk (without external tool pass):
+		// the next method call does saved text and rebuild the internal model + lastModelBuildHadErrors state
 		super.performSave(overwrite, progressMonitor);
 
 		if (!isRunningExternalToolOnSave()) {
 			return;
 		}
+		/* execute this after outline build is done async - so also async call necessary to get correct error state*/
+		EclipseUtil.safeAsyncExec(()->executeExternalActionsIfNoErrors());
+		
+	}
+
+	private void executeExternalActionsIfNoErrors() {
+		/* we must fetch the result by waiting outline build done (which was done async)*/
+		if (lastModelBuildHadErrors) {
+			// when there are internal failures we do NOT call the external tool, because for example beautysh.py would fail again 
+			// and we will get odd situations on UI
+			return;
+		}
+		
+		/* prevent user interaction at editor while external tool job is running */
+		Control control = getAdapter(Control.class);
+		
+		EclipseUtil.safeAsyncExec(()-> {
+				if (! control.isDisposed()) {
+					if (control instanceof StyledText) {
+						StyledText t = (StyledText) control;
+						t.setEditable(false);
+					}
+				}
+		}
+		);
 		Job job = new Job("execute bash editor save action") {
 
 			@Override
@@ -777,15 +806,27 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 					callExternalToolAndRefreshEditorContent(monitor);
 				} catch (CoreException e) {
 					return e.getStatus();
+				} finally {
+					/* in any case, enable editor again */
+					EclipseUtil.safeAsyncExec(()-> {
+						if (! control.isDisposed()) {
+							if (control instanceof StyledText) {
+								StyledText t = (StyledText) control;
+								t.setEditable(true);
+							}
+						}
+			}
+			);
 				}
-
 				return Status.OK_STATUS;
 			}
 		};
+		
 		job.setUser(true);
 		job.setSystem(false);
 		job.schedule();
 	}
+	
 
 	private void callExternalToolAndRefreshEditorContent(IProgressMonitor progressMonitor) throws CoreException {
 		// we will run the external tool from the directory where the current file is
