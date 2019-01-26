@@ -52,6 +52,10 @@ public interface OutputHandler {
 		public String getFullOutput() {
 			return fullOutput;
 		}
+		
+		public void clearOutput() {
+			fullOutput = "";
+		}
 	}
 
 }
