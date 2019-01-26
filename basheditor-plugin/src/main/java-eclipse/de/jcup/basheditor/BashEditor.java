@@ -143,7 +143,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		synchronized (monitor) {
 			if (quickOutlineOpened) {
 				/*
-				 * already opened - this is in future the anker point#117  for ctrl+o+o...
+				 * already opened - this is in future the anker point#117 for ctrl+o+o...
 				 */
 				return;
 			}
@@ -172,7 +172,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		BashScriptModel model;
 		try {
 			model = modelBuilder.build(text);
-		} catch (BashScriptModelException e) { 
+		} catch (BashScriptModelException e) {
 			BashEditorUtil.logError("Was not able to build script model", e);
 			model = FALLBACK_MODEL;
 		}
@@ -277,12 +277,12 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		return outlinePage;
 	}
 
-	/**#117 
-	 * Installs an additional source viewer support which uses editor preferences
-	 * instead of standard text preferences. If standard source viewer support would
-	 * be set with editor preferences all standard preferences would be lost or had
-	 * to be reimplmented. To avoid this another source viewer support is
-	 * installed...
+	/**
+	 * #117 Installs an additional source viewer support which uses editor
+	 * preferences instead of standard text preferences. If standard source viewer
+	 * support would be set with editor preferences all standard preferences would
+	 * be lost or had to be reimplmented. To avoid this another source viewer
+	 * support is installed...
 	 */
 	private void installAdditionalSourceViewerSupport() {
 
@@ -347,6 +347,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		}
 
 	}
+
 	private String bgColor;
 	private String fgColor;
 	private boolean ignoreNextCaretMove;
@@ -426,8 +427,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	 * Does rebuild the outline - this is done asynchronous
 	 */
 	public void rebuildOutline() {
-		lastModelBuildHadErrors=false;
-		
+		lastModelBuildHadErrors = false;
+
 		String text = getDocumentText();
 
 		IPreferenceStore store = BashEditorUtil.getPreferences().getPreferenceStore();
@@ -465,7 +466,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 				getOutlinePage().rebuild(model);
 
 				if (model.hasErrors()) {
-					lastModelBuildHadErrors=true;
+					lastModelBuildHadErrors = true;
 					int severity;
 					if (BashEditorValidationErrorLevel.INFO.equals(errorLevel)) {
 						severity = IMarker.SEVERITY_INFO;
@@ -759,42 +760,48 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 	public void validate() {
 		rebuildOutline();
 	}
-	
+
 	@Override
 	protected void performSave(boolean overwrite, IProgressMonitor progressMonitor) {
 
 		// first of all do save the changes to disk (without external tool pass):
-		// the next method call does saved text and rebuild the internal model + lastModelBuildHadErrors state
+		// the next method call does saved text and rebuild the internal model +
+		// lastModelBuildHadErrors state
 		super.performSave(overwrite, progressMonitor);
 
 		if (!isRunningExternalToolOnSave()) {
 			return;
 		}
-		/* execute this after outline build is done async - so also async call necessary to get correct error state*/
-		EclipseUtil.safeAsyncExec(()->executeExternalActionsIfNoErrors());
-		
+		/*
+		 * execute this after outline build is done async - so also async call necessary
+		 * to get correct error state
+		 */
+		EclipseUtil.safeAsyncExec(() -> executeExternalActionsIfNoErrors());
+
 	}
 
 	private void executeExternalActionsIfNoErrors() {
-		/* we must fetch the result by waiting outline build done (which was done async)*/
+		/*
+		 * we must fetch the result by waiting outline build done (which was done async)
+		 */
 		if (lastModelBuildHadErrors) {
-			// when there are internal failures we do NOT call the external tool, because for example beautysh.py would fail again 
+			// when there are internal failures we do NOT call the external tool, because
+			// for example beautysh.py would fail again
 			// and we will get odd situations on UI
 			return;
 		}
-		
+
 		/* prevent user interaction at editor while external tool job is running */
 		Control control = getAdapter(Control.class);
-		
-		EclipseUtil.safeAsyncExec(()-> {
-				if (! control.isDisposed()) {
-					if (control instanceof StyledText) {
-						StyledText t = (StyledText) control;
-						t.setEditable(false);
-					}
+
+		EclipseUtil.safeAsyncExec(() -> {
+			if (!control.isDisposed()) {
+				if (control instanceof StyledText) {
+					StyledText t = (StyledText) control;
+					t.setEditable(false);
 				}
-		}
-		);
+			}
+		});
 		Job job = new Job("execute bash editor save action") {
 
 			@Override
@@ -805,25 +812,23 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 					return e.getStatus();
 				} finally {
 					/* in any case, enable editor again */
-					EclipseUtil.safeAsyncExec(()-> {
-						if (! control.isDisposed()) {
+					EclipseUtil.safeAsyncExec(() -> {
+						if (!control.isDisposed()) {
 							if (control instanceof StyledText) {
 								StyledText t = (StyledText) control;
 								t.setEditable(true);
 							}
 						}
-			}
-			);
+					});
 				}
 				return Status.OK_STATUS;
 			}
 		};
-		
+
 		job.setUser(true);
 		job.setSystem(false);
 		job.schedule();
 	}
-	
 
 	private void callExternalToolAndRefreshEditorContent(IProgressMonitor progressMonitor) throws CoreException {
 		// we will run the external tool from the directory where the current file is
@@ -832,7 +837,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		if (externalToolString == null || externalToolString.trim().isEmpty()) {
 			return;
 		}
-		
+
 		if (progressMonitor != null) {
 			progressMonitor.beginTask(externalToolString, 1);
 		}
