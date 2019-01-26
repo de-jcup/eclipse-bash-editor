@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Save actions</title>
+</head>
+
+<body>
+	<img src="images/bash-editor-logo.png" /><a href="toc.html">Table of content</a>
+	<h3>Save actions</h3>
+	<p>
+		You can define in "<code>Window->Preferences->Bash editor</code>" what shall happen when
+		a bash file is saved <i>(currently only external source formatter is supported)</i>.
+	</p>
+	<p>
+		<h4>External source reformatter action</h4>
+		If enabled the editor will always save the editor content, call the external tool and reloads the file into editor again, so the
+		formatting changes will be applied.<br>
+		<br>
+		Per default this option is disabled but has a working default setup for <code>beautysh</code>.
+		The installation for <code>beautysh</code> is described at <a href="https://github.com/bemeurer/beautysh">beautysh GitHub</a>. 
+		But of course you can use any external source code formatter of your choice! Just call your tool with <code>$filename</code> as variable for the edit file path
+		inside your given command line in preferences and it shall work.
+	</p>
+</body>
+</html>
