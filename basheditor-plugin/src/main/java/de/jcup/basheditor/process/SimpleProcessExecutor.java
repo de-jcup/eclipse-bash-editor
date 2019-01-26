@@ -15,7 +15,8 @@
  */
 package de.jcup.basheditor.process;
 
-import static de.jcup.basheditor.SimpleAssert.*;
+import static de.jcup.basheditor.SimpleAssert.notNull;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
