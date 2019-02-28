@@ -6,18 +6,17 @@ import org.eclipse.debug.core.model.IVariable;
 
 public class BashValue extends AbstractBashDebugElement implements IValue {
 
-	public IVariable[] vars = new IVariable[0];
-	private String fValue;
-	public BashVariable fVariable;
+	IVariable[] containedVariables = new IVariable[0];
+	private String value;
 
 	public BashValue(BashDebugTarget target, String value) {
 		super(target);
-		fValue = value;
+		this.value = value;
 	}
 
 	public String getReferenceTypeName() throws DebugException {
 		try {
-			Integer.parseInt(fValue);
+			Integer.parseInt(value);
 		} catch (NumberFormatException e) {
 			return "text";
 		}
@@ -25,7 +24,7 @@ public class BashValue extends AbstractBashDebugElement implements IValue {
 	}
 
 	public String getValueString() throws DebugException {
-		return fValue;
+		return value;
 	}
 
 	public boolean isAllocated() throws DebugException {
@@ -33,11 +32,11 @@ public class BashValue extends AbstractBashDebugElement implements IValue {
 	}
 
 	public IVariable[] getVariables() throws DebugException {
-		return vars;
+		return containedVariables;
 	}
 
 	public boolean hasVariables() throws DebugException {
-		if (vars.length > 0) {
+		if (containedVariables.length > 0) {
 			return true;
 		}
 		return false;

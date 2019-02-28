@@ -1,6 +1,8 @@
 package de.jcup.basheditor.debug.element;
 
 import java.io.IOException;
+import java.net.BindException;
+import java.net.SocketException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarkerDelta;
@@ -22,13 +24,14 @@ import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.core.model.IVariable;
+import org.eclipse.jface.dialogs.ErrorDialog;
 
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.debug.BashDebugConstants;
 import de.jcup.basheditor.debug.BashDebugger;
+import de.jcup.basheditor.debug.BashDebugger.DebugCommand;
 import de.jcup.basheditor.debug.DebugEventSource;
 import de.jcup.basheditor.debug.DebugEventSupport;
-import de.jcup.basheditor.debug.BashDebugger.DebugCommand;
 import de.jcup.basheditor.debug.launch.BashDocumentChangeRegistry;
 import de.jcup.basheditor.debug.launch.BashSourceLookupParticipant;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
@@ -71,8 +74,18 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 		this.thread = new BashThread(this);
 		this.threads = new IThread[] { thread };
 		this.documentChangeRegistry= BashDocumentChangeRegistry.INSTANCE;
+		this.debugger = new BashDebugger(this, thread);
+	}
+	
+	/**
+	 * Starts debug session on target
+	 * @return <code>true</code> when session was established, otherwise <code>false</code>
+	 */
+	public boolean startDebugSession() {
 		try {
-			debugger = new BashDebugger(this, thread);
+			if (! debugger.startDebugServerSession(port)) {
+				return false;
+			}
 			IBreakpoint[] breakpoints = getBreakpointManager().getBreakpoints(BashDebugConstants.BASH_DEBUG_MODEL_ID);
 			if (breakpoints.length > 0) {
 				debugger.markBreakPointsToggled();
@@ -80,11 +93,12 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 		} catch (Exception e) {
 			EclipseUtil.logError("Problems while collecting bash breakpoints", e, BashEditorActivator.getDefault());
 		}
-
 		eventDispatchJob = new BashDebugTargetEventDispatchJob();
 		eventDispatchJob.schedule();
 
 		getBreakpointManager().addBreakpointListener(this);
+		return true;
+		
 	}
 	
 	public BashDocumentChangeRegistry getDocumentChangeRegistry() {
@@ -223,7 +237,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 	}
 
 	public boolean isDisconnected() {
-		return debugger.isTerminated();
+		return ! debugger.isConnected();
 	}
 
 	public boolean supportsStorageRetrieval() {
@@ -292,17 +306,27 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
 				BashSourceLookupParticipant.loadLookupSource();
-				debugger.accept(port);
+				debugger.connect();
 				if (!debugger.isTerminated()) {
 					started();
 					debugger.process(stopOnStartup);
 				}
 				debugger.reset();
 			} catch (Exception e) {
-				if (!(e instanceof ArrayIndexOutOfBoundsException) && !(e instanceof java.net.SocketException)) {
-					if (!debugger.isTerminated()) {
-						EclipseUtil.logError("Was not able to terminate!", e, BashEditorActivator.getDefault());
+				boolean needsErrorLog = true;
+				if (e instanceof BindException) {
+					needsErrorLog=false;
+					IStatus status = new Status(IStatus.ERROR,BashEditorActivator.getDefault().getPluginID(),"Bash debug session binding failed for port:"+port, e);
+					EclipseUtil.safeAsyncExec(()->ErrorDialog.openError(null, "Bash debug error", "Debug sessin binding failed.", status));
+				}else if (e instanceof SocketException) {
+					if (e.getMessage().indexOf("Broken pipe")!=-1) {
+						/* this happens even with exit code 0 normal termination! Unfortunately 
+						 * socket output streams cannot be checked if available, so this workaround necessary"*/
+						needsErrorLog=false;
 					}
+				}
+				if (needsErrorLog) {
+					EclipseUtil.logError("Debugger problem occurred", e, BashEditorActivator.getDefault());
 				}
 			} finally {
 				terminated();
@@ -347,18 +371,18 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 
 	}
 
-	public IVariable[] getBashValues(BashStackFrame frame) {
+	public IVariable[] createBashVariables(BashStackFrame frame) {
 		if (debugger == null) {
 			return new IVariable[] {};
 		}
-		return debugger.getBashValues(frame);
+		return debugger.createBashVariables(frame);
 	}
 
-	public IValue getValue(String expression, IDebugElement context) throws Exception {
+	public IValue getValue(String expression, IDebugElement element) throws Exception {
 		if (debugger == null) {
 			return null;
 		}
-		return debugger.getValue(expression, context);
+		return debugger.getValue(expression, element);
 	}
 
 	public void setFileResource(IFile fileResource) {
@@ -368,4 +392,6 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 	public IFile getFileResource() {
 		return fileResource;
 	}
+
+	
 }

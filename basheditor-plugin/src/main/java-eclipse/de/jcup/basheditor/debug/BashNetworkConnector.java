@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Vector;
 
 import de.jcup.basheditor.BashEditorActivator;
-import de.jcup.basheditor.debug.DebugBashCodeBuilder;
+import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.script.parser.ParseToken;
 import de.jcup.basheditor.script.parser.TokenParser;
 import de.jcup.basheditor.script.parser.TokenParserException;
@@ -31,48 +31,64 @@ public class BashNetworkConnector {
 	private Vector<BashNetworkVariableData> bashVariables = new Vector<BashNetworkVariableData>();
 	private TokenParser parser = new TokenParser();
 	private DebugBashCodeBuilder builder;
+	private int port;
 
-	public BashNetworkConnector(ServerSocket serverSocket, DebugBashCodeBuilder builder) throws IOException {
-		this.serverSocket = serverSocket;
-		this.builder = builder;
+	public BashNetworkConnector(int port) {
+		this.port = port;
+		this.builder = new DebugBashCodeBuilder();
+		builder.setPort(port);
+		;
 	}
 
 	public BashNetworkVariableData getBashLineNumber() {
 		return bashLineNumber;
 	}
-	
+
 	public BashNetworkVariableData getBashSource() {
 		return bashSource;
 	}
-	
+
 	public BashNetworkVariableData getFunctionName() {
 		return functionName;
 	}
-	
+
+	public void startServerSocket() throws IOException {
+		serverSocket = new ServerSocket(port);
+	}
+
 	public void connect() throws IOException {
 		socket = serverSocket.accept();
+
 		inputStream = socket.getInputStream();
 		outputStream = socket.getOutputStream();
-
 	}
 
 	public void cancel() throws IOException {
-		serverSocket.close();
+		disconnect();
 	}
 
 	public void disconnect() throws IOException {
-		if (socket != null && !socket.isClosed()) {
-			socket.close();
-		}
 		if (serverSocket != null && !serverSocket.isClosed()) {
 			serverSocket.close();
+		}
+		if (socket != null && !socket.isClosed()) {
+			socket.close();
 		}
 	}
 
 	public void stepBegin() throws IOException {
+		if (BashEditorPreferences.getInstance().isDebugConsoleEnabled()) {
+			BashDebugConsole.println(">> =============== <<");
+			BashDebugConsole.println(">> Begin new step  <<");
+			BashDebugConsole.println(">> =============== <<");
+		}
+		bashVariables.clear();
+
 		String command = builder.buildRemoteDebugCommand();
 		outputStream.write(command.getBytes());
 		outputStream.flush();
+
+		StepParseContext spc = new StepParseContext();
 
 		byte[] buffer = new byte[100 * 1024];
 		int numberOfLines = 0;
@@ -82,8 +98,8 @@ public class BashNetworkConnector {
 				numberOfLines++;
 			} else {
 				if (n == '\t' && numberOfLines > 10) {
-					String stepStr = new String(buffer, 0, i);
-					parse(stepStr);
+					spc.stepStr = new String(buffer, 0, i);
+					parse(spc);
 					break;
 				} else {
 					numberOfLines = 0;
@@ -111,18 +127,46 @@ public class BashNetworkConnector {
 		return nameOfFirstFunction.equalsIgnoreCase(builder.getNameOfTrapFunction());
 	}
 
-	private void parse(String stepSourceCode) {
+	private void parse(StepParseContext spc) {
+
+		String stepSourceCode = spc.stepStr;
 		String[] sourceCodeLines = stepSourceCode.split("\n");
-		bashVariables.clear();
 
 		for (String sourceCodeLine : sourceCodeLines) {
-			addBashVariables(sourceCodeLine);
+			addBashVariables(spc, sourceCodeLine);
 		}
 		Collections.sort(bashVariables);
 	}
 
+	private class StepParseContext {
+		private String stepStr;
+		private boolean trapFunctionFound;
 
-	private void addBashVariables(String sourceCodeLine) {
+		public boolean isTrapFunctionAlreadyFound() {
+			return trapFunctionFound;
+		}
+	}
+
+	private void addBashVariables(StepParseContext context, String sourceCodeLine) {
+		if (BashEditorPreferences.getInstance().isDebugConsoleEnabled()) {
+			BashDebugConsole.println("Parsing:" + sourceCodeLine);
+		}
+		if (context.isTrapFunctionAlreadyFound()) {
+			/*
+			 * trap function is first function which will be found. After this output is
+			 * only function content. We must ignore next lines for variables, because
+			 * current variable content is already known and parsing more will result in
+			 * duplicates (code scan in functions...)
+			 */
+			return;
+		}
+		if (sourceCodeLine.startsWith(builder.getNameOfTrapFunction())) {
+			if (BashEditorPreferences.getInstance().isDebugConsoleEnabled()) {
+				BashDebugConsole.println(">>>Function found, mark end of variables reached:" + sourceCodeLine);
+			}
+			context.trapFunctionFound = true;
+			return;
+		}
 		try {
 			List<ParseToken> parsed = parser.parse(sourceCodeLine);
 			// e.g. [EXPRESSION:'BASH_ARGC=', EXPRESSION:'([0]=', STRING:'"6")']
@@ -133,6 +177,7 @@ public class BashNetworkConnector {
 			BashNetworkVariableData variable = null;
 			for (Iterator<ParseToken> it = parsed.iterator(); it.hasNext();) {
 				ParseToken token = it.next();
+
 				if (token.isVariableDefinition()) {
 					String variableName = token.getTextAsVariableName();
 					variable = new BashNetworkVariableData(variableName);
@@ -160,14 +205,14 @@ public class BashNetworkConnector {
 						}
 						ParseToken contentToken = it.next();
 						variable.addArrayValue(builder.buildSafeArrayValue(contentToken.getText()));
-						
+
 						while (it.hasNext()) {
-							identifierToken= it.next();
+							identifierToken = it.next();
 							if (it.hasNext()) {
 								contentToken = it.next();
 								variable.addArrayValue(builder.buildSafeArrayValue(contentToken.getText()));
 							}
-							
+
 						}
 					} else {
 						variable.setValue(value);
@@ -182,6 +227,9 @@ public class BashNetworkConnector {
 	}
 
 	public void stepEnd() throws IOException {
+		if (!isConnected()) {
+			return;
+		}
 		outputStream.write("\n".getBytes());
 		outputStream.flush();
 	}
@@ -199,6 +247,13 @@ public class BashNetworkConnector {
 
 	public BashNetworkVariableData getVariableData(int i) {
 		return bashVariables.get(i);
+	}
+
+	public boolean isConnected() {
+		if (socket == null) {
+			return false;
+		}
+		return socket.isConnected();
 	}
 
 }

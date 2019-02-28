@@ -98,7 +98,10 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		/* ++++++++++++++++ */
 		/* + Debug action + */
 		/* ++++++++++++++++ */
-		store.setDefault(P_LAUNCH_IN_EXTERNAL_TERMINAL_ENABLED.getId(),true);
+		store.setDefault(P_LAUNCH_IN_TERMINAL_ENABLED.getId(),true);
+		store.setDefault(P_KEEP_TERMINAL_OPEN_ON_ERRORS.getId(),true);
+		store.setDefault(P_SHOW_META_INFO_IN_DEBUG_CONSOLE.getId(),false);
+		
 	}
 
 }

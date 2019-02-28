@@ -32,6 +32,9 @@ import de.jcup.basheditor.BashEditor;
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.ColorUtil;
 import de.jcup.basheditor.EclipseUtil;
+import de.jcup.basheditor.debug.launch.OSUtil;
+import de.jcup.basheditor.debug.launch.TerminalLauncher;
+import de.jcup.basheditor.debug.launch.TerminalLauncher.TerminalLauncherConfig;
 
 public class BashEditorPreferences {
 
@@ -170,7 +173,21 @@ public class BashEditorPreferences {
 	}
 
 	public boolean isAutomaticLaunchInExternalTerminalEnabled() {
-		return getBooleanPreference(BashEditorPreferenceConstants.P_LAUNCH_IN_EXTERNAL_TERMINAL_ENABLED);
+		return getBooleanPreference(BashEditorPreferenceConstants.P_LAUNCH_IN_TERMINAL_ENABLED);
+	}
+
+	public boolean isDebugConsoleEnabled() {
+		return getBooleanPreference(BashEditorPreferenceConstants.P_SHOW_META_INFO_IN_DEBUG_CONSOLE);
+	}
+
+	public TerminalLauncherConfig getTerminalLauncherConfig() {
+		TerminalLauncherConfig config = null;
+		if (OSUtil.isWindows()) {
+			config = TerminalLauncher.DefaultLaunchConfig.WINDOWS.create();
+		}else {
+			config = TerminalLauncher.DefaultLaunchConfig.LINUX_GNOME.create();
+		}
+		return config;
 	}
 
 	

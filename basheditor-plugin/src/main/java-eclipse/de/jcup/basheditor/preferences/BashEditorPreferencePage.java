@@ -72,7 +72,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 	private BooleanFieldEditor codeAssistWithBashKeywords;
 	private BooleanFieldEditor codeAssistWithSimpleWords;
 	private BooleanFieldEditor toolTipsEnabled;
-	private BooleanFieldEditor launchInExternalTerminalEnabled;
+	
 
 	
 	public BashEditorPreferencePage() {
@@ -246,12 +246,6 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		toolTipsEnabled.getDescriptionControl(codeAssistGroup)
 		.setToolTipText("When enabled tool tips will occure for keywords");
 		addField(toolTipsEnabled);
-
-		launchInExternalTerminalEnabled = new BooleanFieldEditor(P_LAUNCH_IN_EXTERNAL_TERMINAL_ENABLED.getId(),
-				"Launch in external terminal", codeAssistGroup);
-		launchInExternalTerminalEnabled.getDescriptionControl(codeAssistGroup)
-		.setToolTipText("When enabled bash launches are done in external terminal");
-		addField(launchInExternalTerminalEnabled);
 
 		
 	}

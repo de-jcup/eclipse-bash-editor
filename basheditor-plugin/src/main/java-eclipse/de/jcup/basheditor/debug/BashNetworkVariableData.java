@@ -18,10 +18,6 @@ public class BashNetworkVariableData implements Comparable<BashNetworkVariableDa
 		this.lowerCasedName=name.toLowerCase();
 	}
 
-	public String getArrayKey(int index) {
-		return "["+index+"]";
-	}
-
 	public String getStringValue(int index) {
 		if (index >= arrayList.size()) {
 			return "";
@@ -32,31 +28,6 @@ public class BashNetworkVariableData implements Comparable<BashNetworkVariableDa
 
 	public int compareTo(BashNetworkVariableData o) {
 		return lowerCasedName.compareTo(o.name.toLowerCase());
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((lowerCasedName == null) ? 0 : lowerCasedName.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		BashNetworkVariableData other = (BashNetworkVariableData) obj;
-		if (lowerCasedName == null) {
-			if (other.lowerCasedName != null)
-				return false;
-		} else if (!lowerCasedName.equals(other.lowerCasedName))
-			return false;
-		return true;
 	}
 
 	public int getIntValue(int index) {
@@ -70,7 +41,7 @@ public class BashNetworkVariableData implements Comparable<BashNetworkVariableDa
 
 	@Override
 	public String toString() {
-		return "InternalBashVariable [name=" + name + ", value=" + value + ", array=" + arrayList + "]";
+		return "BashNetworkVariableData [name=" + name + ", value=" + value + ", array=" + arrayList + "]";
 	}
 
 	public String getName() {

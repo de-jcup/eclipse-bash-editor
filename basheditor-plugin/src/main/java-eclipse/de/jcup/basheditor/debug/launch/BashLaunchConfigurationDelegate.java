@@ -6,8 +6,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -19,18 +17,17 @@ import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.InfoPopup;
 import de.jcup.basheditor.debug.BashDebugConstants;
 import de.jcup.basheditor.debug.element.BashDebugTarget;
+import de.jcup.basheditor.debug.element.DummyProcess;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashLaunchConfigurationDelegate extends LaunchConfigurationDelegate {
 
 	private BashDebugTarget target;
+	private TerminalLauncher terminalLauncher = new TerminalLauncher();
 
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		if (target != null) {
-			if (!target.isTerminated()) {
-				throwCoreException("Debugger is already running and not terminated.", null);
-			}
 			try {
 				target.disconnect();
 			} catch (Exception e) {
@@ -47,19 +44,27 @@ public class BashLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 		launch.setAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP, Boolean.toString(stopOnStartup));
 		int port = configuration.getAttribute(BashDebugConstants.LAUNCH_ATTR_SOCKET_PORT, BashDebugConstants.DEFAULT_DEBUG_PORT);
 
+		boolean canDoAutoRun = getPreferences().isAutomaticLaunchInExternalTerminalEnabled();
 		IProcess process = new DummyBashProcess();
-		if (true ||mode.equals(ILaunchManager.DEBUG_MODE)) {
-			target = new BashDebugTarget(launch, process, port);
-			target.setFileResource(programFileResource);
-			launch.addDebugTarget(target);
+		target = new BashDebugTarget(launch, process, port);
+		target.setFileResource(programFileResource);
+		launch.addDebugTarget(target);
+		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
+			if (! target.startDebugSession()) {
+				return;
+			}
 		}else if (mode.contentEquals(ILaunchManager.RUN_MODE)) {
 			// does not work debug view has zombie entires then.  reason for "true" before
-			launch.terminate();
+			// do not start debug session.
+			if (canDoAutoRun) {
+				launch.addProcess(new DummyProcess("Running:"+program, launch));
+			}
 		}
 		/* debug process is started, so launch terminal or inform*/
-		if (BashEditorPreferences.getInstance().isAutomaticLaunchInExternalTerminalEnabled()) {
+		if (canDoAutoRun) {
 			
-			new TerminalLauncher(programFile,params).execute();
+			terminalLauncher.execute(programFile,params,getPreferences().getTerminalLauncherConfig());
+			
 		} else {
 			EclipseUtil.safeAsyncExec(new Runnable() {
 
@@ -73,7 +78,7 @@ public class BashLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 					
 					InfoPopup popup = new InfoPopup(shell, titleText, infoText,null);
 					popup.setSubMessage(subMessage);
-					popup.setLinkToPreferencesId("basheditor.eclipse.preferences.BashEditorEditorPreferencePage");
+					popup.setLinkToPreferencesId("basheditor.eclipse.gradleeditor.preferences.BashEditorDebugPreferencePage");
 					popup.setLinkToPreferencesText("Change behaviour in <a href=\"https://github.com/de-jcup/eclipse-bash-editor\">preferences</a>");
 					popup.open();
 				}
@@ -82,10 +87,8 @@ public class BashLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 		}
 	}
 
-	private void throwCoreException(String message, Throwable e) throws CoreException {
-		throw new CoreException(new Status(IStatus.ERROR, BashEditorActivator.getDefault().getPluginID(), 0, message, e));
+	private BashEditorPreferences getPreferences() {
+		return BashEditorPreferences.getInstance();
 	}
-
-	
 
 }

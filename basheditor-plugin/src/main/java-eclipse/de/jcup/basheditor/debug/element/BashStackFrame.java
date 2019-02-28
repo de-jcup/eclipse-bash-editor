@@ -13,56 +13,56 @@ import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashStackFrame extends AbstractBashDebugElement implements IStackFrame, IDisconnect {
 
-	private BashThread fThread;
+	private BashThread thread;
 	private String functionName;
 	public int frameLineNumber;
 	private String fileName;
-	private int fId;
-	public IVariable[] fVariables;
-	BashDebugger.StackElement bash_Debug;
+	private int id;
+	public IVariable[] variables;
+	BashDebugger.StackElement stackElement;
 
-	public BashStackFrame(BashThread thread, String fileName, String functionName, int currentLine, int id, BashDebugger.StackElement bash_Debug) {
+	public BashStackFrame(BashThread thread, String fileName, String functionName, int currentLine, int id, BashDebugger.StackElement stackElement) {
 		super((BashDebugTarget) thread.getDebugTarget());
-		fId = id;
-		fThread = thread;
+		this.id = id;
+		this.thread = thread;
 		this.frameLineNumber = currentLine;
-		int p = fileName.indexOf("@");
-		if (p == -1) {
+		int atSignIndex = fileName.indexOf("@");
+		if (atSignIndex == -1) {
 			this.fileName = fileName;
 		} else {
-			this.fileName = fileName.substring(p + 1);
+			this.fileName = fileName.substring(atSignIndex + 1);
 		}
 		this.functionName = functionName;
-		this.bash_Debug = bash_Debug;
+		this.stackElement = stackElement;
 	}
 
 	public IThread getThread() {
-		return fThread;
+		return thread;
 	}
 
 	public IVariable[] getVariables() throws DebugException {
-		if (fVariables == null) {
+		if (variables == null) {
 			BashDebugTarget bashDebugTarget = getBashDebugTarget();
 			bashDebugTarget.lock();
 			try {
-				fVariables = bashDebugTarget.getBashValues(this);
+				variables = bashDebugTarget.createBashVariables(this);
 			} catch (Exception e) {
 				EclipseUtil.logError("Was not able to get variables!", e, BashEditorActivator.getDefault());
 			}
 			bashDebugTarget.unlock();
 		}
-		if (fVariables == null) {
+		if (variables == null) {
 			return new IVariable[0];
 		}
-		return fVariables;
+		return variables;
 	}
 
 	public boolean hasVariables() throws DebugException {
 		getVariables();
-		if (fVariables == null) {
+		if (variables == null) {
 			return false;
 		}
-		return fVariables.length > 0;
+		return variables.length > 0;
 	}
 
 	public int getLineNumber() throws DebugException {
@@ -172,7 +172,7 @@ public class BashStackFrame extends AbstractBashDebugElement implements IStackFr
 			if (!sameLineNumber) {
 				return false;
 			}
-			boolean sameFrameId = stackFrame.fId == fId;
+			boolean sameFrameId = stackFrame.id == id;
 			return  sameFrameId;
 		} catch (DebugException e) {
 			EclipseUtil.logError("Was not able to handle equals!", e, BashEditorActivator.getDefault());
@@ -185,11 +185,11 @@ public class BashStackFrame extends AbstractBashDebugElement implements IStackFr
 		if (sourceFileName == null) {
 			return -1;
 		}
-		return sourceFileName.hashCode() + fId;
+		return sourceFileName.hashCode() + id;
 	}
 
 	protected int getIdentifier() {
-		return fId;
+		return id;
 	}
 
 	public boolean canDisconnect() {

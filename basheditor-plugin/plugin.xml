@@ -25,6 +25,14 @@
    		id="basheditor.preferences.keyword.saveaction"
    		label="save action">
      </keyword>
+     <keyword
+   		id="basheditor.preferences.keyword.debug"
+   		label="debug">
+     </keyword>
+     <keyword
+   		id="basheditor.preferences.keyword.debugger"
+   		label="debugger">
+     </keyword>
     
    </extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -297,6 +305,19 @@
          </keywordReference>
       </page>
       
+      <page
+         id="basheditor.eclipse.gradleeditor.preferences.BashEditorDebugPreferencePage"
+         class="de.jcup.basheditor.preferences.BashEditorDebugPreferencePage"
+         name="Debug"
+         category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
+          <keywordReference
+               id="basheditor.preferences.keyword.debug">
+         </keywordReference>
+         <keywordReference
+               id="basheditor.preferences.keyword.debugger">
+         </keywordReference>
+      </page>
+      
     </extension>
     <extension
          point="org.eclipse.core.runtime.preferences">
@@ -475,5 +496,15 @@
     <super type="org.eclipse.debug.core.breakpointMarker" />
 </extension>
    
-   
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!--                          CONSOLE                                     -->
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- http://stackoverflow.com/questions/29783017/add-custom-console-to-eclipse-console-list -->
+<extension point="org.eclipse.ui.console.consoleFactories">
+	   <consoleFactory
+	         class="de.jcup.basheditor.debug.BashDebugConsoleFactory"
+	         icon="icons/bash-editor.png"
+	         label="Bash Debug Console">
+	   </consoleFactory>
+</extension>
 </plugin>

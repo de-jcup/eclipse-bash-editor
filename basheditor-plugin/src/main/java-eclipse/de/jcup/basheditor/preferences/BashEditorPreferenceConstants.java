@@ -35,7 +35,11 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED("saveActionExternalToolEnabled"),
 	P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND("saveActionExternalToolCommand"),
 	
-	P_LAUNCH_IN_EXTERNAL_TERMINAL_ENABLED("launchAutomaticallyInExternalTerminal"),
+	P_LAUNCH_IN_TERMINAL_ENABLED("launchInTerminalEnabled"), 
+	
+	P_SHOW_META_INFO_IN_DEBUG_CONSOLE("showMetaInfoInDebugConsole"),
+	
+	P_KEEP_TERMINAL_OPEN_ON_ERRORS("keepLaunchedTerminalOpenOnErrors"),
 	
 	;
 	
