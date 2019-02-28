@@ -169,6 +169,10 @@ public class BashEditorPreferences {
 		return INSTANCE;
 	}
 
+	public boolean isAutomaticLaunchInExternalTerminalEnabled() {
+		return getBooleanPreference(BashEditorPreferenceConstants.P_LAUNCH_IN_EXTERNAL_TERMINAL_ENABLED);
+	}
+
 	
 
 }

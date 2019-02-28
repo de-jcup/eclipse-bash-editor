@@ -215,14 +215,8 @@
     <extension point="org.eclipse.ui.menus">
       <menuContribution
             locationURI="popup:basheditor.editors.BashEditor.context?after=additions">
-         <command
-               commandId="basheditor.editor.commands.source.validate" icon="icons/bash-editor.png"
-               >
-         <command
-               commandId="basheditor.editor.commands.quickoutline"
-               >
-         </command>
-         </command>
+         <command commandId="basheditor.editor.commands.source.validate" icon="icons/bash-editor.png" />
+         <command commandId="basheditor.editor.commands.quickoutline" />
       </menuContribution>
       
       <menuContribution
@@ -254,7 +248,7 @@
    <extension
       point = "org.eclipse.ui.preferencePages">
       <page
-         id="basheditor.eclipse.gradleeditor.preferences.BashEditorEditorPreferencePage"
+         id="basheditor.eclipse.preferences.BashEditorEditorPreferencePage"
          class="de.jcup.basheditor.preferences.BashEditorPreferencePage"
          name="Bash Editor"
          >
@@ -269,7 +263,7 @@
          id="basheditor.eclipse.gradleeditor.preferences.BashEditorEditorSyntaxColorPreferencePage"
          class="de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferencePage"
          name="Syntax coloring"
-         category="basheditor.eclipse.gradleeditor.preferences.BashEditorEditorPreferencePage">
+         category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
          <keywordReference
                id="basheditor.preferences.keyword.bash">
          </keywordReference>
@@ -281,7 +275,7 @@
          id="basheditor.eclipse.gradleeditor.preferences.BashEditorValidationPreferencePage"
          class="de.jcup.basheditor.preferences.BashEditorValidationPreferencePage"
          name="Validation"
-         category="basheditor.eclipse.gradleeditor.preferences.BashEditorEditorPreferencePage">
+         category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
           <keywordReference
                id="basheditor.preferences.keyword.bash">
          </keywordReference>
@@ -294,7 +288,7 @@
          id="basheditor.eclipse.gradleeditor.preferences.BashEditorSaveActionsPreferencePage"
          class="de.jcup.basheditor.preferences.BashEditorSaveActionsPreferencePage"
          name="Save Actions"
-         category="basheditor.eclipse.gradleeditor.preferences.BashEditorEditorPreferencePage">
+         category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
           <keywordReference
                id="basheditor.preferences.keyword.bash">
          </keywordReference>
@@ -335,5 +329,151 @@
             primary="true">
       </toc>
    </extension>
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!--                          CONVERSION:Debugging.core                   -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   
+    <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            sourceLocatorId="de.jcup.basheditor.debug.sourceLookupDirector.sh"
+            name="Bash script"
+            sourcePathComputerId="de.jcup.basheditor.debug.sourcePathComputer.sh"
+            delegate="de.jcup.basheditor.debug.launch.BashLaunchConfigurationDelegate"
+            modes="run, debug"
+            id="de.jcup.basheditor.debug.launchConfigurationType.sh">
+      </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.sourceLocators">
+      <sourceLocator
+            name="Bash Source Lookup Director"
+            class="de.jcup.basheditor.debug.launch.BashSourceLookupDirector"
+            id="de.jcup.basheditor.debug.sourceLookupDirector.sh">
+      </sourceLocator>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.sourcePathComputers">
+      <sourcePathComputer
+            class="de.jcup.basheditor.debug.launch.BashSourcePathComputerDelegate"
+            id="de.jcup.basheditor.debug.sourcePathComputer.sh">
+      </sourcePathComputer>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.breakpoints">
+      <breakpoint
+            markerType="basheditor.debug.breakpoint.marker"
+            class="de.jcup.basheditor.debug.BashLineBreakpoint"
+            id="basheditor.debug.lineBreakpoint">
+      </breakpoint>
+   </extension>
+   <extension
+         id="basheditor.debug.lineBreakpoint.marker"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.debug.core.lineBreakpointMarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!--                          Debug                                       -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            type="de.jcup.basheditor.debug.launchConfigurationType.sh"
+            description="Debug a Bash script"
+            class="de.jcup.basheditor.debug.launch.config.BashLaunchConfigurationTabGroup"
+            id="de.jcup.basheditor.debug.launchConfigurationTabGroup.sh">
+      </launchConfigurationTabGroup>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.debugModelPresentations">
+      <debugModelPresentation
+            class="de.jcup.basheditor.debug.BashDebugModelLabelProvider"
+            id="basheditor.debug.model">
+      </debugModelPresentation>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            class="de.jcup.basheditor.debug.BashLineBreakpointAdapterFactory"
+            adaptableType="de.jcup.basheditor.BashEditor">
+				<adapter type="org.eclipse.debug.ui.actions.IToggleBreakpointsTarget"/>
+      </factory>
+      
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.editorActions">
+      <editorContribution
+            targetID="basheditor.editors.BashEditor"
+            id="basheditor.editors.BashEditor.rulerActions">
+         <action
+               label="Not Used"
+               class="org.eclipse.debug.ui.actions.RulerToggleBreakpointActionDelegate"
+               style="push"
+               actionID="RulerDoubleClick"
+               id="pda.doubleClickBreakpointAction"/>
+      </editorContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.contexts">
+      <context
+            name="Debugging Bash"
+            description="Debugging Bash"
+            id="de.jcup.basheditor.debug.bash.debugging"
+            parentId="org.eclipse.debug.ui.debugging">
+      </context>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.debugModelContextBindings">
+      <modelContextBinding
+            debugModelId="basheditor.debug.model"
+            contextId="de.jcup.basheditor.debug.bash.debugging">
+      </modelContextBinding>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            icon="icons/bash-editor.png"
+            configTypeID="de.jcup.basheditor.debug.launchConfigurationType.sh"
+            id="basheditor.debug.launchConfigurationTypeImage">
+      </launchConfigurationTypeImage>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="de.jcup.basheditor.debug.BashSourceNotFoundEditor"
+            default="false"
+            id="org.eclipse.debug.ui.sourcelookup.CommonSourceNotFoundEditor"
+            name="SourceNotFoundEditor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.watchExpressionDelegates">
+      <watchExpressionDelegate
+            debugModel="basheditor.debug.model"
+            delegateClass="de.jcup.basheditor.debug.BashWatchExpressionDelegate">
+      </watchExpressionDelegate>
+   </extension>
+   
+
+<!-- The id is the same as the referenced "markerType" in the org.eclipse.debug.core.breakpoints
+    extension point -->
+<extension id="basheditor.debug.breakpoint.marker" point="org.eclipse.core.resources.markers">
+    <!-- persist the marker, so that the referenced breakpoint will be recreated -->
+    <persistent value="true" />
+    <!-- Additional attributes for the marker can be defined, which are also
+    <attribute name="CUSTOM_ADDITIONAL_ATTR_WHICH_IS_ALSO_PERSISTED" />
+        persisted -->
+    <!-- The org.eclipse.debug.core.breakpointMarker super type indicated that
+        this marker is used for a breakpoint -->
+    <super type="org.eclipse.debug.core.breakpointMarker" />
+</extension>
+   
    
 </plugin>

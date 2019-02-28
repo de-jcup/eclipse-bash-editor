@@ -15,8 +15,13 @@
  */
 package de.jcup.basheditor.script.parser;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class ParseToken {
 
+	private static final Pattern VALID_VARIABLE_NAME_PATTERN=Pattern.compile("[a-z_A-Z]+=");
+	
 	private static final String EQUAL_OPERAND = "=";
 	String text;
 	int start;
@@ -178,6 +183,14 @@ public class ParseToken {
 		}
 		return text;
 	}
+	
+	public String getTextAsVariableName() {
+		String sfe = getSafeText();
+		if (sfe.endsWith("=")) {
+			return sfe.substring(0,sfe.length()-1);
+		}
+		return sfe;
+	}
 
 	public boolean isOpenBlock() {
 		return getSafeText().length() == 1 && text.endsWith("{");
@@ -186,7 +199,17 @@ public class ParseToken {
 	public boolean isCloseBlock() {
 		return getSafeText().length() == 1 && text.endsWith("}");
 	}
-
+	/**
+	 * Looks always like "variableName="
+	 * @return true when accepted variable definition
+	 */
+	public boolean isVariableDefinition() {
+		String t = getSafeText();
+		boolean isVariable = t.endsWith("=");
+		isVariable = isVariable && t.length()>1;
+		isVariable = isVariable && VALID_VARIABLE_NAME_PATTERN.matcher(t).matches();
+		return isVariable;
+	}
 	public boolean isDo() {
 		return getSafeText().equals("do");
 	}
@@ -218,4 +241,6 @@ public class ParseToken {
 	public boolean isEsac() {
 		return getSafeText().equals("esac");
 	}
+
+	
 }

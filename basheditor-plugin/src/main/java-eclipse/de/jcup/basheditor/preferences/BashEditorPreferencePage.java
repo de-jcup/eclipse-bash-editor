@@ -15,16 +15,8 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.BashEditorUtil.getPreferences;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_KEYWORDS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_SIMPLEWORDS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_AUTO_CREATE_END_BRACKETSY;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_ENCLOSING_BRACKETS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_COLOR;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_ENABLED;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_OUTLINE_WITH_EDITOR;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_TOOLTIPS_ENABLED;
+import static de.jcup.basheditor.BashEditorUtil.*;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 
 import java.util.ArrayList;
 
@@ -80,6 +72,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 	private BooleanFieldEditor codeAssistWithBashKeywords;
 	private BooleanFieldEditor codeAssistWithSimpleWords;
 	private BooleanFieldEditor toolTipsEnabled;
+	private BooleanFieldEditor launchInExternalTerminalEnabled;
 
 	
 	public BashEditorPreferencePage() {
@@ -253,6 +246,12 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 		toolTipsEnabled.getDescriptionControl(codeAssistGroup)
 		.setToolTipText("When enabled tool tips will occure for keywords");
 		addField(toolTipsEnabled);
+
+		launchInExternalTerminalEnabled = new BooleanFieldEditor(P_LAUNCH_IN_EXTERNAL_TERMINAL_ENABLED.getId(),
+				"Launch in external terminal", codeAssistGroup);
+		launchInExternalTerminalEnabled.getDescriptionControl(codeAssistGroup)
+		.setToolTipText("When enabled bash launches are done in external terminal");
+		addField(launchInExternalTerminalEnabled);
 
 		
 	}
