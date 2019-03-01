@@ -24,6 +24,7 @@ import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConst
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import de.jcup.basheditor.debug.launch.TerminalLauncher;
 import de.jcup.basheditor.script.parser.validator.BashEditorValidationErrorLevel;
 
 /**
@@ -100,7 +101,9 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		/* ++++++++++++++++ */
 		store.setDefault(P_LAUNCH_IN_TERMINAL_ENABLED.getId(),true);
 		store.setDefault(P_KEEP_TERMINAL_OPEN_ON_ERRORS.getId(),true);
+		store.setDefault(P_KEEP_TERMINAL_OPEN_ALWAYS.getId(),false);
 		store.setDefault(P_SHOW_META_INFO_IN_DEBUG_CONSOLE.getId(),false);
+		store.setDefault(P_LAUNCH_XTERMINAL_SNIPPET.getId(),TerminalLauncher.DEFAULT_XTERMINAL_SNIPPET);
 		
 	}
 

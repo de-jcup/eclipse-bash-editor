@@ -41,6 +41,10 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	
 	P_KEEP_TERMINAL_OPEN_ON_ERRORS("keepLaunchedTerminalOpenOnErrors"),
 	
+	P_LAUNCH_XTERMINAL_SNIPPET("launchXTerminalSnippet"), 
+	
+	P_KEEP_TERMINAL_OPEN_ALWAYS("keepLaunchedTerminalOpenAlways"),
+	
 	;
 	
 

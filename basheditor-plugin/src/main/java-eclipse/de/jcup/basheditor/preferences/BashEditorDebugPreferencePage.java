@@ -16,24 +16,35 @@ package de.jcup.basheditor.preferences;
  */
 
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+import static org.eclipse.swt.events.SelectionListener.*;
+
+import java.io.IOException;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import de.jcup.basheditor.BashEditorUtil;
+import de.jcup.basheditor.EclipseUtil;
+import de.jcup.basheditor.debug.launch.OSUtil;
+import de.jcup.basheditor.debug.launch.TerminalLaucherTestExecution;
 
 public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	private BooleanFieldEditor launchInExternalTerminalEnabled;
 	private BooleanFieldEditor showMetaInfoInDebugConsoleEnabled;
 	private BooleanFieldEditor keepExternalTerminalOpenOnErrors;
-	
+	private StringFieldEditor launchXterminalSnippet;
+	private Button testTerminalButton;
+	private BooleanFieldEditor keepExternalTerminalOpenAlways;
+
 	public BashEditorDebugPreferencePage() {
 		super(GRID);
 		setPreferenceStore(BashEditorUtil.getPreferences().getPreferenceStore());
@@ -46,48 +57,76 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 
 	@Override
 	protected void createFieldEditors() {
-		
-		/* --------------------- */
-		/* --   Save action   -- */
-		/* --------------------- */
 
-		GridData debugGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL|GridData.GRAB_HORIZONTAL);
-		debugGroupLayoutData.horizontalSpan=2;
-		debugGroupLayoutData.widthHint=400;
-		
-		Group terminalGroup = new Group(getFieldEditorParent(),SWT.NONE);
+		GridData debugGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
+		debugGroupLayoutData.horizontalSpan = 2;
+		debugGroupLayoutData.widthHint = 400;
+
+		/* ----------------- */
+		/* -- TERMINAL -- */
+		/* ----------------- */
+		Group terminalGroup = new Group(getFieldEditorParent(), SWT.NONE);
 		terminalGroup.setText("Terminal");
-		terminalGroup.setLayout(new GridLayout());
+		terminalGroup.setLayout(new GridLayout(2, false));
 		terminalGroup.setLayoutData(debugGroupLayoutData);
-		
-//		TerminalLauncher launer = new TerminalLauncher();
-//		String exampleCommand = launer.createExampleCommand(BashEditorPreferences.getInstance().getTerminalLauncherConfig());
-		
-		launchInExternalTerminalEnabled = new BooleanFieldEditor(P_LAUNCH_IN_TERMINAL_ENABLED.getId(),
-				"Automatically launch in terminal", terminalGroup);
+
+		launchInExternalTerminalEnabled = new BooleanFieldEditor(P_LAUNCH_IN_TERMINAL_ENABLED.getId(), "Automatically launch in terminal", terminalGroup);
 		launchInExternalTerminalEnabled.getDescriptionControl(terminalGroup)
-		.setToolTipText("When enabled bash launches are done automatically in external terminal. If not enabled you have to execute by your own.");
+				.setToolTipText("When enabled bash launches are done automatically in external terminal. If not enabled you have to execute by your own.");
 		addField(launchInExternalTerminalEnabled);
-		
-		keepExternalTerminalOpenOnErrors = new BooleanFieldEditor(P_KEEP_TERMINAL_OPEN_ON_ERRORS.getId(),
-				"Keep terminal open on errors.", terminalGroup);
-		keepExternalTerminalOpenOnErrors.getDescriptionControl(terminalGroup)
-		.setToolTipText("Keep external terminal open when exit code !=0. So its possible to see output when script failed.");
+
+		keepExternalTerminalOpenOnErrors = new BooleanFieldEditor(P_KEEP_TERMINAL_OPEN_ON_ERRORS.getId(), "Keep terminal open on errors.", terminalGroup);
+		keepExternalTerminalOpenOnErrors.getDescriptionControl(terminalGroup).setToolTipText("Keep external terminal open when exit code !=0. So its possible to see output when script failed.");
 		addField(keepExternalTerminalOpenOnErrors);
 
+		keepExternalTerminalOpenAlways = new BooleanFieldEditor(P_KEEP_TERMINAL_OPEN_ALWAYS.getId(), "Keep terminal always open.", terminalGroup);
+		keepExternalTerminalOpenAlways.getDescriptionControl(terminalGroup).setToolTipText("Keep external terminal  always open, even when exit code =0.");
+		addField(keepExternalTerminalOpenAlways);
+
+		launchXterminalSnippet = new StringFieldEditor(P_LAUNCH_XTERMINAL_SNIPPET.getId(), "XTerminal command", terminalGroup);
+		launchXterminalSnippet.getTextControl(terminalGroup)
+				.setToolTipText("Define your XTerminal command with valid option to execute a bash snippet.\nDefault value is suitable for alternative x-terminal set to gnome or mate-terminal");
+		addField(launchXterminalSnippet);
+
+		if ( OSUtil.isWindows()) {
+			/* we disable this option at Linux */
+			launchXterminalSnippet.setEnabled(false, terminalGroup);
+		}
+
+		testTerminalButton = new Button(terminalGroup, SWT.PUSH);
+		testTerminalButton.setText("Test Terminal");
+		testTerminalButton.setToolTipText("Will execute a test bash script which will fail with exit code 1.\n\nSo you are able to test out the behaviours of \n'Keep terminal open on errors/always'");
+		testTerminalButton.addSelectionListener(widgetSelectedAdapter(e -> doValidateExternalTool()));
+
+		GridData testTerminalButtonGridData = new GridData();
+		testTerminalButtonGridData.horizontalAlignment = GridData.END;
+		testTerminalButtonGridData.horizontalSpan = 2;
+		testTerminalButton.setLayoutData(testTerminalButtonGridData);
+
 		/* just add an empty label as divider */
-	    new Label(getFieldEditorParent(),SWT.NONE);
-		
-		Group consoleGroup = new Group(getFieldEditorParent(),SWT.NONE);
+		new Label(getFieldEditorParent(), SWT.NONE);
+
+		/* ---------------- */
+		/* -- CONSOLE -- */
+		/* ---------------- */
+		Group consoleGroup = new Group(getFieldEditorParent(), SWT.NONE);
 		consoleGroup.setText("Console");
 		consoleGroup.setLayout(new GridLayout());
 		consoleGroup.setLayoutData(debugGroupLayoutData);
-		showMetaInfoInDebugConsoleEnabled = new BooleanFieldEditor(P_SHOW_META_INFO_IN_DEBUG_CONSOLE.getId(),
-				"Show meta information in debug console", consoleGroup);
-		showMetaInfoInDebugConsoleEnabled.getDescriptionControl(consoleGroup)
-		.setToolTipText("When enabled some meta information used for debugging is shown in debug console");
+
+		showMetaInfoInDebugConsoleEnabled = new BooleanFieldEditor(P_SHOW_META_INFO_IN_DEBUG_CONSOLE.getId(), "Show meta information in debug console", consoleGroup);
+		showMetaInfoInDebugConsoleEnabled.getDescriptionControl(consoleGroup).setToolTipText("When enabled some meta information used for debugging is shown in debug console");
 		addField(showMetaInfoInDebugConsoleEnabled);
-		
+
+	}
+
+	private Object doValidateExternalTool() {
+		try {
+			TerminalLaucherTestExecution.tryToExecuteTemporaryTestBashScript();
+		} catch (IOException e) {
+			EclipseUtil.logError("Was not able execute test", e);
+		}
+		return null;
 	}
 
 }

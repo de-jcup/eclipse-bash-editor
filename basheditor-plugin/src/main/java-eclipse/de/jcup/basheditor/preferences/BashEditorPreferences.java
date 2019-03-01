@@ -15,7 +15,7 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_OUTLINE_WITH_EDITOR;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -32,9 +32,6 @@ import de.jcup.basheditor.BashEditor;
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.ColorUtil;
 import de.jcup.basheditor.EclipseUtil;
-import de.jcup.basheditor.debug.launch.OSUtil;
-import de.jcup.basheditor.debug.launch.TerminalLauncher;
-import de.jcup.basheditor.debug.launch.TerminalLauncher.TerminalLauncherConfig;
 
 public class BashEditorPreferences {
 
@@ -180,16 +177,17 @@ public class BashEditorPreferences {
 		return getBooleanPreference(BashEditorPreferenceConstants.P_SHOW_META_INFO_IN_DEBUG_CONSOLE);
 	}
 
-	public TerminalLauncherConfig getTerminalLauncherConfig() {
-		TerminalLauncherConfig config = null;
-		if (OSUtil.isWindows()) {
-			config = TerminalLauncher.DefaultLaunchConfig.WINDOWS.create();
-		}else {
-			config = TerminalLauncher.DefaultLaunchConfig.LINUX_GNOME.create();
-		}
-		return config;
+	public String getXTerminalSnippet() {
+		return getStringPreference(BashEditorPreferenceConstants.P_LAUNCH_XTERMINAL_SNIPPET);
 	}
 
+	public boolean isLaunchedTerminalWaitingOnErrors() {
+		return getBooleanPreference(BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ON_ERRORS);
+	}
+	
+	public boolean isLaunchedTerminalAlwaysWaiting() {
+		return getBooleanPreference(BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ALWAYS);
+	}
 	
 
 }

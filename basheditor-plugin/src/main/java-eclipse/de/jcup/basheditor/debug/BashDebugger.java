@@ -212,28 +212,29 @@ public class BashDebugger {
 
 	public void process(boolean xstopOnStartup) throws Exception {
 		
-		ProcessContext pc = new ProcessContext(this);
+		ProcessContext context = new ProcessContext(this);
 		
 		if (xstopOnStartup) {
-			pc.stop();
+			context.stop();
 		}
-		if (!pc.isStopped()) {
+		if (!context.isStopped()) {
 			resume = true;
 		}
 		do {
 			lock();
 
 			bashConnector.stepBegin();
-			pc.update(bashConnector);
+			context.update(bashConnector);
 			
-			stackLevel = pc.getBashLineNumber().getArraySize();
+			stackLevel = context.getBashLineNumber().getArraySize();
 
-			handleStop(pc);
+			handleStop(context);
 
-			createStack(pc);
-			createFrames(pc);
+			createStack(context);
+			createFrames(context);
+			
 			unlock();
-			if (pc.isStopped()) {
+			if (context.isStopped()) {
 				resume = false;
 				if (stackFrames.length > 0) {
 					uiUpdate();
@@ -244,7 +245,7 @@ public class BashDebugger {
 					}
 				}
 			}
-			pc.stop();
+			context.stop();
 
 			lock();
 
@@ -265,50 +266,50 @@ public class BashDebugger {
 
 	}
 
-	private void createStack(ProcessContext pc) {
+	private void createStack(ProcessContext context) {
 		
-		BashNetworkVariableData bashLineNumber = pc.getBashLineNumber();
-		BashNetworkVariableData functionName = pc.getFunctionName();
-		BashNetworkVariableData bashSource = pc.getBashSource();
+		BashNetworkVariableData bashLineNumber = context.getBashLineNumber();
+		BashNetworkVariableData functionName = context.getFunctionName();
+		BashNetworkVariableData bashSource = context.getBashSource();
 		
-		int max_stack_level = bashSource.getArraySize() - 1;
-		pc.clearStack();
+		int maxStackLevel = bashSource.getArraySize() - 1;
+		context.clearStack();
 		
-		for (int stack_level = 0; stack_level <= max_stack_level; stack_level++) {
-			StackElement ar = new StackElement();
+		for (int stackLevel = 0; stackLevel <= maxStackLevel; stackLevel++) {
+			StackElement stackElement = new StackElement();
 			
-			ar.currentline = bashLineNumber.getIntValue(stack_level);
-			ar.source = bashSource.getStringValue(stack_level);
-			ar.name = functionName.getStringValue(stack_level);
-			ar.level = stack_level;
+			stackElement.currentline = bashLineNumber.getIntValue(stackLevel);
+			stackElement.source = bashSource.getStringValue(stackLevel);
+			stackElement.name = functionName.getStringValue(stackLevel);
+			stackElement.level = stackLevel;
 			
-			pc.addStack(ar);
+			context.addStack(stackElement);
 		}
 	}
 
-	private void handleStop(ProcessContext pc) throws CoreException {
+	private void handleStop(ProcessContext context) throws CoreException {
 		if (resume) {
-			stopOnStackLevelStopOrSuspend(pc);
-			stopOnBreakpoint(pc);
+			stopOnStackLevelStopOrSuspend(context);
+			stopOnBreakpoint(context);
 		}
 		suspend = false;
 	}
 
-	private void stopOnStackLevelStopOrSuspend(ProcessContext pc) {
-		pc.go();
+	private void stopOnStackLevelStopOrSuspend(ProcessContext processContext) {
+		processContext.go();
 		if (stackLevel == stackLevelStop || suspend) {
-			pc.stop();
+			processContext.stop();
 		}
 	}
 
-	private void stopOnBreakpoint(ProcessContext pc) throws CoreException {
+	private void stopOnBreakpoint(ProcessContext context) throws CoreException {
 		IBreakpointManager breakpointManager = DebugPlugin.getDefault().getBreakpointManager();
 		if (! breakpointManager.isEnabled()) {
 			/* all breakpoints turned off...*/
 			return;
 		}
-		BashNetworkVariableData bashLineNumber = pc.getBashLineNumber();
-		BashNetworkVariableData bashSource = pc.getBashSource();
+		BashNetworkVariableData bashLineNumber = context.getBashLineNumber();
+		BashNetworkVariableData bashSource = context.getBashSource();
 		
 		IBreakpoint[] breakpoints = breakpointManager.getBreakpoints(BashDebugConstants.BASH_DEBUG_MODEL_ID);
 		int line;
@@ -323,7 +324,7 @@ public class BashDebugger {
 			
 			String lookupSource = BashSourceLookupParticipant.getReverseLookupSourceItem(breakPoint.getMarker().getResource().getFullPath());
 			if (line == currentline && source.equals(lookupSource)) {
-				pc.stop();
+				context.stop();
 				break;
 			}
 		}

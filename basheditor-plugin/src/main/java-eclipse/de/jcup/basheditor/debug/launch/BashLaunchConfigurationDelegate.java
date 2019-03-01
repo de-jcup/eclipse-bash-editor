@@ -6,8 +6,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -57,8 +55,7 @@ public class BashLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 		}
 		/* debug process is started, so launch terminal or inform*/
 		if (canDoAutoRun) {
-			
-			terminalLauncher.execute(programFile,params,getPreferences().getTerminalLauncherConfig());
+			terminalLauncher.execute(programFile,params,getPreferences().getXTerminalSnippet());
 			
 		} else {
 			EclipseUtil.safeAsyncExec(new Runnable() {
@@ -81,9 +78,7 @@ public class BashLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 			});
 		}
 	}
-	private void throwCoreException(String message, Throwable e) throws CoreException {
-		throw new CoreException(new Status(IStatus.ERROR, BashEditorActivator.getDefault().getPluginID(), 0, message, e));
-	}
+	
 	private BashEditorPreferences getPreferences() {
 		return BashEditorPreferences.getInstance();
 	}
