@@ -26,7 +26,7 @@ public class DummyBashProcess implements IProcess {
 	}
 
 	public String getLabel() {
-		return "Dummy bash process";
+		return "Bash script process";
 	}
 
 	public ILaunch getLaunch() {

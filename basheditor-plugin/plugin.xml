@@ -361,7 +361,7 @@
             name="Bash script"
             sourcePathComputerId="de.jcup.basheditor.debug.sourcePathComputer.sh"
             delegate="de.jcup.basheditor.debug.launch.BashLaunchConfigurationDelegate"
-            modes="run, debug"
+            modes="debug"
             id="de.jcup.basheditor.debug.launchConfigurationType.sh">
       </launchConfigurationType>
    </extension>

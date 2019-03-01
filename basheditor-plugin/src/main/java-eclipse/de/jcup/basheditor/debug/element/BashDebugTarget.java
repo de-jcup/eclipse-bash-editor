@@ -237,7 +237,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 	}
 
 	public boolean isDisconnected() {
-		return ! debugger.isConnected();
+		return ! debugger.isTerminated();
 	}
 
 	public boolean supportsStorageRetrieval() {

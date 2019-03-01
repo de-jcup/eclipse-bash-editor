@@ -9,7 +9,14 @@ import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IThread;
 
-public class ReplacementDebugTarget implements IDebugTarget {
+/**
+ * Could be used for "run" mode.
+ * @author albert
+ *
+ */
+public class DummyDebugTarget implements IDebugTarget {
+
+	private boolean disconnected;
 
 	@Override
 	public String getModelIdentifier() {
@@ -102,17 +109,18 @@ public class ReplacementDebugTarget implements IDebugTarget {
 	@Override
 	public boolean canDisconnect() {
 		
-		return false;
+		return true;
 	}
 
 	@Override
 	public void disconnect() throws DebugException {
+		this.disconnected=true;
 	}
 
 	@Override
 	public boolean isDisconnected() {
 		
-		return false;
+		return disconnected;
 	}
 
 	@Override

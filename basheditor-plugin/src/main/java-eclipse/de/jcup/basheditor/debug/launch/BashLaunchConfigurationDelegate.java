@@ -6,6 +6,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -17,7 +19,6 @@ import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.InfoPopup;
 import de.jcup.basheditor.debug.BashDebugConstants;
 import de.jcup.basheditor.debug.element.BashDebugTarget;
-import de.jcup.basheditor.debug.element.DummyProcess;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
 
@@ -45,19 +46,13 @@ public class BashLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 		int port = configuration.getAttribute(BashDebugConstants.LAUNCH_ATTR_SOCKET_PORT, BashDebugConstants.DEFAULT_DEBUG_PORT);
 
 		boolean canDoAutoRun = getPreferences().isAutomaticLaunchInExternalTerminalEnabled();
-		IProcess process = new DummyBashProcess();
-		target = new BashDebugTarget(launch, process, port);
-		target.setFileResource(programFileResource);
-		launch.addDebugTarget(target);
 		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
+			IProcess process = new DummyBashProcess();
+			target = new BashDebugTarget(launch, process, port);
+			target.setFileResource(programFileResource);
+			launch.addDebugTarget(target);
 			if (! target.startDebugSession()) {
 				return;
-			}
-		}else if (mode.contentEquals(ILaunchManager.RUN_MODE)) {
-			// does not work debug view has zombie entires then.  reason for "true" before
-			// do not start debug session.
-			if (canDoAutoRun) {
-				launch.addProcess(new DummyProcess("Running:"+program, launch));
 			}
 		}
 		/* debug process is started, so launch terminal or inform*/
@@ -86,7 +81,9 @@ public class BashLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 			});
 		}
 	}
-
+	private void throwCoreException(String message, Throwable e) throws CoreException {
+		throw new CoreException(new Status(IStatus.ERROR, BashEditorActivator.getDefault().getPluginID(), 0, message, e));
+	}
 	private BashEditorPreferences getPreferences() {
 		return BashEditorPreferences.getInstance();
 	}
