@@ -77,7 +77,7 @@ public class BashNetworkConnector {
 	}
 
 	public void stepBegin() throws IOException {
-		if (BashEditorPreferences.getInstance().isDebugConsoleEnabled()) {
+		if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
 			BashDebugConsole.println(">> =============== <<");
 			BashDebugConsole.println(">> Begin new step  <<");
 			BashDebugConsole.println(">> =============== <<");
@@ -148,7 +148,7 @@ public class BashNetworkConnector {
 	}
 
 	private void addBashVariables(StepParseContext context, String sourceCodeLine) {
-		if (BashEditorPreferences.getInstance().isDebugConsoleEnabled()) {
+		if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
 			BashDebugConsole.println("Parsing:" + sourceCodeLine);
 		}
 		if (context.isTrapFunctionAlreadyFound()) {
@@ -161,7 +161,7 @@ public class BashNetworkConnector {
 			return;
 		}
 		if (sourceCodeLine.startsWith(builder.getNameOfTrapFunction())) {
-			if (BashEditorPreferences.getInstance().isDebugConsoleEnabled()) {
+			if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
 				BashDebugConsole.println(">>>Function found, mark end of variables reached:" + sourceCodeLine);
 			}
 			context.trapFunctionFound = true;

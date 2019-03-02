@@ -64,7 +64,7 @@ public class TerminalLauncher {
 	}
 
 	protected void logExecutedCommand(LaunchRunnable runnable) {
-		if (BashEditorPreferences.getInstance().isDebugConsoleEnabled()) {
+		if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
 			BashDebugConsole.println(">>> Launch Terminal:");
 			BashDebugConsole.println("    " + runnable.createCommandString());
 		}

@@ -173,7 +173,7 @@ public class BashEditorPreferences {
 		return getBooleanPreference(BashEditorPreferenceConstants.P_LAUNCH_IN_TERMINAL_ENABLED);
 	}
 
-	public boolean isDebugConsoleEnabled() {
+	public boolean isShowMetaInfoInDebugConsoleEnabled() {
 		return getBooleanPreference(BashEditorPreferenceConstants.P_SHOW_META_INFO_IN_DEBUG_CONSOLE);
 	}
 
