@@ -16,9 +16,9 @@
 package de.jcup.basheditor.script;
 
 import static de.jcup.basheditor.script.AssertScriptModel.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.List;
 
 import org.junit.Before;
@@ -117,17 +117,17 @@ public class BashScriptModelBuilderTest {
     public void none_of_the_testscripts_contains_any_failure() throws Exception {
         /* prepare */
         StringBuilder errorCollector = new StringBuilder();
-        List<String> scriptNames = TestScriptLoader.fetchAllTestScriptNames();
-        for (String scriptName : scriptNames) {
+        List<File> scriptFiles = TestScriptLoader.fetchAllTestScriptFiles();
+        for (File scriptFile : scriptFiles) {
 
-            String script = TestScriptLoader.loadScriptFromTestScripts(scriptName);
+            String script = TestScriptLoader.loadScript(scriptFile);
 
             /* execute */
             try {
                 BashScriptModel bashScriptModel = builderToTest.build(script);
                 /* test */
                 if (bashScriptModel.hasErrors()) {
-                    errorCollector.append("script file:").append(scriptName).append(" contains errors:\n");
+                    errorCollector.append("script file:").append(scriptFile).append(" contains errors:\n");
                     for (BashError error : bashScriptModel.getErrors()) {
                         errorCollector.append("-");
                         errorCollector.append(error.getMessage());
@@ -136,7 +136,7 @@ public class BashScriptModelBuilderTest {
                 }
             } catch (BashScriptModelException e) {
                 /* test */
-                errorCollector.append("script file:").append(scriptName).append(" contains errors:\n");
+                errorCollector.append("script file:").append(scriptFile).append(" contains errors:\n");
                 errorCollector.append("-");
                 Throwable root = e;
                 while (root.getCause() != null) {

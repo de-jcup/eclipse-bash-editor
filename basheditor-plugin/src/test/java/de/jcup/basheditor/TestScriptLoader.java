@@ -32,13 +32,23 @@ public class TestScriptLoader {
 		}
 	}
 	
-	public static List<String> fetchAllTestScriptNames() {
+	public static List<File> fetchAllTestScriptFiles() {
 		assertTestscriptFolderExists();
-		List<String> list = new ArrayList<>();
-		for (File file: testScriptRootFolder.listFiles()){
-			list.add(file.getName());
-		}
+		List<File> list = new ArrayList<>();
+		File folder = testScriptRootFolder;
+		fetchTestScriptNames(list, folder);
 		return list;
+	}
+
+	private static void fetchTestScriptNames(List<File> list, File folder) {
+		for (File file: folder.listFiles()){
+			if (file.isFile()) {
+				list.add(file);
+			}
+			if (file.isDirectory()) {
+				fetchTestScriptNames(list,file);
+			}
+		}
 	}
 	
 	public static String loadScriptFromTestScripts(String testScriptName) throws IOException{
