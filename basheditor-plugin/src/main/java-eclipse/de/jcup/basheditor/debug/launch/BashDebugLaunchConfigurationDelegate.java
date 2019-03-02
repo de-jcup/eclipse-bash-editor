@@ -1,6 +1,7 @@
 package de.jcup.basheditor.debug.launch;
 
 import java.io.File;
+import java.io.FileReader;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -12,20 +13,25 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.FixMethodOrder;
 
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.InfoPopup;
 import de.jcup.basheditor.debug.BashDebugConstants;
+import de.jcup.basheditor.debug.DebugBashCodeToggleSupport;
 import de.jcup.basheditor.debug.element.BashDebugTarget;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
 
-public class BashLaunchConfigurationDelegate extends LaunchConfigurationDelegate {
+public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDelegate {
 
 	private BashDebugTarget target;
 	private TerminalLauncher terminalLauncher = new TerminalLauncher();
 
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
+		if (!mode.equals(ILaunchManager.DEBUG_MODE)) {
+			throw new IllegalStateException("Ony debug mode supported, not :" + mode);
+		}
 		if (target != null) {
 			try {
 				target.disconnect();
@@ -39,46 +45,53 @@ public class BashLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 		IWorkspaceRoot root = EclipseUtil.getWorkspace().getRoot();
 		IFile programFileResource = (IFile) root.findMember(program);
 		File programFile = programFileResource.getLocation().toFile();
+		
+		DebugBashCodeToggleSupport toggleSupport = new DebugBashCodeToggleSupport();
+		
+		/* FIXME Albert, 03.03.2019: load script (ADOPT testscript loader.. and load program file.*/ 
+		/* FIXME Albert, 03.03.2019: load script (change script by toggleSupport.enableDebugging)*/ 
+		
+		/* FIXME Albert, 03.03.2019: add finally block(finally revert by toggleSupport.disableDebugging), after launch ?*/ 
+		
+		
 		boolean stopOnStartup = configuration.getAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP, false);
 		launch.setAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP, Boolean.toString(stopOnStartup));
 		int port = configuration.getAttribute(BashDebugConstants.LAUNCH_ATTR_SOCKET_PORT, BashDebugConstants.DEFAULT_DEBUG_PORT);
 
 		boolean canDoAutoRun = getPreferences().isAutomaticLaunchInExternalTerminalEnabled();
-		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
-			IProcess process = new DummyBashProcess();
-			target = new BashDebugTarget(launch, process, port);
-			target.setFileResource(programFileResource);
-			launch.addDebugTarget(target);
-			if (! target.startDebugSession()) {
-				return;
-			}
+		IProcess process = new DummyBashProcess();
+		target = new BashDebugTarget(launch, process, port);
+		target.setFileResource(programFileResource);
+		launch.addDebugTarget(target);
+		if (!target.startDebugSession()) {
+			return;
 		}
-		/* debug process is started, so launch terminal or inform*/
+		/* debug process is started, so launch terminal or inform */
 		if (canDoAutoRun) {
-			terminalLauncher.execute(programFile,params,getPreferences().getXTerminalSnippet());
-			
+			terminalLauncher.execute(programFile, params, getPreferences().getXTerminalSnippet());
+
 		} else {
 			EclipseUtil.safeAsyncExec(new Runnable() {
 
 				@Override
 				public void run() {
 					Shell shell = EclipseUtil.getSafeDisplay().getActiveShell();
-					
+
 					String titleText = "Bash launch necessary";
 					String infoText = "You have only started the debug remote connection.\nThe bash program is currently not started.";
 					String subMessage = "Either you start your bash program from commandline\nor you change your preferences to launch in terminal";
-					
-					InfoPopup popup = new InfoPopup(shell, titleText, infoText,null);
+
+					InfoPopup popup = new InfoPopup(shell, titleText, infoText, null);
 					popup.setSubMessage(subMessage);
 					popup.setLinkToPreferencesId("basheditor.eclipse.gradleeditor.preferences.BashEditorDebugPreferencePage");
 					popup.setLinkToPreferencesText("Change behaviour in <a href=\"https://github.com/de-jcup/eclipse-bash-editor\">preferences</a>");
 					popup.open();
 				}
-				
+
 			});
 		}
 	}
-	
+
 	private BashEditorPreferences getPreferences() {
 		return BashEditorPreferences.getInstance();
 	}

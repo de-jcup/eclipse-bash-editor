@@ -360,7 +360,7 @@
             sourceLocatorId="de.jcup.basheditor.debug.sourceLookupDirector.sh"
             name="Bash script"
             sourcePathComputerId="de.jcup.basheditor.debug.sourcePathComputer.sh"
-            delegate="de.jcup.basheditor.debug.launch.BashLaunchConfigurationDelegate"
+            delegate="de.jcup.basheditor.debug.launch.BashDebugLaunchConfigurationDelegate"
             modes="debug"
             id="de.jcup.basheditor.debug.launchConfigurationType.sh">
       </launchConfigurationType>
