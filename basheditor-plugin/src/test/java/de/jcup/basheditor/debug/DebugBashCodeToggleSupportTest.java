@@ -11,7 +11,8 @@ import de.jcup.basheditor.TestScriptLoader;
 
 public class DebugBashCodeToggleSupportTest {
 
-	private static final String DEBUG_ENABLED_CODE = "source "+System.getProperty("user.home")+"/.basheditor/_debug_v1.sh";
+	private static final String BASE_EXPECTED_DEBUG_ENABLED_CODE = "source "+System.getProperty("user.home")+"/.basheditor/remote-debugging-v1.sh";
+	private static final String EXPECTED_DEBUG_ENABLED_CODE = BASE_EXPECTED_DEBUG_ENABLED_CODE+" localhost "+BashDebugConstants.DEFAULT_DEBUG_PORT+"#BASHEDITOR-TMP-REMOTE-DEBUGGING-END";
 	private DebugBashCodeToggleSupport supportToTest;
 
 	@Before
@@ -22,38 +23,52 @@ public class DebugBashCodeToggleSupportTest {
 	@Test
 	public void enable_debugging_empty_code_results_in_firstline_including_temp_debugger_file() throws Exception {
 		/* execute */
-		String newCode = supportToTest.enableDebugging("");
+		String newCode = supportToTest.enableDebugging("","localhost", BashDebugConstants.DEFAULT_DEBUG_PORT);
 
 		/* test */
 		String[] asArray = newCode.split("\n");
 		assertEquals(1, asArray.length);
-		assertTrue(asArray[0].startsWith(DEBUG_ENABLED_CODE));
+		assertTrue(asArray[0].startsWith(EXPECTED_DEBUG_ENABLED_CODE));
 
 	}
 
 	@Test
 	public void enable_debugging_starting_with_comment_results_in_firstline_including_temp_debugger_file_and_with_comment_before() throws Exception {
 		/* execute */
-		String newCode = supportToTest.enableDebugging("#! /bin/mybash");
+		String newCode = supportToTest.enableDebugging("#! /bin/mybash","localhost", BashDebugConstants.DEFAULT_DEBUG_PORT);
 
 		/* test */
 		String[] asArray = newCode.split("\n");
-		assertEquals(1, asArray.length);
-		assertEquals(DEBUG_ENABLED_CODE+" #! /bin/mybash", asArray[0]);
+		assertEquals(2, asArray.length);
+		assertEquals(EXPECTED_DEBUG_ENABLED_CODE, asArray[0]);
+		assertEquals("#! /bin/mybash", asArray[1]);
+
+	}
+	
+	@Test
+	public void enable_debugging_starting_with_not_comment_but_code_results_in_firstline_including_temp_debugger_file_and_new_line_with_command_before() throws Exception {
+		/* execute */
+		String newCode = supportToTest.enableDebugging("echo alpha","localhost", BashDebugConstants.DEFAULT_DEBUG_PORT);
+
+		/* test */
+		String[] asArray = newCode.split("\n");
+		assertEquals(2, asArray.length);
+		assertEquals(EXPECTED_DEBUG_ENABLED_CODE, asArray[0]);
+		assertEquals("echo alpha", asArray[1]);
 
 	}
 
 	@Test
 	public void enable_debugging_will_automatically_create_debug_bash_code_file_which_contains_data_of_code_builder() throws Exception {
 		/* prepare */
-		File file = new File(System.getProperty("user.home"),".basheditor/_debug_v1.sh");
+		File file = new File(System.getProperty("user.home"),"/.basheditor/remote-debugging-v1.sh");
 		if (file.exists()) {
 			file.delete();
 		}
 		assertFalse(file.exists());
 
 		/* execute */
-		supportToTest.enableDebugging("");
+		supportToTest.enableDebugging("","localhost",BashDebugConstants.DEFAULT_DEBUG_PORT);
 
 		/* test */
 		assertTrue(file.exists()); // file must be recreated
@@ -74,22 +89,26 @@ public class DebugBashCodeToggleSupportTest {
 
 	@Test
 	public void disable_debugging_first_line_has_include_but_nothing_else_results_in_empty_code() throws Exception {
-		assertEquals("", supportToTest.disableDebugging(DEBUG_ENABLED_CODE));
+		assertEquals("", supportToTest.disableDebugging(EXPECTED_DEBUG_ENABLED_CODE+"\n"));
+	}
+	@Test
+	public void disable_debugging_first_line_has_include_and_one_empty_line_nothing_else_results_in_one_empty_line() throws Exception {
+		assertEquals("\n", supportToTest.disableDebugging(EXPECTED_DEBUG_ENABLED_CODE+"\n\n"));
 	}
 
 	@Test
 	public void disable_debugging_first_line_has_include_and_comment_after_include_only_comment_remains() throws Exception {
-		assertEquals("#! /bin/mybash", supportToTest.disableDebugging(DEBUG_ENABLED_CODE + "#! /bin/mybash"));
+		assertEquals("#! /bin/mybash", supportToTest.disableDebugging(EXPECTED_DEBUG_ENABLED_CODE + "\n#! /bin/mybash"));
 	}
 
 	@Test
 	public void disable_debugging_first_line_has_include_and_comment_secondline_has_alpha_after_include_only_comment_remains_in_first_line_second_has_alpha() throws Exception {
-		assertEquals("#! /bin/mybash\nalpha", supportToTest.disableDebugging(DEBUG_ENABLED_CODE + "#! /bin/mybash\nalpha"));
+		assertEquals("#! /bin/mybash\nalpha", supportToTest.disableDebugging(EXPECTED_DEBUG_ENABLED_CODE + "\n#! /bin/mybash\nalpha"));
 	}
 	
 	@Test
 	public void disable_debugging_first_line_has_include_and_second_an_echo_alpha_result_first_line_will_be_echo_alpha() throws Exception {
-		assertEquals("echo alpha", supportToTest.disableDebugging(DEBUG_ENABLED_CODE + "\necho alpha"));
+		assertEquals("echo alpha", supportToTest.disableDebugging(EXPECTED_DEBUG_ENABLED_CODE + "\necho alpha"));
 	}
 
 }

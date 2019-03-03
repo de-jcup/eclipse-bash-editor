@@ -1,7 +1,6 @@
 package de.jcup.basheditor.debug.launch;
 
 import java.io.File;
-import java.io.FileReader;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -13,12 +12,10 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.FixMethodOrder;
 
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.InfoPopup;
 import de.jcup.basheditor.debug.BashDebugConstants;
-import de.jcup.basheditor.debug.DebugBashCodeToggleSupport;
 import de.jcup.basheditor.debug.element.BashDebugTarget;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
@@ -46,22 +43,13 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 		IFile programFileResource = (IFile) root.findMember(program);
 		File programFile = programFileResource.getLocation().toFile();
 		
-		DebugBashCodeToggleSupport toggleSupport = new DebugBashCodeToggleSupport();
-		
-		/* FIXME Albert, 03.03.2019: load script (ADOPT testscript loader.. and load program file.*/ 
-		/* FIXME Albert, 03.03.2019: load script (change script by toggleSupport.enableDebugging)*/ 
-		
-		/* FIXME Albert, 03.03.2019: add finally block(finally revert by toggleSupport.disableDebugging), after launch ?*/ 
-		
-		
 		boolean stopOnStartup = configuration.getAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP, false);
 		launch.setAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP, Boolean.toString(stopOnStartup));
 		int port = configuration.getAttribute(BashDebugConstants.LAUNCH_ATTR_SOCKET_PORT, BashDebugConstants.DEFAULT_DEBUG_PORT);
 
 		boolean canDoAutoRun = getPreferences().isAutomaticLaunchInExternalTerminalEnabled();
 		IProcess process = new DummyBashProcess();
-		target = new BashDebugTarget(launch, process, port);
-		target.setFileResource(programFileResource);
+		target = new BashDebugTarget(launch, process, port,programFileResource);
 		launch.addDebugTarget(target);
 		if (!target.startDebugSession()) {
 			return;

@@ -3,13 +3,11 @@ package de.jcup.basheditor.debug;
 public class DebugBashCodeBuilder {
 	private static final String DEFAULT_FUNCTION_NAME_TRAP = "_________DEBUG_TRAP";
 	private static final String DEFAULT_DEBUG_COMMAND = "_________DEBUG_COMMAND";
-
+	
 	final String nameOfTrapFunction = DEFAULT_FUNCTION_NAME_TRAP;
 	final String nameOfDebugCommand = DEFAULT_DEBUG_COMMAND;
 
 	private int fileDescriptor = 33;
-	private int port = 33333;
-	private String hostname = "localhost";
 
 	public DebugBashCodeBuilder() {
 	}
@@ -20,14 +18,6 @@ public class DebugBashCodeBuilder {
 	
 	public String getNameOfTrapFunction() {
 		return nameOfTrapFunction;
-	}
-	
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
 	}
 	
 	public String getNameOfBashLineNumberVariable() {
@@ -48,7 +38,7 @@ public class DebugBashCodeBuilder {
 
 	public String buildDebugBashCodeSnippet() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("exec " + fileDescriptor + "<>/dev/tcp/" + hostname + "/" + port + "\n");
+		sb.append("exec " + fileDescriptor + "<>/dev/tcp/$1/$2 #params: 1=hostname(e.g localhost),2=port\n");
 		sb.append("function " + nameOfTrapFunction + "()\n");
 		sb.append("{\n");
 		sb.append("	local " + nameOfDebugCommand + "\n");
@@ -84,6 +74,10 @@ public class DebugBashCodeBuilder {
 			text= text.substring(0,text.length()-1);
 		}
 		return text;
+	}
+
+	public int getLinesOfDebugCode() {
+		return 10;
 	}
 	
 }

@@ -1,11 +1,13 @@
 package de.jcup.basheditor.debug.element;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.SocketException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarkerDelta;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -24,21 +26,25 @@ import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.core.model.IVariable;
-import org.eclipse.jface.dialogs.ErrorDialog;
 
 import de.jcup.basheditor.BashEditorActivator;
+import de.jcup.basheditor.ScriptUtil;
 import de.jcup.basheditor.debug.BashDebugConstants;
 import de.jcup.basheditor.debug.BashDebugger;
 import de.jcup.basheditor.debug.BashDebugger.DebugCommand;
+import de.jcup.basheditor.debug.DebugBashCodeToggleSupport;
 import de.jcup.basheditor.debug.DebugEventSource;
 import de.jcup.basheditor.debug.DebugEventSupport;
 import de.jcup.basheditor.debug.launch.BashDocumentChangeRegistry;
 import de.jcup.basheditor.debug.launch.BashSourceLookupParticipant;
+import de.jcup.eclipse.commons.EclipseResourceHelper;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashDebugTarget extends AbstractBashDebugElement implements IDebugTarget, DebugEventSource {
 
-	private BashDebugger debugger = null;
+	private BashDebugger debugger;
+	
+	private DebugBashCodeToggleSupport toggleSupport = new DebugBashCodeToggleSupport();
 
 	private IProcess process;
 
@@ -64,10 +70,15 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 	
 	private BashDocumentChangeRegistry documentChangeRegistry;
 	
-	public BashDebugTarget(ILaunch launch, IProcess process, int port) throws CoreException {
+	public BashDebugTarget(ILaunch launch, IProcess process, int port, IFile programFileResource) throws CoreException {
 		super(null);
-
+		
+		if (programFileResource==null) {
+			throw new IllegalArgumentException("File resource must be not null!");
+		}
+		
 		this.launch = launch;
+		this.fileResource=programFileResource;
 		this.port = port;
 		this.stopOnStartup = Boolean.valueOf(launch.getAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP));
 		this.process = process;
@@ -93,6 +104,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 		} catch (Exception e) {
 			EclipseUtil.logError("Problems while collecting bash breakpoints", e, BashEditorActivator.getDefault());
 		}
+		
 		eventDispatchJob = new BashDebugTargetEventDispatchJob();
 		eventDispatchJob.schedule();
 
@@ -304,7 +316,21 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 		}
 
 		protected IStatus run(IProgressMonitor monitor) {
+			IStatus status = Status.OK_STATUS;
+			File startFile = null;
+			String originCode = null;
 			try {
+				startFile = EclipseResourceHelper.DEFAULT.toFile(fileResource);
+				originCode = ScriptUtil.loadScript(startFile);
+			} catch (Exception e) {
+				return new Status(IStatus.ERROR,BashEditorActivator.getDefault().getPluginID(),"Bash script loading failed for :"+fileResource, e);
+			}
+			
+			try {
+				String debugCode = toggleSupport.enableDebugging(originCode,"localhost", port);
+				ScriptUtil.saveScript(startFile, debugCode);
+				/* reload content in editor BEFORE debugging. Important because editor otherwise has problems with first break point (source change...) */
+				fileResource.refreshLocal(IResource.DEPTH_ZERO,monitor);
 				BashSourceLookupParticipant.loadLookupSource();
 				debugger.connect();
 				if (!debugger.isTerminated()) {
@@ -316,8 +342,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 				boolean needsErrorLog = true;
 				if (e instanceof BindException) {
 					needsErrorLog=false;
-					IStatus status = new Status(IStatus.ERROR,BashEditorActivator.getDefault().getPluginID(),"Bash debug session binding failed for port:"+port, e);
-					EclipseUtil.safeAsyncExec(()->ErrorDialog.openError(null, "Bash debug error", "Debug sessin binding failed.", status));
+					return new Status(IStatus.ERROR,BashEditorActivator.getDefault().getPluginID(),"Bash debug session binding failed for port:"+port, e);
 				}else if (e instanceof SocketException) {
 					if (e.getMessage().indexOf("Broken pipe")!=-1) {
 						/* this happens even with exit code 0 normal termination! Unfortunately 
@@ -336,13 +361,25 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 					EclipseUtil.logError("Unable to finally disconnect bash connector", e1, BashEditorActivator.getDefault());
 				}
 				debugger.markTerminated();
+				try {
+					/* if somebody has changed the code in mean time we just reload again and toggle only off! */
+					String debugCode = ScriptUtil.loadScript(startFile);
+					originCode = toggleSupport.disableDebugging(debugCode);
+					ScriptUtil.saveScript(startFile, originCode);
+					
+					fileResource.refreshLocal(IResource.DEPTH_ZERO,monitor);
+					
+				} catch (Exception e) {
+					status = new Status(IStatus.ERROR,BashEditorActivator.getDefault().getPluginID(),"Removing temp bash script debugging parts failed for :"+fileResource, e);
+				}
+				
 			}
 			try {
 				BashSourceLookupParticipant.saveLookupSource();
 			} catch (IOException e1) {
 				EclipseUtil.logError("Unable to save lookup source", e1, BashEditorActivator.getDefault());
 			}
-			return Status.OK_STATUS;
+			return status;
 		}
 
 	}
@@ -383,10 +420,6 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 			return null;
 		}
 		return debugger.getValue(expression, element);
-	}
-
-	public void setFileResource(IFile fileResource) {
-		this.fileResource= fileResource;
 	}
 	
 	public IFile getFileResource() {

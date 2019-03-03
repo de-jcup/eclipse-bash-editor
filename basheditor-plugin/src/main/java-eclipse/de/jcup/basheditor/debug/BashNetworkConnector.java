@@ -36,8 +36,6 @@ public class BashNetworkConnector {
 	public BashNetworkConnector(int port) {
 		this.port = port;
 		this.builder = new DebugBashCodeBuilder();
-		builder.setPort(port);
-		;
 	}
 
 	public BashNetworkVariableData getBashLineNumber() {
@@ -97,7 +95,7 @@ public class BashNetworkConnector {
 			if (n == '\n') {
 				numberOfLines++;
 			} else {
-				if (n == '\t' && numberOfLines > 10) {
+				if (n == '\t' && numberOfLines > builder.getLinesOfDebugCode()) {
 					spc.stepStr = new String(buffer, 0, i);
 					parse(spc);
 					break;

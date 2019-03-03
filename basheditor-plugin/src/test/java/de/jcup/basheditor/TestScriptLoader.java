@@ -15,10 +15,7 @@
  */
  package de.jcup.basheditor;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,20 +55,6 @@ public class TestScriptLoader {
 		return loadScript(file);
 	}
 
-	public static String loadScript(File file) throws IOException, FileNotFoundException {
-		if (!file.exists()){
-			throw new IllegalArgumentException("Test case corrupt! Test script file does not exist:"+file);
-		}
-		StringBuilder sb = new StringBuilder();
-		try(BufferedReader br = new BufferedReader(new FileReader(file))){
-			String line = null;
-			while ((line=br.readLine())!=null){
-				sb.append(line);
-				sb.append("\n");
-			}
-		}
-		return sb.toString();
-	}
 
 	public static File getTestScriptFile(String testScriptName) {
 		File file = new File(testScriptRootFolder,testScriptName);
@@ -82,5 +65,9 @@ public class TestScriptLoader {
 		if (!testScriptRootFolder.exists()){
 			throw new IllegalArgumentException("Test setup corrupt! Root folder of test scripts not found:"+testScriptRootFolder);
 		}
+	}
+
+	public static String loadScript(File scriptFile) throws IOException {
+		return ScriptUtil.loadScript(scriptFile);
 	}
 }

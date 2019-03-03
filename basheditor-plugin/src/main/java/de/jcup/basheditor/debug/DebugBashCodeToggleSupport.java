@@ -12,20 +12,22 @@ import java.io.IOException;
  *
  */
 public class DebugBashCodeToggleSupport {
-	private static final File BASH_CODE_DEBUGGER_FILE = new File(System.getProperty("user.home"),".basheditor/_debug_v1.sh");
-	private static final String INCLUDE = "source "+BASH_CODE_DEBUGGER_FILE.getAbsolutePath();
+	private static final File BASH_CODE_DEBUGGER_FILE = new File(System.getProperty("user.home"),".basheditor/remote-debugging-v1.sh");
+	private static final String INCLUDE_PREFIX = "source "+BASH_CODE_DEBUGGER_FILE.getAbsolutePath();
+	private static final String DEBUG_POSTFIX="#BASHEDITOR-TMP-REMOTE-DEBUGGING-END\n";
 	private DebugBashCodeBuilder codeBuilder;
 
+	
 	public DebugBashCodeToggleSupport() {
 		this.codeBuilder=new DebugBashCodeBuilder();
 	}
 
-	public String enableDebugging(String sourceCode) throws IOException {
+	public String enableDebugging(String sourceCode, String hostname, int port) throws IOException {
 		ensureDebugFileExists();
-		if (sourceCode.startsWith(INCLUDE)) {
-			return sourceCode;
-		}
-		return INCLUDE+" "+sourceCode;
+		disableDebugging(sourceCode); // if we got some call before with maybe another port or host etc.
+		StringBuilder sb = new StringBuilder();
+		sb.append(INCLUDE_PREFIX).append(" ").append(hostname).append(" ").append(port).append(DEBUG_POSTFIX).append(sourceCode);
+		return sb.toString();
 	}
 
 	private void ensureDebugFileExists() throws IOException{
@@ -44,14 +46,12 @@ public class DebugBashCodeToggleSupport {
 	}
 
 	public String disableDebugging(String sourceCode) throws IOException {
-		if (!sourceCode.startsWith(INCLUDE)) {
+		int index = sourceCode.indexOf(DEBUG_POSTFIX);
+		if (index==-1) {
 			return sourceCode;
 		}
-		String data = sourceCode.substring(INCLUDE.length());
-		if (data.startsWith("\n")) {
-			/* new command line found and not a # ...*/
-			data=data.substring(1);
-		}
+		int pos = index+ DEBUG_POSTFIX.length();
+		String data = sourceCode.substring(pos);
 		return data;
 	}
 	

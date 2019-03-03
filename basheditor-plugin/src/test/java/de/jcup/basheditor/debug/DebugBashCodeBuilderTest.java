@@ -56,10 +56,7 @@ public class DebugBashCodeBuilderTest {
 	}
 
 	@Test
-	public void given_port_and_hostname_are_inside_script_default_filedescriptor_choosen_is_33() {
-		/* prepare */
-		builderToTest.setPort(666);
-		builderToTest.setHostname("jcup.de");
+	public void hostname_and_port_parameters_are_inside_script_default_filedescriptor_choosen_is_33() {
 
 		/* execute */
 		String result = builderToTest.buildDebugBashCodeSnippet();
@@ -67,7 +64,7 @@ public class DebugBashCodeBuilderTest {
 		/* test @formatter:off */
 		int line=1;
 		assertLines(result).
-			contains(line++, "exec 33<>/dev/tcp/jcup.de/666").
+			contains(line++, "exec 33<>/dev/tcp/$1/$2 #params: 1=hostname(e.g localhost),2=port").
 			contains(line++, "function "+builderToTest.getNameOfTrapFunction()+"()").
 			contains(line++, "{").
 			contains(line++, "local "+builderToTest.getNameOfDebugCommand()).
