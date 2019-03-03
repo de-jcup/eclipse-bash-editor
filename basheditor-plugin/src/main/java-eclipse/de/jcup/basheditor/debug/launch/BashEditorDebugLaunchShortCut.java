@@ -196,7 +196,7 @@ public class BashEditorDebugLaunchShortCut implements ILaunchShortcut2 {
 		wc.setAttribute(BashDebugConstants.LAUNCH_ATTR_BASH_PROGRAM, resource.getFullPath().toString());
 		wc.setAttribute(BashDebugConstants.LAUNCH_ATTR_BASH_PARAMS, "");
 		wc.setAttribute(BashDebugConstants.LAUNCH_ATTR_LAUNCH_MODE, "debug");
-		wc.setAttribute(BashDebugConstants.LAUNCH_ATTR_SOCKET_PORT, BashDebugConstants.DEFAULT_DEBUG_PORT_AS_STRING);
+		wc.setAttribute(BashDebugConstants.LAUNCH_ATTR_SOCKET_PORT, BashDebugConstants.DEFAULT_DEBUG_PORT);
 		wc.setAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP, true);
 	}
 

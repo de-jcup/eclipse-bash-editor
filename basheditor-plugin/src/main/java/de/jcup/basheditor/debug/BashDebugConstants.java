@@ -28,6 +28,5 @@ public class BashDebugConstants {
 	public static final String LAUNCH_ATTR_LAUNCH_MODE = LAUNCH_CONFIG_PREFIX + ".LAUCH_MODE";
 
 	public static final int DEFAULT_DEBUG_PORT = 33333;
-	public static final int DEFAULT_DEBUG_PORT_AS_STRING = 33333;
 
 }
