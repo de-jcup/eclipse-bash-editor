@@ -26,7 +26,7 @@ import org.eclipse.ui.editors.text.TextFileDocumentProvider;
  *
  */
 public class BashTextFileDocumentProvider extends TextFileDocumentProvider {
-
+	
 	@Override
 	public IDocument getDocument(Object element) {
 		IDocument document = super.getDocument(element);

@@ -83,6 +83,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import de.jcup.basheditor.document.BashFileDocumentProvider;
 import de.jcup.basheditor.document.BashTextFileDocumentProvider;
+import de.jcup.basheditor.document.DocumentLineChangeSupport;
 import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
 import de.jcup.basheditor.outline.BashEditorTreeContentProvider;
 import de.jcup.basheditor.outline.BashQuickOutlineDialog;
@@ -136,6 +137,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		}
 	}
 
+	
 	/**
 	 * Opens quick outline
 	 */
@@ -574,6 +576,13 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 		// workaround to show action set for block mode etc.
 		// https://www.eclipse.org/forums/index.php/t/366630/
 		page.showActionSet("org.eclipse.ui.edit.text.actionSet.presentation");
+		
+//		DocumentLineChangeSupport lineChangeSupport = new DocumentLineChangeSupport();
+//		try {
+//			lineChangeSupport.register(this);
+//		} catch (CoreException e) {
+//			EclipseUtil.logError("Wasn't able to register line change support", e);
+//		}
 
 	}
 

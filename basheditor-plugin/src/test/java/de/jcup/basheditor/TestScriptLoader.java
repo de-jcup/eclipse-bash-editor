@@ -15,9 +15,7 @@
  */
  package de.jcup.basheditor;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,32 +29,32 @@ public class TestScriptLoader {
 		}
 	}
 	
-	public static List<String> fetchAllTestScriptNames() {
+	public static List<File> fetchAllTestScriptFiles() {
 		assertTestscriptFolderExists();
-		List<String> list = new ArrayList<>();
-		for (File file: testScriptRootFolder.listFiles()){
-			list.add(file.getName());
-		}
+		List<File> list = new ArrayList<>();
+		File folder = testScriptRootFolder;
+		fetchTestScriptNames(list, folder);
 		return list;
+	}
+
+	private static void fetchTestScriptNames(List<File> list, File folder) {
+		for (File file: folder.listFiles()){
+			if (file.isFile()) {
+				list.add(file);
+			}
+			if (file.isDirectory()) {
+				fetchTestScriptNames(list,file);
+			}
+		}
 	}
 	
 	public static String loadScriptFromTestScripts(String testScriptName) throws IOException{
 		assertTestscriptFolderExists();
 		
 		File file = getTestScriptFile(testScriptName);
-		if (!file.exists()){
-			throw new IllegalArgumentException("Test case corrupt! Test script file does not exist:"+file);
-		}
-		StringBuilder sb = new StringBuilder();
-		try(BufferedReader br = new BufferedReader(new FileReader(file))){
-			String line = null;
-			while ((line=br.readLine())!=null){
-				sb.append(line);
-				sb.append("\n");
-			}
-		}
-		return sb.toString();
+		return loadScript(file);
 	}
+
 
 	public static File getTestScriptFile(String testScriptName) {
 		File file = new File(testScriptRootFolder,testScriptName);
@@ -67,5 +65,9 @@ public class TestScriptLoader {
 		if (!testScriptRootFolder.exists()){
 			throw new IllegalArgumentException("Test setup corrupt! Root folder of test scripts not found:"+testScriptRootFolder);
 		}
+	}
+
+	public static String loadScript(File scriptFile) throws IOException {
+		return ScriptUtil.loadScript(scriptFile);
 	}
 }

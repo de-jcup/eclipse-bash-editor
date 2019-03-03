@@ -15,7 +15,7 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_OUTLINE_WITH_EDITOR;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -169,6 +169,25 @@ public class BashEditorPreferences {
 		return INSTANCE;
 	}
 
+	public boolean isAutomaticLaunchInExternalTerminalEnabled() {
+		return getBooleanPreference(BashEditorPreferenceConstants.P_LAUNCH_IN_TERMINAL_ENABLED);
+	}
+
+	public boolean isShowMetaInfoInDebugConsoleEnabled() {
+		return getBooleanPreference(BashEditorPreferenceConstants.P_SHOW_META_INFO_IN_DEBUG_CONSOLE);
+	}
+
+	public String getXTerminalSnippet() {
+		return getStringPreference(BashEditorPreferenceConstants.P_LAUNCH_XTERMINAL_SNIPPET);
+	}
+
+	public boolean isLaunchedTerminalWaitingOnErrors() {
+		return getBooleanPreference(BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ON_ERRORS);
+	}
+	
+	public boolean isLaunchedTerminalAlwaysWaiting() {
+		return getBooleanPreference(BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ALWAYS);
+	}
 	
 
 }

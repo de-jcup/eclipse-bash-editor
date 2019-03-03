@@ -18,13 +18,14 @@ package de.jcup.basheditor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import de.jcup.eclipse.commons.PluginContextProvider;
 import de.jcup.eclipse.commons.keyword.TooltipTextSupport;
 import de.jcup.eclipse.commons.resource.EclipseResourceInputStreamProvider;
 
 /**
  * The activator class controls the plug-in life cycle
  */
-public class BashEditorActivator extends AbstractUIPlugin {
+public class BashEditorActivator extends AbstractUIPlugin implements PluginContextProvider {
 
 	// The plug-in COMMAND_ID
 	public static final String PLUGIN_ID = "de.jcup.basheditor"; //$NON-NLS-1$
@@ -64,6 +65,16 @@ public class BashEditorActivator extends AbstractUIPlugin {
 	 */
 	public static BashEditorActivator getDefault() {
 		return plugin;
+	}
+
+	@Override
+	public AbstractUIPlugin getActivator() {
+		return this;
+	}
+
+	@Override
+	public String getPluginID() {
+		return PLUGIN_ID;
 	}
 
 }
