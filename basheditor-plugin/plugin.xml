@@ -351,7 +351,7 @@
       </toc>
    </extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-   <!--                          CONVERSION:Debugging.core                   -->
+   <!--                          Debugging                                   -->
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    
     <extension
@@ -362,7 +362,7 @@
             sourcePathComputerId="de.jcup.basheditor.debug.sourcePathComputer.sh"
             delegate="de.jcup.basheditor.debug.launch.BashDebugLaunchConfigurationDelegate"
             modes="debug"
-            id="de.jcup.basheditor.debug.launchConfigurationType.sh">
+            id="de.jcup.basheditor.debug.launchConfigurationType">
       </launchConfigurationType>
    </extension>
    <extension
@@ -399,13 +399,10 @@
       </persistent>
    </extension>
    
-   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-   <!--                          Debug                                       -->
-   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
-            type="de.jcup.basheditor.debug.launchConfigurationType.sh"
+            type="de.jcup.basheditor.debug.launchConfigurationType"
             description="Debug a Bash script"
             class="de.jcup.basheditor.debug.launch.config.BashLaunchConfigurationTabGroup"
             id="de.jcup.basheditor.debug.launchConfigurationTabGroup.sh">
@@ -434,7 +431,7 @@
             targetID="basheditor.editors.BashEditor"
             id="basheditor.editors.BashEditor.rulerActions">
          <action
-               label="Not Used"
+               label="no label"
                class="org.eclipse.debug.ui.actions.RulerToggleBreakpointActionDelegate"
                style="push"
                actionID="RulerDoubleClick"
@@ -461,10 +458,20 @@
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             icon="icons/bash-editor.png"
-            configTypeID="de.jcup.basheditor.debug.launchConfigurationType.sh"
+            configTypeID="de.jcup.basheditor.debug.launchConfigurationType"
             id="basheditor.debug.launchConfigurationTypeImage">
       </launchConfigurationTypeImage>
    </extension>
+   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
+		<launchConfigurationType
+        delegate="de.jcup.basheditor.debug.launch.BashDebugLaunchConfigurationDelegate"
+        delegateDescription="Launches given bash script in debug mode"
+        id="basheditor.debug.launchConfigurationType"
+        modes="run"
+        name="EGradle"
+        public="true" >
+       </launchConfigurationType>
+	</extension>
    <extension
          point="org.eclipse.ui.editors">
       <editor
@@ -482,7 +489,41 @@
       </watchExpressionDelegate>
    </extension>
    
-
+    <!-- launch shortcuts for Debug, as ... -->
+ 	<extension point="org.eclipse.debug.ui.launchShortcuts">
+    	<shortcut
+        id="de.jcup.basheditor.debug.launchShortCut"
+        class="de.jcup.basheditor.debug.launch.BashEditorDebugLaunchShortCut"
+        label="Bash script"
+        icon="icons/bash-editor.png"
+        modes="debug">
+            <contextualLaunch>
+            
+            <enablement>
+	            <with variable="selection">
+			        <count value="1"/>
+			        <iterate ifEmpty="false">
+			        <or>
+				            <!-- we only allow files with name *.sh to be executed as bash scripts -->
+				        	<adapt type="org.eclipse.core.resources.IFile">
+				                	<test property="org.eclipse.core.resources.name"
+				                         value="*.sh"/>
+				            </adapt>
+				            <not>
+    				            <!-- we also allow files with name having no dot inside.. -->
+                                <adapt type="org.eclipse.core.resources.IFile">
+                                        <test property="org.eclipse.core.resources.name"
+                                             value="*.*"/>
+                                </adapt>
+				            </not>
+				     </or>
+			        </iterate>
+			    </with>
+            </enablement>
+        </contextualLaunch>
+            
+    	</shortcut>
+	</extension>
 <!-- The id is the same as the referenced "markerType" in the org.eclipse.debug.core.breakpoints
     extension point -->
 <extension id="basheditor.debug.breakpoint.marker" point="org.eclipse.core.resources.markers">

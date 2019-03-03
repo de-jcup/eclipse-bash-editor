@@ -100,7 +100,7 @@ public class BashSourceLookupParticipant extends AbstractSourceLookupParticipant
 			IPath path = new Path(frameFileSource);
 			try {
 				file = root.getFile(path);
-			} catch (Exception e) {
+			} catch ( Exception e) {
 				EclipseUtil.logError("Was not able to determin root file", e, BashEditorActivator.getDefault());
 
 			}

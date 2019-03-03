@@ -15,12 +15,11 @@
  */
 package de.jcup.basheditor.script.parser;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ParseToken {
 
-	private static final Pattern VALID_VARIABLE_NAME_PATTERN=Pattern.compile("[a-z_A-Z]+=");
+	private static final Pattern VALID_VARIABLE_NAME_PATTERN=Pattern.compile("[a-z_A-Z]+[a-z_A-Z0-9]+=");
 	
 	private static final String EQUAL_OPERAND = "=";
 	String text;

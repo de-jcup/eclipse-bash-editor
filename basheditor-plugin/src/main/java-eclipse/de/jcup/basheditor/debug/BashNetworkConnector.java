@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Vector;
 
 import de.jcup.basheditor.BashEditorActivator;
+import de.jcup.basheditor.EclipseDeveloperSettings;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.script.parser.ParseToken;
 import de.jcup.basheditor.script.parser.TokenParser;
@@ -75,7 +76,7 @@ public class BashNetworkConnector {
 	}
 
 	public void stepBegin() throws IOException {
-		if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
+		if (isShowingMetaInformation()) {
 			BashDebugConsole.println(">> =============== <<");
 			BashDebugConsole.println(">> Begin new step  <<");
 			BashDebugConsole.println(">> =============== <<");
@@ -126,11 +127,13 @@ public class BashNetworkConnector {
 	}
 
 	private void parse(StepParseContext spc) {
-
 		String stepSourceCode = spc.stepStr;
 		String[] sourceCodeLines = stepSourceCode.split("\n");
 
 		for (String sourceCodeLine : sourceCodeLines) {
+		    if (isShowingMetaInformation()) {
+		        BashDebugConsole.println("Parse:" + sourceCodeLine);
+		    }
 			addBashVariables(spc, sourceCodeLine);
 		}
 		Collections.sort(bashVariables);
@@ -146,9 +149,6 @@ public class BashNetworkConnector {
 	}
 
 	private void addBashVariables(StepParseContext context, String sourceCodeLine) {
-		if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
-			BashDebugConsole.println("Parsing:" + sourceCodeLine);
-		}
 		if (context.isTrapFunctionAlreadyFound()) {
 			/*
 			 * trap function is first function which will be found. After this output is
@@ -159,7 +159,7 @@ public class BashNetworkConnector {
 			return;
 		}
 		if (sourceCodeLine.startsWith(builder.getNameOfTrapFunction())) {
-			if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
+			if (isShowingMetaInformation()) {
 				BashDebugConsole.println(">>>Function found, mark end of variables reached:" + sourceCodeLine);
 			}
 			context.trapFunctionFound = true;
@@ -167,6 +167,9 @@ public class BashNetworkConnector {
 		}
 		try {
 			List<ParseToken> parsed = parser.parse(sourceCodeLine);
+			if (isShowingMetaInformationInTraceMode()) {
+				BashDebugConsole.println(">>>Tokens found:"+parsed);
+			}
 			// e.g. [EXPRESSION:'BASH_ARGC=', EXPRESSION:'([0]=', STRING:'"6")']
 			// e.g. [EXPRESSION:'BASH_ARGV=', EXPRESSION:'([0]=', STRING:'"-d"',
 			// EXPRESSION:'[1]=', STRING:'"1.0.0"', EXPRESSION:'[2]=', STRING:'"-s"',
@@ -215,7 +218,9 @@ public class BashNetworkConnector {
 					} else {
 						variable.setValue(value);
 					}
-
+					if (isShowingMetaInformationInTraceMode()) {
+						BashDebugConsole.println(">> found + add variable:"+variable);
+					}
 					bashVariables.add(variable);
 				}
 			}
@@ -223,6 +228,14 @@ public class BashNetworkConnector {
 			EclipseUtil.logError("Parse problems at line:" + sourceCodeLine, e, BashEditorActivator.getDefault());
 		}
 	}
+
+    private boolean isShowingMetaInformationInTraceMode() {
+        return EclipseDeveloperSettings.SHOW_METAINFORMATION_TRACEMODE && isShowingMetaInformation();
+    }
+
+    private boolean isShowingMetaInformation() {
+        return BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled();
+    }
 
 	public void stepEnd() throws IOException {
 		if (!isConnected()) {

@@ -23,6 +23,23 @@ import org.junit.Test;
 
 public class ParseTokenTest {
 	
+    @Test
+    public void token_var_starting_with_underscore_is_var() {
+        assertTrue(new ParseToken("_XYZ=").isVariableDefinition());
+    }
+    @Test
+    public void token_var_ending_with_underscore_is_var() {
+        assertTrue(new ParseToken("XYZ_=").isVariableDefinition());
+    }
+    
+    @Test
+    public void token_var1_equal_is_var() {
+        assertTrue(new ParseToken("var1=").isVariableDefinition());
+    }
+    @Test
+    public void token_XYZ_equal_is_var() {
+        assertTrue(new ParseToken("XYZ=").isVariableDefinition());
+    }
 	@Test
 	public void token_do_is_do() {
 		assertTrue(new ParseToken("do").isDo());
