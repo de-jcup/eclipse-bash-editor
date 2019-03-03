@@ -9,55 +9,65 @@ import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IThread;
 
+import de.jcup.basheditor.debug.BashDebugConstants;
+import de.jcup.basheditor.debug.DebugEventSource;
+import de.jcup.basheditor.debug.DebugEventSupport;
+import de.jcup.basheditor.debug.launch.BashRemoteProcess;
+
 /**
- * Could be used for "run" mode.
+ * Can be used when standard debug target calls is not possible. E.g. when file no longer exists etc.
  * @author albert
  *
  */
-public class DummyDebugTarget implements IDebugTarget {
-
+public class FallbackBashDebugTarget implements IDebugTarget, DebugEventSource {
+    private DebugEventSupport support = new DebugEventSupport();
 	private boolean disconnected;
+	private boolean terminated;
+    private ILaunch launch;
+    private IProcess process;
+    private IThread[] threads = new IThread[] {};
+    private String name;
 
+	public FallbackBashDebugTarget(ILaunch launch, String name) {
+	    this.launch=launch;
+	    this.process = new BashRemoteProcess(launch);
+	    this.name=name;
+	}
+	
 	@Override
 	public String getModelIdentifier() {
-		
-		return null;
+		return BashDebugConstants.BASH_DEBUG_MODEL_ID;
 	}
 
 	@Override
 	public IDebugTarget getDebugTarget() {
-		
-		return null;
+		return this;
 	}
 
 	@Override
 	public ILaunch getLaunch() {
-		
-		return null;
+		return launch;
 	}
 
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
-		
 		return null;
 	}
 
 	@Override
 	public boolean canTerminate() {
-		
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isTerminated() {
-		
-		return false;
+		return terminated;
 	}
 
 	@Override
 	public void terminate() throws DebugException {
-		
-		
+	    this.terminated=true;
+	    support.fireTerminateEvent(this);
 	}
 
 	@Override
@@ -108,7 +118,6 @@ public class DummyDebugTarget implements IDebugTarget {
 
 	@Override
 	public boolean canDisconnect() {
-		
 		return true;
 	}
 
@@ -119,7 +128,6 @@ public class DummyDebugTarget implements IDebugTarget {
 
 	@Override
 	public boolean isDisconnected() {
-		
 		return disconnected;
 	}
 
@@ -135,13 +143,12 @@ public class DummyDebugTarget implements IDebugTarget {
 
 	@Override
 	public IProcess getProcess() {
-		
-		return null;
+		return process;
 	}
 
 	@Override
 	public IThread[] getThreads() throws DebugException {
-		return null;
+		return threads;
 	}
 
 	@Override
@@ -151,7 +158,7 @@ public class DummyDebugTarget implements IDebugTarget {
 
 	@Override
 	public String getName() throws DebugException {
-		return null;
+		return name;
 	}
 
 	@Override

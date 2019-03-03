@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Albert Tregnaghi
+ * Copyright 2019 Albert Tregnaghi
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,33 @@ public class BashEditorDebugLaunchShortCut implements ILaunchShortcut2 {
 		}
 		searchAndLaunch(new Object[] { resource }, additionalScope, mode, getTypeSelectionTitle(), getEditorEmptyMessage());
 	}
+	
+	/**
+     * Resolves a type that can be launched from the given scope and launches in the
+     * specified mode.
+     * 
+     * @param resources       the java children to consider for a type that can be
+     *                        launched
+     * @param mode            launch mode
+     * @param selectTitle     prompting title for choosing a type to launch
+     * @param additionalScope additional scope for launch
+     * @param emptyMessage    error message when no types are resolved for launching
+     */
+    protected void searchAndLaunch(Object[] resources, Object additionalScope, String mode, String selectTitle, String emptyMessage) {
+        IResource resource = null;
+        Object object = resources[0];
+        if (object instanceof IResource) {
+            resource = (IResource) object;
+        } else if (object instanceof IAdaptable) {
+            IAdaptable adaptable = (IAdaptable) object;
+            resource = getLaunchableResource(adaptable);
+        } else {
+            throw new IllegalArgumentException("Bash debug launch shortcut cannot handle object type:" + object);
+        }
+        if (resource != null) {
+            launch(resource, additionalScope, mode);
+        }
+    }
 
 	public IResource getLaunchableResource(IEditorPart editorpart) {
 		return getLaunchableResource(editorpart.getEditorInput());
@@ -206,7 +233,7 @@ public class BashEditorDebugLaunchShortCut implements ILaunchShortcut2 {
 	 *         project of the file will be used instead)
 	 */
 	protected boolean isResourceToMapFilesAllowed() {
-		return false;
+		return true;
 	}
 
 	/**
@@ -218,18 +245,6 @@ public class BashEditorDebugLaunchShortCut implements ILaunchShortcut2 {
 	 */
 	protected boolean isResourceToMapFoldersAllowed() {
 		return false;
-	}
-
-	protected ILaunchConfiguration findLaunchConfiguration(IResource resource, Object additionalScope, ILaunchConfigurationType configType) {
-		List<ILaunchConfiguration> configs = getCandidates(resource, additionalScope, configType);
-		int count = configs.size();
-		if (count == 1) {
-			return configs.get(0);
-		}
-		if (count > 1) {
-			return chooseConfiguration(configs);
-		}
-		return null;
 	}
 
 	/**
@@ -355,30 +370,5 @@ public class BashEditorDebugLaunchShortCut implements ILaunchShortcut2 {
 		}
 	}
 
-	/**
-	 * Resolves a type that can be launched from the given scope and launches in the
-	 * specified mode.
-	 * 
-	 * @param resources       the java children to consider for a type that can be
-	 *                        launched
-	 * @param mode            launch mode
-	 * @param selectTitle     prompting title for choosing a type to launch
-	 * @param additionalScope additional scope for launch
-	 * @param emptyMessage    error message when no types are resolved for launching
-	 */
-	private void searchAndLaunch(Object[] resources, Object additionalScope, String mode, String selectTitle, String emptyMessage) {
-		IResource resource = null;
-		Object object = resources[0];
-		if (object instanceof IResource) {
-			resource = (IResource) object;
-		} else if (object instanceof IAdaptable) {
-			IAdaptable adaptable = (IAdaptable) object;
-			resource = getLaunchableResource(adaptable);
-		} else {
-			throw new IllegalArgumentException("Bash debug launch shortcut cannot handle object type:" + object);
-		}
-		if (resource != null) {
-			launch(resource, additionalScope, mode);
-		}
-	}
+	
 }

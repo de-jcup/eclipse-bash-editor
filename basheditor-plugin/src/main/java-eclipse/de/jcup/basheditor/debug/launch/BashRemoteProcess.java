@@ -5,8 +5,14 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamsProxy;
 
-public class DummyBashProcess implements IProcess {
+public class BashRemoteProcess implements IProcess {
 	public boolean terminated = false;
+    private ILaunch launch;
+    private int exitValue = -1;
+	
+	public BashRemoteProcess(ILaunch launch) {
+	    this.launch=launch;
+	}
 
 	public synchronized boolean isTerminated() {
 		return terminated;
@@ -26,11 +32,11 @@ public class DummyBashProcess implements IProcess {
 	}
 
 	public String getLabel() {
-		return "Bash script process";
+		return "Bash remote debug process";
 	}
 
 	public ILaunch getLaunch() {
-		return null;
+		return launch;
 	}
 
 	public IStreamsProxy getStreamsProxy() {
@@ -46,7 +52,7 @@ public class DummyBashProcess implements IProcess {
 	}
 
 	public int getExitValue() throws DebugException {
-		return 0;
+		return exitValue;
 	}
 
 }
