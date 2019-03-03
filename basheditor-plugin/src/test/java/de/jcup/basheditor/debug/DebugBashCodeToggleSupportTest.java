@@ -12,7 +12,7 @@ import de.jcup.basheditor.TestScriptLoader;
 public class DebugBashCodeToggleSupportTest {
 
 	private static final String BASE_EXPECTED_DEBUG_ENABLED_CODE = "source "+System.getProperty("user.home")+"/.basheditor/remote-debugging-v1.sh";
-	private static final String EXPECTED_DEBUG_ENABLED_CODE = BASE_EXPECTED_DEBUG_ENABLED_CODE+" localhost "+BashDebugConstants.DEFAULT_DEBUG_PORT+"#BASHEDITOR-TMP-REMOTE-DEBUGGING-END";
+	private static final String EXPECTED_DEBUG_ENABLED_CODE = BASE_EXPECTED_DEBUG_ENABLED_CODE+" localhost "+BashDebugConstants.DEFAULT_DEBUG_PORT+" #BASHEDITOR-TMP-REMOTE-DEBUGGING-END";
 	private DebugBashCodeToggleSupport supportToTest;
 
 	@Before

@@ -6,7 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * Class is responsible to change existin source code on a file to have DEBUGGER_script in first line. It shall also be able
+ * Class is responsible to change existing source code on a file to have DEBUGGER_script in first line. It shall also be able
  * to remove this line from a source file.
  * @author albert
  *
@@ -26,7 +26,7 @@ public class DebugBashCodeToggleSupport {
 		ensureDebugFileExists();
 		disableDebugging(sourceCode); // if we got some call before with maybe another port or host etc.
 		StringBuilder sb = new StringBuilder();
-		sb.append(INCLUDE_PREFIX).append(" ").append(hostname).append(" ").append(port).append(DEBUG_POSTFIX).append(sourceCode);
+		sb.append(INCLUDE_PREFIX).append(" ").append(hostname).append(" ").append(port).append(" ").append(DEBUG_POSTFIX).append(sourceCode);
 		return sb.toString();
 	}
 
