@@ -22,11 +22,13 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.jcup.basheditor.CallTestContext;
 import de.jcup.basheditor.TestScriptLoader;
+import de.jcup.basheditor.debug.launch.OSUtil;
 
 public class DebugBashCodeToggleSupportTest {
 
-	private static final String BASE_EXPECTED_DEBUG_ENABLED_CODE = "source "+System.getProperty("user.home")+"/.basheditor/remote-debugging-v1.sh";
+	private static final String BASE_EXPECTED_DEBUG_ENABLED_CODE = "source "+OSUtil.toUnixPath(System.getProperty("user.home")+"/.basheditor/remote-debugging-v1.sh");
 	private static final String EXPECTED_DEBUG_ENABLED_CODE = BASE_EXPECTED_DEBUG_ENABLED_CODE+" localhost "+BashDebugConstants.DEFAULT_DEBUG_PORT+" #BASHEDITOR-TMP-REMOTE-DEBUGGING-END";
 	private DebugBashCodeToggleSupport supportToTest;
 
@@ -34,7 +36,45 @@ public class DebugBashCodeToggleSupportTest {
 	public void before() {
 		supportToTest = new DebugBashCodeToggleSupport();
 	}
-
+	
+	@Test
+    public void bugfix_139_convert_unixpathes_in_windows() throws Exception {
+	    
+	    /* windows pathes are adopted to unix pathes in min-gw style*/
+	    assertEquals("/C/Users/albert/.basheditor/remote-debugging-v1.sh", supportToTest.convertToUnixStylePath("C:\\Users\\albert\\.basheditor\\remote-debugging-v1.sh"));
+	    assertEquals("/D/some/Other/.path/xYz.sh", supportToTest.convertToUnixStylePath("D:\\some\\Other\\.path\\xYz.sh"));
+	    assertEquals("/X", supportToTest.convertToUnixStylePath("X:"));
+	    assertEquals("/Y/file1.txt", supportToTest.convertToUnixStylePath("Y:\\file1.txt"));
+	    
+	    /* unix pathes keep as is */
+	    assertEquals("/C/Users/albert/.basheditor/remote-debugging-v1.sh", supportToTest.convertToUnixStylePath("/C/Users/albert/.basheditor/remote-debugging-v1.sh"));
+	    assertEquals("/D/some/Other/.path/xYz.sh", supportToTest.convertToUnixStylePath("/D/some/Other/.path/xYz.sh"));
+	    assertEquals("/X", supportToTest.convertToUnixStylePath("/X"));
+	    assertEquals("/Y/file1.txt", supportToTest.convertToUnixStylePath("/Y/file1.txt"));
+	    assertEquals("/file1.txt", supportToTest.convertToUnixStylePath("/file1.txt"));
+	    
+	}
+	
+	@Test
+    public void bugfix_139_check_convertToUnixStylePath_really_called() throws Exception {
+        CallTestContext supportToTestWas = new CallTestContext();
+        /* prepare */
+        supportToTest = new DebugBashCodeToggleSupport() {
+            @Override
+            String convertToUnixStylePath(String path) {
+                supportToTestWas.called=true;
+                return super.convertToUnixStylePath(path);
+            }
+        };
+        
+        /* execute */
+        supportToTest.enableDebugging("", null,-1);
+        
+        /* check converter method replaces this as expected */
+        assertTrue(supportToTestWas.called);
+        
+    }
+	
 	@Test
 	public void enable_debugging_empty_code_results_in_firstline_including_temp_debugger_file() throws Exception {
 		/* execute */

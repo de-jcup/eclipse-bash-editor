@@ -15,8 +15,10 @@
  */
 package de.jcup.basheditor.debug.launch;
 
+import java.util.regex.Pattern;
+
 public class OSUtil {
-	
+    private static final Pattern WINDOWS_BACKSLASH_TO_SLASH_PATTERN = Pattern.compile("\\\\");
 	private static boolean isWindows;
 	
 	static {
@@ -27,4 +29,23 @@ public class OSUtil {
 	public static boolean isWindows() {
 		return isWindows;
 	}
+
+    public static String toUnixPath(String path) {
+        if (path==null) {
+            return "null";
+        }
+        // e.g. "C:\\Users\\albert\\.basheditor\\remote-debugging-v1.sh"
+        int index = path.indexOf(':');
+        if (index!=1) {
+            return path;
+        }
+        char windowsDrive = path.charAt(0);
+        String remaining = path.substring(2);
+        StringBuilder sb = new StringBuilder();
+        sb.append('/');
+        sb.append(windowsDrive);
+        sb.append(WINDOWS_BACKSLASH_TO_SLASH_PATTERN.matcher(remaining).replaceAll("/"));
+        
+        return sb.toString();
+    }
 }

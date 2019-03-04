@@ -297,7 +297,7 @@
          class="de.jcup.basheditor.preferences.BashEditorSaveActionsPreferencePage"
          name="Save Actions"
          category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
-          <keywordReference
+         <keywordReference
                id="basheditor.preferences.keyword.bash">
          </keywordReference>
          <keywordReference
@@ -315,6 +315,9 @@
          </keywordReference>
          <keywordReference
                id="basheditor.preferences.keyword.debugger">
+         </keywordReference>
+         <keywordReference
+               id="basheditor.preferences.keyword.bash">
          </keywordReference>
       </page>
       
