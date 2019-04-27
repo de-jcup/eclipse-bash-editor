@@ -4,7 +4,7 @@ public enum BashEditorTabReplaceStrategy implements PreferenceIdentifiable, Pref
    
     NEVER("never","Never"),
     
-    USE_DEFAULT("use_default","Use default for text editors"),
+    USE_DEFAULT("use_default","Use eclipse default settings for text editors"),
     
     ALWAYS("always","Always, with custom space amount"),
     ;
