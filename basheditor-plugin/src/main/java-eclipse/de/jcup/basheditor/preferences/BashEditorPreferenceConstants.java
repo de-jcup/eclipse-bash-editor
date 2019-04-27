@@ -43,7 +43,11 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	
 	P_LAUNCH_XTERMINAL_SNIPPET("launchXTerminalSnippet"), 
 	
-	P_KEEP_TERMINAL_OPEN_ALWAYS("keepLaunchedTerminalOpenAlways"),
+	P_KEEP_TERMINAL_OPEN_ALWAYS("keepLaunchedTerminalOpenAlways"), 
+	
+	P_REPLACE_TAB_BY_SPACES_STRATEGY("replaceTabBySpacesStrategy"),
+	
+	P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT("replaceTabBySpacesAmount"),
 	
 	;
 	

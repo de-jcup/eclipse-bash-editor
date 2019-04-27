@@ -105,6 +105,13 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		store.setDefault(P_SHOW_META_INFO_IN_DEBUG_CONSOLE.getId(),false);
 		store.setDefault(P_LAUNCH_XTERMINAL_SNIPPET.getId(),TerminalLauncher.DEFAULT_XTERMINAL_SNIPPET);
 		
+		/* ++++++++++++++++ */
+        /* + replace tab + */
+        /* ++++++++++++++++ */
+		
+		store.setDefault(P_REPLACE_TAB_BY_SPACES_STRATEGY.getId(), BashEditorTabReplaceStrategy.getDefault().getId());
+		store.setDefault(P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT.getId(),3);
+		
 	}
 
 }

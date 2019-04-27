@@ -9,6 +9,14 @@
    		id="basheditor.preferences.keyword.bash"
    		label="bash">
      </keyword>
+     <keyword
+        id="basheditor.preferences.keyword.space"
+        label="space">
+     </keyword>
+     <keyword
+        id="basheditor.preferences.keyword.tab"
+        label="tab">
+     </keyword>
       <keyword
    		id="basheditor.preferences.keyword.color"
    		label="color">
@@ -263,9 +271,16 @@
          <keywordReference
                id="basheditor.preferences.keyword.bash">
          </keywordReference>
-          <keywordReference
+         <keywordReference
                id="basheditor.preferences.keyword.editor">
          </keywordReference>
+         <keywordReference
+               id="basheditor.preferences.keyword.space">
+         </keywordReference>
+         <keywordReference
+               id="basheditor.preferences.keyword.tab">
+         </keywordReference>
+         
       </page>
       <page
          id="basheditor.eclipse.gradleeditor.preferences.BashEditorEditorSyntaxColorPreferencePage"

@@ -123,6 +123,11 @@ public class BashEditorPreferences {
 		boolean data = getPreferenceStore().getBoolean(id.getId());
 		return data;
 	}
+	
+	public int getIntPreference(BashEditorPreferenceConstants id) {
+        int data = getPreferenceStore().getInt(id.getId());
+        return data;
+    }
 
 	public void setBooleanPreference(BashEditorPreferenceConstants id, boolean value) {
 		getPreferenceStore().setValue(id.getId(), value);
@@ -188,6 +193,15 @@ public class BashEditorPreferences {
 	public boolean isLaunchedTerminalAlwaysWaiting() {
 		return getBooleanPreference(BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ALWAYS);
 	}
-	
+
+    public int getAmountOfSpacesToReplaceTab() {
+        return getIntPreference(P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT);
+    }
+    
+    public BashEditorTabReplaceStrategy getReplaceTabBySpacesStrategy() {
+       String strategyId = getStringPreference(P_REPLACE_TAB_BY_SPACES_STRATEGY);
+       return BashEditorTabReplaceStrategy.fromId(strategyId); 
+    }
+
 
 }
