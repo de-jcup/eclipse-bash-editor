@@ -34,7 +34,52 @@ public class BashScriptModelBuilderTest {
     public void before() {
         builderToTest = new BashScriptModelBuilder();
     }
+    @Test
+    public void an_empty_script_has_novariables() throws Exception{
+        /* prepare */
+        String script = "";
 
+        /* execute */
+        BashScriptModel bashScriptModel = builderToTest.build(script);
+
+        /* test @formatter:off*/
+        assertThat(bashScriptModel).
+            hasNoErrors().
+            hasNoVariables();
+        /* @formatter:on */
+    }
+    @Test
+    public void a_variable_xxx_is_recognized() throws Exception{
+        /* prepare */
+        String script = "xxx=1234";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModel bashScriptModel = builderToTest.build(script);
+
+        /* test @formatter:off*/
+        assertThat(bashScriptModel).
+            hasNoErrors().
+            hasVariable("xxx").withValue("1234");
+        /* @formatter:on */
+    }
+    
+    @Test
+    public void a_variable_xxx_and_changedf_in_another_line_is_recognized() throws Exception{
+        /* prepare */
+        String script = "xxx=1234\n#some remarks\nxxx=5432";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModel bashScriptModel = builderToTest.build(script);
+
+        /* test @formatter:off*/
+        assertThat(bashScriptModel).
+            hasNoErrors().
+            hasVariable("xxx").withValue("1234").hasAssignments(2);
+        /* @formatter:on */
+    }
+    
     @Test
     public void bugfix_130_case_esac_no_problems() throws Exception {
         /* prepare */

@@ -16,6 +16,7 @@
 package de.jcup.basheditor.script;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import de.jcup.basheditor.script.parser.ParseToken;
@@ -56,7 +57,7 @@ public class BashScriptModelBuilder {
         } catch (TokenParserException e) {
             throw new BashScriptModelException("Was not able to build bashscript", e);
         }
-
+        buildScriptVariablesByTokens(model, tokens);
         buildFunctionsByTokens(model, tokens);
 
         List<ValidationResult> results = new ArrayList<>();
@@ -75,6 +76,33 @@ public class BashScriptModelBuilder {
         }
 
         return model;
+    }
+
+    private void buildScriptVariablesByTokens(BashScriptModel model, List<ParseToken> tokens) {
+        Iterator<ParseToken> it = tokens.iterator();
+        while (it.hasNext()) {
+            ParseToken token = it.next();
+
+            if (token.isVariableDefinition()) {
+                String varName = token.getTextAsVariableName();
+                BashVariable var = model.getVariable(varName);
+                if (var==null) {
+                    var = new BashVariable();
+                    if (it.hasNext()) {
+                        ParseToken value = it.next();
+                        var.setInitialValue(value.getText());
+                    }
+                   model.getVariables().put(varName,var);
+                }
+                
+                BashVariableAssignment assignment = new BashVariableAssignment();
+                assignment.setStart(token.getStart());
+                assignment.setEnd(token.getEnd());
+                
+                var.getAssignments().add(assignment);
+            }
+        }
+
     }
 
     private void appendDebugTokens(BashScriptModel model, List<ParseToken> tokens) {
@@ -152,8 +180,8 @@ public class BashScriptModelBuilder {
 
                 model.functions.add(function);
                 /*
-                 * function created - last currentTokenNr++ was too much because
-                 * it will be done by loop to- so reduce with 1
+                 * function created - last currentTokenNr++ was too much because it will be done
+                 * by loop to- so reduce with 1
                  */
                 int newTokenNr = functionScope.getCurrentTokenNr() - 1;
                 if (newTokenNr > tokenNr) {
@@ -163,13 +191,11 @@ public class BashScriptModelBuilder {
             } else {
                 if (functionScope.hasFunctionKeywordPrefix()) {
                     /*
-                     * function prefix defined but its not really a function, so
-                     * something odd!
+                     * function prefix defined but its not really a function, so something odd!
                      */
                     if (!ignoreFunctionValidation) {
 
-                        model.errors
-                                .add(createBashErrorFunctionPrefixFoundButNotAFunction(functionScope.getFunctionName(), functionScope.getToken()));
+                        model.errors.add(createBashErrorFunctionPrefixFoundButNotAFunction(functionScope.getFunctionName(), functionScope.getToken()));
                     }
                 }
             }
@@ -218,8 +244,8 @@ public class BashScriptModelBuilder {
 
     protected void inspectPotentialFunctionUntilEndingBracketOrNextIsOpenCurly(FunctionScope functionScope) {
         /*
-         * either we come from "function xyz()" or just "xyz()" -> current token
-         * is always methodname
+         * either we come from "function xyz()" or just "xyz()" -> current token is
+         * always methodname
          */
         if (!functionScope.hasNextToken()) {
             return;
@@ -236,8 +262,8 @@ public class BashScriptModelBuilder {
         }
         if (followToken.isOpenBlock()) {
             /*
-             * only allowed for "function xyz {}" but not for "xyz {}" - means
-             * without keyword function there must be brackets used!
+             * only allowed for "function xyz {}" but not for "xyz {}" - means without
+             * keyword function there must be brackets used!
              */
             functionScope.setIsFunction(functionScope.hasFunctionKeywordPrefix());
             functionScope.backToken();// move back to have access to curly
@@ -259,18 +285,15 @@ public class BashScriptModelBuilder {
     }
 
     private BashError createBashErrorFunctionPrefixFoundButNotAFunction(String functionName, ParseToken token) {
-        return new BashError(token.getStart(), token.getEnd(),
-                "Keyword function used but it's not a valid function definition: '" + functionName + "'.");
+        return new BashError(token.getStart(), token.getEnd(), "Keyword function used but it's not a valid function definition: '" + functionName + "'.");
     }
 
     private BashError createBashErrorCloseFunctionCurlyBraceMissing(String functionName, ParseToken openCurlyBraceToken) {
-        return new BashError(openCurlyBraceToken.getStart(), openCurlyBraceToken.getEnd(),
-                "This curly brace is not closed. So function '" + functionName + "' is not valid.");
+        return new BashError(openCurlyBraceToken.getStart(), openCurlyBraceToken.getEnd(), "This curly brace is not closed. So function '" + functionName + "' is not valid.");
     }
 
     private BashError createBashErrorFunctionMissingCurlyBrace(ParseToken token, String functionName) {
-        return new BashError(token.getStart(), token.getEnd(),
-                "The function '" + functionName + "' is not valid because no opening curly brace found.");
+        return new BashError(token.getStart(), token.getEnd(), "The function '" + functionName + "' is not valid because no opening curly brace found.");
     }
 
     public void setDebug(boolean debugMode) {

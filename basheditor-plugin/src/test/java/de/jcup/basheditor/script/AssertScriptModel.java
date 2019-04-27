@@ -148,5 +148,19 @@ public class AssertScriptModel {
 		assertEquals("Amount of debug tokens not as expected", amount ,model.getDebugTokens().size());
 		return this;
 	}
+	
+	public AssertScriptModel hasNoVariables() {
+	    if (model.getVariables().isEmpty()){
+	        return this;
+	    }
+	    fail("Model has variables:"+model.getVariables());
+	    return this;
+	}
+	
+	public AssertVariable hasVariable(String varName) {
+        BashVariable variable = model.getVariable(varName);
+        assertNotNull("Variable not found:"+varName, variable);
+        return new AssertVariable(variable);
+    }
 
 }
