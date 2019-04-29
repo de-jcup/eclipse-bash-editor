@@ -15,12 +15,16 @@
  */
  package de.jcup.basheditor.script;
 
-public class BashFunction {
+import java.util.Map;
+import java.util.TreeMap;
+
+public class BashFunction implements BashVariableRegistry  {
 
 	String name;
+	Map<String, BashVariable> variables = new TreeMap<String, BashVariable>();
 	int position;
 	int lengthToNameEnd;
-	public int end;
+	int end;
 
 	public int getLengthToNameEnd() {
 		return lengthToNameEnd;
@@ -43,4 +47,21 @@ public class BashFunction {
 		return "function "+name+"()";
 	}
 
+	/**
+     * @return map of variables, scope is root of script, no functions
+     */
+    public Map<String, BashVariable> getVariables() {
+        return variables;
+    }
+
+    /**
+     * @param varName
+     * @return variable or <code>null</code>
+     */
+    public BashVariable getVariable(String varName) {
+        if (varName == null) {
+            return null;
+        }
+        return variables.get(varName);
+    }
 }

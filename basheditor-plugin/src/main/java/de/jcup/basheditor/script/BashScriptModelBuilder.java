@@ -57,7 +57,7 @@ public class BashScriptModelBuilder {
         } catch (TokenParserException e) {
             throw new BashScriptModelException("Was not able to build bashscript", e);
         }
-        buildScriptVariablesByTokens(model, tokens);
+        buildScriptVariablesByTokens(model,false,true, tokens);
         buildFunctionsByTokens(model, tokens);
 
         List<ValidationResult> results = new ArrayList<>();
@@ -78,28 +78,40 @@ public class BashScriptModelBuilder {
         return model;
     }
 
-    private void buildScriptVariablesByTokens(BashScriptModel model, List<ParseToken> tokens) {
+    private void buildScriptVariablesByTokens(BashVariableRegistry model, boolean acceptLocal, boolean acceptglobal, List<ParseToken> tokens) {
         Iterator<ParseToken> it = tokens.iterator();
+        boolean beforeWaslocal = false;
         while (it.hasNext()) {
-            ParseToken token = it.next();
-
+            ParseToken token = it.next();            
+            
             if (token.isVariableDefinition()) {
+                if (beforeWaslocal && ! acceptLocal) {
+                    continue;
+                }
+                if (!beforeWaslocal && ! acceptglobal) {
+                    continue;
+                }
                 String varName = token.getTextAsVariableName();
                 BashVariable var = model.getVariable(varName);
-                if (var==null) {
-                    var = new BashVariable();
-                    if (it.hasNext()) {
-                        ParseToken value = it.next();
-                        var.setInitialValue(value.getText());
-                    }
-                   model.getVariables().put(varName,var);
-                }
                 
                 BashVariableAssignment assignment = new BashVariableAssignment();
                 assignment.setStart(token.getStart());
                 assignment.setEnd(token.getEnd());
+                if (var==null) {
+                    var = new BashVariable(varName,assignment);
+                    var.setLocal(beforeWaslocal);
+                    if (debugMode && it.hasNext()) {
+                        ParseToken value = it.next();
+                        /* we set this only for debug purpose */
+                        var.setInitialValue(value.getText());
+                    }
+                   model.getVariables().put(varName,var);
+                }else {
+                    var.getAssignments().add(assignment);
+                }
                 
-                var.getAssignments().add(assignment);
+            }else {
+                beforeWaslocal = token.isLocalDef();
             }
         }
 
@@ -188,6 +200,12 @@ public class BashScriptModelBuilder {
                     /* avoid infinite loops... shoud not happen, but... */
                     tokenNr = newTokenNr;
                 }
+                
+                /* create local variables */
+                /* FIXME albert, 2019-04-29: add kill switch for variable detection and provide preference (so users can turn off the feature if wanted)*/
+                /* FIXME albert, 2019-04-29: add some junit tests to check local variable detection*/
+                buildScriptVariablesByTokens(function, true,false, functionScope.getTokensInside());
+                
             } else {
                 if (functionScope.hasFunctionKeywordPrefix()) {
                     /*
@@ -234,9 +252,10 @@ public class BashScriptModelBuilder {
 
     protected void scanForFunctionEnd(FunctionScope functionScope, BashFunction function) {
         while (functionScope.hasNextToken()) {
-            ParseToken closeCurlyBraceToken = functionScope.nextToken();
-            if (closeCurlyBraceToken.isCloseBlock()) {
-                function.end = closeCurlyBraceToken.getEnd();
+            ParseToken nextToken = functionScope.nextToken();
+            functionScope.getTokensInside().add(nextToken);
+            if (nextToken.isCloseBlock()) {
+                function.end = nextToken.getEnd();
                 break;
             }
         }

@@ -15,6 +15,9 @@
  */
  package de.jcup.basheditor.outline;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Item {
 
 	ItemType type;
@@ -22,12 +25,29 @@ public class Item {
 	int offset;
 	int length;
 	int endOffset;
+	List<Item> children;
 	
 	/**
 	 * @return item type , or <code>null</code>
 	 */
 	public ItemType getItemType(){
 		return type;
+	}
+	
+	public boolean hasChildren() {
+	    return children!=null && children.size()>0;
+	}
+	
+	/**
+	 * Gets children list. List will be created lazily.
+	 * To prevent unused objects, use {@link #hasChildren()} before
+	 * @return list, never <code>null</code>
+	 */
+	public List<Item> getChildren(){
+	    if (children==null) {
+	        children=new ArrayList<Item>();
+	    }
+	    return children;
 	}
 
 	public String getName() {

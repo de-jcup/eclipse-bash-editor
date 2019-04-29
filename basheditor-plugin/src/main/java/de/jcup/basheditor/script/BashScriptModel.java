@@ -23,12 +23,12 @@ import java.util.TreeMap;
 
 import de.jcup.basheditor.script.parser.ParseToken;
 
-public class BashScriptModel {
+public class BashScriptModel implements BashVariableRegistry {
 
     Collection<BashFunction> functions = new ArrayList<>();
     Collection<BashError> errors = new ArrayList<>();
     List<ParseToken> debugTokenList;
-    private Map<String, BashVariable> variables = new TreeMap<String, BashVariable>();
+    Map<String, BashVariable> variables = new TreeMap<String, BashVariable>();
 
     public Collection<BashFunction> getFunctions() {
         return functions;

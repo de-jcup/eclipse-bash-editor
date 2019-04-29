@@ -65,6 +65,23 @@ public class BashScriptModelBuilderTest {
     }
     
     @Test
+    public void a_variable_xxx_is_recognized_inside_function() throws Exception{
+        /* prepare */
+        String script = "function abc {xxx=1234}";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModel bashScriptModel = builderToTest.build(script);
+
+        /* test @formatter:off*/
+        assertThat(bashScriptModel).
+            hasNoErrors().
+            hasNoVariables().
+            hasVariable("xxx").withValue("1234");
+        /* @formatter:on */
+    }
+    
+    @Test
     public void a_variable_xxx_and_changedf_in_another_line_is_recognized() throws Exception{
         /* prepare */
         String script = "xxx=1234\n#some remarks\nxxx=5432";

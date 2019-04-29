@@ -31,7 +31,9 @@ import de.jcup.basheditor.EclipseUtil;
 
 public class BashEditorOutlineLabelProvider extends BaseLabelProvider implements IStyledLabelProvider, IColorProvider {
 
-	private static final String ICON_FUNCTION = "public_co.png";
+    private static final String ICON_GLOBAL_VARIABLE = "field_public_obj.png";
+    private static final String ICON_LOCAL_VARIABLE = "localvariable.png";
+	private static final String ICON_FUNCTION = "methpub_obj.png";
 	private static final String ICON_ERROR ="error_tsk.png";
 	private static final String ICON_INFO ="info_tsk.png";
 
@@ -75,6 +77,10 @@ public class BashEditorOutlineLabelProvider extends BaseLabelProvider implements
 				return getOutlineImage(ICON_ERROR);
 			case META_INFO:
 				return getOutlineImage(ICON_INFO);
+			case GLOBAL_VARIABLE:
+                return getOutlineImage(ICON_GLOBAL_VARIABLE);
+			case LOCAL_VARIABLE:
+                return getOutlineImage(ICON_LOCAL_VARIABLE);
 			default:
 				return null;
 			}
