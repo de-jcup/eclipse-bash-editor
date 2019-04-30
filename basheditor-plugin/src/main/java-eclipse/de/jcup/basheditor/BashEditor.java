@@ -270,12 +270,12 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
             @Override
             public boolean isReplaceTabBySpacesEnabled() {
                 BashEditorTabReplaceStrategy strategy = BashEditorPreferences.getInstance().getReplaceTabBySpacesStrategy();
-                if (BashEditorTabReplaceStrategy.ALWAYS.equals(strategy)){
+                if (BashEditorTabReplaceStrategy.ALWAYS.equals(strategy)) {
                     return true;
                 }
-                /* in all other cases we do NOT use the replacement implementation.
-                 * Why ? We let the standard text editor implementation work on default
-                 * setup
+                /*
+                 * in all other cases we do NOT use the replacement implementation. Why ? We let
+                 * the standard text editor implementation work on default setup
                  */
                 return false;
             }
@@ -295,12 +295,12 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     @Override
     protected boolean isTabsToSpacesConversionEnabled() {
         BashEditorTabReplaceStrategy strategy = BashEditorPreferences.getInstance().getReplaceTabBySpacesStrategy();
-        if (BashEditorTabReplaceStrategy.USE_DEFAULT.equals(strategy)){
+        if (BashEditorTabReplaceStrategy.USE_DEFAULT.equals(strategy)) {
             return super.isTabsToSpacesConversionEnabled();
         }
         return false;
     }
-    
+
     public BashEditorContentOutlinePage getOutlinePage() {
         if (outlinePage == null) {
             outlinePage = new BashEditorContentOutlinePage(this);
@@ -488,6 +488,8 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
                 BashScriptModel model;
                 try {
+                    modelBuilder.setIgnoreVariables(!BashEditorPreferences.getInstance().isOutlineShowVariablesEnabled());
+
                     model = modelBuilder.build(text);
                 } catch (BashScriptModelException e) {
                     BashEditorUtil.logError("Was not able to build validation model", e);

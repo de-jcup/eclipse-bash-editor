@@ -27,6 +27,8 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	P_EDITOR_AUTO_CREATE_END_BRACKETSY("autoCreateEndBrackets"),
 
 	P_LINK_OUTLINE_WITH_EDITOR("linkOutlineWithEditor"),
+	
+	P_SHOW_VARIABLES_IN_OUTLINE("showVariablesInOutline"),
 
 	P_CODE_ASSIST_ADD_KEYWORDS("codeAssistAddsKeyWords"), P_CODE_ASSIST_ADD_SIMPLEWORDS("codeAssistAddsSimpleWords"),
 

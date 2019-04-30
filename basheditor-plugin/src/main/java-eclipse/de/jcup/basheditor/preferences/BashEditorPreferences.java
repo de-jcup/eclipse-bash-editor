@@ -136,6 +136,9 @@ public class BashEditorPreferences {
 	public boolean isLinkOutlineWithEditorEnabled() {
 		return getBooleanPreference(P_LINK_OUTLINE_WITH_EDITOR);
 	}
+	public boolean isOutlineShowVariablesEnabled() {
+	    return getBooleanPreference(P_SHOW_VARIABLES_IN_OUTLINE);
+	}
 	
 	public IPreferenceStore getPreferenceStore() {
 		return store;
