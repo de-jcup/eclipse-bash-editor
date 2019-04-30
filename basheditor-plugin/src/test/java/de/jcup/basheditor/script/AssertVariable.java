@@ -18,5 +18,15 @@ public class AssertVariable{
         assertEquals("Variable has not expected assignments",amount,variable.getAssignments().size());
         return this;
     }
+
+    public AssertVariable islocal() {
+        assertTrue("Is not local!",variable.isLocal());
+        return this;
+    }
+    
+    public AssertVariable isGlobal() {
+        assertFalse("Is not global!",variable.isLocal());
+        return this;
+    }
     
 }

@@ -60,12 +60,28 @@ public class BashScriptModelBuilderTest {
         /* test @formatter:off*/
         assertThat(bashScriptModel).
             hasNoErrors().
-            hasVariable("xxx").withValue("1234");
+            hasVariable("xxx").withValue("1234").isGlobal();
         /* @formatter:on */
     }
     
     @Test
-    public void a_variable_xxx_is_recognized_inside_function() throws Exception{
+    public void a_local_variable_xxx_is_recognized_inside_function() throws Exception{
+        /* prepare */
+        String script = "function abc {local xxx=1234}";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModel bashScriptModel = builderToTest.build(script);
+
+        /* test @formatter:off*/
+        assertThat(bashScriptModel).
+            hasNoErrors().
+            hasFunction("abc").hasVariable("xxx").withValue("1234").islocal();
+        /* @formatter:on */
+    }
+    
+    @Test
+    public void a_global_variable_xxx_in_afunction_is_recognized_inside_model() throws Exception{
         /* prepare */
         String script = "function abc {xxx=1234}";
 
@@ -76,8 +92,7 @@ public class BashScriptModelBuilderTest {
         /* test @formatter:off*/
         assertThat(bashScriptModel).
             hasNoErrors().
-            hasNoVariables().
-            hasVariable("xxx").withValue("1234");
+            hasVariable("xxx").withValue("1234").isGlobal();
         /* @formatter:on */
     }
     
@@ -122,7 +137,7 @@ public class BashScriptModelBuilderTest {
 
         /* test @formatter:off*/
         assertThat(bashScriptModel).
-            hasFunction("deploy").
+            hasFunction("deploy").and().
             hasFunctions(1).
             hasNoErrors();
         /* @formatter:on */
@@ -138,7 +153,7 @@ public class BashScriptModelBuilderTest {
 
         /* test @formatter:off*/
         assertThat(bashScriptModel).
-            hasFunction("test").
+            hasFunction("test").and().
             hasFunctions(1);
         /* @formatter:on */
     }
@@ -153,7 +168,7 @@ public class BashScriptModelBuilderTest {
 
         /* test @formatter:off*/
         assertThat(bashScriptModel).
-            hasFunction("test").
+            hasFunction("test").and().
             hasFunctions(1);
         /* @formatter:on */
     }
@@ -168,9 +183,9 @@ public class BashScriptModelBuilderTest {
 
         /* test @formatter:off*/
         assertThat(bashScriptModel).
-            hasFunction("warn").
-            hasFunction("die").
-            hasFunction("other").
+            hasFunction("warn").and().
+            hasFunction("die").and().
+            hasFunction("other").and().
             hasFunctions(3);
         /* @formatter:on */
     }
@@ -334,7 +349,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest.build(code);
 
         /* test */
-        assertThat(bashScriptModel).hasFunction("a").hasErrors(1);
+        assertThat(bashScriptModel).hasFunction("a").and().hasErrors(1);
     }
 
     @Test
@@ -346,7 +361,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest.build(code);
 
         /* test */
-        assertThat(bashScriptModel).hasFunction("Usage").hasFunction("Msg").hasFunction("Fatal").hasFunctions(3);
+        assertThat(bashScriptModel).hasFunction("Usage").and().hasFunction("Msg").and().hasFunction("Fatal").and().hasFunctions(3);
     }
 
     @Test
@@ -358,7 +373,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest.build(code);
 
         /* test */
-        assertThat(bashScriptModel).hasFunction("Usage").hasFunction("Msg").hasFunction("Fatal").hasFunctions(3);
+        assertThat(bashScriptModel).hasFunction("Usage").and().hasFunction("Msg").and().hasFunction("Fatal").and().hasFunctions(3);
     }
 
     @Test
@@ -370,7 +385,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest.build(code);
 
         /* test */
-        assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").hasNoErrors();
+        assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").and().hasNoErrors();
     }
 
     @Test
@@ -394,7 +409,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest.build(code);
 
         /* test */
-        assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").hasNoErrors();
+        assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").and().hasNoErrors();
     }
 
     @Test
@@ -406,7 +421,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest.build(code);
 
         /* test */
-        assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").hasNoErrors();
+        assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").and().hasNoErrors();
     }
 
     @Test
@@ -418,7 +433,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest.build(code);
 
         /* test */
-        assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").hasNoErrors();
+        assertThat(bashScriptModel).hasFunctions(1).hasFunction("xy").and().hasNoErrors();
     }
 
     @Test
@@ -430,7 +445,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest.build(code);
 
         /* test */
-        assertThat(bashScriptModel).hasFunction("display").hasFunctions(1).hasNoErrors();
+        assertThat(bashScriptModel).hasFunction("display").and().hasFunctions(1).and().hasNoErrors();
     }
 
     @Test
@@ -468,7 +483,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest.build(code);
 
         /* test */
-        assertThat(bashScriptModel).hasFunctions(2).hasFunction("f1").hasFunction("f2").hasNoFunction("f1b");
+        assertThat(bashScriptModel).hasFunctions(2).hasFunction("f1").and().hasFunction("f2").and().hasNoFunction("f1b");
     }
 
     @Test
@@ -493,7 +508,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest.build(code);
 
         /* test */
-        assertThat(bashScriptModel).hasFunctions(1).hasFunction("read-file").hasNoErrors();
+        assertThat(bashScriptModel).hasFunctions(1).hasFunction("read-file").and().hasNoErrors();
     }
 
     @Test
@@ -568,7 +583,7 @@ public class BashScriptModelBuilderTest {
         BashScriptModel bashScriptModel = builderToTest
                 .build("function test1 {\n#something\n}\n #other line\n\nfunction test2 {\n#something else\n}\n");
         /* test */
-        assertThat(bashScriptModel).hasFunction("test1").hasFunction("test2").hasFunctions(2);
+        assertThat(bashScriptModel).hasFunction("test1").and().hasFunction("test2").and().hasFunctions(2);
     }
 
     @Test
@@ -580,7 +595,7 @@ public class BashScriptModelBuilderTest {
         /* execute */
         BashScriptModel bashScriptModel = builderToTest.build(bashScript);
         /* test */
-        assertThat(bashScriptModel).hasNoErrors().hasFunction("test1").hasFunction("test2").hasFunctions(2);
+        assertThat(bashScriptModel).hasNoErrors().hasFunction("test1").and().hasFunction("test2").and().hasFunctions(2);
     }
 
     @Test
@@ -589,7 +604,7 @@ public class BashScriptModelBuilderTest {
         assertNotNull(bashScriptModel);
 
         /* test */
-        assertThat(bashScriptModel).hasFunctions(1).hasFunctionWithPosition("test", 0).hasNoErrors();
+        assertThat(bashScriptModel).hasFunctions(1).hasFunctionWithPosition("test", 0).and().hasNoErrors();
     }
 
     @Test
