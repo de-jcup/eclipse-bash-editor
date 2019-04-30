@@ -65,6 +65,24 @@ public class BashScriptModelBuilderTest {
     }
     
     @Test
+    public void when_turned_off_a_variable_xxx_is_NOT_recognized() throws Exception{
+        /* prepare */
+        String script = "xxx=1234";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        builderToTest.setIgnoreVariables(true);
+        BashScriptModel bashScriptModel = builderToTest.build(script);
+
+        /* test @formatter:off*/
+        assertThat(bashScriptModel).
+            hasNoErrors().
+            hasNoVariables();
+        /* @formatter:on */
+    }
+    
+    
+    @Test
     public void a_local_variable_xxx_is_recognized_inside_function() throws Exception{
         /* prepare */
         String script = "function abc {local xxx=1234}";

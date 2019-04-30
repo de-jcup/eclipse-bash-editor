@@ -39,12 +39,13 @@ public class BashScriptModelBuilder {
     private boolean ignoreIfValidation;
     private boolean ignoreFunctionValidation;
     private boolean debugMode;
+    private boolean ignoreVariables;
 
     /**
      * Parses given script and creates a bash script model
      * 
      * @param bashScript
-     * @return a simple model with some information about bash script
+     * @return a model about bash script
      * @throws BashScriptModelException
      */
     public BashScriptModel build(String bashScript) throws BashScriptModelException {
@@ -79,6 +80,9 @@ public class BashScriptModelBuilder {
     }
 
     private void buildScriptVariablesByTokens(BashVariableRegistry model, boolean acceptLocal, boolean acceptglobal, List<ParseToken> tokens) {
+        if (ignoreVariables) {
+            return;
+        }
         Iterator<ParseToken> it = tokens.iterator();
         boolean beforeWaslocal = false;
         while (it.hasNext()) {
@@ -123,6 +127,14 @@ public class BashScriptModelBuilder {
 
     public void setIgnoreBlockValidation(boolean ignoreBlockValidation) {
         this.ignoreBlockValidation = ignoreBlockValidation;
+    }
+    
+    /**
+     * When set to <code>true</code> the builder will not fetch any information about variables!
+     * @param ignoreVariables
+     */
+    public void setIgnoreVariables(boolean ignoreVariables) {
+       this.ignoreVariables=ignoreVariables;
     }
 
     public void setIgnoreDoValidation(boolean ignoreDoValidation) {
@@ -318,5 +330,7 @@ public class BashScriptModelBuilder {
     public void setDebug(boolean debugMode) {
         this.debugMode = debugMode;
     }
+
+    
 
 }
