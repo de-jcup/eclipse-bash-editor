@@ -156,24 +156,35 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 
 	public Item tryToFindByOffset(int offset) {
 		synchronized (monitor) {
-			if (items == null) {
-				return null;
-			}
-			for (Object oitem : items) {
-				if (!(oitem instanceof Item)) {
-					continue;
-				}
-				Item item = (Item) oitem;
-				int itemStart = item.getOffset();
-				int itemEnd = item.getEndOffset();// old:
-													// itemStart+item.getLength();
-				if (offset >= itemStart && offset <= itemEnd) {
-					return item;
-				}
-			}
-
+			return findItemByOffset(offset,items);
 		}
-		return null;
 	}
+
+    private Item findItemByOffset(int offset, Object[] items) {
+        if (items == null) {
+            return null;
+        }
+        for (Object oitem : items) {
+        	if (!(oitem instanceof Item)) {
+        		continue;
+        	}
+        	Item item = (Item) oitem;
+        	int itemStart = item.getOffset();
+        	int itemEnd = item.getEndOffset();
+        	
+        	/* do children first - otherwise parent can hide children... */
+        	if (item.hasChildren()) {
+        	    Item itemFound = findItemByOffset(offset, item.getChildren().toArray());
+        	    if (itemFound!=null) {
+        	        return itemFound;
+        	    }
+        	}
+        	/* do parent now */
+        	if (offset >= itemStart && offset <= itemEnd) {
+        	    return item;
+        	}
+        }
+        return null;
+    }
 
 }
