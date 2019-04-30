@@ -13,47 +13,67 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.script;
+package de.jcup.basheditor.script;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import de.jcup.basheditor.script.parser.ParseToken;
 
-public class BashScriptModel {
+public class BashScriptModel implements BashVariableRegistry {
 
-	Collection<BashFunction> functions = new ArrayList<>();
-	Collection<BashError> errors = new ArrayList<>();
-	List<ParseToken> debugTokenList;
+    Collection<BashFunction> functions = new ArrayList<>();
+    Collection<BashError> errors = new ArrayList<>();
+    List<ParseToken> debugTokenList;
+    Map<String, BashVariable> variables = new TreeMap<String, BashVariable>();
 
-	public Collection<BashFunction> getFunctions() {
-		return functions;
-	}
+    public Collection<BashFunction> getFunctions() {
+        return functions;
+    }
 
-	public Collection<BashError> getErrors() {
-		return errors;
-	}
-	
-	public boolean hasErrors(){
-		return !getErrors().isEmpty();
-	}
-	
-	/**
-	 * Returns a debug token list - if list is null, a new one will be created
-	 * @return debug token list, never <code>null</code>
-	 */
-	public List<ParseToken> getDebugTokens(){
-		if (debugTokenList==null){
-			debugTokenList=new ArrayList<>();
-		}
-		return debugTokenList;
-	}
-	
-	public boolean hasDebugTokens() {
-		return debugTokenList!=null;
-	}
-	
-	
+    public Collection<BashError> getErrors() {
+        return errors;
+    }
+
+    public boolean hasErrors() {
+        return !getErrors().isEmpty();
+    }
+
+    /**
+     * Returns a debug token list - if list is null, a new one will be created
+     * 
+     * @return debug token list, never <code>null</code>
+     */
+    public List<ParseToken> getDebugTokens() {
+        if (debugTokenList == null) {
+            debugTokenList = new ArrayList<>();
+        }
+        return debugTokenList;
+    }
+
+    public boolean hasDebugTokens() {
+        return debugTokenList != null;
+    }
+
+    /**
+     * @return map of variables, scope is root of script, no functions
+     */
+    public Map<String, BashVariable> getVariables() {
+        return variables;
+    }
+
+    /**
+     * @param varName
+     * @return variable or <code>null</code>
+     */
+    public BashVariable getVariable(String varName) {
+        if (varName == null) {
+            return null;
+        }
+        return variables.get(varName);
+    }
 
 }

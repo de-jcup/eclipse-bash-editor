@@ -23,5 +23,9 @@ public enum ItemType {
 	
 	META_ERROR,
 	
-	META_DEBUG
+	META_DEBUG, 
+	
+	GLOBAL_VARIABLE, 
+	
+	LOCAL_VARIABLE
 }

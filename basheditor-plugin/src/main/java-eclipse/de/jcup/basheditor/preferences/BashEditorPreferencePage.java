@@ -79,6 +79,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
     private BooleanFieldEditor codeAssistWithBashKeywords;
     private BooleanFieldEditor codeAssistWithSimpleWords;
     private BooleanFieldEditor toolTipsEnabled;
+    private BooleanFieldEditor showVariablesInOutline;
 
     public BashEditorPreferencePage() {
         super(GRID);
@@ -141,6 +142,11 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
         linkEditorWithOutline = new BooleanFieldEditor(P_LINK_OUTLINE_WITH_EDITOR.getId(), "New opened editors are linked with outline", otherComposite);
         linkEditorWithOutline.getDescriptionControl(otherComposite).setToolTipText("Via this setting the default behaviour for new opened outlines is set");
         addField(linkEditorWithOutline);
+        
+        /* enable variables inside putline */
+        showVariablesInOutline = new BooleanFieldEditor(P_SHOW_VARIABLES_IN_OUTLINE.getId(), "Variables are shown in outline", otherComposite);
+        showVariablesInOutline.getDescriptionControl(otherComposite).setToolTipText("This defines the behaviour of outline in new opened editors.\nYou have to close and reopen existing files by bash editor to get the effect there as well.");
+        addField(showVariablesInOutline);
 
         Label spacer = new Label(appearanceComposite, SWT.LEFT);
         GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);

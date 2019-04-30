@@ -17,12 +17,15 @@ package de.jcup.basheditor.outline;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import de.jcup.basheditor.SimpleStringUtils;
 import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.script.BashScriptModel;
+import de.jcup.basheditor.script.BashVariable;
+import de.jcup.basheditor.script.BashVariableAssignment;
 import de.jcup.basheditor.script.parser.ParseToken;
 
 public class BashEditorTreeContentProvider implements ITreeContentProvider {
@@ -52,7 +55,14 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		return null;
+	    if (parentElement instanceof Item) {
+            Item item = (Item) parentElement;
+            if (!item.hasChildren()) {
+                return null;
+            }
+            return item.getChildren().toArray();
+        }
+        return null;
 	}
 
 	@Override
@@ -62,11 +72,16 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
+	    if (element instanceof Item) {
+	        Item item = (Item) element;
+	        return item.hasChildren();
+	    }
 		return false;
 	}
 
 	private Item[] createItems(BashScriptModel model) {
 		List<Item> list = new ArrayList<>();
+        addVariables(list,  model.getVariables());
 		for (BashFunction function : model.getFunctions()) {
 			Item item = new Item();
 			item.name = function.getName();
@@ -75,6 +90,11 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 			item.length = function.getLengthToNameEnd();
 			item.endOffset = function.getEnd();
 			list.add(item);
+			
+			if (! function.getVariables().isEmpty()) {
+			    addVariables(item.getChildren(), function.getVariables());
+			}
+			
 		}
 		if (list.isEmpty()) {
 			Item item = new Item();
@@ -111,6 +131,19 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 
 	}
 
+    private void addVariables(List<Item> list, Map<String, BashVariable> variablesMap) {
+        for (BashVariable variable: variablesMap.values()) {
+		    BashVariableAssignment initial = variable.getInitialAssignment();
+		    Item item = new Item();
+            item.name = variable.getName();
+            item.type = ItemType.GLOBAL_VARIABLE;
+            item.offset = initial.getStart();
+            item.length = initial.getEnd()-initial.getStart();
+            item.endOffset = initial.getEnd();
+            list.add(item);
+		}
+    }
+
 	public void rebuildTree(BashScriptModel model) {
 		synchronized (monitor) {
 			if (model == null) {
@@ -123,24 +156,35 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
 
 	public Item tryToFindByOffset(int offset) {
 		synchronized (monitor) {
-			if (items == null) {
-				return null;
-			}
-			for (Object oitem : items) {
-				if (!(oitem instanceof Item)) {
-					continue;
-				}
-				Item item = (Item) oitem;
-				int itemStart = item.getOffset();
-				int itemEnd = item.getEndOffset();// old:
-													// itemStart+item.getLength();
-				if (offset >= itemStart && offset <= itemEnd) {
-					return item;
-				}
-			}
-
+			return findItemByOffset(offset,items);
 		}
-		return null;
 	}
+
+    private Item findItemByOffset(int offset, Object[] items) {
+        if (items == null) {
+            return null;
+        }
+        for (Object oitem : items) {
+        	if (!(oitem instanceof Item)) {
+        		continue;
+        	}
+        	Item item = (Item) oitem;
+        	int itemStart = item.getOffset();
+        	int itemEnd = item.getEndOffset();
+        	
+        	/* do children first - otherwise parent can hide children... */
+        	if (item.hasChildren()) {
+        	    Item itemFound = findItemByOffset(offset, item.getChildren().toArray());
+        	    if (itemFound!=null) {
+        	        return itemFound;
+        	    }
+        	}
+        	/* do parent now */
+        	if (offset >= itemStart && offset <= itemEnd) {
+        	    return item;
+        	}
+        }
+        return null;
+    }
 
 }

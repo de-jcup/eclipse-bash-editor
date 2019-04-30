@@ -38,6 +38,7 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 
 		/* Outline */
 		store.setDefault(P_LINK_OUTLINE_WITH_EDITOR.getId(), true);
+		store.setDefault(P_SHOW_VARIABLES_IN_OUTLINE.getId(), true);
 
 		/* ++++++++++++ */
 		/* + Brackets + */

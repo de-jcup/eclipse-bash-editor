@@ -16,6 +16,7 @@
 package de.jcup.basheditor.script;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import de.jcup.basheditor.script.parser.ParseToken;
@@ -38,12 +39,13 @@ public class BashScriptModelBuilder {
     private boolean ignoreIfValidation;
     private boolean ignoreFunctionValidation;
     private boolean debugMode;
+    private boolean ignoreVariables;
 
     /**
      * Parses given script and creates a bash script model
      * 
      * @param bashScript
-     * @return a simple model with some information about bash script
+     * @return a model about bash script
      * @throws BashScriptModelException
      */
     public BashScriptModel build(String bashScript) throws BashScriptModelException {
@@ -56,7 +58,7 @@ public class BashScriptModelBuilder {
         } catch (TokenParserException e) {
             throw new BashScriptModelException("Was not able to build bashscript", e);
         }
-
+        buildScriptVariablesByTokens(model,false,true, tokens);
         buildFunctionsByTokens(model, tokens);
 
         List<ValidationResult> results = new ArrayList<>();
@@ -77,12 +79,62 @@ public class BashScriptModelBuilder {
         return model;
     }
 
+    private void buildScriptVariablesByTokens(BashVariableRegistry model, boolean acceptLocal, boolean acceptglobal, List<ParseToken> tokens) {
+        if (ignoreVariables) {
+            return;
+        }
+        Iterator<ParseToken> it = tokens.iterator();
+        boolean beforeWaslocal = false;
+        while (it.hasNext()) {
+            ParseToken token = it.next();            
+            
+            if (token.isVariableDefinition()) {
+                if (beforeWaslocal && ! acceptLocal) {
+                    continue;
+                }
+                if (!beforeWaslocal && ! acceptglobal) {
+                    continue;
+                }
+                String varName = token.getTextAsVariableName();
+                BashVariable var = model.getVariable(varName);
+                
+                BashVariableAssignment assignment = new BashVariableAssignment();
+                assignment.setStart(token.getStart());
+                assignment.setEnd(token.getEnd());
+                if (var==null) {
+                    var = new BashVariable(varName,assignment);
+                    var.setLocal(beforeWaslocal);
+                    if (debugMode && it.hasNext()) {
+                        ParseToken value = it.next();
+                        /* we set this only for debug purpose */
+                        var.setInitialValue(value.getText());
+                    }
+                   model.getVariables().put(varName,var);
+                }else {
+                    var.getAssignments().add(assignment);
+                }
+                
+            }else {
+                beforeWaslocal = token.isLocalDef();
+            }
+        }
+
+    }
+
     private void appendDebugTokens(BashScriptModel model, List<ParseToken> tokens) {
         model.getDebugTokens().addAll(tokens);
     }
 
     public void setIgnoreBlockValidation(boolean ignoreBlockValidation) {
         this.ignoreBlockValidation = ignoreBlockValidation;
+    }
+    
+    /**
+     * When set to <code>true</code> the builder will not fetch any information about variables!
+     * @param ignoreVariables
+     */
+    public void setIgnoreVariables(boolean ignoreVariables) {
+       this.ignoreVariables=ignoreVariables;
     }
 
     public void setIgnoreDoValidation(boolean ignoreDoValidation) {
@@ -152,24 +204,28 @@ public class BashScriptModelBuilder {
 
                 model.functions.add(function);
                 /*
-                 * function created - last currentTokenNr++ was too much because
-                 * it will be done by loop to- so reduce with 1
+                 * function created - last currentTokenNr++ was too much because it will be done
+                 * by loop to- so reduce with 1
                  */
                 int newTokenNr = functionScope.getCurrentTokenNr() - 1;
                 if (newTokenNr > tokenNr) {
                     /* avoid infinite loops... shoud not happen, but... */
                     tokenNr = newTokenNr;
                 }
+                
+                /* create local variables */
+                /* FIXME albert, 2019-04-29: add kill switch for variable detection and provide preference (so users can turn off the feature if wanted)*/
+                /* FIXME albert, 2019-04-29: add some junit tests to check local variable detection*/
+                buildScriptVariablesByTokens(function, true,false, functionScope.getTokensInside());
+                
             } else {
                 if (functionScope.hasFunctionKeywordPrefix()) {
                     /*
-                     * function prefix defined but its not really a function, so
-                     * something odd!
+                     * function prefix defined but its not really a function, so something odd!
                      */
                     if (!ignoreFunctionValidation) {
 
-                        model.errors
-                                .add(createBashErrorFunctionPrefixFoundButNotAFunction(functionScope.getFunctionName(), functionScope.getToken()));
+                        model.errors.add(createBashErrorFunctionPrefixFoundButNotAFunction(functionScope.getFunctionName(), functionScope.getToken()));
                     }
                 }
             }
@@ -208,9 +264,10 @@ public class BashScriptModelBuilder {
 
     protected void scanForFunctionEnd(FunctionScope functionScope, BashFunction function) {
         while (functionScope.hasNextToken()) {
-            ParseToken closeCurlyBraceToken = functionScope.nextToken();
-            if (closeCurlyBraceToken.isCloseBlock()) {
-                function.end = closeCurlyBraceToken.getEnd();
+            ParseToken nextToken = functionScope.nextToken();
+            functionScope.getTokensInside().add(nextToken);
+            if (nextToken.isCloseBlock()) {
+                function.end = nextToken.getEnd();
                 break;
             }
         }
@@ -218,8 +275,8 @@ public class BashScriptModelBuilder {
 
     protected void inspectPotentialFunctionUntilEndingBracketOrNextIsOpenCurly(FunctionScope functionScope) {
         /*
-         * either we come from "function xyz()" or just "xyz()" -> current token
-         * is always methodname
+         * either we come from "function xyz()" or just "xyz()" -> current token is
+         * always methodname
          */
         if (!functionScope.hasNextToken()) {
             return;
@@ -236,8 +293,8 @@ public class BashScriptModelBuilder {
         }
         if (followToken.isOpenBlock()) {
             /*
-             * only allowed for "function xyz {}" but not for "xyz {}" - means
-             * without keyword function there must be brackets used!
+             * only allowed for "function xyz {}" but not for "xyz {}" - means without
+             * keyword function there must be brackets used!
              */
             functionScope.setIsFunction(functionScope.hasFunctionKeywordPrefix());
             functionScope.backToken();// move back to have access to curly
@@ -259,22 +316,21 @@ public class BashScriptModelBuilder {
     }
 
     private BashError createBashErrorFunctionPrefixFoundButNotAFunction(String functionName, ParseToken token) {
-        return new BashError(token.getStart(), token.getEnd(),
-                "Keyword function used but it's not a valid function definition: '" + functionName + "'.");
+        return new BashError(token.getStart(), token.getEnd(), "Keyword function used but it's not a valid function definition: '" + functionName + "'.");
     }
 
     private BashError createBashErrorCloseFunctionCurlyBraceMissing(String functionName, ParseToken openCurlyBraceToken) {
-        return new BashError(openCurlyBraceToken.getStart(), openCurlyBraceToken.getEnd(),
-                "This curly brace is not closed. So function '" + functionName + "' is not valid.");
+        return new BashError(openCurlyBraceToken.getStart(), openCurlyBraceToken.getEnd(), "This curly brace is not closed. So function '" + functionName + "' is not valid.");
     }
 
     private BashError createBashErrorFunctionMissingCurlyBrace(ParseToken token, String functionName) {
-        return new BashError(token.getStart(), token.getEnd(),
-                "The function '" + functionName + "' is not valid because no opening curly brace found.");
+        return new BashError(token.getStart(), token.getEnd(), "The function '" + functionName + "' is not valid because no opening curly brace found.");
     }
 
     public void setDebug(boolean debugMode) {
         this.debugMode = debugMode;
     }
+
+    
 
 }

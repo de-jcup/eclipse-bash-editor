@@ -15,6 +15,7 @@
  */
 package de.jcup.basheditor.script;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.jcup.basheditor.script.parser.ParseToken;
@@ -26,11 +27,15 @@ class FunctionScope {
     private boolean isFunction;
     private Integer functionStart;
     private ParseToken token;
-
+    private List<ParseToken> tokensInside=new ArrayList<ParseToken>();
+    
     public FunctionScope(List<ParseToken> tokens) {
         this.tokens = tokens;
     }
-
+    public List<ParseToken> getTokensInside() {
+        return tokensInside;
+    }
+    
     public void setToken(ParseToken token) {
         this.token = token;
     }

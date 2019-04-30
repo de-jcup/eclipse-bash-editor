@@ -41,6 +41,11 @@ public class AssertScriptModel {
 	public AssertScriptModel hasNoFunctions() {
 		return hasFunctions(0);
 	}
+	
+	public AssertScriptModel and() {
+	    /* just syntax sugar ...*/
+	    return this;
+	}
 		
 	public AssertScriptModel hasFunctions(int amount) {
 		Collection<BashFunction> functions = getFunctions();
@@ -51,19 +56,46 @@ public class AssertScriptModel {
 	}
 
 	public AssertScriptModel hasNoFunction(String functionName) {
-		return hasFunction(functionName, false, -1);
+		hasFunction(functionName, false, -1);
+		return this;
 	}
 
-	public AssertScriptModel hasFunction(String functionName) {
+	public AssertFuction hasFunction(String functionName) {
 		return hasFunction(functionName, true, -1);
 	}
 
-	public AssertScriptModel hasFunctionWithPosition(String functionName, int expectedPosition) {
+	public AssertFuction hasFunctionWithPosition(String functionName, int expectedPosition) {
 		return hasFunction(functionName, true, expectedPosition);
 
 	}
+	
+	public class AssertFuction{
+	    private BashFunction function;
 
-	private AssertScriptModel hasFunction(String functionName, boolean excpectedFunctionExists, int expectedPosition) {
+        public AssertFuction(BashFunction function) {
+	        this.function=function;
+	    }
+
+        AssertScriptModel and() {
+	        return AssertScriptModel.this;
+	    }
+        
+        public AssertFuction hasNoVariables() {
+            if (function.getVariables().isEmpty()){
+                return this;
+            }
+            fail("Model has variables:"+model.getVariables());
+            return this;
+        }
+        
+        public AssertVariable hasVariable(String varName) {
+            BashVariable variable = function.getVariable(varName);
+            assertNotNull("Variable not found:"+varName, variable);
+            return new AssertVariable(variable);
+        }
+	}
+
+	private AssertFuction hasFunction(String functionName, boolean excpectedFunctionExists, int expectedPosition) {
 		BashFunction found = null;
 
 		for (BashFunction function : getFunctions()) {
@@ -89,7 +121,7 @@ public class AssertScriptModel {
 			}
 		}
 
-		return this;
+		return new AssertFuction(found);
 	}
 
 	private StringBuilder createFunctionStringList() {
@@ -148,5 +180,19 @@ public class AssertScriptModel {
 		assertEquals("Amount of debug tokens not as expected", amount ,model.getDebugTokens().size());
 		return this;
 	}
+	
+	public AssertScriptModel hasNoVariables() {
+	    if (model.getVariables().isEmpty()){
+	        return this;
+	    }
+	    fail("Model has variables:"+model.getVariables());
+	    return this;
+	}
+	
+	public AssertVariable hasVariable(String varName) {
+        BashVariable variable = model.getVariable(varName);
+        assertNotNull("Variable not found:"+varName, variable);
+        return new AssertVariable(variable);
+    }
 
 }

@@ -74,7 +74,7 @@ public class ParseToken {
 			sb.append("COMMENT");
 		}
 		if (isVariable()){
-			sb.append("VARIABLE");
+			sb.append("GLOBAL_VARIABLE");
 		}
 		if (isString()){
 			sb.append("STRING");
@@ -240,6 +240,10 @@ public class ParseToken {
 	public boolean isEsac() {
 		return getSafeText().equals("esac");
 	}
+
+    public boolean isLocalDef() {
+        return getSafeText().equals("local");
+    }
 
 	
 }

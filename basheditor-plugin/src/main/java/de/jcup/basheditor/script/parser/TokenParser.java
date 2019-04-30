@@ -226,7 +226,7 @@ public class TokenParser {
 	private boolean isVariableStateHandled(ParseContext context) {
 		char c = context.getCharAtPos();
 		/*
-		 * handle change to VARIABLE state when from CODE - comments and strings
+		 * handle change to GLOBAL_VARIABLE state when from CODE - comments and strings
 		 * are ignored
 		 */
 		if (context.inState(CODE) || context.inState(INIT)) {
@@ -269,7 +269,7 @@ public class TokenParser {
 
 	private boolean handleInitialVariableTypeDetermination(ParseContext context, char c) {
 		/*
-		 * the state setting to VARIABLE is done on another method - this does
+		 * the state setting to GLOBAL_VARIABLE is done on another method - this does
 		 * only handle initial way
 		 */
 		if (!context.inState(ParserState.VARIABLE)) {
