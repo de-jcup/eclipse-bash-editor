@@ -18,6 +18,8 @@ package de.jcup.basheditor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import de.jcup.basheditor.workspacemodel.SharedBashModel;
+import de.jcup.basheditor.workspacemodel.SharedBashModelSupportProvider;
 import de.jcup.eclipse.commons.PluginContextProvider;
 import de.jcup.eclipse.commons.keyword.TooltipTextSupport;
 import de.jcup.eclipse.commons.resource.EclipseResourceInputStreamProvider;
@@ -33,7 +35,7 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
 	// The shared instance
 	private static BashEditorActivator plugin;
 	private ColorManager colorManager;
-
+	private SharedBashModelSupportProvider modelProvider;
 
 	/**
 	 * The constructor
@@ -41,6 +43,7 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
 	public BashEditorActivator() {
 		colorManager = new ColorManager();
 		TooltipTextSupport.setTooltipInputStreamProvider(new EclipseResourceInputStreamProvider(PLUGIN_ID));
+		modelProvider= new SharedBashModelSupportProvider(this);
 	}
 
 	public ColorManager getColorManager() {
@@ -50,11 +53,13 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		modelProvider.getWorkspaceModelSupport().install();
 	}
 
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		colorManager.dispose();
+		modelProvider.getWorkspaceModelSupport().uninstall();
 		super.stop(context);
 	}
 
@@ -75,6 +80,10 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
 	@Override
 	public String getPluginID() {
 		return PLUGIN_ID;
+	}
+	
+	public SharedBashModel getModel() {
+	    return modelProvider.getWorkspaceModelSupport().getModel();
 	}
 
 }
