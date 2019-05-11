@@ -4,6 +4,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
+import de.jcup.basheditor.EclipseDeveloperSettings;
 import de.jcup.basheditor.script.BashScriptModel;
 import de.jcup.basheditor.script.BashScriptModelBuilder;
 import de.jcup.basheditor.script.BashScriptModelException;
@@ -49,7 +50,9 @@ public class SharedBashModelBuilder extends AbstractModelBuilder<SharedBashModel
         switch (action.getType()) {
         case ADD:
             String loadedscript = loadScript(file);
-            System.out.println("added script:"+file.getName());
+            if (EclipseDeveloperSettings.SHOW_SHAREDMODEL_TRACEMODE) {
+                System.out.println("added script:"+file.getName());
+            }
             try {
                 /*
                  * the builder support already has checked that this file is a bash file - means
@@ -63,7 +66,9 @@ public class SharedBashModelBuilder extends AbstractModelBuilder<SharedBashModel
             break;
         case DELETE:
             model.remove(file);
-            System.out.println("removed script:"+file.getName());
+            if (EclipseDeveloperSettings.SHOW_SHAREDMODEL_TRACEMODE) {
+                System.out.println("removed script:"+file.getName());
+            }
             break;
         default:
             break;
@@ -78,6 +83,9 @@ public class SharedBashModelBuilder extends AbstractModelBuilder<SharedBashModel
         }
         String name = file.getName();
         try {
+            if (EclipseDeveloperSettings.SHOW_SHAREDMODEL_TRACEMODE) {
+                System.out.println("Loading script:"+file);
+            }
             return EclipseResourceHelper.DEFAULT.readAsText(file, provider, name);
         } catch (CoreException e) {
             EclipseUtil.logError("Was not able to load script:" + name, e, provider);

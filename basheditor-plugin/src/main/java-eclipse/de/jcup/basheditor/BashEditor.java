@@ -31,6 +31,7 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -404,6 +405,14 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
             }
             return null;
         }
+        if (IProject.class.equals(adapter)) {
+            IEditorInput input = getEditorInput();
+            if (input instanceof IFileEditorInput) {
+                IFileEditorInput feditorInput = (IFileEditorInput) input;
+                return (T)feditorInput.getFile().getProject();
+            }
+        }
+        
         if (ISourceViewer.class.equals(adapter)) {
             return (T) getSourceViewer();
         }

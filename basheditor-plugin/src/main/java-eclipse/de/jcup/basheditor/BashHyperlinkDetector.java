@@ -15,10 +15,13 @@
  */
 package de.jcup.basheditor;
 
+import static de.jcup.basheditor.preferences.BashEditorLinkFunctionStrategy.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.text.BadLocationException;
@@ -29,11 +32,13 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.AbstractHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
+import de.jcup.basheditor.preferences.BashEditorLinkFunctionStrategy;
+import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.workspacemodel.SharedModelMethodTarget;
 
 /**
- * Hyperlink detector for all kind of hyperlinks in egradle editor.
+ * Hyperlink detector for functions. Depending of selected LinkFunctionStrategy hyper links for script internal, project scope and workspace scope will be created
  * 
  * @author Albert Tregnaghi
  *
@@ -69,11 +74,23 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 
     private IHyperlink[] createExternalHyperlinks(BashFunctionEditorInfo functionInfo, boolean canShowMultipleHyperlinks) {
         /* not found internal, so try external variant */
-
-        List<SharedModelMethodTarget> foundFunctionCandidates = BashEditorActivator.getDefault().getModel().findResourcesHavingMethods(functionInfo.functionName);
+        
+        if (!BashEditorPreferences.getInstance().isSharedModelBuildEnabled()){
+            return null;
+        }
+        BashEditorLinkFunctionStrategy linkFunctionStrategy = BashEditorPreferences.getInstance().getLinkFunctionStrategy();
+        if (SCRIPT.equals(linkFunctionStrategy)){
+            return null;
+        }
+        IProject project = null;//if kept null its will enforce workspace scope as parameter.
+        if (PROJECT.equals(linkFunctionStrategy)){
+            project= adaptable.getAdapter(IProject.class);
+        } 
+        List<SharedModelMethodTarget> foundFunctionCandidates = BashEditorActivator.getDefault().getModel().findResourcesHavingMethods(functionInfo.functionName, project);
         if (foundFunctionCandidates.isEmpty()) {
             return null;
         }
+        
         boolean mustReduceToFirstEntry = !canShowMultipleHyperlinks && foundFunctionCandidates.size() > 1;
         if (mustReduceToFirstEntry) {
             IHyperlink hyper = createExternalHyperlink(functionInfo, foundFunctionCandidates.iterator().next());

@@ -2,7 +2,9 @@ package de.jcup.basheditor.workspacemodel;
 
 import org.eclipse.core.resources.IFile;
 
+import de.jcup.basheditor.BashEditor;
 import de.jcup.basheditor.LineIsBashSheBangValidator;
+import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.eclipse.commons.PluginContextProvider;
 import de.jcup.eclipse.commons.workspacemodel.AbstractConfigurableModelBuilderSupportProvider;
 import de.jcup.eclipse.commons.workspacemodel.ModelBuilder;
@@ -30,7 +32,7 @@ public class SharedBashModelSupportProvider extends AbstractConfigurableModelBui
 
     @Override
     public String getModelName() {
-        return "shared bash model";
+        return "Shared bash model";
     }
 
     @Override
@@ -49,8 +51,7 @@ public class SharedBashModelSupportProvider extends AbstractConfigurableModelBui
 
     @Override
     public boolean isProjectModelBuilderSupportEnabled() {
-        /* FIXME Albert, 2019-05-10: make a preference page entry */
-        return true;
+        return BashEditorPreferences.getInstance().isSharedModelBuildEnabled();
     }
 
 }

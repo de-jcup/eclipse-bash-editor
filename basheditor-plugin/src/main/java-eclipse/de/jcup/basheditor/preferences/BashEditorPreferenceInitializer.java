@@ -113,6 +113,13 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		store.setDefault(P_REPLACE_TAB_BY_SPACES_STRATEGY.getId(), BashEditorTabReplaceStrategy.getDefault().getId());
 		store.setDefault(P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT.getId(),3);
 		
+		/* ++++++++++++++++ */
+        /* + shared model + */
+        /* ++++++++++++++++ */
+        
+        store.setDefault(P_SHARED_MODEL_ENABLED.getId(), true);
+        store.setDefault(P_LINK_FUNCTIONS_STRATEGY.getId(),BashEditorLinkFunctionStrategy.getDefault().getId());
+		
 	}
 
 }

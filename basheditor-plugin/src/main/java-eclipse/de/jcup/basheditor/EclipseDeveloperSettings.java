@@ -17,4 +17,5 @@ package de.jcup.basheditor;
 
 public class EclipseDeveloperSettings {
     public static final boolean SHOW_METAINFORMATION_TRACEMODE = Boolean.getBoolean("basheditor.show.metainformation.tracemode");
+    public static final boolean SHOW_SHAREDMODEL_TRACEMODE = Boolean.getBoolean("basheditor.show.sharedmodel.tracemode");
 }
