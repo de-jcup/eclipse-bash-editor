@@ -206,5 +206,14 @@ public class BashEditorPreferences {
        return BashEditorTabReplaceStrategy.fromId(strategyId); 
     }
 
+    public boolean isSharedModelBuildEnabled() {
+        return getBooleanPreference(BashEditorPreferenceConstants.P_SHARED_MODEL_ENABLED);
+    }
+    
+    public BashEditorLinkFunctionStrategy getLinkFunctionStrategy() {
+        String strategyId = getStringPreference(P_LINK_FUNCTIONS_STRATEGY);
+        return BashEditorLinkFunctionStrategy.fromId(strategyId); 
+     }
+
 
 }

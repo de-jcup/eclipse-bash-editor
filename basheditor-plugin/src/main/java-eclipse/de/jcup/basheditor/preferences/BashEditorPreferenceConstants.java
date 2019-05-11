@@ -51,6 +51,9 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	
 	P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT("replaceTabBySpacesAmount"),
 	
+	P_SHARED_MODEL_ENABLED("sharedModelEnabled"),
+	
+	P_LINK_FUNCTIONS_STRATEGY("linkFunctionsStrategy"),
 	;
 	
 

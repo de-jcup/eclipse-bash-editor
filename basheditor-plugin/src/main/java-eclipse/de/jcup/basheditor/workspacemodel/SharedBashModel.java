@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import de.jcup.basheditor.script.BashFunction;
@@ -27,12 +28,18 @@ public class SharedBashModel {
         sharedMap.remove(resource);
     }
     
-    public List<SharedModelMethodTarget> findResourcesHavingMethods(String functionName){
+    public List<SharedModelMethodTarget> findResourcesHavingMethods(String functionName, IProject projectScope){
         List<SharedModelMethodTarget> list = new ArrayList<SharedModelMethodTarget>();
         if (functionName==null) {
             return list;
         }
         for (IResource resource: sharedMap.keySet()) {
+            if (projectScope!=null) {
+                boolean notInProjectScope = ! projectScope.equals(resource.getProject());
+                if (notInProjectScope){
+                    continue;
+                }
+            }
             BashScriptModel scriptModel = sharedMap.get(resource);
             if (scriptModel==null) {
                 continue;

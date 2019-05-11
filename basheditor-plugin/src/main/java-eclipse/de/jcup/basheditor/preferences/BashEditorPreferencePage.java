@@ -16,15 +16,12 @@ package de.jcup.basheditor.preferences;
  */
 
 import static de.jcup.basheditor.BashEditorUtil.*;
+import static de.jcup.basheditor.preferences.BashEditorLinkFunctionStrategy.*;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 import static de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -36,14 +33,14 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
+import de.jcup.eclipse.commons.ui.UIMasterSlaveSupport;
+import de.jcup.eclipse.commons.ui.preferences.AccessibleBooleanFieldEditor;
 import de.jcup.eclipse.commons.ui.preferences.ChangeableComboFieldEditor;
 
 /**
@@ -55,12 +52,7 @@ import de.jcup.eclipse.commons.ui.preferences.ChangeableComboFieldEditor;
  *
  */
 public class BashEditorPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
-
-    protected static final int INDENT = 20;
-
-    protected static void indent(Control control) {
-        ((GridData) control.getLayoutData()).horizontalIndent += INDENT;
-    }
+   
 
     private Button bracketHighlightingCheckbox;
     private Button enclosingBracketsRadioButton;
@@ -70,8 +62,6 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
     private ColorFieldEditor matchingBracketsColor;
     private BooleanFieldEditor linkEditorWithOutline;
 
-    private ArrayList<SlaveSelectionListener> masterSlaveListeners = new ArrayList<>();
-
     private boolean enclosingBrackets;
     private boolean highlightBracketAtCaretLocation;
     private boolean matchingBrackets;
@@ -80,10 +70,12 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
     private BooleanFieldEditor codeAssistWithSimpleWords;
     private BooleanFieldEditor toolTipsEnabled;
     private BooleanFieldEditor showVariablesInOutline;
+    private UIMasterSlaveSupport uiMasterSlaveSupport;
 
     public BashEditorPreferencePage() {
         super(GRID);
         setPreferenceStore(getPreferences().getPreferenceStore());
+        uiMasterSlaveSupport=new UIMasterSlaveSupport();
     }
 
     @Override
@@ -104,25 +96,11 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
             setBoolean(P_EDITOR_MATCHING_BRACKETS_ENABLED, matchingBrackets);
             setBoolean(P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION, highlightBracketAtCaretLocation);
             setBoolean(P_EDITOR_ENCLOSING_BRACKETS, enclosingBrackets);
-        }
+        } 
         return ok;
     }
 
-    protected void createDependency(Button master, Control slave) {
-        Assert.isNotNull(slave);
-        indent(slave);
-        MasterButtonSlaveSelectionListener listener = new MasterButtonSlaveSelectionListener(master, slave);
-        master.addSelectionListener(listener);
-        this.masterSlaveListeners.add(listener);
-    }
     
-    protected void createDependency(Combo master, Control slave, List<String> enabledVariants) {
-        Assert.isNotNull(slave);
-        indent(slave);
-        MasterComboSlaveSelectionListener listener = new MasterComboSlaveSelectionListener(master, slave, enabledVariants);
-        master.addSelectionListener(listener);
-        this.masterSlaveListeners.add(listener);
-    }
 
     @Override
     protected void createFieldEditors() {
@@ -196,7 +174,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
                 }
             }
         });
-        createDependency(bracketHighlightingCheckbox, matchingBracketRadioButton);
+        uiMasterSlaveSupport.createDependency(bracketHighlightingCheckbox, matchingBracketRadioButton);
 
         label = "highlight matching bracket and caret location";
         matchingBracketAndCaretLocationRadioButton = addButton(radioComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
@@ -207,7 +185,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
                 }
             }
         });
-        createDependency(bracketHighlightingCheckbox, matchingBracketAndCaretLocationRadioButton);
+        uiMasterSlaveSupport.createDependency(bracketHighlightingCheckbox, matchingBracketAndCaretLocationRadioButton);
 
         label = "highlight enclosing brackets";
         enclosingBracketsRadioButton = addButton(radioComposite, SWT.RADIO, label, 0, new SelectionAdapter() {
@@ -221,12 +199,12 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
                 }
             }
         });
-        createDependency(bracketHighlightingCheckbox, enclosingBracketsRadioButton);
+        uiMasterSlaveSupport.createDependency(bracketHighlightingCheckbox, enclosingBracketsRadioButton);
 
         matchingBracketsColor = new ColorFieldEditor(P_EDITOR_MATCHING_BRACKETS_COLOR.getId(), "Matching brackets color", radioComposite);
         addField(matchingBracketsColor);
-        createDependency(bracketHighlightingCheckbox, matchingBracketsColor.getLabelControl(radioComposite));
-        createDependency(bracketHighlightingCheckbox, matchingBracketsColor.getColorSelector().getButton());
+        uiMasterSlaveSupport.createDependency(bracketHighlightingCheckbox, matchingBracketsColor.getLabelControl(radioComposite));
+        uiMasterSlaveSupport.createDependency(bracketHighlightingCheckbox, matchingBracketsColor.getColorSelector().getButton());
 
         /* --------------------- */
         /* -- Code assistance -- */
@@ -248,9 +226,8 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 
         codeAssistWithSimpleWords = new BooleanFieldEditor(P_CODE_ASSIST_ADD_SIMPLEWORDS.getId(), "Existing words", codeAssistGroup);
         codeAssistWithSimpleWords.getDescriptionControl(codeAssistGroup)
-                .setToolTipText("When enabled the current source will be scanned for words. The existing words will be available as code proposals");
+                .setToolTipText("When enaprotected static final int INDENT = 20;bled the current source will be scanned for words. The existing words will be available as code proposals");
         addField(codeAssistWithSimpleWords);
-
         toolTipsEnabled = new BooleanFieldEditor(P_TOOLTIPS_ENABLED.getId(), "Tooltips for keywords", codeAssistGroup);
         toolTipsEnabled.getDescriptionControl(codeAssistGroup).setToolTipText("When enabled tool tips will occure for keywords");
         addField(toolTipsEnabled);
@@ -275,18 +252,37 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
         IntegerFieldEditor amountFieldEditor = new IntegerFieldEditor(P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT.getId(), "Amount of spaces", tabReplaceGroup);
         amountFieldEditor.setValidRange(2, 20);
         addField(amountFieldEditor);
-        createDependency(tabReplaceStrategy.getComboBoxControl(tabReplaceGroup),amountFieldEditor.getTextControl(tabReplaceGroup), Arrays.asList(ALWAYS.getLabelText()));
+        uiMasterSlaveSupport.createDependency(tabReplaceStrategy.getComboBoxControl(tabReplaceGroup),amountFieldEditor.getTextControl(tabReplaceGroup), Arrays.asList(ALWAYS.getLabelText()));
         
-        updateSlaveComponents();
+        
+        /* ------------------------ */
+        /* -- Shared model setup -- */
+        /* ------------------------ */
+        AccessibleBooleanFieldEditor sharedModelBuildEnabled = new AccessibleBooleanFieldEditor(P_SHARED_MODEL_ENABLED.getId(), "Shared model build enabled", appearanceComposite);
+        addField(sharedModelBuildEnabled);
+        
+        GridData sharedModelGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
+        sharedModelGroupLayoutData.horizontalSpan = 2;
+        codeAssistGroupLayoutData.widthHint = 400;
+        Group sharedModelGroup = new Group(appearanceComposite, SWT.NONE);
+        sharedModelGroup.setText("Shared model");
+        sharedModelGroup.setLayout(new GridLayout());
+        sharedModelGroup.setLayoutData(sharedModelGroupLayoutData);
+
+        String[][] linkStrategyLabelAndValues = new String[][] { new String[] { SCRIPT.getLabelText(), SCRIPT.getId() }, new String[] { PROJECT.getLabelText(), PROJECT.getId() },
+                new String[] { WORKSPACE.getLabelText(), WORKSPACE.getId() }, };
+        ChangeableComboFieldEditor linkStrategy = new ChangeableComboFieldEditor(P_LINK_FUNCTIONS_STRATEGY.getId(), "Link functions strategy", linkStrategyLabelAndValues, sharedModelGroup) ;
+        addField(linkStrategy);
+        uiMasterSlaveSupport.createDependency(sharedModelBuildEnabled.getChangeControl(appearanceComposite),sharedModelGroup);
+        uiMasterSlaveSupport.updateSlaveComponents();
     }
 
     @Override
     protected void initialize() {
         initializeBracketHighlightingPreferences();
         super.initialize();
-        updateSlaveComponents();
+        uiMasterSlaveSupport.updateSlaveComponents();
     }
-
     private Button addButton(Composite parent, int style, String label, int indentation, SelectionListener listener) {
         Button button = new Button(parent, style);
         button.setText(label);
@@ -310,7 +306,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 
     private boolean getDefaultBoolean(BashEditorPreferenceConstants id) {
         return getPreferences().getDefaultBooleanPreference(id);
-    }
+    }protected static final int INDENT = 20;
 
     private void initializeBracketHighlightingPreferences() {
         matchingBrackets = getBoolean(P_EDITOR_MATCHING_BRACKETS_ENABLED);
@@ -336,71 +332,8 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
             this.matchingBracketRadioButton.setSelection(!(highlightBracketAtCaretLocation));
             this.matchingBracketAndCaretLocationRadioButton.setSelection(highlightBracketAtCaretLocation);
         }
-        updateSlaveComponents();
+        uiMasterSlaveSupport.updateSlaveComponents();
     }
 
-    private void updateSlaveComponents() {
-        for (SlaveSelectionListener listener : masterSlaveListeners) {
-            listener.updateSlaveComponent();
-        }
-    }
-    
-    private abstract class SlaveSelectionListener implements SelectionListener {
-        @Override
-        public void widgetDefaultSelected(SelectionEvent e) {
-
-        }
-
-        @Override
-        public void widgetSelected(SelectionEvent e) {
-            updateSlaveComponent();
-        }
-
-        protected abstract void updateSlaveComponent();
-    }
-        
-    private class MasterButtonSlaveSelectionListener extends SlaveSelectionListener{
-        private Button master;
-        private Control slave;
-
-        public MasterButtonSlaveSelectionListener(Button master, Control slave) {
-            this.master = master;
-            this.slave = slave;
-        }
-
-        protected void updateSlaveComponent() {
-            boolean state = master.getSelection();
-            slave.setEnabled(state);
-        }
-    }
-    
-    private class MasterComboSlaveSelectionListener extends SlaveSelectionListener {
-        private Combo master;
-        private Control slave;
-        private List<String> enabledVariants;
-
-        public MasterComboSlaveSelectionListener(Combo master, Control slave, List<String> enabledVariants) {
-            this.master = master;
-            this.slave = slave;
-            if (enabledVariants==null) {
-                this.enabledVariants=Collections.emptyList();
-            }else {
-                this.enabledVariants=new ArrayList<String>(enabledVariants);
-            }
-        }
-
-
-        protected void updateSlaveComponent() {
-            int index = master.getSelectionIndex();
-            boolean enabled = false;
-            if (index!=-1) {
-                String[] items = master.getItems();
-                if (items!=null && items.length>index) {
-                    String selected = items[index];
-                    enabled = enabledVariants.contains(selected);
-                }
-            }
-            slave.setEnabled(enabled);
-        }
-    }
+   
 }
