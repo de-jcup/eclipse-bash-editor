@@ -50,7 +50,7 @@ public class SharedBashModelSupportProvider extends AbstractConfigurableModelBui
     }
 
     @Override
-    public boolean isProjectModelBuilderSupportEnabled() {
+    public boolean isModelBuilderSupportEnabled() {
         return BashEditorPreferences.getInstance().isSharedModelBuildEnabled();
     }
 
