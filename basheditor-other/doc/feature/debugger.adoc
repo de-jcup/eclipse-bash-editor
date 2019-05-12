@@ -1,0 +1,40 @@
+== Debugger
+=== Terminal handling
+
+==== Linux
+===== Mint Linux
+Standard way is currently to use gnome terminal in such way (under the hood)
+----
+bash -c x-terminal-emulator -e bash --login -c 'cd /tmp/xyz;./terminallaunchXYZ.sh -a 1 -b 2;_exit_status=$?;echo "XYZ"'
+----
+===== CentOS
+With https://github.com/de-jcup/eclipse-bash-editor/issues/150 a problem
+come up with cent OS: The terminal was not launchable out of the box
+
+===== More common way
+There must be a possibility to define a custom approach but still preventing users to make things wrong... or have to change every time the call.
+ 
+====== Potential solution
+Provide the complete execution string and define a variable
+which represents the script to launch.
+
+For example:
+----
+bash -c x-terminal-emulator -e bash --login -c 'cd ${EBE_TMP_FOLDER};./${EBE_SCRIPTNAME} -a 1 -b 2;_exit_status=$?;echo "XYZ"'
+----
+
+
+==== Windows
+===== Win 7
+====== GIT for windows (MinGW)
+Win7 with installed `GIT for windows` comes up with a MinGW and the 
+defaults are working good
+
+===== Win 10
+====== WSL
+There are problems with the handling, see 
+https://github.com/de-jcup/eclipse-bash-editor/issues/155 for details.
+
+
+
+
