@@ -18,14 +18,15 @@ package de.jcup.basheditor;
 import static org.eclipse.core.runtime.Assert.*;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 
 import de.jcup.basheditor.script.BashFunction;
-import de.jcup.eclipse.commons.EclipseResourceHelper;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashExternalFunctionHyperlink implements IHyperlink {
@@ -62,7 +63,8 @@ public class BashExternalFunctionHyperlink implements IHyperlink {
     public void open() {
         IEditorPart editor;
         try {
-            editor = EclipseResourceHelper.DEFAULT.openInEditor(file);
+            IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+            editor = IDE.openEditor(page, file,BashEditor.EDITOR_ID);
             if (editor instanceof BashEditor) {
                 BashEditor be = (BashEditor) editor;
                 be.selectAndReveal(function.getPosition(), function.getLengthToNameEnd());

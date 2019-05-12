@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+fooShell(){
+    echo "from shell without file name extension..."
+}

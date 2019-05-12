@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
+import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.eclipse.commons.ui.UIMasterSlaveSupport;
 import de.jcup.eclipse.commons.ui.preferences.AccessibleBooleanFieldEditor;
 import de.jcup.eclipse.commons.ui.preferences.ChangeableComboFieldEditor;
@@ -71,6 +72,8 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
     private BooleanFieldEditor toolTipsEnabled;
     private BooleanFieldEditor showVariablesInOutline;
     private UIMasterSlaveSupport uiMasterSlaveSupport;
+    private AccessibleBooleanFieldEditor sharedModelBuildEnabled;
+    private boolean sharedModelBuildEnabledBefore;
 
     public BashEditorPreferencePage() {
         super(GRID);
@@ -80,7 +83,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 
     @Override
     public void init(IWorkbench workbench) {
-
+        this.sharedModelBuildEnabledBefore=BashEditorPreferences.getInstance().isSharedModelBuildEnabled();
     }
 
     @Override
@@ -96,6 +99,15 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
             setBoolean(P_EDITOR_MATCHING_BRACKETS_ENABLED, matchingBrackets);
             setBoolean(P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION, highlightBracketAtCaretLocation);
             setBoolean(P_EDITOR_ENCLOSING_BRACKETS, enclosingBrackets);
+            
+            /* check */
+            if (!sharedModelBuildEnabledBefore) {
+                if (sharedModelBuildEnabled.getBooleanValue()) {
+                    /* means enabled again... we must rebuild the complete model */
+                    BashEditorActivator.getDefault().rebuildSharedBashModel();
+                }
+            }
+            
         } 
         return ok;
     }
@@ -258,7 +270,15 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
         /* ------------------------ */
         /* -- Shared model setup -- */
         /* ------------------------ */
-        AccessibleBooleanFieldEditor sharedModelBuildEnabled = new AccessibleBooleanFieldEditor(P_SHARED_MODEL_ENABLED.getId(), "Shared model build enabled", appearanceComposite);
+        sharedModelBuildEnabled = new AccessibleBooleanFieldEditor(P_SHARED_MODEL_ENABLED.getId(), "Shared model build enabled", appearanceComposite);
+        sharedModelBuildEnabled.getLabelControl(appearanceComposite).setToolTipText(
+                  "When enabled a shared bash model is build which can be used \n"
+                + "between different bash editor instances.\n"
+                + "\n"
+                + "This will make some special features available.\n"
+                + "If you have performance problems because of if this model build\n"
+                + "you can disable it here.\n");
+        
         addField(sharedModelBuildEnabled);
         
         GridData sharedModelGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
@@ -271,7 +291,8 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 
         String[][] linkStrategyLabelAndValues = new String[][] { new String[] { SCRIPT.getLabelText(), SCRIPT.getId() }, new String[] { PROJECT.getLabelText(), PROJECT.getId() },
                 new String[] { WORKSPACE.getLabelText(), WORKSPACE.getId() }, };
-        ChangeableComboFieldEditor linkStrategy = new ChangeableComboFieldEditor(P_LINK_FUNCTIONS_STRATEGY.getId(), "Link functions strategy", linkStrategyLabelAndValues, sharedModelGroup) ;
+        ChangeableComboFieldEditor linkStrategy = new ChangeableComboFieldEditor(P_LINK_FUNCTIONS_STRATEGY.getId(), "Function hyperlink strategy", linkStrategyLabelAndValues, sharedModelGroup) ;
+        linkStrategy.getLabelControl(sharedModelGroup).setToolTipText("This defines how hyperlinking in functions works - means potential targets can be resolved.");
         addField(linkStrategy);
         uiMasterSlaveSupport.createDependency(sharedModelBuildEnabled.getChangeControl(appearanceComposite),sharedModelGroup);
         uiMasterSlaveSupport.updateSlaveComponents();

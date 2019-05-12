@@ -86,4 +86,8 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
 	    return modelProvider.getWorkspaceModelSupport().getModel();
 	}
 
+    public void rebuildSharedBashModel() {
+        modelProvider.getWorkspaceModelSupport().fullRebuild();
+    }
+
 }
