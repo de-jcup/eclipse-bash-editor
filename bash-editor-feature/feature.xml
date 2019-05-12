@@ -2,22 +2,24 @@
 <feature
       id="de.jcup.basheditor"
       label="Bash Editor"
-      version="2.1.0"
+      version="2.1.1"
       provider-name="Albert Tregnaghi">
 
    <description url="https://marketplace.eclipse.org/content/bash-editor">
-      Bash Editor is a eclipse plugin to edit and debug bash scripts (.sh)
+      Bash Editor is a eclipse plugin to edit and debug bash scripts
+(.sh)
 It supports 
 - Integrated debugger
 - Outline + Quickoutline
-- Hyperlinking
-- Syntax coloring which is customizeable and has additional defaults for dark theme
+- Hyperlinking (different scopes possible: script, project, workspace)
+- Syntax coloring which is customizeable and has additional defaults
+for dark theme
 - Bracket switching + highlighting
 - Block commenting (CTRL+7)
 - Auto bracket closing for []
 - Validation
-- Outline + Quickoutline
 - OnSave actions
+- ... more see https://github.com/de-jcup/eclipse-bash-editor/wiki for more details
    </description>
 
    <copyright>

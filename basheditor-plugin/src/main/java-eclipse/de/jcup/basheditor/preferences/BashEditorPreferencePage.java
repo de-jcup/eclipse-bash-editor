@@ -271,11 +271,10 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
         /* -- Shared model setup -- */
         /* ------------------------ */
         sharedModelBuildEnabled = new AccessibleBooleanFieldEditor(P_SHARED_MODEL_ENABLED.getId(), "Shared model build enabled", appearanceComposite);
-        sharedModelBuildEnabled.getLabelControl(appearanceComposite).setToolTipText(
-                  "When enabled a shared bash model is build which can be used \n"
-                + "between different bash editor instances.\n"
+        sharedModelBuildEnabled.getDescriptionControl(appearanceComposite).setToolTipText(
+                  "When enabled a bash model is build which contains all bash script models among complete workspace.\n"
                 + "\n"
-                + "This will make some special features available.\n"
+                + "This will make some special features available: E.g. hyperlinking to external defined functions.\n"
                 + "If you have performance problems because of if this model build\n"
                 + "you can disable it here.\n");
         
