@@ -30,7 +30,7 @@ public class BashFunctionHyperlink implements IHyperlink {
 	
 
 	public BashFunctionHyperlink(IRegion region, BashFunction function, BashEditor editor) {
-		isNotNull(region, "Gradle hyperlink region may not be null!");
+		isNotNull(region, "Bash hyperlink region may not be null!");
 		isNotNull(function, "function may not be null!");
 		isNotNull(editor, "editor may not be null!");
 		this.region = region;

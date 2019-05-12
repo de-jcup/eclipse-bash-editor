@@ -36,7 +36,7 @@ public class BashExternalFunctionHyperlink implements IHyperlink {
     private IFile file;
 
     public BashExternalFunctionHyperlink(IRegion region, BashFunction function, IFile file) {
-        isNotNull(region, "Gradle hyperlink region may not be null!");
+        isNotNull(region, "Bash hyperlink region may not be null!");
         isNotNull(function, "function may not be null!");
         isNotNull(file, "file may not be null!");
         this.region = region;
