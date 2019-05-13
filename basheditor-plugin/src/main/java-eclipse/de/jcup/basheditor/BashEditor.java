@@ -47,6 +47,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension2;
@@ -390,6 +391,10 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     public <T> T getAdapter(Class<T> adapter) {
         if (BashEditor.class.equals(adapter)) {
             return (T) this;
+        }
+        if (ITextViewer.class.equals(adapter)){
+        	/* fall back for Eclipse neon working - AbstractTextEditor did not support his in neon, so adapter was always null... see #162 */
+        	return (T)getSourceViewer();
         }
         if (IContentOutlinePage.class.equals(adapter)) {
             return (T) getOutlinePage();
