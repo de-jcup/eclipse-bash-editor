@@ -17,4 +17,5 @@
    <feature url="features/de.jcup.basheditor_2.0.1.jar" id="de.jcup.basheditor" version="2.0.1"/>
    <feature url="features/de.jcup.basheditor_2.1.0.jar" id="de.jcup.basheditor" version="2.1.0"/>
    <feature url="features/de.jcup.basheditor_2.1.1.jar" id="de.jcup.basheditor" version="2.1.1"/>
+   <feature url="features/de.jcup.basheditor_2.1.2.jar" id="de.jcup.basheditor" version="2.1.2"/>
 </site>
