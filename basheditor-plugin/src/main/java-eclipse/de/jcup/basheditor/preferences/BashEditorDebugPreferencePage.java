@@ -15,8 +15,12 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
-import static org.eclipse.swt.events.SelectionListener.*;
+import static de.jcup.basheditor.NeonCompatiblity.widgetSelectedAdapter;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ALWAYS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ON_ERRORS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_IN_TERMINAL_ENABLED;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_XTERMINAL_SNIPPET;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHOW_META_INFO_IN_DEBUG_CONSOLE;
 
 import java.io.IOException;
 
@@ -128,5 +132,6 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 		}
 		return null;
 	}
+	
 
 }

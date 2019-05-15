@@ -15,9 +15,9 @@ package de.jcup.basheditor.preferences;
  *
  */
 
+import static de.jcup.basheditor.NeonCompatiblity.widgetSelectedAdapter;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED;
-import static org.eclipse.swt.events.SelectionListener.widgetSelectedAdapter;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -189,4 +189,6 @@ public class BashEditorSaveActionsPreferencePage extends FieldEditorPreferencePa
 		super.initialize();
 		enableSaveActionFieldEditors(isSaveActionEnabled());
 	}
+	
+	
 }
