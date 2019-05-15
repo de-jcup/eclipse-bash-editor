@@ -23,12 +23,27 @@ For example:
 bash -c x-terminal-emulator -e bash --login -c 'cd ${EBE_TMP_FOLDER};./${EBE_SCRIPTNAME} -a 1 -b 2;_exit_status=$?;echo "XYZ"'
 ----
 
+or (maybe better):
+----
+bash -c x-terminal-emulator -e bash --login -c '${BE_CMD_CALL}'
+----
+
 
 ==== Windows
 ===== Win 7
 ====== GIT for windows (MinGW)
 Win7 with installed `GIT for windows` comes up with a MinGW and the 
 defaults are working good
+----
+ cmd.exe /C start "Bash Editor DEBUG Session: test.sh" cmd.exe /C "bash --login -c './test.sh ;_exit_status=$?;echo "Exit code=$_exit_status";read -p "Press enter to continue..."'"
+----
+
+reduced:
+
+----
+ cmd.exe /C start "${BE_CMD_TITLE}" cmd.exe /C "bash --login -c '${BE_CMD_CALL}'
+----
+
 
 ===== Win 10
 ====== WSL
@@ -36,5 +51,14 @@ There are problems with the handling, see
 https://github.com/de-jcup/eclipse-bash-editor/issues/155 for details.
 
 
+=== General approach
+- Use a new preference id for the terminal command (so no migration necessary)
+- Default becomes system specific, so pressing `Restore Defaults` will bring up
+  os relevant standard which is currently working for win7 and Linux Mint/Ubuntu
+- Should be inside a bigger Textfield (like done for AsciiDoctor-Editor) and
+  separate whitespaces to command parts.
+- There should be an option `Show resulting call` near `Test` button, so 
+  user can check the output before executing... The build command should
+  be shown in a text box where users can copy it.
 
 
