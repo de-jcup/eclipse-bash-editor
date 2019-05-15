@@ -491,15 +491,6 @@
        </launchConfigurationType>
 	</extension>
    <extension
-         point="org.eclipse.ui.editors">
-      <editor
-            class="de.jcup.basheditor.debug.BashSourceNotFoundEditor"
-            default="false"
-            id="org.eclipse.debug.ui.sourcelookup.CommonSourceNotFoundEditor"
-            name="SourceNotFoundEditor">
-      </editor>
-   </extension>
-   <extension
          point="org.eclipse.debug.core.watchExpressionDelegates">
       <watchExpressionDelegate
             debugModel="basheditor.debug.model"

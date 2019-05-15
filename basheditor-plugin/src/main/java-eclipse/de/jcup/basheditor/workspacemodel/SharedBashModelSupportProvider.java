@@ -21,6 +21,7 @@ import java.net.URI;
 
 import org.eclipse.core.resources.IFile;
 
+import de.jcup.basheditor.BashFileExtensionMatcher;
 import de.jcup.basheditor.EclipseDeveloperSettings;
 import de.jcup.basheditor.LineIsBashSheBangValidator;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
@@ -32,6 +33,7 @@ import de.jcup.eclipse.commons.workspacemodel.ModelBuilder;
 public class SharedBashModelSupportProvider extends AbstractConfigurableModelBuilderSupportProvider<SharedBashModel> {
 
     private LineIsBashSheBangValidator sheBangValidator;
+    private BashFileExtensionMatcher matcher = new BashFileExtensionMatcher();
 
     public SharedBashModelSupportProvider(PluginContextProvider provider) {
         super(provider);
@@ -80,7 +82,7 @@ public class SharedBashModelSupportProvider extends AbstractConfigurableModelBui
                 EclipseUtil.logError("Was not able to read file " + file, e, getPluginContextProvider());
                 return false;
             }
-        } else if (fileExtension.contentEquals("sh") || fileExtension.contentEquals("bash")) {
+        } else if (matcher.isMatching(fileExtension,false)) {
             /* always accepted */
             return true;
         }

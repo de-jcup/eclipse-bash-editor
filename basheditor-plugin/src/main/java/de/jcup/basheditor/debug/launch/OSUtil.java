@@ -20,10 +20,12 @@ import java.util.regex.Pattern;
 public class OSUtil {
     private static final Pattern WINDOWS_BACKSLASH_TO_SLASH_PATTERN = Pattern.compile("\\\\");
 	private static boolean isWindows;
+    private static boolean isMac;
 	
 	static {
 		String osName = System.getProperty("os.name");
 		isWindows = osName.toLowerCase().indexOf("windows")!=-1;
+		isMac=osName.toLowerCase().indexOf("mac")!=-1;
 	}
 	
 	public static boolean isWindows() {
@@ -47,5 +49,9 @@ public class OSUtil {
         sb.append(WINDOWS_BACKSLASH_TO_SLASH_PATTERN.matcher(remaining).replaceAll("/"));
         
         return sb.toString();
+    }
+
+    public static boolean isMacOS() {
+        return isMac;
     }
 }

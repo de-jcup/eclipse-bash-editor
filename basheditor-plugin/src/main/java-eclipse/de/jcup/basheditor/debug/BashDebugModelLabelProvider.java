@@ -15,26 +15,37 @@
  */
 package de.jcup.basheditor.debug;
 
+import java.io.File;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.ILineBreakpoint;
 import org.eclipse.debug.core.model.IValue;
+import org.eclipse.debug.core.sourcelookup.containers.LocalFileStorage;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IValueDetailListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
 import de.jcup.basheditor.BashEditor;
 import de.jcup.basheditor.BashEditorActivator;
+import de.jcup.basheditor.BashFileExtensionMatcher;
 import de.jcup.basheditor.EclipseUtil;
+import de.jcup.basheditor.FileExtensionExtractor;
 import de.jcup.basheditor.debug.element.AbstractBashDebugElement;
 import de.jcup.basheditor.debug.element.BashVariable;
 
 public class BashDebugModelLabelProvider extends LabelProvider implements IDebugModelPresentation {
 	private static final String FALLBACK_DETAIL_VALUE = "";
-
+	private BashFileExtensionMatcher matcher = new BashFileExtensionMatcher();
+	private FileExtensionExtractor extractor = new FileExtensionExtractor();
+	
 	public void setAttribute(String attribute, Object value) {
 	}
 
@@ -71,12 +82,54 @@ public class BashDebugModelLabelProvider extends LabelProvider implements IDebug
 		if (element instanceof ILineBreakpoint) {
 			return new FileEditorInput((IFile) ((ILineBreakpoint) element).getMarker().getResource());
 		}
+		if (element instanceof LocalFileStorage) {
+		    LocalFileStorage lfs = (LocalFileStorage) element;
+		  
+		    File file = lfs.getFile();
+		    if (file==null) {
+		        return null;
+		    }
+		    IFileStore fileStore;
+            try {
+                fileStore= EFS.getStore(file.toURI());
+                return new FileStoreEditorInput(fileStore);
+            }catch(Exception e) {
+                EclipseUtil.logError("Was not able to get file store for file:"+file, e);
+            }
+		}
 		return null;
 	}
 
 	public String getEditorId(IEditorInput input, Object element) {
-		if (element instanceof IFile || element instanceof ILineBreakpoint) {
-			return BashEditor.EDITOR_ID;
+	    if (element instanceof BashLineBreakpoint) {
+            return BashEditor.EDITOR_ID;
+        }
+	    if (element instanceof IFileEditorInput) {
+	        IFileEditorInput fei = (IFileEditorInput) element;
+	        element = fei.getFile();
+	    }
+	    if (element instanceof LocalFileStorage) {
+	        LocalFileStorage lfs = (LocalFileStorage) element;
+            File file = lfs.getFile();
+            if (file==null) {
+                return null;
+            }
+            String fileExtension = extractor.extractFileExtension(file);
+            if (matcher.isMatching(fileExtension)){
+                return BashEditor.EDITOR_ID;
+            }else {
+                return null;
+            }
+            
+        }
+	    if (element instanceof IFile) {
+	        IFile file = (IFile) element;
+	        String fileExtension = file.getFileExtension();
+	        if (matcher.isMatching(fileExtension,false)){
+	            return BashEditor.EDITOR_ID;
+	        }else {
+	            return null;
+	        }
 		}
 		return null;
 	}
