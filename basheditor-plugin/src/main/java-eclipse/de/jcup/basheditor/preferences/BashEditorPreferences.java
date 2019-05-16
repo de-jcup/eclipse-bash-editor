@@ -186,7 +186,7 @@ public class BashEditorPreferences {
 	}
 
 	public String getXTerminalSnippet() {
-		return getStringPreference(BashEditorPreferenceConstants.P_LAUNCH_XTERMINAL_SNIPPET);
+		return getStringPreference(BashEditorPreferenceConstants.P_LAUNCH_TERMINAL_COMMAND);
 	}
 
 	public boolean isLaunchedTerminalWaitingOnErrors() {
