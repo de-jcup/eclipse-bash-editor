@@ -22,54 +22,38 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import de.jcup.basheditor.BashEditorActivator;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
+
 public class TerminalLaucherTestExecution {
 
 	private static boolean outsideEclipse;
+	private static final String params = "-a 1 -b 2";
 	
     public static void main(String[] args) throws Exception {
     	outsideEclipse=true;
-        tryToExecuteTemporaryTestBashScript();
+        tryToExecuteTemporaryTestBashScript("xxx");
     }
-
-	public static void tryToExecuteTemporaryTestBashScript() throws IOException {
-		TerminalLauncher launcher = new TerminalLauncher() {
-            protected void logExectionError(java.io.IOException e) {
-            	if (outsideEclipse) {
-            		e.printStackTrace();
-            	}else {
-            		super.logExectionError(e);
-            	}
-            }
-
-            @Override
-            protected void logExecutedCommand(LaunchRunnable runnable) {
-            	if (outsideEclipse) {
-            		System.out.println(">>> runnable cmd:\n"+runnable.createCommandString());
-            	}else {
-            		super.logExecutedCommand(runnable);
-            	}
-            }
-            
-            @Override
-            protected boolean isWaitingAlways() {
-            	if (outsideEclipse) {
-            		return false;
-            	}
-                return super.isWaitingAlways();
-            }
-            
-            @Override
-            protected boolean isWaitingOnErrors() {
-            	if (outsideEclipse) {
-            		return true;
-            	}
-                return super.isWaitingOnErrors();
-            }
-        };
+    public static String simulateCallCommandForTestBashScript(String terminalCommand) throws IOException {
+        try{
+            return createLauncher().simulate(createTempFile(), params, terminalCommand);
+        }catch(IOException e) {
+            EclipseUtil.logError("Was not able create test file", e, BashEditorActivator.getDefault());
+            return "";
+        }
         
-        String params = "-a 1 -b 2";
+    }
+	public static void tryToExecuteTemporaryTestBashScript(String terminalCommand) throws IOException {
 
-        // --------------------------------------------------------------------------------------------------------------------------------|123456789
+      
+
+        TerminalLauncher launcher = createLauncher();
+        
+        launcher.execute(createTempFile(), params,terminalCommand);
+	}
+	
+	private static File createTempFile() throws IOException {
+	    // --------------------------------------------------------------------------------------------------------------------------------|123456789
         Path tempFile = Files.createTempFile("terminallaunch", ".sh");
         File temp = tempFile.toFile();
         temp.setExecutable(true, true);
@@ -80,7 +64,44 @@ public class TerminalLaucherTestExecution {
             bw.write("echo $1 $2 $3\n");
             bw.write("exit 1");
         }
+        return temp;
+	}
+	
+	private static TerminalLauncher createLauncher() {
+	    TerminalLauncher launcher = new TerminalLauncher() {
+            protected void logExectionError(java.io.IOException e) {
+                if (outsideEclipse) {
+                    e.printStackTrace();
+                }else {
+                    super.logExectionError(e);
+                }
+            }
 
-        launcher.execute(temp, params,TerminalLauncher.DEFAULT_XTERMINAL_SNIPPET);
+            @Override
+            protected void logExecutedCommand(LaunchRunnable runnable) {
+                if (outsideEclipse) {
+                    System.out.println(">>> runnable cmd:\n"+runnable.createCommandString());
+                }else {
+                    super.logExecutedCommand(runnable);
+                }
+            }
+            
+            @Override
+            protected boolean isWaitingAlways() {
+                if (outsideEclipse) {
+                    return false;
+                }
+                return super.isWaitingAlways();
+            }
+            
+            @Override
+            protected boolean isWaitingOnErrors() {
+                if (outsideEclipse) {
+                    return true;
+                }
+                return super.isWaitingOnErrors();
+            }
+        };
+        return launcher; 
 	}
 }

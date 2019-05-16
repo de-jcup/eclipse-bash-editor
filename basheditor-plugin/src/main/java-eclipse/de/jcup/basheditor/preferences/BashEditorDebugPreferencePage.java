@@ -33,6 +33,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -45,9 +46,10 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 	private BooleanFieldEditor launchInExternalTerminalEnabled;
 	private BooleanFieldEditor showMetaInfoInDebugConsoleEnabled;
 	private BooleanFieldEditor keepExternalTerminalOpenOnErrors;
-	private StringFieldEditor launchXterminalSnippet;
+	private StringFieldEditor launchTerminalCommand;
 	private Button testTerminalButton;
 	private BooleanFieldEditor keepExternalTerminalOpenAlways;
+    private Text text;
 
 	public BashEditorDebugPreferencePage() {
 		super(GRID);
@@ -87,30 +89,44 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 		keepExternalTerminalOpenAlways.getDescriptionControl(terminalGroup).setToolTipText("Keep external terminal  always open, even when exit code =0.");
 		addField(keepExternalTerminalOpenAlways);
 
-		launchXterminalSnippet = new StringFieldEditor(P_LAUNCH_TERMINAL_COMMAND.getId(), "XTerminal command", terminalGroup);
-		launchXterminalSnippet.getTextControl(terminalGroup)
-				.setToolTipText("Define your XTerminal command with valid option to execute a bash snippet.\nDefault value is suitable for alternative x-terminal set to gnome or mate-terminal");
-		addField(launchXterminalSnippet);
+		launchTerminalCommand = new StringFieldEditor(P_LAUNCH_TERMINAL_COMMAND.getId(), "Start command", terminalGroup);
+		launchTerminalCommand.getTextControl(terminalGroup)
+				.setToolTipText("Define your command to provide a login shell which can execute script\nand keeps terminal open for debug output");
+		addField(launchTerminalCommand);
 
-		if ( OSUtil.isWindows()) {
-			/* we disable this option at Linux */
-			launchXterminalSnippet.setEnabled(false, terminalGroup);
-		}
+
+		Button showTestTerminalCommandButton = new Button(terminalGroup, SWT.PUSH);
+		showTestTerminalCommandButton.setText("Show result cmd");
+		showTestTerminalCommandButton.setToolTipText("Will show resulting cmd call for your given command\n\nSo you are able to test out the behaviours of \n'Keep terminal open on errors/always'");
+		showTestTerminalCommandButton.addSelectionListener(widgetSelectedAdapter(e -> doShowCommandString()));
+
+		GridData showTestTerminalCommandButtonGridData = new GridData();
+		showTestTerminalCommandButtonGridData.horizontalAlignment = GridData.END;
+		showTestTerminalCommandButtonGridData.horizontalSpan = 1;
+		showTestTerminalCommandButton.setLayoutData(showTestTerminalCommandButtonGridData);
 
 		testTerminalButton = new Button(terminalGroup, SWT.PUSH);
-		testTerminalButton.setText("Test Terminal");
-		testTerminalButton.setToolTipText("Will execute a test bash script which will fail with exit code 1.\n\nSo you are able to test out the behaviours of \n'Keep terminal open on errors/always'");
-		testTerminalButton.addSelectionListener(widgetSelectedAdapter(e -> doValidateExternalTool()));
+        testTerminalButton.setText("Test Terminal");
+        testTerminalButton.setToolTipText("Will execute a test bash script which will fail with exit code 1.\n\nSo you are able to test out the behaviours of \n'Keep terminal open on errors/always'");
+        testTerminalButton.addSelectionListener(widgetSelectedAdapter(e -> doExecuteTestScript()));
 
-		GridData testTerminalButtonGridData = new GridData();
-		testTerminalButtonGridData.horizontalAlignment = GridData.END;
-		testTerminalButtonGridData.horizontalSpan = 2;
-		testTerminalButton.setLayoutData(testTerminalButtonGridData);
+        GridData testTerminalButtonGridData = new GridData();
+        testTerminalButtonGridData.horizontalAlignment = GridData.END;
+        testTerminalButtonGridData.horizontalSpan = 1;
+        testTerminalButton.setLayoutData(testTerminalButtonGridData);
+//		/* just add an empty label as divider */
+//		new Label(getFieldEditorParent(), SWT.NONE);
 
-		/* just add an empty label as divider */
-		new Label(getFieldEditorParent(), SWT.NONE);
+        GridData testCommandOutputGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//		testCommandOutputGridData.horizontalAlignment = GridData.BEGINNING;
+        testCommandOutputGridData.horizontalSpan =2;
+        
+        text = new Text(terminalGroup, SWT.SINGLE | SWT.LEAD | SWT.BORDER);
+        text.setLayoutData(testCommandOutputGridData);
+        text.setText("");
+        text.setEditable(false);
 
-		/* ---------------- */
+        /* ---------------- */
 		/* -- CONSOLE -- */
 		/* ---------------- */
 		Group consoleGroup = new Group(getFieldEditorParent(), SWT.NONE);
@@ -124,14 +140,24 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 
 	}
 
-	private Object doValidateExternalTool() {
+	private Object doShowCommandString() {
 		try {
-			TerminalLaucherTestExecution.tryToExecuteTemporaryTestBashScript();
+			String result = TerminalLaucherTestExecution.simulateCallCommandForTestBashScript(launchTerminalCommand.getStringValue());
+			text.setText(result);
 		} catch (IOException e) {
 			EclipseUtil.logError("Was not able execute test", e);
 		}
 		return null;
 	}
+	
+	private Object doExecuteTestScript() {
+        try {
+            TerminalLaucherTestExecution.tryToExecuteTemporaryTestBashScript(launchTerminalCommand.getStringValue());
+        } catch (IOException e) {
+            EclipseUtil.logError("Was not able execute test", e);
+        }
+        return null;
+    }
 	
 
 }

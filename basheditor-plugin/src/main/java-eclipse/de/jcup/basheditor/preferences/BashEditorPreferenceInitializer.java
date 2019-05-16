@@ -24,7 +24,10 @@ import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConst
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import de.jcup.basheditor.debug.launch.TerminalLauncher;
+import de.jcup.basheditor.debug.launch.DefaultLinuxTerminalCommandStringProvider;
+import de.jcup.basheditor.debug.launch.DefaultTerminalCommandStringProvider;
+import de.jcup.basheditor.debug.launch.DefaultWindowsTerminalCommandStringProvider;
+import de.jcup.basheditor.debug.launch.OSUtil;
 import de.jcup.basheditor.script.parser.validator.BashEditorValidationErrorLevel;
 
 /**
@@ -104,7 +107,8 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		store.setDefault(P_KEEP_TERMINAL_OPEN_ON_ERRORS.getId(),true);
 		store.setDefault(P_KEEP_TERMINAL_OPEN_ALWAYS.getId(),false);
 		store.setDefault(P_SHOW_META_INFO_IN_DEBUG_CONSOLE.getId(),false);
-		store.setDefault(P_LAUNCH_TERMINAL_COMMAND.getId(),TerminalLauncher.DEFAULT_XTERMINAL_SNIPPET);
+		
+		store.setDefault(P_LAUNCH_TERMINAL_COMMAND.getId(),createOSSpecificDefaultCommandStringProvder().getDefaultTerminalCommandString());
 		
 		/* ++++++++++++++++ */
         /* + replace tab + */
@@ -121,5 +125,12 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
         store.setDefault(P_LINK_FUNCTIONS_STRATEGY.getId(),BashEditorLinkFunctionStrategy.getDefault().getId());
 		
 	}
+	
+	private DefaultTerminalCommandStringProvider createOSSpecificDefaultCommandStringProvder() {
+        if (OSUtil.isWindows()) {
+            return new DefaultWindowsTerminalCommandStringProvider();
+        }
+        return new DefaultLinuxTerminalCommandStringProvider();
+    }
 
 }

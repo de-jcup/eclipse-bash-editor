@@ -39,33 +39,38 @@ import de.jcup.eclipse.commons.ui.EclipseUtil;
  * @formatter:on
  */
 public class TerminalLauncher {
-
-	public final static String DEFAULT_XTERMINAL_SNIPPET = "x-terminal-emulator -e";
-
-	public void execute(File file, String params, String linuxTerminalSnippet) {
-		if (linuxTerminalSnippet == null) {
-			linuxTerminalSnippet = DEFAULT_XTERMINAL_SNIPPET;
-		}
+    
+	public void execute(File file, String params, String terminalCommand) {
 		/* setup context */
-		TerminalLaunchContext context = new TerminalLaunchContext();
-		context.file = file;
-		context.params = params;
-		context.terminalCommand = linuxTerminalSnippet;
-		context.waitAlways = isWaitingAlways();
-		context.waitOnErrors = isWaitingOnErrors();
-
-		/* build command list */
-		TerminalCommandListBuilder commandListBuilder = createOSSpecificCommandListBuilder();
-		List<String> commands = commandListBuilder.buildCommands(context);
-
+	    if (file==null) {
+	        EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
+	        return;
+	    }
+	    TerminalLaunchContext context = createContext(file, params, terminalCommand);
+		
 		/* execute in own thread */
-		LaunchRunnable launchRunnable = new LaunchRunnable(context.getWoringDirFile(), commands);
+		LaunchRunnable launchRunnable = new LaunchRunnable(context.getWoringDirFile(), context.commands);
 		Thread thread = new Thread(launchRunnable);
 		thread.setName("Launch in terminal:" + file.getName());
 		thread.start();
 	}
 
-	protected boolean isWaitingOnErrors() {
+	public String simulate(File file, String params, String terminalCommand) {
+        /* setup context */
+        if (file==null) {
+            EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
+            return "";
+        }
+        TerminalLaunchContext context = createContext(file, params, terminalCommand);
+        return context.commandString;
+    }
+
+	private TerminalLaunchContext createContext(File file, String params, String terminalCommand) {
+	    return TerminalLaunchContextBuilder.builder().file(file).command(terminalCommand).params(params).waitingAlways(isWaitingAlways()).waitingOnErrors(isWaitingOnErrors()).build();
+	}
+	
+
+    protected boolean isWaitingOnErrors() {
 		return BashEditorPreferences.getInstance().isLaunchedTerminalWaitingOnErrors();
 	}
 
@@ -84,12 +89,7 @@ public class TerminalLauncher {
 		}
 	}
 
-	private TerminalCommandListBuilder createOSSpecificCommandListBuilder() {
-		if (OSUtil.isWindows()) {
-			return new WindowsTerminalCommandListBuilder();
-		}
-		return new LinuxTerminalCommandListBuilder();
-	}
+	
 
 	protected class LaunchRunnable implements Runnable {
 
