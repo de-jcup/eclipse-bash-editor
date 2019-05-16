@@ -17,7 +17,6 @@ package de.jcup.basheditor.debug.launch;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import de.jcup.basheditor.BashEditorActivator;
@@ -48,10 +47,10 @@ public class TerminalLauncher {
 			linuxTerminalSnippet = DEFAULT_XTERMINAL_SNIPPET;
 		}
 		/* setup context */
-		LaunchContext context = new LaunchContext();
+		TerminalLaunchContext context = new TerminalLaunchContext();
 		context.file = file;
 		context.params = params;
-		context.xTerminalSnippet = linuxTerminalSnippet;
+		context.terminalCommand = linuxTerminalSnippet;
 		context.waitAlways = isWaitingAlways();
 		context.waitOnErrors = isWaitingOnErrors();
 
@@ -90,111 +89,6 @@ public class TerminalLauncher {
 			return new WindowsTerminalCommandListBuilder();
 		}
 		return new LinuxTerminalCommandListBuilder();
-	}
-
-	private class LaunchContext {
-		File file;
-		String params;
-		String xTerminalSnippet;
-		boolean waitAlways;
-		boolean waitOnErrors;
-		boolean switchToWorkingDirNecessary;
-
-		public String getUnixStyledWorkingDir() {
-			return getWoringDirFile().getAbsolutePath();
-		}
-
-		public File getWoringDirFile() {
-			return file.getParentFile();
-		}
-
-		public boolean isSwitchToWorkingDirNecessary() {
-			return switchToWorkingDirNecessary;
-		}
-	}
-
-	private abstract class TerminalCommandListBuilder {
-		protected abstract List<String> buildCommands(LaunchContext context);
-
-		protected String createBashCallerSnippet(LaunchContext context) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("bash --login -c '");
-			if (context.isSwitchToWorkingDirNecessary()) {
-				sb.append("cd ");
-				sb.append(context.getUnixStyledWorkingDir());
-				sb.append(";");
-			}
-			sb.append("./" + context.file.getName());
-			sb.append(" " + context.params);
-
-			sb.append(";");
-			sb.append("_exit_status=$?");
-			sb.append(";");
-			sb.append("echo \"Exit code=$_exit_status\"");
-			sb.append(";");
-			if (context.waitAlways) {
-				sb.append("read -p \"Press enter to continue...\"");
-			} else if (context.waitOnErrors) {
-				sb.append("if [ $_exit_status -ne 0 ]; then read -p \"Unexpected exit code:$_exit_status , press enter to continue\";fi");
-			}
-			sb.append("'");
-			return sb.toString();
-		}
-	}
-
-	private class WindowsTerminalCommandListBuilder extends TerminalCommandListBuilder {
-
-		@Override
-		protected List<String> buildCommands(LaunchContext context) {
-			context.switchToWorkingDirNecessary = false; // not necessary, because on windows the working is still same
-
-			List<String> commands = new ArrayList<String>();
-			commands.add("cmd.exe");
-
-			commands.add("/C");
-
-			commands.add("start");
-
-			commands.add("\"Bash Editor DEBUG Session: " + context.file.getName() + "\"");
-
-			commands.add("cmd.exe");
-
-			commands.add("/C");
-
-			StringBuilder fullSnippet = new StringBuilder();
-			fullSnippet.append("\"");
-			fullSnippet.append(createBashCallerSnippet(context));
-			fullSnippet.append("\"");
-			commands.add(fullSnippet.toString());
-
-			return commands;
-		}
-
-	}
-
-	private class LinuxTerminalCommandListBuilder extends TerminalCommandListBuilder {
-
-		@Override
-		protected List<String> buildCommands(LaunchContext context) {
-			context.switchToWorkingDirNecessary = true; // bash login on linux systems will lead to user home dir
-
-			List<String> commands = new ArrayList<String>();
-
-			commands.add("bash");
-
-			commands.add("-c");
-
-			StringBuilder fullSnippet = new StringBuilder();
-			fullSnippet.append(context.xTerminalSnippet);
-			fullSnippet.append(" ");
-			fullSnippet.append(createBashCallerSnippet(context));
-			commands.add(fullSnippet.toString());            	 
-
-			commands.add("&");
-
-			return commands;
-		}
-
 	}
 
 	protected class LaunchRunnable implements Runnable {

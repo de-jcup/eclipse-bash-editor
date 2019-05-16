@@ -104,7 +104,7 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		store.setDefault(P_KEEP_TERMINAL_OPEN_ON_ERRORS.getId(),true);
 		store.setDefault(P_KEEP_TERMINAL_OPEN_ALWAYS.getId(),false);
 		store.setDefault(P_SHOW_META_INFO_IN_DEBUG_CONSOLE.getId(),false);
-		store.setDefault(P_LAUNCH_XTERMINAL_SNIPPET.getId(),TerminalLauncher.DEFAULT_XTERMINAL_SNIPPET);
+		store.setDefault(P_LAUNCH_TERMINAL_COMMAND.getId(),TerminalLauncher.DEFAULT_XTERMINAL_SNIPPET);
 		
 		/* ++++++++++++++++ */
         /* + replace tab + */

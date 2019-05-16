@@ -19,7 +19,7 @@ import static de.jcup.basheditor.NeonCompatiblity.widgetSelectedAdapter;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ALWAYS;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ON_ERRORS;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_IN_TERMINAL_ENABLED;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_XTERMINAL_SNIPPET;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_TERMINAL_COMMAND;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHOW_META_INFO_IN_DEBUG_CONSOLE;
 
 import java.io.IOException;
@@ -87,7 +87,7 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 		keepExternalTerminalOpenAlways.getDescriptionControl(terminalGroup).setToolTipText("Keep external terminal  always open, even when exit code =0.");
 		addField(keepExternalTerminalOpenAlways);
 
-		launchXterminalSnippet = new StringFieldEditor(P_LAUNCH_XTERMINAL_SNIPPET.getId(), "XTerminal command", terminalGroup);
+		launchXterminalSnippet = new StringFieldEditor(P_LAUNCH_TERMINAL_COMMAND.getId(), "XTerminal command", terminalGroup);
 		launchXterminalSnippet.getTextControl(terminalGroup)
 				.setToolTipText("Define your XTerminal command with valid option to execute a bash snippet.\nDefault value is suitable for alternative x-terminal set to gnome or mate-terminal");
 		addField(launchXterminalSnippet);
