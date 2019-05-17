@@ -19,6 +19,7 @@ public class TerminalLaunchContextBuilder {
     
     private boolean waitingAlways;
     private boolean waitingOnErrors;
+    private String starterTemplate;
     private TerminalLaunchContextBuilder() {
         
     }
@@ -31,8 +32,12 @@ public class TerminalLaunchContextBuilder {
         return this;
     }
     
-    public TerminalLaunchContextBuilder command(String command) {
+    public TerminalLaunchContextBuilder terminalCommand(String command) {
         this.terminalCommand=command;
+        return this;
+    }
+    public TerminalLaunchContextBuilder starterCommand(String starterTemplate) {
+        this.starterTemplate=starterTemplate;
         return this;
     }
     
@@ -61,6 +66,7 @@ public class TerminalLaunchContextBuilder {
         context.switchToWorkingDirNecessary=true;
         context.commandString="";
         context.commands=new ArrayList<String>();
+        context.startTemplate=starterTemplate;
         
         try{
             /* build command list */
@@ -70,12 +76,15 @@ public class TerminalLaunchContextBuilder {
             map.put(TerminalCommandVariable.CMD_CALL.getId(), internalCommand);
             map.put(TerminalCommandVariable.CMD_TITLE.getId(), "Bash Editor DEBUG Session:"+file.getName());
             
-            List<String> list = toListConverter.convert(context.terminalCommand);
+            context.commandString= variableReplaceSupport.replaceVariables(context.terminalCommand, map);
+            map.put(TerminalCommandVariable.CMD_TERMINAL.getId(), context.commandString);
+            
+            
+            List<String> list = toListConverter.convert(context.startTemplate);
             for (String command: list) {
                 context.commands.add(variableReplaceSupport.replaceVariables(command, map));
             }
-            /* just for output ...*/
-            context.commandString= variableReplaceSupport.replaceVariables(context.terminalCommand, map);
+            
         }catch(RuntimeException e) {
             context.exception=e;
         }

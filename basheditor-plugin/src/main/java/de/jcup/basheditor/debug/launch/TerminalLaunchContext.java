@@ -13,6 +13,7 @@ class TerminalLaunchContext {
 	boolean switchToWorkingDirNecessary;
     String commandString;
     Exception exception;
+    String startTemplate;
 
 	public String getUnixStyledWorkingDir() {
 		File workingDirFile = getWoringDirFile();
