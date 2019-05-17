@@ -40,13 +40,13 @@ import de.jcup.eclipse.commons.ui.EclipseUtil;
  */
 public class TerminalLauncher {
     
-	public void execute(File file, String params, String terminalCommand) {
+	public void execute(File file, String params, String terminalCommand, String starterCommand) {
 		/* setup context */
 	    if (file==null) {
 	        EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
 	        return;
 	    }
-	    TerminalLaunchContext context = createContext(file, params, terminalCommand);
+	    TerminalLaunchContext context = createContext(file, params, terminalCommand,starterCommand);
 		
 		/* execute in own thread */
 		LaunchRunnable launchRunnable = new LaunchRunnable(context.getWoringDirFile(), context.commands);
@@ -55,18 +55,18 @@ public class TerminalLauncher {
 		thread.start();
 	}
 
-	public String simulate(File file, String params, String terminalCommand) {
+	public String simulate(File file, String params, String terminalCommand, String starterCommand) {
         /* setup context */
         if (file==null) {
             EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
             return "";
         }
-        TerminalLaunchContext context = createContext(file, params, terminalCommand);
+        TerminalLaunchContext context = createContext(file, params, terminalCommand, starterCommand);
         return context.commandString;
     }
 
-	private TerminalLaunchContext createContext(File file, String params, String terminalCommand) {
-	    return TerminalLaunchContextBuilder.builder().file(file).command(terminalCommand).params(params).waitingAlways(isWaitingAlways()).waitingOnErrors(isWaitingOnErrors()).build();
+	private TerminalLaunchContext createContext(File file, String params, String terminalCommand, String starterCommand) {
+	    return TerminalLaunchContextBuilder.builder().file(file).starterCommand(starterCommand).terminalCommand(terminalCommand).params(params).waitingAlways(isWaitingAlways()).waitingOnErrors(isWaitingOnErrors()).build();
 	}
 	
 

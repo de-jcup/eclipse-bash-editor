@@ -32,7 +32,7 @@ public class TerminalLaunchContextBuilderTest {
     }
 
     private String testProviderAndReturnCommandString(DefaultTerminalCommandStringProvider defaultProvider) {
-        return TerminalLaunchContextBuilder.builder().file(file).command(defaultProvider.getDefaultTerminalCommandString()).params("-a 1 -b 2").build().commandString;
+        return TerminalLaunchContextBuilder.builder().file(file).terminalCommand(defaultProvider.getDefaultTerminalCommandString()).params("-a 1 -b 2").build().commandString;
     }
 
 }

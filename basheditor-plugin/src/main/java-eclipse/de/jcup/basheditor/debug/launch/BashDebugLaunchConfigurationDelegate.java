@@ -88,8 +88,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 		launch.addDebugTarget(target);
 		/* debug process is started, so launch terminal or inform */
 		if (canDoAutoRun) {
-			terminalLauncher.execute(programFile, params, getPreferences().getXTerminalSnippet());
-
+			terminalLauncher.execute(programFile, params, getPreferences().getTerminalCommand(),getPreferences().getStarterCommand());
 		} else {
 			EclipseUtil.safeAsyncExec(new Runnable() {
 

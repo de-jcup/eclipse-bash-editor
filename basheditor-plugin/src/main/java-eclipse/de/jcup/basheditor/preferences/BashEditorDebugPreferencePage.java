@@ -15,12 +15,7 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.NeonCompatiblity.widgetSelectedAdapter;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ALWAYS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ON_ERRORS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_IN_TERMINAL_ENABLED;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_TERMINAL_COMMAND;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHOW_META_INFO_IN_DEBUG_CONSOLE;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 
 import java.io.IOException;
 
@@ -32,15 +27,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import de.jcup.basheditor.BashEditorUtil;
 import de.jcup.basheditor.EclipseUtil;
-import de.jcup.basheditor.debug.launch.OSUtil;
 import de.jcup.basheditor.debug.launch.TerminalLaucherTestExecution;
+import static de.jcup.basheditor.NeonCompatiblity.widgetSelectedAdapter;
 
 public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	private BooleanFieldEditor launchInExternalTerminalEnabled;
@@ -50,6 +44,7 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 	private Button testTerminalButton;
 	private BooleanFieldEditor keepExternalTerminalOpenAlways;
     private Text text;
+    private StringFieldEditor launchStarterCommand;
 
 	public BashEditorDebugPreferencePage() {
 		super(GRID);
@@ -89,7 +84,12 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 		keepExternalTerminalOpenAlways.getDescriptionControl(terminalGroup).setToolTipText("Keep external terminal  always open, even when exit code =0.");
 		addField(keepExternalTerminalOpenAlways);
 
-		launchTerminalCommand = new StringFieldEditor(P_LAUNCH_TERMINAL_COMMAND.getId(), "Start command", terminalGroup);
+		launchStarterCommand = new StringFieldEditor(P_LAUNCH_STARTER_COMMAND.getId(), "Start command", terminalGroup);
+		launchStarterCommand.getTextControl(terminalGroup)
+		.setToolTipText("Define your command to start a command environment which will be able to execute your launch command");
+		addField(launchStarterCommand);
+
+		launchTerminalCommand = new StringFieldEditor(P_LAUNCH_TERMINAL_COMMAND.getId(), "Terminal command", terminalGroup);
 		launchTerminalCommand.getTextControl(terminalGroup)
 				.setToolTipText("Define your command to provide a login shell which can execute script\nand keeps terminal open for debug output");
 		addField(launchTerminalCommand);
@@ -142,7 +142,7 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 
 	private Object doShowCommandString() {
 		try {
-			String result = TerminalLaucherTestExecution.simulateCallCommandForTestBashScript(launchTerminalCommand.getStringValue());
+			String result = TerminalLaucherTestExecution.simulateCallCommandForTestBashScript(launchTerminalCommand.getStringValue(),launchStarterCommand.getStringValue());
 			text.setText(result);
 		} catch (IOException e) {
 			EclipseUtil.logError("Was not able execute test", e);
@@ -152,7 +152,7 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 	
 	private Object doExecuteTestScript() {
         try {
-            TerminalLaucherTestExecution.tryToExecuteTemporaryTestBashScript(launchTerminalCommand.getStringValue());
+            TerminalLaucherTestExecution.tryToExecuteTemporaryTestBashScript(launchTerminalCommand.getStringValue(),launchStarterCommand.getStringValue());
         } catch (IOException e) {
             EclipseUtil.logError("Was not able execute test", e);
         }

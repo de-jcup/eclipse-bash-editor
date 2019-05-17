@@ -185,9 +185,13 @@ public class BashEditorPreferences {
 		return getBooleanPreference(BashEditorPreferenceConstants.P_SHOW_META_INFO_IN_DEBUG_CONSOLE);
 	}
 
-	public String getXTerminalSnippet() {
+	public String getTerminalCommand() {
 		return getStringPreference(BashEditorPreferenceConstants.P_LAUNCH_TERMINAL_COMMAND);
 	}
+	
+	public String getStarterCommand() {
+        return getStringPreference(BashEditorPreferenceConstants.P_LAUNCH_STARTER_COMMAND);
+    }
 
 	public boolean isLaunchedTerminalWaitingOnErrors() {
 		return getBooleanPreference(BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ON_ERRORS);

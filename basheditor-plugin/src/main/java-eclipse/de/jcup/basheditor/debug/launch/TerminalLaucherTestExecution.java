@@ -32,24 +32,24 @@ public class TerminalLaucherTestExecution {
 	
     public static void main(String[] args) throws Exception {
     	outsideEclipse=true;
-        tryToExecuteTemporaryTestBashScript("xxx");
+        tryToExecuteTemporaryTestBashScript("xxx","yyy");
     }
-    public static String simulateCallCommandForTestBashScript(String terminalCommand) throws IOException {
+    public static String simulateCallCommandForTestBashScript(String terminalCommand, String starterCommand) throws IOException {
         try{
-            return createLauncher().simulate(createTempFile(), params, terminalCommand);
+            return createLauncher().simulate(createTempFile(), params, terminalCommand,starterCommand);
         }catch(IOException e) {
             EclipseUtil.logError("Was not able create test file", e, BashEditorActivator.getDefault());
             return "";
         }
         
     }
-	public static void tryToExecuteTemporaryTestBashScript(String terminalCommand) throws IOException {
+	public static void tryToExecuteTemporaryTestBashScript(String terminalCommand, String starterCommand) throws IOException {
 
       
 
         TerminalLauncher launcher = createLauncher();
         
-        launcher.execute(createTempFile(), params,terminalCommand);
+        launcher.execute(createTempFile(), params,terminalCommand,starterCommand);
 	}
 	
 	private static File createTempFile() throws IOException {
