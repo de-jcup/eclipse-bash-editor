@@ -6,12 +6,12 @@ public interface DefaultTerminalCommandStringProvider {
      * The command which will prepare a bash to execute the terminal command
      * @return
      */
-    public String getDefaultStarterCommandString();
+    public String getStarterCommandString();
 
     /**
      * The command which will open a graphical terminal, is a bash operation
      * @return
      */
-    public String getDefaultTerminalCommandString();
+    public String getTerminalCommandString();
     
 }

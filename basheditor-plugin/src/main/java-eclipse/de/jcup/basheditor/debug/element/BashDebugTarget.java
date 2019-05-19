@@ -59,7 +59,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 
 	private BashDebugger debugger;
 	
-	private DebugBashCodeToggleSupport toggleSupport = new DebugBashCodeToggleSupport();
+	private DebugBashCodeToggleSupport toggleSupport;
 
 	private IProcess process;
 
@@ -88,6 +88,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 	public BashDebugTarget(ILaunch launch, IProcess process, int port, IFile programFileResource) throws CoreException {
 		super(null);
 		
+		toggleSupport = new DebugBashCodeToggleSupport(BashEditorActivator.getDefault());
 		if (programFileResource==null) {
 			throw new IllegalArgumentException("File resource must be not null!");
 		}

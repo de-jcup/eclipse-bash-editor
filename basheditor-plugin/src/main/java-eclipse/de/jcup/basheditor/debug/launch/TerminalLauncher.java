@@ -103,6 +103,9 @@ public class TerminalLauncher {
 
 		@Override
 		public void run() {
+		    if (commands==null || commands.isEmpty()) {
+		        return;
+		    }
 			ProcessBuilder pb = new ProcessBuilder(commands);
 			pb.directory(workingDir);
 			logExecutedCommand(this);

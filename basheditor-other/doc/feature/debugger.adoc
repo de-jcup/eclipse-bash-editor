@@ -50,6 +50,11 @@ reduced:
 There are problems with the handling, see 
 https://github.com/de-jcup/eclipse-bash-editor/issues/155 for details.
 
+====== Solution WSL and other systems on windows
+
+ditaa::diagrams/wsdl-solution.ditaa[] 
+
+
 
 === General approach
 - Use a new preference id for the terminal command (so no migration necessary)

@@ -109,8 +109,9 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		store.setDefault(P_SHOW_META_INFO_IN_DEBUG_CONSOLE.getId(),false);
 		
 		DefaultTerminalCommandStringProvider launchDefaultProvider=createOSSpecificDefaultCommandStringProvder();
-		store.setDefault(P_LAUNCH_TERMINAL_COMMAND.getId(),launchDefaultProvider.getDefaultTerminalCommandString());
-		store.setDefault(P_LAUNCH_STARTER_COMMAND.getId(),launchDefaultProvider.getDefaultStarterCommandString());
+		store.setDefault(P_LAUNCH_TERMINAL_COMMAND.getId(),launchDefaultProvider.getTerminalCommandString());
+		store.setDefault(P_LAUNCH_STARTER_COMMAND.getId(),launchDefaultProvider.getStarterCommandString());
+		store.setDefault(P_USER_HOME_CUSTOMPATH.getId(),"");
 		
 		/* ++++++++++++++++ */
         /* + replace tab + */
