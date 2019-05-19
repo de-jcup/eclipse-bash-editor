@@ -4,12 +4,12 @@ public class DefaultWindowsTerminalCommandStringProvider implements DefaultTermi
     
 	
     @Override
-    public String getDefaultStarterCommandString() {
+    public String getStarterCommandString() {
         return "cmd.exe /C start \""+TerminalCommandVariable.CMD_TITLE+"\" cmd.exe /C \""+TerminalCommandVariable.CMD_TERMINAL+"\"";
     }
 
     @Override
-	public String getDefaultTerminalCommandString() {
+	public String getTerminalCommandString() {
 	    return TerminalCommandVariable.CMD_CALL.getVariableRepresentation();
 	}
 

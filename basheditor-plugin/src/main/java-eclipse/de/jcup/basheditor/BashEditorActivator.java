@@ -18,6 +18,9 @@ package de.jcup.basheditor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import de.jcup.basheditor.debug.BashDebugInfoProvider;
+import de.jcup.basheditor.debug.launch.OSUtil;
+import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.workspacemodel.SharedBashModel;
 import de.jcup.basheditor.workspacemodel.SharedBashModelSupportProvider;
 import de.jcup.eclipse.commons.PluginContextProvider;
@@ -27,7 +30,7 @@ import de.jcup.eclipse.commons.resource.EclipseResourceInputStreamProvider;
 /**
  * The activator class controls the plug-in life cycle
  */
-public class BashEditorActivator extends AbstractUIPlugin implements PluginContextProvider {
+public class BashEditorActivator extends AbstractUIPlugin implements PluginContextProvider, BashDebugInfoProvider {
 
 	// The plug-in COMMAND_ID
 	public static final String PLUGIN_ID = "de.jcup.basheditor"; //$NON-NLS-1$
@@ -89,5 +92,26 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
     public void rebuildSharedBashModel() {
         modelProvider.getWorkspaceModelSupport().fullRebuild();
     }
+
+    @Override
+    public String getSystemUserHomePath() {
+        String userHome = System.getProperty("user.home");
+        return userHome;
+    }
+
+    @Override
+    public String getDefaultScriptPathToUserHome() {
+       return OSUtil.toUnixPath(getSystemUserHomePath());
+    }
+
+    @Override
+    public String getResultingScriptPathToUserHome() {
+        String customPath = BashEditorPreferences.getInstance().getCustomScriptPathToUserHome();
+        if (customPath==null || customPath.trim().isEmpty()) {
+            return getDefaultScriptPathToUserHome();
+        }
+        return customPath.trim();
+    }
+
 
 }

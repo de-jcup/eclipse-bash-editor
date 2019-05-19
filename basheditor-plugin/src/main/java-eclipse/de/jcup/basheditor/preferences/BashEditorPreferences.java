@@ -219,5 +219,9 @@ public class BashEditorPreferences {
         return BashEditorLinkFunctionStrategy.fromId(strategyId); 
      }
 
+    public String getCustomScriptPathToUserHome() {
+        return getStringPreference(BashEditorPreferenceConstants.P_USER_HOME_CUSTOMPATH);
+    }
+
 
 }

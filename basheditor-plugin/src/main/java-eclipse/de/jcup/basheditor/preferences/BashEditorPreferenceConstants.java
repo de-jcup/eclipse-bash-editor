@@ -54,7 +54,10 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	
 	P_SHARED_MODEL_ENABLED("sharedModelEnabled"),
 	
-	P_LINK_FUNCTIONS_STRATEGY("linkFunctionsStrategy"),
+	P_LINK_FUNCTIONS_STRATEGY("linkFunctionsStrategy"), 
+	
+	P_USER_HOME_CUSTOMPATH("userHomeCustomPath"),
+	
 	;
 	
 

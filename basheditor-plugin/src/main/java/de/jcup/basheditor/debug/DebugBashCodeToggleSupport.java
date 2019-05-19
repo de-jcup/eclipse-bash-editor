@@ -19,8 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
-import de.jcup.basheditor.debug.launch.OSUtil;
+import java.util.Objects;
 
 /**
  * Class is responsible to change existing source code on a file to have
@@ -31,40 +30,51 @@ import de.jcup.basheditor.debug.launch.OSUtil;
  *
  */
 public class DebugBashCodeToggleSupport {
+    private static final String PATH_FROM_USER_HOME_TO_DEBUGGER_SCRIPT = ".basheditor/remote-debugging-v1.sh";
     private static final String DEBUG_POSTFIX = "#BASHEDITOR-TMP-REMOTE-DEBUGGING-END\n";
     private DebugBashCodeBuilder codeBuilder;
+    private BashDebugInfoProvider infoProvider;
 
-    public DebugBashCodeToggleSupport() {
+    public DebugBashCodeToggleSupport(BashDebugInfoProvider infoProvider) {
+        Objects.requireNonNull(infoProvider);
+        
+        this.infoProvider=infoProvider;
         this.codeBuilder = new DebugBashCodeBuilder();
+        
     }
 
     public String enableDebugging(String sourceCode, String hostname, int port) throws IOException {
-        File debuggerFile = ensureDebugFileExists();
+        ensureDebugFileExistsInSystemUserHome();
         disableDebugging(sourceCode); // if we got some call before with maybe another port or host etc.
         StringBuilder sb = new StringBuilder();
-        sb.append(createSourceToInclude(debuggerFile)).append(" ").append(hostname).append(" ").append(port).append(" ").append(DEBUG_POSTFIX).append(sourceCode);
+        sb.append(createSourceToInclude(infoProvider.getResultingScriptPathToUserHome())).append(" ").append(hostname).append(" ").append(port).append(" ").append(DEBUG_POSTFIX).append(sourceCode);
         return sb.toString();
     }
 
-    private File resolveDebuggerFile() {
-        return new File(System.getProperty("user.home"), ".basheditor/remote-debugging-v1.sh");
+    private File resolveDebuggerFile(String base) {
+        return new File(base, PATH_FROM_USER_HOME_TO_DEBUGGER_SCRIPT);
     }
 
-    private String createSourceToInclude(File debuggerFile) {
-        if (debuggerFile == null) {
-            throw new IllegalStateException("file may not be null");
+    private String createSourceToInclude(String base) { 
+        StringBuilder sb = new StringBuilder();
+        sb.append("source ");
+        if (base!=null) {
+            sb.append(base);
+            if (!base.endsWith("/")) {
+                sb.append("/");
+            }
+        }else {
+            sb.append("/tmp/missing-base/");
         }
-        return "source " + convertToUnixStylePath(debuggerFile.getAbsolutePath());
+        sb.append(PATH_FROM_USER_HOME_TO_DEBUGGER_SCRIPT);
+        return sb.toString();
     }
-
     
 
-    String convertToUnixStylePath(String absolutePath) {
-        return OSUtil.toUnixPath(absolutePath);
-    }
-
-    private File ensureDebugFileExists() throws IOException {
-        File debuggerFile = resolveDebuggerFile();
+   
+    private File ensureDebugFileExistsInSystemUserHome() throws IOException {
+        /* ensure debug script file does really exist on user.home */
+        File debuggerFile = resolveDebuggerFile(infoProvider.getSystemUserHomePath());
         if (debuggerFile.exists()) {
             return debuggerFile;
         }
