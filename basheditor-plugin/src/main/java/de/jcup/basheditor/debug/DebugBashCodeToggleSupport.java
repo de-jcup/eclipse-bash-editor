@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 public class DebugBashCodeToggleSupport {
     private static final String PATH_FROM_USER_HOME_TO_DEBUGGER_SCRIPT = ".basheditor/remote-debugging-v1.sh";
-    private static final String DEBUG_POSTFIX = "#BASHEDITOR-TMP-REMOTE-DEBUGGING-END\n";
+    private static final String DEBUG_POSTFIX = "#BASHEDITOR-TMP-REMOTE-DEBUGGING-END|Origin line:";
     private DebugBashCodeBuilder codeBuilder;
     private BashDebugInfoProvider infoProvider;
 
@@ -45,9 +45,16 @@ public class DebugBashCodeToggleSupport {
 
     public String enableDebugging(String sourceCode, String hostname, int port) throws IOException {
         ensureDebugFileExistsInSystemUserHome();
-        disableDebugging(sourceCode); // if we got some call before with maybe another port or host etc.
+        String nSourceCode= disableDebugging(sourceCode); // if we got some call before with maybe another port or host etc.
         StringBuilder sb = new StringBuilder();
-        sb.append(createSourceToInclude(infoProvider.getResultingScriptPathToUserHome())).append(" ").append(hostname).append(" ").append(port).append(" ").append(DEBUG_POSTFIX).append(sourceCode);
+        sb.append(createSourceToInclude(infoProvider.getResultingScriptPathToUserHome())).append(" ").append(hostname).append(" ").append(port).append(" ");
+        sb.append(DEBUG_POSTFIX);
+        if (!nSourceCode.startsWith("#!")) {
+            // this means its not something like #!/bin/bash etc. means: this line could be important and we do not want to just override it
+            // so add a new line here:
+            sb.append("\n");
+        }
+        sb.append(nSourceCode);
         return sb.toString();
     }
 
@@ -97,6 +104,12 @@ public class DebugBashCodeToggleSupport {
         }
         int pos = index + DEBUG_POSTFIX.length();
         String data = sourceCode.substring(pos);
+        if (data.startsWith("\n")) { 
+            /* in this case this means that first line was not a sheebang - e.g. "#! /bin bash" or so and so there was a newline added
+             * and we must remove it as well!
+             */
+            data=data.substring(1);
+        }
         return data;
     }
 

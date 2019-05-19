@@ -27,7 +27,7 @@ import de.jcup.basheditor.TestScriptLoader;
 public class DebugBashCodeToggleSupportTest {
 
 	private static final String BASE_EXPECTED_DEBUG_ENABLED_CODE = "source scriptHome/.basheditor/remote-debugging-v1.sh";
-	private static final String EXPECTED_DEBUG_ENABLED_CODE = BASE_EXPECTED_DEBUG_ENABLED_CODE+" localhost "+BashDebugConstants.DEFAULT_DEBUG_PORT+" #BASHEDITOR-TMP-REMOTE-DEBUGGING-END";
+	private static final String EXPECTED_DEBUG_ENABLED_CODE = BASE_EXPECTED_DEBUG_ENABLED_CODE+" localhost "+BashDebugConstants.DEFAULT_DEBUG_PORT+" #BASHEDITOR-TMP-REMOTE-DEBUGGING-END|Origin line:";
 	private DebugBashCodeToggleSupport supportToTest;
     private TestBashDebugInfoProvider infoProvider;
 
@@ -57,9 +57,8 @@ public class DebugBashCodeToggleSupportTest {
 
 		/* test */
 		String[] asArray = newCode.split("\n");
-		assertEquals(2, asArray.length);
-		assertEquals(EXPECTED_DEBUG_ENABLED_CODE, asArray[0]);
-		assertEquals("#! /bin/mybash", asArray[1]);
+		assertEquals(1, asArray.length);
+		assertEquals(EXPECTED_DEBUG_ENABLED_CODE+"#! /bin/mybash", asArray[0]);
 
 	}
 	
@@ -76,6 +75,12 @@ public class DebugBashCodeToggleSupportTest {
 
 	}
 
+	@Test
+	public void when_source_already_in_first_line_we_ignore_it() throws Exception {
+	    String origin = "source scriptHome/.basheditor/remote-debugging-v1.sh localhost 33333 #BASHEDITOR-TMP-REMOTE-DEBUGGING-END|Origin line:\nbla...";
+	    assertEquals(origin, supportToTest.enableDebugging(origin,"localhost",33333));
+	}
+	
 	@Test
 	public void enable_debugging_will_automatically_create_debug_bash_code_file_which_contains_data_of_code_builder() throws Exception {
 		/* prepare */
@@ -116,12 +121,12 @@ public class DebugBashCodeToggleSupportTest {
 
 	@Test
 	public void disable_debugging_first_line_has_include_and_comment_after_include_only_comment_remains() throws Exception {
-		assertEquals("#! /bin/mybash", supportToTest.disableDebugging(EXPECTED_DEBUG_ENABLED_CODE + "\n#! /bin/mybash"));
+		assertEquals("#! /bin/mybash", supportToTest.disableDebugging(EXPECTED_DEBUG_ENABLED_CODE + "#! /bin/mybash"));
 	}
 
 	@Test
 	public void disable_debugging_first_line_has_include_and_comment_secondline_has_alpha_after_include_only_comment_remains_in_first_line_second_has_alpha() throws Exception {
-		assertEquals("#! /bin/mybash\nalpha", supportToTest.disableDebugging(EXPECTED_DEBUG_ENABLED_CODE + "\n#! /bin/mybash\nalpha"));
+		assertEquals("#! /bin/mybash\nalpha", supportToTest.disableDebugging(EXPECTED_DEBUG_ENABLED_CODE + "#! /bin/mybash\nalpha"));
 	}
 	
 	@Test
