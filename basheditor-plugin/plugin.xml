@@ -223,6 +223,21 @@
             commandId="basheditor.editor.commands.gotomatchingbracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">	  
 		</key>
+		<key
+            sequence="F5"
+            contextId="basheditor.editors.BashEditor.context"
+            commandId="org.eclipse.debug.ui.commands.StepInto"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+        <key
+            sequence="F6"
+            contextId="basheditor.editors.BashEditor.context"
+            commandId="org.eclipse.debug.ui.commands.StepOver"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+        <key
+            sequence="F7"
+            contextId="de.jcup.basheditor.debug.bash.debugging"
+            commandId="org.eclipse.debug.ui.commands.StepReturn"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
     </extension> 
     
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -480,16 +495,17 @@
             id="basheditor.debug.launchConfigurationTypeImage">
       </launchConfigurationTypeImage>
    </extension>
-   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
+   <!--<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 		<launchConfigurationType
         delegate="de.jcup.basheditor.debug.launch.BashDebugLaunchConfigurationDelegate"
         delegateDescription="Launches given bash script in debug mode"
         id="basheditor.debug.launchConfigurationType"
         modes="run"
-        name="EGradle"
+        name="Bash Editor"
         public="true" >
        </launchConfigurationType>
 	</extension>
+	-->
    <extension
          point="org.eclipse.debug.core.watchExpressionDelegates">
       <watchExpressionDelegate
