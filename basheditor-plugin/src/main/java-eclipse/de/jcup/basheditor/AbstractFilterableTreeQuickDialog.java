@@ -318,6 +318,7 @@ public abstract class AbstractFilterableTreeQuickDialog<T> extends AbstractQuick
 				return;
 			}
 			boolean allowedChar = false;
+			allowedChar = allowedChar || event.character == '-';
 			allowedChar = allowedChar || event.character == '*';
 			allowedChar = allowedChar || event.character == '(';
 			allowedChar = allowedChar || event.character == ')';
