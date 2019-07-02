@@ -85,5 +85,20 @@ public class HereDocRuleTest {
 		
 	}
 	
+	@Test
+    public void heredoc_with_minus_line_starting_with_space_followed_by_delimiter_returns_token_when_scanner_pos_is_not_0_but_1() {
+        /* prepare */
+        scanner = new SimpleTestCharacterScanner(" <<- EOF\nsomething\n\tEOF");
+        scanner.column=1;
+        
+        rule.trace=true;
+        
+        /* execute */
+        IToken result = rule.evaluate(scanner);
+        
+        /* test */
+        assertEquals(token,result);
+        
+    }
 
 }

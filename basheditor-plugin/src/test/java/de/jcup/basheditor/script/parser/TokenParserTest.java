@@ -210,6 +210,20 @@ public class TokenParserTest {
     public void heredoc_found_when_a_heredoc_EOF_nl_b_space_hyphen_x_nl_EOF() throws Exception {
         assertParsing("a <<EOF\nb 'x\nEOF").resultsIn("a", "<<EOF", "b 'x", "EOF");
     }
+    
+    @Test
+    public void heredoc_found_when_a_heredoc_space_EOF_nl_b_space_hyphen_x_nl_EOF() throws Exception {
+        assertParsing("a << EOF\nb 'x\nEOF").resultsIn("a", "<<EOF", "b 'x", "EOF");
+    }
+    
+    @Test
+    public void heredoc_found_issue_169_example_without_minus() throws Exception {
+        assertParsing("a << EOF > /tmp/file\n\tbla\nEOF").resultsIn("a", "<<EOF", "> /tmp/file\n\tbla", "EOF");
+    }
+    @Test
+    public void heredoc_found_issue_169_example_with_minus() throws Exception {
+        assertParsing("a <<- EOF > /tmp/file\n\tbla\nEOF").resultsIn("a", "<<-EOF", "> /tmp/file\n\tbla", "EOF");
+    }
 
     @Test
     public void herestring_found_when_a_herestring_EOF_nl_b_space_hyphen_x_nl_EOF() throws Exception {
@@ -219,6 +233,11 @@ public class TokenParserTest {
     @Test
     public void heredoc_found_when_a_heredoc_negative_hyphen_EOF_hyphen_nl_b_space_hyphen_x_nl_EOF() throws Exception {
         assertParsing("a <<-'EOF'\nb 'x\nEOF").resultsIn("a", "<<-'EOF'", "b 'x", "EOF");
+    }
+    
+    @Test
+    public void heredoc_found_when_a_heredoc_negative_hyphen_space_EOF_hyphen_nl_b_space_hyphen_x_nl_EOF() throws Exception {
+        assertParsing("a <<- 'EOF'\nb 'x\nEOF").resultsIn("a", "<<-'EOF'", "b 'x", "EOF");
     }
 
     @Test

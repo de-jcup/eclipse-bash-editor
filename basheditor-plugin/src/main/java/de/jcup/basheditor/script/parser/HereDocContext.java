@@ -35,6 +35,7 @@ class HereDocContext{
 	int hereDocTokenStart=-1;
 	int hereDocPos;
 	int hereDocTokenEnd;
+    String heredocTokenString;
 	
 	public HereDocContext(CodePosSupport codePosSupport){
 		if (codePosSupport==null){

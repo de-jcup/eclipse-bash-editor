@@ -50,7 +50,7 @@ public class HereDocParserSupport {
 		ParseToken hereDocToken = new ParseToken();
 		hereDocToken.start = context.hereDocTokenStart;
 		hereDocToken.end = context.hereDocTokenEnd;
-		hereDocToken.text = "<<" + context.getLiteral();
+		hereDocToken.text = context.heredocTokenString + context.getLiteral();
 
 		parseContext.addToken(hereDocToken);
 
@@ -145,6 +145,15 @@ public class HereDocParserSupport {
 			/* no here-doc but here-string - so break */
 			return context;
 		}
+		if (ca.charValue() == '-') {
+		    ca = context.getCharacterAtPosOrNull(context.hereDocPos++);
+		    if (ca == null) {
+		        return context;
+		    }
+		    context.heredocTokenString="<<-";
+		}else {
+		    context.heredocTokenString="<<";
+		}
 		// next line will mark also as initialized!
 		context.hereDocTokenStart=hereDocTokenStart; 
 		context.lastCharacter=ca;
@@ -160,8 +169,10 @@ public class HereDocParserSupport {
 		StringBuilder literal = new StringBuilder();
 		if (Character.isWhitespace(ca.charValue())) {
 			/* CHECKPOINT 2a:<< .. found so ignore and keep on getting literal */
+		    /* CHECKPOINT 3a:<<- .. found so ignore and keep on getting literal */
 		} else {
 			/* CHECKPOINT 2b:<<.. found so get literal */
+		    /* CHECKPOINT 3b:<<-.. found so get literal */
 			literal.append(ca.charValue());
 		}
 		do {
