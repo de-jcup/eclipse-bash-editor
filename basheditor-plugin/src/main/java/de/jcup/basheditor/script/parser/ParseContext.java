@@ -178,9 +178,9 @@ class ParseContext implements CodePosSupport{
 
 	boolean insideString() {
 		boolean inString = false;
-		inString = inString || inState(ParserState.INSIDE_DOUBLE_STRING);
+		inString = inString || inState(ParserState.INSIDE_DOUBLE_QUOTE);
 		inString = inString || inState(ParserState.INSIDE_DOUBLE_TICKED);
-		inString = inString || inState(ParserState.INSIDE_SINGLE_STRING);
+		inString = inString || inState(ParserState.INSIDE_SINGLE_QUOTE);
 		return inString;
 	}
 

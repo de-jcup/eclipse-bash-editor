@@ -730,12 +730,12 @@ public class TokenParserTest {
     }
 
     @Test
-    public void a_single_do_string_followed_by_space_and_ESCAPE_and_do_does_result_in_NO_do_token() throws Exception {
+    public void a_single_do_string_followed_by_space_and_ESCAPE_and_do_does_result_in_do_token() throws Exception {
         /* execute */
         List<ParseToken> tokens = parserToTest.parse("'do\\' do '");
 
         /* test */
-        assertThat(tokens).containsNotToken("do");
+        assertThat(tokens).containsOneToken("do");
 
     }
 

@@ -18,9 +18,9 @@ package de.jcup.basheditor.script.parser;
 import static de.jcup.basheditor.script.parser.ParserState.CODE;
 import static de.jcup.basheditor.script.parser.ParserState.INIT;
 import static de.jcup.basheditor.script.parser.ParserState.INSIDE_COMMENT;
-import static de.jcup.basheditor.script.parser.ParserState.INSIDE_DOUBLE_STRING;
+import static de.jcup.basheditor.script.parser.ParserState.INSIDE_DOUBLE_QUOTE;
 import static de.jcup.basheditor.script.parser.ParserState.INSIDE_DOUBLE_TICKED;
-import static de.jcup.basheditor.script.parser.ParserState.INSIDE_SINGLE_STRING;
+import static de.jcup.basheditor.script.parser.ParserState.INSIDE_SINGLE_QUOTE;
 import static de.jcup.basheditor.script.parser.ParserState.VARIABLE;
 
 import java.util.ArrayList;
@@ -90,15 +90,15 @@ public class TokenParser {
 		char c = context.getCharAtPos();
 
 		if (c == CHAR_STRING_SINGLE_APOSTROPHE) {
-			return handleString(INSIDE_SINGLE_STRING, context, INSIDE_DOUBLE_TICKED, INSIDE_DOUBLE_STRING);
+			return handleString(INSIDE_SINGLE_QUOTE, context, INSIDE_DOUBLE_TICKED, INSIDE_DOUBLE_QUOTE);
 		}
 		/* handle double string */
 		if (c == CHAR_STRING_DOUBLE_APOSTROPHE) {
-			return handleString(INSIDE_DOUBLE_STRING, context, INSIDE_DOUBLE_TICKED, INSIDE_SINGLE_STRING);
+			return handleString(INSIDE_DOUBLE_QUOTE, context, INSIDE_DOUBLE_TICKED, INSIDE_SINGLE_QUOTE);
 		}
 		/* handle double ticked string */
 		if (c == CHAR_STRING_DOUBLE_TICKED) {
-			return handleString(INSIDE_DOUBLE_TICKED, context, INSIDE_SINGLE_STRING, INSIDE_DOUBLE_STRING);
+			return handleString(INSIDE_DOUBLE_TICKED, context, INSIDE_SINGLE_QUOTE, INSIDE_DOUBLE_QUOTE);
 		}
 		if (context.insideString()) {
 			context.appendCharToText();
@@ -455,7 +455,7 @@ public class TokenParser {
 			}
 
 		}
-		if (context.isCharBeforeEscapeSign()) {
+		if (!ParserState.INSIDE_SINGLE_QUOTE.equals(stringState) && context.isCharBeforeEscapeSign()) {
 			/* escaped */
 			context.appendCharToText();
 			return true;
