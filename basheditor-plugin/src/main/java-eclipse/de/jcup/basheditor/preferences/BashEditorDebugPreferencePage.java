@@ -18,7 +18,12 @@ package de.jcup.basheditor.preferences;
 import static de.jcup.basheditor.NeonCompatiblity.*;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -36,8 +41,9 @@ import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.BashEditorUtil;
 import de.jcup.basheditor.EclipseUtil;
 import de.jcup.basheditor.debug.launch.TerminalCommandVariable;
-import de.jcup.basheditor.debug.launch.TerminalLaucherTestExecution;
 import de.jcup.basheditor.debug.launch.TerminalLaunchContext;
+import de.jcup.basheditor.debug.launch.TerminalLaunchContextBuilder;
+import de.jcup.basheditor.debug.launch.TerminalLauncher;
 
 public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
     private static final String TOOLTIP_HEADER_TESTOUTPUT = "Here you will find the last output created by `Show result cmd`.\n"
@@ -51,7 +57,8 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
     private Text testCommandOutputText;
     private StringFieldEditor launchStarterCommand;
     private StringFieldEditor customUserHomePath;
-
+    private static final String params = "-a 1 -b 2";
+    
     public BashEditorDebugPreferencePage() {
         super(GRID);
         setPreferenceStore(BashEditorUtil.getPreferences().getPreferenceStore());
@@ -109,7 +116,7 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
     }
 
     private void createTerminalParts() {
-        GridData debugGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.BEGINNING |GridData.GRAB_HORIZONTAL);
+        GridData debugGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.BEGINNING | GridData.GRAB_HORIZONTAL);
         debugGroupLayoutData.horizontalSpan = 2;
         debugGroupLayoutData.widthHint = 400;
 
@@ -127,26 +134,22 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
         addField(keepExternalTerminalOpenAlways);
 
         launchStarterCommand = new StringFieldEditor(P_LAUNCH_STARTER_COMMAND.getId(), "Start command", terminalGroup);
-        launchStarterCommand.getTextControl(terminalGroup).setToolTipText(
-                "Defines how to start a command environment where terminal command can be executed.\n"
-                + "This command must be run in background, so in Linux ensure you end this command with an &\n\n"
-                + "You must use "+TerminalCommandVariable.BE_TERMINAL.getVariableRepresentation()+" as parameter here.");
+        launchStarterCommand.getTextControl(terminalGroup)
+                .setToolTipText("Defines how to start a command environment where terminal command can be executed.\n"
+                        + "This command must be run in background, so in Linux ensure you end this command with an &\n\n" + "You must use "
+                        + TerminalCommandVariable.BE_TERMINAL.getVariableRepresentation() + " as parameter here.");
         addField(launchStarterCommand);
 
         launchTerminalCommand = new StringFieldEditor(P_LAUNCH_TERMINAL_COMMAND.getId(), "Terminal command", terminalGroup);
-        launchTerminalCommand.getTextControl(terminalGroup).setToolTipText(
-                "This represents "+TerminalCommandVariable.BE_TERMINAL.getVariableRepresentation()+" in start command before.\n"
-                + "Defines the command to provide a login shell which can execute script\n"
-                + "and keeps terminal open for debug output.\n\n"
-                + "Here you can use "+TerminalCommandVariable.BE_CMD_CALL.getVariableRepresentation()+" as generated bash call script\n"
-                + "and "+TerminalCommandVariable.BE_CMD_TITLE.getVariableRepresentation()+" for a title information in your terminal if you want it.\n\n"
-                + "Press `Show result cmd` button to show calculated variant.");
+        launchTerminalCommand.getTextControl(terminalGroup).setToolTipText("This represents " + TerminalCommandVariable.BE_TERMINAL.getVariableRepresentation() + " in start command before.\n"
+                + "Defines the command to provide a login shell which can execute script\n" + "and keeps terminal open for debug output.\n\n" + "Here you can use "
+                + TerminalCommandVariable.BE_CMD_CALL.getVariableRepresentation() + " as generated bash call script\n" + "and " + TerminalCommandVariable.BE_CMD_TITLE.getVariableRepresentation()
+                + " for a title information in your terminal if you want it.\n\n" + "Press `Show result cmd` button to show calculated variant.");
         addField(launchTerminalCommand);
 
         Button showTestTerminalCommandButton = new Button(terminalGroup, SWT.PUSH);
         showTestTerminalCommandButton.setText("Show result cmd");
-        showTestTerminalCommandButton.setToolTipText("Will show resulting cmd call for your given command\n\n"
-                + "So you are able to test if the terminal command works.");
+        showTestTerminalCommandButton.setToolTipText("Will show resulting cmd call for your given command\n\n" + "So you are able to test if the terminal command works.");
         showTestTerminalCommandButton.addSelectionListener(widgetSelectedAdapter(e -> doShowCommandString()));
 
         GridData showTestTerminalCommandButtonGridData = new GridData();
@@ -170,10 +173,10 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 //		testCommandOutputGridData.horizontalAlignment = GridData.BEGINNING;
         testCommandOutputGridData.horizontalSpan = 2;
         testCommandOutputGridData.verticalSpan = 3;
-        testCommandOutputGridData.grabExcessVerticalSpace=true;
-        testCommandOutputGridData.heightHint=100;
+        testCommandOutputGridData.grabExcessVerticalSpace = true;
+        testCommandOutputGridData.heightHint = 100;
 
-        testCommandOutputText = new Text(terminalGroup, SWT.MULTI| SWT.LEAD | SWT.BORDER|SWT.WRAP|SWT.V_SCROLL);
+        testCommandOutputText = new Text(terminalGroup, SWT.MULTI | SWT.LEAD | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
         testCommandOutputText.setLayoutData(testCommandOutputGridData);
         testCommandOutputText.setText("");
         testCommandOutputText.setToolTipText(TOOLTIP_HEADER_TESTOUTPUT);
@@ -182,23 +185,55 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
 
     private Object doShowCommandString() {
         try {
-            TerminalLaunchContext context = TerminalLaucherTestExecution.simulateCallCommandForTestBashScript(launchTerminalCommand.getStringValue(), launchStarterCommand.getStringValue());
-            if (context==null) {
-                testCommandOutputText.setText("");
-                testCommandOutputText.setText(TOOLTIP_HEADER_TESTOUTPUT);
-            }else {
-                testCommandOutputText.setText(context.getTerminalExecutionCommand());
-                testCommandOutputText.setToolTipText(TOOLTIP_HEADER_TESTOUTPUT+"\n\nBash editor will launch this:\n"+context.getLaunchTerminalCommand());
-            }
+            TerminalLaunchContext context = createTestLaunchContext();
+            testCommandOutputText.setText(context.getTerminalExecutionCommand());
+            testCommandOutputText.setToolTipText(TOOLTIP_HEADER_TESTOUTPUT + "\n\nBash editor will launch this:\n" + context.getLaunchTerminalCommand());
         } catch (IOException e) {
             EclipseUtil.logError("Was not able execute test", e);
         }
         return null;
     }
 
+    private TerminalLaunchContext createTestLaunchContext() throws IOException {
+        boolean waitOnError = keepExternalTerminalOpenOnErrors.getBooleanValue();
+        boolean alwaysWait = keepExternalTerminalOpenAlways.getBooleanValue();
+        String terminalCommand = launchTerminalCommand.getStringValue();
+        String starterCommand = launchStarterCommand.getStringValue();
+        
+        /* @formatter:off*/
+        TerminalLaunchContext context = TerminalLaunchContextBuilder.builder().
+                file(createTempFile()).
+                params(params).
+                waitingOnErrors(waitOnError).
+                waitingAlways(alwaysWait).
+                terminalCommand(terminalCommand).
+                starterCommand(starterCommand).build();
+        /* @formatter:on*/
+        return context;
+        
+    }
+    
+  
+    private static File createTempFile() throws IOException {
+        // --------------------------------------------------------------------------------------------------------------------------------|123456789
+        Path tempFile = Files.createTempFile("terminallaunch", ".sh");
+        File temp = tempFile.toFile();
+        temp.setExecutable(true, true);
+
+        try (FileWriter fw = new FileWriter(temp); BufferedWriter bw = new BufferedWriter(fw)) {
+            bw.write("#! /bin/bash\n");
+            bw.write("echo 'A simple test'\n");
+            bw.write("echo $1 $2 $3\n");
+            bw.write("exit 1");
+        }
+        return temp;
+    }
+
     private Object doExecuteTestScript() {
         try {
-            TerminalLaucherTestExecution.tryToExecuteTemporaryTestBashScript(launchTerminalCommand.getStringValue(), launchStarterCommand.getStringValue());
+            TerminalLauncher launcher = new TerminalLauncher();
+            launcher.execute(createTestLaunchContext());
+
         } catch (IOException e) {
             EclipseUtil.logError("Was not able execute test", e);
         }

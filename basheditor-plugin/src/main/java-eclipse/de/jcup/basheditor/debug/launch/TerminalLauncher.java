@@ -40,31 +40,34 @@ import de.jcup.eclipse.commons.ui.EclipseUtil;
  */
 public class TerminalLauncher {
     
-	public void execute(File file, String params, String terminalCommand, String starterCommand) {
-		/* setup context */
-	    if (file==null) {
-	        EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
-	        return;
-	    }
-	    TerminalLaunchContext context = createContext(file, params, terminalCommand,starterCommand);
-		
-		/* execute in own thread */
-		LaunchRunnable launchRunnable = new LaunchRunnable(context.getWorkingDirFile(), context.commands);
-		Thread thread = new Thread(launchRunnable);
-		thread.setName("Launch in terminal:" + file.getName());
-		thread.start();
-	}
-
-	public TerminalLaunchContext simulate(File file, String params, String terminalCommand, String starterCommand) {
+    public void execute(File file, String params, String terminalCommand, String starterCommand) {
         /* setup context */
         if (file==null) {
             EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
-            return null;
+            return;
         }
-        TerminalLaunchContext context = createContext(file, params, terminalCommand, starterCommand);
-        return context;
+        TerminalLaunchContext context = createContext(file, params, terminalCommand,starterCommand);
+        execute(context);
+        
     }
 
+    
+    public void execute(TerminalLaunchContext context) {
+        if (context==null) {
+            EclipseUtil.logError("Context was null", null, BashEditorActivator.getDefault());
+            return;
+        }
+        if (context.file==null) {
+            EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
+            return;
+        }
+        /* execute in own thread */
+        LaunchRunnable launchRunnable = new LaunchRunnable(context.getWorkingDirFile(), context.commands);
+        Thread thread = new Thread(launchRunnable);
+        thread.setName("Launch in terminal:" + context.file.getName());
+        thread.start();
+    }
+    
 	private TerminalLaunchContext createContext(File file, String params, String terminalCommand, String starterCommand) {
 	    return TerminalLaunchContextBuilder.builder().file(file).starterCommand(starterCommand).terminalCommand(terminalCommand).params(params).waitingAlways(isWaitingAlways()).waitingOnErrors(isWaitingOnErrors()).build();
 	}
