@@ -19,12 +19,12 @@ public class DefaultLinuxTerminalCommandStringProvider implements DefaultTermina
 
     @Override
     public String getStarterCommandString() {
-        return "bash -c "+TerminalCommandVariable.CMD_TERMINAL.getVariableRepresentation()+" &";
+        return "bash -c "+TerminalCommandVariable.BE_TERMINAL.getVariableRepresentation()+" &";
     }
     
     @Override
     public String getTerminalCommandString() {
-        return "x-terminal-emulator -e bash --login -c '"+TerminalCommandVariable.CMD_CALL.getVariableRepresentation()+"'";
+        return "x-terminal-emulator -e bash --login -c '"+TerminalCommandVariable.BE_CMD_CALL.getVariableRepresentation()+"'";
 	}
 
 }

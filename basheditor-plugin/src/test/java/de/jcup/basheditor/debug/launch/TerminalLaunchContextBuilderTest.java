@@ -26,28 +26,67 @@ import org.junit.Test;
 public class TerminalLaunchContextBuilderTest {
 
     private File file;
+    private String path;
 
     @Before
     public void before() throws Exception {
-        file = Files.createTempFile("xyz", ".txt").toFile();
+        file = Files.createTempFile("xyz", ".sh").toFile();
+        
+        path = file.getParentFile().getAbsolutePath();
+        path = OSUtil.toUnixPath(path);
     }
 
     @Test
     public void check_default_linux_command_works() throws Exception {
-        String command = testProviderAndReturnCommandString(new DefaultLinuxTerminalCommandStringProvider());
-        assertNotNull(command);
-        assertNotEquals("", command);
-    }
-    
-    @Test
-    public void check_default_windows_command_works() throws Exception {
-        String command = testProviderAndReturnCommandString(new DefaultWindowsTerminalCommandStringProvider());
-        assertNotNull(command);
-        assertNotEquals("", command);
+        /* prepare */
+        String expectedTerminalCommand = "x-terminal-emulator -e bash --login -c 'cd "+path+";./" + file.getName() + " -a 1 -b 2;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\"'";
+
+        /* execute */
+        TerminalLaunchContext context =  testProviderAndReturnCommandString(new DefaultLinuxTerminalCommandStringProvider());
+
+        /* test */
+        assertNotNull(context);
+        assertNull(context.exception);
+        String terminalCommand = context.terminalExecutionCommand;
+        assertEquals(expectedTerminalCommand,terminalCommand);
+        
+        String launchCommand = context.launchTerminalCommand;
+        assertNotNull(launchCommand);
+        assertEquals("bash -c "+expectedTerminalCommand+" &", launchCommand);
     }
 
-    private String testProviderAndReturnCommandString(DefaultTerminalCommandStringProvider defaultProvider) {
-        return TerminalLaunchContextBuilder.builder().file(file).terminalCommand(defaultProvider.getTerminalCommandString()).params("-a 1 -b 2").build().commandString;
+    @Test
+    public void check_default_windows_command_works() throws Exception {
+        //cmd.exe /c start "my title" cmd.exe /C bash --login -c 'cd /C/Users/atrigna/AppData/Local/Temp;./terminallaunch8349202239915867888.sh -a 1 -b 2;_exit_status=$?;echo "Exit code=$_exit_status";read -p "Press enter to continue..."'
+        /* prepare */
+        String expectedTerminalCommand = "start \"Bash Editor DEBUG Session:"+file.getName()+"\" cmd.exe /C bash --login -c 'cd "+path+";./"+ file.getName() + " -a 1 -b 2;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\"'";
+
+        /* execute */
+        TerminalLaunchContext context = testProviderAndReturnCommandString(new DefaultWindowsTerminalCommandStringProvider());
+
+        /* test */
+        /* test */
+        assertNotNull(context);
+        assertNull(context.exception);
+        String terminalCommand = context.terminalExecutionCommand;
+        assertEquals(expectedTerminalCommand,terminalCommand);
+        
+        String launchCommand = context.launchTerminalCommand;
+        assertNotNull(launchCommand);
+        assertEquals("cmd.exe /C "+expectedTerminalCommand, launchCommand);
+    }
+
+    private TerminalLaunchContext testProviderAndReturnCommandString(DefaultTerminalCommandStringProvider defaultProvider) {
+        /* @formatter:off*/
+        TerminalLaunchContext build = TerminalLaunchContextBuilder.builder().
+                    file(file).
+                    terminalCommand(defaultProvider.getTerminalCommandString()).
+                    starterCommand(defaultProvider.getStarterCommandString()).
+                    params("-a 1 -b 2").
+                    waitingAlways(true).
+                    build();
+        return build;
+        /* @formatter:on*/
     }
 
 }

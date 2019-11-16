@@ -18,7 +18,8 @@ package de.jcup.basheditor.debug.launch;
 import java.io.File;
 import java.util.List;
 
-class TerminalLaunchContext {
+public class TerminalLaunchContext {
+    
     List<String> commands;
 	File file;
 	String params;
@@ -26,19 +27,28 @@ class TerminalLaunchContext {
 	boolean waitAlways;
 	boolean waitOnErrors;
 	boolean switchToWorkingDirNecessary;
-    String commandString;
+    String launchTerminalCommand;
+    String terminalExecutionCommand;
     Exception exception;
     String startTemplate;
-
+    
+    public String getLaunchTerminalCommand() {
+        return launchTerminalCommand;
+    }
+    
+    public String getTerminalExecutionCommand() {
+        return terminalExecutionCommand;
+    }
+    
 	public String getUnixStyledWorkingDir() {
-		File workingDirFile = getWoringDirFile();
+		File workingDirFile = getWorkingDirFile();
 		if (workingDirFile==null) {
 		    return null;
 		}
-        return workingDirFile.getAbsolutePath();
+        return OSUtil.toUnixPath(workingDirFile.getAbsolutePath());
 	}
 
-	public File getWoringDirFile() {
+	public File getWorkingDirFile() {
 	    if (file==null) {
 	        return null;
 	    }

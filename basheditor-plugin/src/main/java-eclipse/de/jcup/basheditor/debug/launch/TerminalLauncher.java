@@ -49,20 +49,20 @@ public class TerminalLauncher {
 	    TerminalLaunchContext context = createContext(file, params, terminalCommand,starterCommand);
 		
 		/* execute in own thread */
-		LaunchRunnable launchRunnable = new LaunchRunnable(context.getWoringDirFile(), context.commands);
+		LaunchRunnable launchRunnable = new LaunchRunnable(context.getWorkingDirFile(), context.commands);
 		Thread thread = new Thread(launchRunnable);
 		thread.setName("Launch in terminal:" + file.getName());
 		thread.start();
 	}
 
-	public String simulate(File file, String params, String terminalCommand, String starterCommand) {
+	public TerminalLaunchContext simulate(File file, String params, String terminalCommand, String starterCommand) {
         /* setup context */
         if (file==null) {
             EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
-            return "";
+            return null;
         }
         TerminalLaunchContext context = createContext(file, params, terminalCommand, starterCommand);
-        return context.commandString;
+        return context;
     }
 
 	private TerminalLaunchContext createContext(File file, String params, String terminalCommand, String starterCommand) {

@@ -1,4 +1,3 @@
-source ./_DEBUG.sh
 #!/bin/bash
 
 name="Albert"

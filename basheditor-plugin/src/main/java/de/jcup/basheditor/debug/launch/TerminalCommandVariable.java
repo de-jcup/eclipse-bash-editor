@@ -17,9 +17,9 @@ package de.jcup.basheditor.debug.launch;
 
 public enum TerminalCommandVariable {
 
-    CMD_TITLE("BE_CMD_TITLE"),
-    CMD_CALL("BE_CMD_CALL"),
-    CMD_TERMINAL("BE_TERMINAL");
+    BE_CMD_TITLE("BE_CMD_TITLE"),
+    BE_CMD_CALL("BE_CMD_CALL"),
+    BE_TERMINAL("BE_TERMINAL");
     
     private String id;
 

@@ -74,30 +74,38 @@ public class TerminalLaunchContextBuilder {
         TerminalLaunchContext context = new TerminalLaunchContext();
         context.file = file;
         context.params = params;
+        
+        context.startTemplate=starterTemplate;
         context.terminalCommand = terminalCommand;
+
         context.waitAlways = waitingAlways;
         context.waitOnErrors = waitingOnErrors;
         context.switchToWorkingDirNecessary=true;
-        context.commandString="";
+        context.launchTerminalCommand="";
         context.commands=new ArrayList<String>();
-        context.startTemplate=starterTemplate;
         
         try{
             /* build command list */
             String internalCommand = itc.build(context);
             
             Map<String,String> map = new  HashMap<String,String>();
-            map.put(TerminalCommandVariable.CMD_CALL.getId(), internalCommand);
-            map.put(TerminalCommandVariable.CMD_TITLE.getId(), "Bash Editor DEBUG Session:"+file.getName());
+            map.put(TerminalCommandVariable.BE_CMD_CALL.getId(), internalCommand);
+            map.put(TerminalCommandVariable.BE_CMD_TITLE.getId(), "Bash Editor DEBUG Session:"+file.getName());
             
-            context.commandString= variableReplaceSupport.replaceVariables(context.terminalCommand, map);
-            map.put(TerminalCommandVariable.CMD_TERMINAL.getId(), context.commandString);
+            context.terminalExecutionCommand = variableReplaceSupport.replaceVariables(context.terminalCommand, map);
+            map.put(TerminalCommandVariable.BE_TERMINAL.getId(), context.terminalExecutionCommand);
             
-            
+            StringBuilder sb = new StringBuilder();
             List<String> list = toListConverter.convert(context.startTemplate);
             for (String command: list) {
-                context.commands.add(variableReplaceSupport.replaceVariables(command, map));
+                String cmdWithContent = variableReplaceSupport.replaceVariables(command, map);
+                context.commands.add(cmdWithContent);
+                if (sb.length()>0) {
+                    sb.append(' ');
+                }
+                sb.append(cmdWithContent);
             }
+            context.launchTerminalCommand=sb.toString();
             
         }catch(RuntimeException e) {
             context.exception=e;

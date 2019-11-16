@@ -113,6 +113,8 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		store.setDefault(P_LAUNCH_STARTER_COMMAND.getId(),launchDefaultProvider.getStarterCommandString());
 		store.setDefault(P_USER_HOME_CUSTOMPATH.getId(),"");
 		
+		
+		
 		/* ++++++++++++++++ */
         /* + replace tab + */
         /* ++++++++++++++++ */

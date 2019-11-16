@@ -20,12 +20,12 @@ public class DefaultWindowsTerminalCommandStringProvider implements DefaultTermi
 	
     @Override
     public String getStarterCommandString() {
-        return "cmd.exe /C start \""+TerminalCommandVariable.CMD_TITLE+"\" cmd.exe /C \""+TerminalCommandVariable.CMD_TERMINAL+"\"";
+        return "cmd.exe /C "+TerminalCommandVariable.BE_TERMINAL.getVariableRepresentation();
     }
 
     @Override
 	public String getTerminalCommandString() {
-	    return TerminalCommandVariable.CMD_CALL.getVariableRepresentation();
+        return "start \""+TerminalCommandVariable.BE_CMD_TITLE.getVariableRepresentation()+"\" cmd.exe /C bash --login -c '"+TerminalCommandVariable.BE_CMD_CALL.getVariableRepresentation()+"'";
 	}
 
 

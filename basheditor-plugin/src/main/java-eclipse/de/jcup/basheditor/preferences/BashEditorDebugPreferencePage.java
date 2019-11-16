@@ -37,14 +37,18 @@ import de.jcup.basheditor.BashEditorUtil;
 import de.jcup.basheditor.EclipseUtil;
 import de.jcup.basheditor.debug.launch.TerminalCommandVariable;
 import de.jcup.basheditor.debug.launch.TerminalLaucherTestExecution;
+import de.jcup.basheditor.debug.launch.TerminalLaunchContext;
 
 public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+    private static final String TOOLTIP_HEADER_TESTOUTPUT = "Here you will find the last output created by `Show result cmd`.\n"
+            + "It is the resulting terminal command, which means you can paste this command inside your CLI and test if the command works\n"
+            + "(means you will see a new terminal appearing which executes a testscript)";
     private BooleanFieldEditor showMetaInfoInDebugConsoleEnabled;
     private BooleanFieldEditor keepExternalTerminalOpenOnErrors;
     private StringFieldEditor launchTerminalCommand;
     private Button testTerminalButton;
     private BooleanFieldEditor keepExternalTerminalOpenAlways;
-    private Text text;
+    private Text testCommandOutputText;
     private StringFieldEditor launchStarterCommand;
     private StringFieldEditor customUserHomePath;
 
@@ -75,21 +79,17 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
         advancedSetupGroup.setLayout(new GridLayout(3, false));
         advancedSetupGroup.setLayoutData(debugGroupLayoutData);
 
-        String customUserHomeTooltipText= "Normally only interesting for windows, at Linux, keep this field empty.\n"
-                + "When using\n"
-                + "- MinGW : it will work without changes here.\n"
-                + "- WSL   : you need a to map used user home to e.g.\n"
-                + "          /mnt/c/user/albert\n\n"
-                + "Be aware: If you configure this wrong your debug session will not close!\n"
-                + "In this case try out until its working correctly and restart eclipse to get\n"
-                + "rid of the unclosed debug sessions...";
+        String customUserHomeTooltipText = "Normally only interesting for windows, at Linux, keep this field empty.\n" + "When using\n" + "- MinGW : it will work without changes here.\n"
+                + "- WSL   : you need a to map used user home to e.g.\n" + "          /mnt/c/user/albert\n\n" + "Be aware: If you configure this wrong your debug session will not close!\n"
+                + "In this case try out until its working correctly and restart eclipse to get\n" + "rid of the unclosed debug sessions...";
         customUserHomePath = new StringFieldEditor(P_USER_HOME_CUSTOMPATH.getId(), "Mapped user home", advancedSetupGroup);
-        customUserHomePath.getLabelControl(advancedSetupGroup).setToolTipText(
-                customUserHomeTooltipText);
-        customUserHomePath.getTextControl(advancedSetupGroup).setToolTipText(
-                "Shows either defined custom user home mapping, or when not defined, a default mapping");
+        customUserHomePath.getLabelControl(advancedSetupGroup).setToolTipText(customUserHomeTooltipText);
+        customUserHomePath.getTextControl(advancedSetupGroup).setToolTipText("Shows either defined custom user home mapping, or when not defined, a default mapping");
         customUserHomePath.setEmptyStringAllowed(true);
-        /* when not defined or empty, we use the default lookup and show it as grey text inside :*/
+        /*
+         * when not defined or empty, we use the default lookup and show it as grey
+         * testCommandOutputText inside :
+         */
         customUserHomePath.getTextControl(advancedSetupGroup).setMessage(BashEditorActivator.getDefault().getDefaultScriptPathToUserHome());
         addField(customUserHomePath);
     }
@@ -109,7 +109,7 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
     }
 
     private void createTerminalParts() {
-        GridData debugGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.BEGINNING);
+        GridData debugGroupLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.BEGINNING |GridData.GRAB_HORIZONTAL);
         debugGroupLayoutData.horizontalSpan = 2;
         debugGroupLayoutData.widthHint = 400;
 
@@ -130,16 +130,16 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
         launchStarterCommand.getTextControl(terminalGroup).setToolTipText(
                 "Defines how to start a command environment where terminal command can be executed.\n"
                 + "This command must be run in background, so in Linux ensure you end this command with an &\n\n"
-                + "You must use "+TerminalCommandVariable.CMD_TERMINAL.getVariableRepresentation()+" as parameter here.");
+                + "You must use "+TerminalCommandVariable.BE_TERMINAL.getVariableRepresentation()+" as parameter here.");
         addField(launchStarterCommand);
 
         launchTerminalCommand = new StringFieldEditor(P_LAUNCH_TERMINAL_COMMAND.getId(), "Terminal command", terminalGroup);
         launchTerminalCommand.getTextControl(terminalGroup).setToolTipText(
-                "This represents "+TerminalCommandVariable.CMD_TERMINAL.getVariableRepresentation()+" in start command before.\n"
+                "This represents "+TerminalCommandVariable.BE_TERMINAL.getVariableRepresentation()+" in start command before.\n"
                 + "Defines the command to provide a login shell which can execute script\n"
                 + "and keeps terminal open for debug output.\n\n"
-                + "Here you can use "+TerminalCommandVariable.CMD_CALL.getVariableRepresentation()+" as generated bash call script\n"
-                + "and "+TerminalCommandVariable.CMD_TITLE.getVariableRepresentation()+" for a title information in your terminal if you want it.\n\n"
+                + "Here you can use "+TerminalCommandVariable.BE_CMD_CALL.getVariableRepresentation()+" as generated bash call script\n"
+                + "and "+TerminalCommandVariable.BE_CMD_TITLE.getVariableRepresentation()+" for a title information in your terminal if you want it.\n\n"
                 + "Press `Show result cmd` button to show calculated variant.");
         addField(launchTerminalCommand);
 
@@ -169,20 +169,27 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
         GridData testCommandOutputGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 //		testCommandOutputGridData.horizontalAlignment = GridData.BEGINNING;
         testCommandOutputGridData.horizontalSpan = 2;
+        testCommandOutputGridData.verticalSpan = 3;
+        testCommandOutputGridData.grabExcessVerticalSpace=true;
+        testCommandOutputGridData.heightHint=100;
 
-        text = new Text(terminalGroup, SWT.SINGLE | SWT.LEAD | SWT.BORDER);
-        text.setLayoutData(testCommandOutputGridData);
-        text.setText("");
-        text.setToolTipText("Here you will find the last output created by `Show result cmd`.\n"
-                + "You can paste this command inside an opened bash and test if the command works\n"
-                + "(means you will see a new terminal appearing which executes a testscript)");
-        text.setEditable(false);
+        testCommandOutputText = new Text(terminalGroup, SWT.MULTI| SWT.LEAD | SWT.BORDER|SWT.WRAP|SWT.V_SCROLL);
+        testCommandOutputText.setLayoutData(testCommandOutputGridData);
+        testCommandOutputText.setText("");
+        testCommandOutputText.setToolTipText(TOOLTIP_HEADER_TESTOUTPUT);
+        testCommandOutputText.setEditable(false);
     }
 
     private Object doShowCommandString() {
         try {
-            String result = TerminalLaucherTestExecution.simulateCallCommandForTestBashScript(launchTerminalCommand.getStringValue(), launchStarterCommand.getStringValue());
-            text.setText(result);
+            TerminalLaunchContext context = TerminalLaucherTestExecution.simulateCallCommandForTestBashScript(launchTerminalCommand.getStringValue(), launchStarterCommand.getStringValue());
+            if (context==null) {
+                testCommandOutputText.setText("");
+                testCommandOutputText.setText(TOOLTIP_HEADER_TESTOUTPUT);
+            }else {
+                testCommandOutputText.setText(context.getTerminalExecutionCommand());
+                testCommandOutputText.setToolTipText(TOOLTIP_HEADER_TESTOUTPUT+"\n\nBash editor will launch this:\n"+context.getLaunchTerminalCommand());
+            }
         } catch (IOException e) {
             EclipseUtil.logError("Was not able execute test", e);
         }
