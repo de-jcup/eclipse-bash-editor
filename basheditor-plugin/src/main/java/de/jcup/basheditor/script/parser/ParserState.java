@@ -27,6 +27,8 @@ enum ParserState{
 	FUNCTION, 
 	
 	VARIABLE,
+	
+	INSIDE_IF,
 
 	UNKNOWN,
 	

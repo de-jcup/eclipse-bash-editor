@@ -37,6 +37,26 @@ public class TokenParserTest {
     }
 
     @Test
+    public void bugfix_186_1() throws Exception{
+    	String testScript ="if [[ \"${PAARMSS[$((idx+1))]}\" =~ ^[[:space:]]{.$ ]]";
+    	
+    	/* @formatter:off*/
+    	assertParsing(testScript).
+			resultsIn("if", "[[", " \"${PAARMSS[$((idx+1))]}\" =~ ^[[:space:]]{.$","]]");
+    	/* @formatter:on*/
+    }
+    
+    @Test
+    public void bugfix_186_2() throws Exception{
+    	String testScript ="if [[ \"${PAARMSS[$((idx+1))]}\" =~ ^[[:space:]]{.$ \" ]]\" ]]";
+    	
+    	/* @formatter:off*/
+    	assertParsing(testScript).
+			resultsIn("if", "[[", " \"${PAARMSS[$((idx+1))]}\" =~ ^[[:space:]]{.$ \" ]]\"","]]");
+    	/* @formatter:on*/
+    }
+    
+    @Test
     public void bugfix_184_1() throws Exception{
     	String testScript ="$USER@${be_servers[$i]}:$UPGRADES_FOLDER";
     	

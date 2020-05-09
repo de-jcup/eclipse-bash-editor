@@ -175,6 +175,15 @@ class ParseContext implements CodePosSupport{
 		}
 		return null;
 	}
+	
+	public ParseToken getLastTokenOrNull() {
+		int max = tokens.size();
+		int pos = max-1;
+		if (pos<0) {
+			return null;
+		}
+		return tokens.get(pos);
+	}
 
 	boolean insideString() {
 		boolean inString = false;
@@ -297,6 +306,13 @@ class ParseContext implements CodePosSupport{
 
 	public void moveToPos(int pos) {
 		this.pos=pos;
+	}
+
+	public void removeCharBefore() {
+		if (sb.length()==0) {
+			return;
+		}
+		sb.deleteCharAt(sb.length()-1);
 	}
 
 	

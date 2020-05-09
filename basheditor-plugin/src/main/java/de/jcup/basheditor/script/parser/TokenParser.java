@@ -15,13 +15,7 @@
  */
 package de.jcup.basheditor.script.parser;
 
-import static de.jcup.basheditor.script.parser.ParserState.CODE;
-import static de.jcup.basheditor.script.parser.ParserState.INIT;
-import static de.jcup.basheditor.script.parser.ParserState.INSIDE_COMMENT;
-import static de.jcup.basheditor.script.parser.ParserState.INSIDE_DOUBLE_QUOTE;
-import static de.jcup.basheditor.script.parser.ParserState.INSIDE_DOUBLE_TICKED;
-import static de.jcup.basheditor.script.parser.ParserState.INSIDE_SINGLE_QUOTE;
-import static de.jcup.basheditor.script.parser.ParserState.VARIABLE;
+import static de.jcup.basheditor.script.parser.ParserState.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +44,15 @@ public class TokenParser {
 		context.chars = bashScript.toCharArray();
 		try {
 			for (; context.hasValidPos(); context.moveForward()) {
+				if (isIfHandled(context)) {
+					continue;
+				}
 
 				if (isVariableStateHandled(context)) {
 					continue;
 				}
+
+
 				if (isCommentStateHandled(context)) {
 					continue;
 				}
@@ -76,6 +75,63 @@ public class TokenParser {
 		}
 
 		return context.tokens;
+	}
+
+	private boolean isIfHandled(ParseContext context) {
+		boolean accepted = false;
+		accepted = accepted || context.inState(INIT);
+		accepted = accepted || context.inState(INSIDE_IF);
+		accepted = accepted || context.inState(CODE);
+		if (!accepted) {
+			return false;
+		}
+		char c = context.getCharAtPos();
+		if (! context.inState(INSIDE_IF)) {
+			if (c == '[') {
+				ParseToken tokenBefore = context.getLastTokenOrNull();
+				if (tokenBefore==null || !tokenBefore.isIf()) {
+					return false;
+				}
+				char charBefore = context.getCharBefore();
+				if (charBefore == '[') {
+					context.appendCharToText();
+					context.addTokenAndResetText();
+					context.switchTo(ParserState.INSIDE_IF);
+					return true;
+				}else {
+					return false;
+				}
+			}
+			return false;
+		}
+		/* inside if */
+		
+		char charBefore = context.getCharBefore();
+		if (c==']' && charBefore ==' ') {
+			boolean notInsideString = isStringCountBalanced(context.sb,'"');
+			if (notInsideString && context.canMoveForward()) {
+				context.moveForward();
+				char c2 = context.getCharAtPos();
+				if (c2 ==']') {
+					context.removeCharBefore();
+					context.addTokenAndResetText();
+					context.appendCharToText(); // do it 2x [[
+					context.appendCharToText();
+					context.addTokenAndResetText();
+					context.switchTo(ParserState.CODE);
+					return true;
+				}else {
+					context.moveBackWard();
+				}
+			}
+		}
+		context.appendCharToText();
+		return true;
+	}
+	
+	private boolean isStringCountBalanced(StringBuilder sb, final char inspect) {
+		long amount = sb.chars().filter( (x) -> x ==(int)inspect ).count();
+		return amount % 2 ==0;
 	}
 
 	private boolean isHereStringStateHandled(ParseContext context) {
@@ -127,8 +183,8 @@ public class TokenParser {
 		char c = context.getCharAtPos();
 		if (c == '\r') {
 			/*
-			 * ignore - we only use \n inside the data parsed so we will handle
-			 * easy \r\n and \n
+			 * ignore - we only use \n inside the data parsed so we will handle easy \r\n
+			 * and \n
 			 */
 			context.moveCurrentTokenPosWhenEmptyText();
 			return true;
@@ -173,8 +229,8 @@ public class TokenParser {
 			return true;
 		}
 		/*
-		 * not inside a comment build token nor in string, so whitespaces are
-		 * not necessary!
+		 * not inside a comment build token nor in string, so whitespaces are not
+		 * necessary!
 		 */
 		if (Character.isWhitespace(c)) {
 			context.addTokenAndResetText();
@@ -279,23 +335,23 @@ public class TokenParser {
 		if (variableContext.getType() != VariableType.INITIAL) {
 			return false;
 		}
-		
-		/* at this point we are at INITIAL variable state - so if we got a string identifier as next 
-		 * this means we must end the "variable" here (see bug 105)
+
+		/*
+		 * at this point we are at INITIAL variable state - so if we got a string
+		 * identifier as next this means we must end the "variable" here (see bug 105)
 		 */
-		if (isStringChar(c)){
+		if (isStringChar(c)) {
 			context.addTokenAndResetText();
 			context.switchTo(ParserState.CODE);
 			return false;
 		}
-		
+
 		context.appendCharToText();
 		if (c == '$' || c == '?') {
 			/*
 			 * c is the NEXT char after the $ was recognized! as described at
-			 * http://tldp.org/LDP/abs/html/special-chars.html "$$" is a special
-			 * variable holding the process id so in this case it terminates the
-			 * variable!
+			 * http://tldp.org/LDP/abs/html/special-chars.html "$$" is a special variable
+			 * holding the process id so in this case it terminates the variable!
 			 */
 			context.addTokenAndResetText();
 			context.switchTo(CODE);
@@ -318,7 +374,7 @@ public class TokenParser {
 		if (variableContext.getType() != VariableType.STANDARD) {
 			return false;
 		}
-		if (Character.isWhitespace(c)) {//context.getCharBefore())) {
+		if (Character.isWhitespace(c)) {// context.getCharBefore())) {
 			context.addTokenAndResetText();
 			context.switchTo(ParserState.CODE);
 			return false;
@@ -350,13 +406,13 @@ public class TokenParser {
 			context.appendCharToText();
 			return true;
 		}
-		if (c=='=') {
+		if (c == '=') {
 			context.addTokenAndResetText();
 			context.switchTo(ParserState.CODE);
 		}
 		/* normal variable or array closed */
 		boolean balanced = isBalanced(variableContext);
-		
+
 		if (c == '}') {
 			if (balanced || variableContext.hasNoOpenedCurlyBraces()) {
 				/* this is a var separator - means end of variable def */
@@ -364,11 +420,11 @@ public class TokenParser {
 				context.switchTo(ParserState.CODE);
 				/* no return, handle normal! */
 				return false;
-			}else{
+			} else {
 				context.appendCharToText();
 				return true;
 			}
-		}else if (Character.isWhitespace(c) || c == ';') {
+		} else if (Character.isWhitespace(c) || c == ';') {
 			if (balanced) {
 				context.addTokenAndResetText();
 				context.switchTo(ParserState.CODE);
@@ -399,7 +455,7 @@ public class TokenParser {
 	}
 
 	private boolean isVarSeparator(char c) {
-		return c=='/' || c=='=';
+		return c == '/' || c == '=';
 	}
 
 	private boolean handleCurlyBracedVariable(ParseContext context, char c, VariableContext variableContext) {
@@ -512,8 +568,8 @@ public class TokenParser {
 		char c = context.getCharAtPos();
 		if (!isStringChar(c)) {
 			/*
-			 * no string - do nothing, pos increment/move forward is done
-			 * outside in for next loop!
+			 * no string - do nothing, pos increment/move forward is done outside in for
+			 * next loop!
 			 */
 			return;
 		}
