@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.console
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.ui
+Import-Package: org.eclipse.ui,
+ org.eclipse.ui.texteditor.templates
 Bundle-ClassPath: .,
  lib/de-jcup-eclipse-commons.jar
 Automatic-Module-Name: de.jcup.basheditor

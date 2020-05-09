@@ -2,3 +2,5 @@
 
 # this is just a test file for files having no file extension like .sh but be also bash script
 # so when finding a #!/bin/bash (shebang) on first line the editor should also be the default editor
+
+# TODO test2-without file extendsion

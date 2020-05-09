@@ -41,13 +41,20 @@ public class BashFileWithoutExtensionPropertyTester extends PropertyTester {
 			/* not supported */
 			return false;
 		}
-
 		IFile file = (IFile) receiver;
-		if (!file.exists()) {
+		return isWithoutFileExtension(file) && isFirstLineBashSheBang(file);
+
+	}
+
+	public boolean isWithoutFileExtension(IFile file) {
+		if (file == null) {
 			return false;
 		}
-		boolean isBashFileWithoutFileExtension = file.getFileExtension() == null;
-		if (!isBashFileWithoutFileExtension) {
+		return file.getFileExtension() == null  || file.getFileExtension().contentEquals("");
+	}
+
+	public boolean isFirstLineBashSheBang(IFile file) {
+		if (file == null || !file.exists()) {
 			return false;
 		}
 		File theFile;
@@ -71,7 +78,6 @@ public class BashFileWithoutExtensionPropertyTester extends PropertyTester {
 			BashEditorUtil.logError("Was not able to test if file is a bash file:" + file.getName(), e);
 			return false;
 		}
-
 	}
 
 }

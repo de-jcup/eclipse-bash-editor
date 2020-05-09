@@ -41,7 +41,18 @@
    		id="basheditor.preferences.keyword.debugger"
    		label="debugger">
      </keyword>
-    
+     <keyword
+   		id="basheditor.preferences.keyword.tasks"
+   		label="tasks">
+     </keyword>
+      <keyword
+        id="basheditor.preferences.keyword.templates"
+        label="templates">
+     </keyword>
+      <keyword
+        id="basheditor.preferences.keyword.todos"
+        label="todos">
+     </keyword>
    </extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          EDITOR                                      -->
@@ -351,11 +362,43 @@
          </keywordReference>
       </page>
       
+       <page
+         id="de.jcup.basheditor.preferences.BashTaskTagsPreferencePage"
+         class="de.jcup.basheditor.preferences.BashTaskTagsPreferencePage"
+         name="Task Tags"
+         category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
+         <keywordReference
+               id="basheditor.preferences.keyword.todos">
+         </keywordReference>
+         <keywordReference
+               id="basheditor.preferences.keyword.bash">
+         </keywordReference>
+         <keywordReference
+               id="basheditor.preferences.keyword.tasks">
+         </keywordReference>
+         
+      </page>
+      <page
+         id="de.jcup.basheditor.preferences.BashTemplatePreferencePage"
+         class="de.jcup.basheditor.preferences.BashEditorTemplatePreferencePage"
+         name="Templates"
+         category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
+         <keywordReference
+               id="basheditor.preferences.keyword.bash">
+         </keywordReference>
+         <keywordReference
+               id="basheditor.preferences.keyword.templates">
+         </keywordReference>
+      </page>
     </extension>
+    
     <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
             class="de.jcup.basheditor.preferences.BashEditorPreferenceInitializer">
+      </initializer>
+      <initializer
+            class="de.jcup.basheditor.preferences.BashTaskTagsPreferenceInitializer">
       </initializer>
    </extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -366,6 +409,15 @@
     	point="org.eclipse.core.resources.markers"
     	name="Bash editor parse error">
         <super type="org.eclipse.core.resources.problemmarker"/>
+        <super type="org.eclipse.core.resources.textmarker"/>
+        <persistent value="true"/>
+    </extension>
+    
+     <extension 
+   		id="de.jcup.basheditor.script.task"
+    	point="org.eclipse.core.resources.markers"
+    	name="Bash editor task">
+        <super type="org.eclipse.core.resources.taskmarker"/>
         <super type="org.eclipse.core.resources.textmarker"/>
         <persistent value="true"/>
     </extension>
@@ -383,6 +435,102 @@
             primary="true">
       </toc>
    </extension>
+   
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!--                          TEMPLATE                                    -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <extension
+         point="org.eclipse.ui.editors.templates">
+      <contextType
+            name="Bash Editor"
+            class="de.jcup.basheditor.templates.BashEditorTemplateContextType"
+            id="de.jcup.basheditor.template.context">
+      </contextType>
+      <template
+            name="TODO"
+            icon="icons/templates/task.png"
+            description="TODO marker for current user and date"
+            contextTypeId="de.jcup.basheditor.template.context"
+            id="basheditor.templates.default.todo">
+         <pattern># TODO ${user}, ${currentDate:date('yyyy-MM-dd')}:${cursor}</pattern>
+      </template>
+      
+      <template
+            name="FIXME"
+            icon="icons/templates/task.png"
+            description="FIXME marker for current user and date"
+            contextTypeId="de.jcup.basheditor.template.context"
+            id="basheditor.templates.default.fixme">
+         <pattern># FIXME ${user}, ${currentDate:date('yyyy-MM-dd')}:${cursor}</pattern>
+      </template>
+      <template
+            name="PARSE-ARGUMENTS"
+            icon="icons/bash-editor.png"
+            description="parse arguments - full working example template"
+            contextTypeId="de.jcup.basheditor.template.context"
+            id="basheditor.templates.default.parsearguments">
+         <pattern> # Parse command line arguments - origin code from https://stackoverflow.com/a/14203146 - please look there for details
+# Usage: Usage demo-space-separated.sh -e conf -s /etc -l /usr/lib /etc/hosts
+POSITIONAL=()
+while [[ $$# -gt 0 ]]
+do
+key="$$1"
+
+case $$key in
+    -e|--extension)
+    EXTENSION="$$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -s|--searchpath)
+    SEARCHPATH="$$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -l|--lib)
+    LIBPATH="$$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --default)
+    DEFAULT=YES
+    shift # past argument
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "$${POSITIONAL[@]}" # restore positional parameters
+
+echo "FILE EXTENSION  = $${EXTENSION}"
+echo "SEARCH PATH     = $${SEARCHPATH}"
+echo "LIBRARY PATH    = $${LIBPATH}"
+echo "DEFAULT         = $${DEFAULT}"
+echo "Number files in SEARCH PATH with EXTENSION:" $$(ls -1 "$${SEARCHPATH}"/*."$${EXTENSION}" | wc -l)
+if [[ -n $$1 ]]; then
+    echo "Last line of file specified as non-opt/last argument:"
+    tail -1 "$$1"
+fi
+         </pattern>
+      </template>
+      <template
+            name="IF-ELIF-ELSE"
+            icon="icons/bash-editor.png"
+            description="if, elseif else template"
+            contextTypeId="de.jcup.basheditor.template.context"
+            id="basheditor.templates.default.ifelifelse">
+         <pattern>if [[ "$$${variableName}" = "${state1}" ]]; then
+	echo "${state1}"
+elif [[ "$$${variableName}" = "${state2}" ]]; then
+	echo "${state2}"
+else
+  	echo "other state"
+fi</pattern>
+      </template>
+</extension>
+   
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          Debugging                                   -->
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->

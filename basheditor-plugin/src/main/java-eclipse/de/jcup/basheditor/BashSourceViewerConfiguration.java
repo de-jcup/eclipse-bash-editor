@@ -51,6 +51,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.URLHyperlinkDetector;
@@ -76,6 +77,8 @@ import de.jcup.basheditor.document.BashDocumentIdentifier;
 import de.jcup.basheditor.document.BashDocumentIdentifiers;
 import de.jcup.basheditor.presentation.BashDefaultTextScanner;
 import de.jcup.basheditor.presentation.PresentationSupport;
+import de.jcup.eclipse.commons.codeassist.MultipleContentAssistProcessor;
+import de.jcup.eclipse.commons.templates.TemplateSupport;
 /**
  * 
  * @author Albert Tregnaghi
@@ -108,9 +111,15 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 		
 		this.contentAssistant = new ContentAssistant();
 		contentAssistProcessor = new BashEditorSimpleWordContentAssistProcessor();
+		
+		TemplateSupport support = BashEditorActivator.getDefault().getTemplateSupportProvider().getSupport();
+        IContentAssistProcessor templateProcessor = support.getProcessor();
+
+		MultipleContentAssistProcessor multiProcessor = new MultipleContentAssistProcessor(templateProcessor, contentAssistProcessor);
+		
 		contentAssistant.enableColoredLabels(true);
 		
-		contentAssistant.setContentAssistProcessor(contentAssistProcessor, IDocument.DEFAULT_CONTENT_TYPE);
+		contentAssistant.setContentAssistProcessor(multiProcessor, IDocument.DEFAULT_CONTENT_TYPE);
 		for (BashDocumentIdentifier identifier: BashDocumentIdentifiers.values()){
 			contentAssistant.setContentAssistProcessor(contentAssistProcessor, identifier.getId());
 		}
