@@ -91,12 +91,42 @@ public class AssertParseTokens {
 			found.add(token.getText());
 		} 
 		if (tokens.length != found.size()){
-			fail("Tokens length differ!\nexpected tokens:\n"+Arrays.asList(tokens)+"\nfound tokens:\n"+found);
+			showTokenDiffAssertion("Tokens length differ - expected "+tokens.length+", but got: "+found.size(),found,tokens);
 		}
 		if (! Arrays.equals(tokens, found.toArray())){
-			fail("Tokens content differ!\nexpected tokens:\n"+Arrays.asList(tokens)+"\nfound tokens:\n"+found);
+			showTokenDiffAssertion("Tokens length content - expected "+tokens.length+", andd got: "+found.size()+" but content is unexpected",found,tokens);
 		}
 		return this;
+	}
+	
+	private void showTokenDiffAssertion(String message, List<String> found, String ...expected) {
+		assertEquals(message, buildTokenStringForCompare(expected),buildTokenStringForCompare(found));
+	}
+	
+	private String buildTokenStringForCompare(String ... tokens) {
+		
+		List<String> list = Arrays.asList(tokens);
+		return buildTokenStringForCompare(list);
+	}
+
+	private String buildTokenStringForCompare(List<String> list) {
+		StringBuilder sb = new StringBuilder();
+		int i=0;
+		for (String token: list) {
+			sb.append(lineNumber(i++)).append(':');
+			sb.append(token);
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+	
+	private String lineNumber(int lineNumber) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(lineNumber);
+		while (sb.length()<4) {
+			sb.insert(0, '0');
+		}
+		return sb.toString();
 	}
 
 	public ParseToken resolveToken(String string) {

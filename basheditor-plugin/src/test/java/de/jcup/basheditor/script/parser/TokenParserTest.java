@@ -37,6 +37,26 @@ public class TokenParserTest {
     }
 
     @Test
+    public void bugfix_184_1() throws Exception{
+    	String testScript ="$USER@${be_servers[$i]}:$UPGRADES_FOLDER";
+    	
+    	/* @formatter:off*/
+    	assertParsing(testScript).
+			resultsIn("$USER@${be_servers[$i]}:$UPGRADES_FOLDER");
+    	/* @formatter:on*/
+    }
+    
+    @Test
+    public void bugfix_184_2() throws Exception{
+    	String testScript ="function { $USER@${be_servers[$i]}:$UPGRADES_FOLDER }";
+    	
+    	/* @formatter:off*/
+    	assertParsing(testScript).
+			resultsIn("function", "{", "$USER@${be_servers[$i]}:$UPGRADES_FOLDER","}");
+    	/* @formatter:on*/
+    }
+    
+    @Test
     public void parse_var1_1_is_recognized_as_variable() throws Exception {
         /* @formatter:off*/
 		assertParsing("var1=1").

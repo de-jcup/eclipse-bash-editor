@@ -318,6 +318,14 @@ public class TokenParser {
 		if (variableContext.getType() != VariableType.STANDARD) {
 			return false;
 		}
+		if (Character.isWhitespace(c)) {//context.getCharBefore())) {
+			context.addTokenAndResetText();
+			context.switchTo(ParserState.CODE);
+			return false;
+		}
+		if (c == '{') {
+			variableContext.incrementVariableOpenCurlyBraces();
+		}
 		if (c == '[') {
 			variableContext.variableArrayOpened();
 			context.appendCharToText();
@@ -341,6 +349,10 @@ public class TokenParser {
 			}
 			context.appendCharToText();
 			return true;
+		}
+		if (c=='=') {
+			context.addTokenAndResetText();
+			context.switchTo(ParserState.CODE);
 		}
 		/* normal variable or array closed */
 		boolean balanced = isBalanced(variableContext);
