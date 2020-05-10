@@ -38,6 +38,10 @@
    		label="debug">
      </keyword>
      <keyword
+   		id="basheditor.preferences.keyword.launch"
+   		label="launch">
+     </keyword>
+     <keyword
    		id="basheditor.preferences.keyword.debugger"
    		label="debugger">
      </keyword>
@@ -309,7 +313,7 @@
          
       </page>
       <page
-         id="basheditor.eclipse.gradleeditor.preferences.BashEditorEditorSyntaxColorPreferencePage"
+         id="basheditor.eclipse.preferences.BashEditorEditorSyntaxColorPreferencePage"
          class="de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferencePage"
          name="Syntax coloring"
          category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
@@ -321,7 +325,7 @@
          </keywordReference>
       </page>
       <page
-         id="basheditor.eclipse.gradleeditor.preferences.BashEditorValidationPreferencePage"
+         id="basheditor.eclipse.preferences.BashEditorValidationPreferencePage"
          class="de.jcup.basheditor.preferences.BashEditorValidationPreferencePage"
          name="Validation"
          category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
@@ -334,7 +338,7 @@
       </page>
       
       <page
-         id="basheditor.eclipse.gradleeditor.preferences.BashEditorSaveActionsPreferencePage"
+         id="basheditor.eclipse.preferences.BashEditorSaveActionsPreferencePage"
          class="de.jcup.basheditor.preferences.BashEditorSaveActionsPreferencePage"
          name="Save Actions"
          category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
@@ -347,12 +351,15 @@
       </page>
       
       <page
-         id="basheditor.eclipse.gradleeditor.preferences.BashEditorDebugPreferencePage"
-         class="de.jcup.basheditor.preferences.BashEditorDebugPreferencePage"
-         name="Debug"
+         id="basheditor.eclipse.preferences.BashEditorLaunchPreferencePage"
+         class="de.jcup.basheditor.preferences.BashEditorLaunchPreferencePage"
+         name="Launch"
          category="basheditor.eclipse.preferences.BashEditorEditorPreferencePage">
           <keywordReference
                id="basheditor.preferences.keyword.debug">
+         </keywordReference>
+          <keywordReference
+               id="basheditor.preferences.keyword.launch">
          </keywordReference>
          <keywordReference
                id="basheditor.preferences.keyword.debugger">

@@ -45,7 +45,7 @@ import de.jcup.basheditor.debug.launch.TerminalLaunchContext;
 import de.jcup.basheditor.debug.launch.TerminalLaunchContextBuilder;
 import de.jcup.basheditor.debug.launch.TerminalLauncher;
 
-public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
     private static final String TOOLTIP_HEADER_TESTOUTPUT = "Here you will find the last output created by `Show result cmd`.\n"
             + "It is the resulting terminal command, which means you can paste this command inside your CLI and test if the command works\n"
             + "(means you will see a new terminal appearing which executes a testscript)";
@@ -59,7 +59,7 @@ public class BashEditorDebugPreferencePage extends FieldEditorPreferencePage imp
     private StringFieldEditor customUserHomePath;
     private static final String params = "-a 1 -b 2";
     
-    public BashEditorDebugPreferencePage() {
+    public BashEditorLaunchPreferencePage() {
         super(GRID);
         setPreferenceStore(BashEditorUtil.getPreferences().getPreferenceStore());
     }
