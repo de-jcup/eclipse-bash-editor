@@ -16,6 +16,7 @@
 package de.jcup.basheditor.debug.launch;
 
 import static de.jcup.basheditor.debug.BashDebugConstants.LAUNCH_ENVIRONMENT_PROPERTIES;
+
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.debug.core.model.RuntimeProcess;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import de.jcup.basheditor.BashEditorActivator;
@@ -70,6 +72,11 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 		}
 		File programFile = programFileResource.getLocation().toFile();
 
+		boolean canBeExecuted = handleNotExecutable(programFile);
+		if (!canBeExecuted) {
+			return;
+		}
+
 		/* only for debugging we support "stopOnStartup" ... */
 		boolean stopOnStartup = debug
 				&& configuration.getAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP, false);
@@ -89,7 +96,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 					Collections.emptyMap());
 
 			Process process = terminalLauncher.execute(programFile, params, getPreferences().getTerminalCommand(),
-					getPreferences().getStarterCommand(),environment);
+					getPreferences().getStarterCommand(), environment);
 
 			IDebugTarget target = createDebugTargetOrNull(launch, process, debug, programFileResource, port);
 			if (target != null) {
@@ -122,6 +129,29 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 		}
 	}
 
+	private boolean handleNotExecutable(File programFile) {
+		if (programFile == null) {
+			throw new IllegalStateException("file is null");
+		}
+		if (programFile.canExecute()) {
+			return true;
+		}
+		EclipseUtil.safeAsyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = EclipseUtil.getSafeDisplay().getActiveShell();
+
+				String titleText = "Bashscript '"+programFile.getName()+"' cannot be executed";
+				String infoText = "The file:\n\n"+programFile.getAbsolutePath()+"\n\ncannot be executed by user who started eclipse / or any user at all.\n\n" + 
+						"Please define correct permissions to the file and try again";
+				MessageDialog.openError(shell, titleText, infoText);
+			}
+
+		});
+		return false;
+	}
+
 	/**
 	 * # Creates debug/run target - if not possible (e.g. debug session cannot be
 	 * started) the returned target is <code>null</code>
@@ -136,7 +166,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 	 */
 	private IDebugTarget createDebugTargetOrNull(ILaunch launch, Process process, boolean debug,
 			IFile programFileResource, int port) throws CoreException, DebugException {
-		if (! debug) {
+		if (!debug) {
 			return null;
 		}
 		IDebugTarget target = null;

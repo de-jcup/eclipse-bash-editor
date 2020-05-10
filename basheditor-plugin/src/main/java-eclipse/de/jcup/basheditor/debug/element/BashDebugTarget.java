@@ -370,6 +370,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 					EclipseUtil.logError("Debugger problem occurred", e, BashEditorActivator.getDefault());
 				}
 			} finally {
+				status = restorOriginCode(monitor, status, startFile);
 				terminated();
 				try {
 					debugger.disconnect();
@@ -377,23 +378,28 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 					EclipseUtil.logError("Unable to finally disconnect bash connector", e1, BashEditorActivator.getDefault());
 				}
 				debugger.markTerminated();
-				try {
-					/* if somebody has changed the code in mean time we just reload again and toggle only off! */
-					String debugCode = ScriptUtil.loadScript(startFile);
-					originCode = toggleSupport.disableDebugging(debugCode);
-					ScriptUtil.saveScript(startFile, originCode);
-					
-					fileResource.refreshLocal(IResource.DEPTH_ZERO,monitor);
-					
-				} catch (Exception e) {
-					status = new Status(IStatus.ERROR,BashEditorActivator.getDefault().getPluginID(),"Removing temp bash script debugging parts failed for :"+fileResource, e);
-				}
 				
 			}
 			try {
 				BashSourceLookupParticipant.saveLookupSource();
 			} catch (IOException e1) {
 				EclipseUtil.logError("Unable to save lookup source", e1, BashEditorActivator.getDefault());
+			}
+			return status;
+		}
+
+		private IStatus restorOriginCode(IProgressMonitor monitor, IStatus status, File startFile) {
+			String originCode;
+			try {
+				/* if somebody has changed the code in mean time we just reload again and toggle only off! */
+				String debugCode = ScriptUtil.loadScript(startFile);
+				originCode = toggleSupport.disableDebugging(debugCode);
+				ScriptUtil.saveScript(startFile, originCode);
+				
+				fileResource.refreshLocal(IResource.DEPTH_ZERO,monitor);
+				
+			} catch (Exception e) {
+				status = new Status(IStatus.ERROR,BashEditorActivator.getDefault().getPluginID(),"Removing temp bash script debugging parts failed for :"+fileResource, e);
 			}
 			return status;
 		}
