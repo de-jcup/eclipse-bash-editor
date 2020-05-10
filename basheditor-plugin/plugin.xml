@@ -542,7 +542,7 @@ fi</pattern>
             name="Bash script"
             sourcePathComputerId="de.jcup.basheditor.debug.sourcePathComputer.sh"
             delegate="de.jcup.basheditor.debug.launch.BashDebugLaunchConfigurationDelegate"
-            modes="debug"
+            modes="debug,run"
             id="de.jcup.basheditor.debug.launchConfigurationType">
       </launchConfigurationType>
    </extension>

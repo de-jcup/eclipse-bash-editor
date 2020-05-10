@@ -36,7 +36,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
 import de.jcup.basheditor.EclipseUtil;
@@ -47,9 +46,6 @@ public class BashLaunchConfigurationMainTab extends AbstractLaunchConfigurationT
 	private Text bashScriptText;
 	private Text bashParameterText;
 	private Button bashScriptSelectionButton;
-	private Spinner portSpinner;
-	private Label portLabel;
-	private Button stopOnStartupButton;
 	
 	String configurationName = "";
 
@@ -102,42 +98,6 @@ public class BashLaunchConfigurationMainTab extends AbstractLaunchConfigurationT
 				updateLaunchConfigurationDialog();
 			}
 		});
-		new Label(comp, SWT.NONE);
-		
-		portLabel = new Label(comp, SWT.NONE);
-		portLabel.setText("Debugger port:");
-		gd = new GridData(GridData.BEGINNING);
-		portLabel.setLayoutData(gd);
-		portLabel.setFont(font);
-
-		portSpinner = new Spinner(comp, SWT.SINGLE | SWT.BORDER);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		portSpinner.setLayoutData(gd);
-		portSpinner.setFont(font);
-		portSpinner.setMaximum(0xFFFF);
-		portSpinner.setMinimum(0x01);
-		
-		portSpinner.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				updateLaunchConfigurationDialog();
-			}
-		});
-		new Label(comp, SWT.NONE);
-		createSeparator(comp, 3);
-		stopOnStartupButton = new Button(comp, SWT.CHECK);
-		stopOnStartupButton.setText("Stop on startup");
-		
-		gd = new GridData(GridData.FILL);
-		stopOnStartupButton.setLayoutData(gd);
-		stopOnStartupButton.setFont(font);
-		stopOnStartupButton.setSelection(false);
-		stopOnStartupButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				updateLaunchConfigurationDialog();
-			}
-		});
-		new Label(comp, SWT.NONE);
-		new Label(comp, SWT.NONE);
 		getLaunchConfigurationDialog().setActiveTab(0);
 	}
 	
@@ -170,11 +130,6 @@ public class BashLaunchConfigurationMainTab extends AbstractLaunchConfigurationT
 			}
 			bashParameterText.setText(params);
 			
-			int port = configuration.getAttribute(BashDebugConstants.LAUNCH_ATTR_SOCKET_PORT, BashDebugConstants.DEFAULT_DEBUG_PORT);
-			portSpinner.setSelection(port);
-			
-			stopOnStartupButton.setSelection(configuration.getAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP, true));
-
 			setMessage(null);
 			setErrorMessage(null);
 			updateLaunchConfigurationDialog();
@@ -199,12 +154,6 @@ public class BashLaunchConfigurationMainTab extends AbstractLaunchConfigurationT
 		
 		configuration.setAttribute(BashDebugConstants.LAUNCH_ATTR_BASH_PROGRAM, program);
 		configuration.setAttribute(BashDebugConstants.LAUNCH_ATTR_BASH_PARAMS, params);
-
-		int port = portSpinner.getSelection();
-		configuration.setAttribute(BashDebugConstants.LAUNCH_ATTR_SOCKET_PORT, port);
-		configuration.setAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP, stopOnStartupButton.getSelection());
-
-
 	}
 
 	public String getName() {

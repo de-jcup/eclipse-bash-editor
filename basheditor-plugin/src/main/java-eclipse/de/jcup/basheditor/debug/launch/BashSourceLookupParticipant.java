@@ -104,17 +104,22 @@ public class BashSourceLookupParticipant extends AbstractSourceLookupParticipant
 		reverseLookupSource.put(file.getFullPath(), frameFileSource);
 		unlock();
 	}
-
 	public static IFile getLookupSourceItem(String frameFileSource) {
+		return getLookupSourceItem(frameFileSource,null);
+	}
+		
+	public static IFile getLookupSourceItem(String frameFileSource, IContainer container) {
 		IFile file;
 		lock();
 		file = lookupSource.get(frameFileSource);
 		unlock();
 		if (file == null) {
-			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+			if (container==null) {
+				container = ResourcesPlugin.getWorkspace().getRoot();
+			}
 			IPath path = new Path(frameFileSource);
 			try {
-				file = root.getFile(path);
+				file = container.getFile(path);
 			} catch ( Exception e) {
 				EclipseUtil.logError("Was not able to determin root file", e, BashEditorActivator.getDefault());
 

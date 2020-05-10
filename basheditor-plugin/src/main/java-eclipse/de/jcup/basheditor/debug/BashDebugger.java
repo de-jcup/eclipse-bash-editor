@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.BindException;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -39,6 +41,7 @@ import de.jcup.basheditor.debug.element.BashDebugTarget;
 import de.jcup.basheditor.debug.element.BashStackFrame;
 import de.jcup.basheditor.debug.element.BashThread;
 import de.jcup.basheditor.debug.element.BashVariable;
+import de.jcup.basheditor.debug.launch.BashDocumentChangeRegistry;
 import de.jcup.basheditor.debug.launch.BashDocumentChangeRegistry.DocumentChange;
 import de.jcup.basheditor.debug.launch.BashDocumentChangeRegistry.DocumentChanges;
 import de.jcup.basheditor.debug.launch.BashSourceLookupParticipant;
@@ -388,7 +391,12 @@ public class BashDebugger {
 			StackElement stackElement = context.getStack(level);
 			currentline = stackElement.currentline;
 			String source = stackElement.source;
-			DocumentChanges docChanges = debugTarget.getDocumentChangeRegistry().getDocumentChanges(source);
+			
+			BashDocumentChangeRegistry documentChangeRegistry = debugTarget.getDocumentChangeRegistry();
+			IFile fileResource = debugTarget.getFileResource();
+			IContainer parent = fileResource.getParent();
+			
+			DocumentChanges docChanges = documentChangeRegistry.getDocumentChanges(source,parent);
 			if (docChanges != null) {
 				for (int i = 0; i < docChanges.changes.size(); i++) {
 					DocumentChange docChange = docChanges.changes.get(i);

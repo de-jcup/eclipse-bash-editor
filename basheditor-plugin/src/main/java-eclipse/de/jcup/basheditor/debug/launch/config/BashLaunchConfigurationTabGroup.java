@@ -23,7 +23,8 @@ public class BashLaunchConfigurationTabGroup extends AbstractLaunchConfiguration
 
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		setTabs(new ILaunchConfigurationTab[] {
-				new BashLaunchConfigurationMainTab()
+				new BashLaunchConfigurationMainTab(),
+				new BashLaunchConfigurationDebugTab()
 		});
 	}
 }

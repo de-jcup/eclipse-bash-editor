@@ -17,6 +17,7 @@ package de.jcup.basheditor.debug.launch;
 
 import java.util.Vector;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 
 public class BashDocumentChangeRegistry {
@@ -57,12 +58,12 @@ public class BashDocumentChangeRegistry {
 		docChanges.changes.add(new DocumentChange(line + 1, numLines));
 	}
 
-	public DocumentChanges getDocumentChanges(String source) {
+	public DocumentChanges getDocumentChanges(String source, IContainer container) {
 		int p = source.indexOf("@");
 		if (p != -1) {
 			source = source.substring(p + 1);
 		}
-		IFile file = BashSourceLookupParticipant.getLookupSourceItem(source);
+		IFile file = BashSourceLookupParticipant.getLookupSourceItem(source,container);
 		if (file == null) {
 			return null;
 		}

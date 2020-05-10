@@ -40,32 +40,34 @@ import de.jcup.eclipse.commons.ui.EclipseUtil;
  */
 public class TerminalLauncher {
     
-    public void execute(File file, String params, String terminalCommand, String starterCommand) {
+    public Process execute(File file, String params, String terminalCommand, String starterCommand) {
         /* setup context */
         if (file==null) {
             EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
-            return;
+            return null;
         }
         TerminalLaunchContext context = createContext(file, params, terminalCommand,starterCommand);
-        execute(context);
+        return execute(context);
         
     }
 
     
-    public void execute(TerminalLaunchContext context) {
+    public Process execute(TerminalLaunchContext context) {
         if (context==null) {
             EclipseUtil.logError("Context was null", null, BashEditorActivator.getDefault());
-            return;
+            return null;
         }
         if (context.file==null) {
             EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
-            return;
+            return null;
         }
         /* execute in own thread */
         LaunchRunnable launchRunnable = new LaunchRunnable(context.getWorkingDirFile(), context.commands);
         Thread thread = new Thread(launchRunnable);
         thread.setName("Launch in terminal:" + context.file.getName());
         thread.start();
+        
+        return launchRunnable.waitForStartedProcessOrNull();
     }
     
 	private TerminalLaunchContext createContext(File file, String params, String terminalCommand, String starterCommand) {
@@ -98,24 +100,38 @@ public class TerminalLauncher {
 
 		private File workingDir;
 		private List<String> commands;
+		Process p;
+		private boolean startedProcess;
 
 		public LaunchRunnable(File workingDir, List<String> commands) {
 			this.workingDir = workingDir;
 			this.commands = commands;
 		}
+		
+		public Process waitForStartedProcessOrNull() {
+			while (!startedProcess) {
+				try {
+					Thread.sleep(300);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+			return p;
+		}
 
 		@Override
 		public void run() {
 		    if (commands==null || commands.isEmpty()) {
-		        return;
+		    	startedProcess=true;
+		    	return;
 		    }
 			ProcessBuilder pb = new ProcessBuilder(commands);
 			pb.directory(workingDir);
 			logExecutedCommand(this);
-			Process p;
 			try {
 				pb.inheritIO();
 				p = pb.start();
+				startedProcess=true;
 				int result = p.waitFor();
 				if (result != 0) {
 					System.err.println("result:" + result);
