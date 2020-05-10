@@ -669,7 +669,7 @@ fi</pattern>
         class="de.jcup.basheditor.debug.launch.BashEditorDebugLaunchShortCut"
         label="Bash script"
         icon="icons/bash-editor.png"
-        modes="debug">
+        modes="debug,run">
             <contextualLaunch>
             
             <enablement>
@@ -682,13 +682,9 @@ fi</pattern>
 				                	<test property="org.eclipse.core.resources.name"
 				                         value="*.sh"/>
 				            </adapt>
-				            <not>
-    				            <!-- we also allow files with name having no dot inside.. -->
-                                <adapt type="org.eclipse.core.resources.IFile">
-                                        <test property="org.eclipse.core.resources.name"
-                                             value="*.*"/>
-                                </adapt>
-				            </not>
+				        	<adapt type="org.eclipse.core.resources.IFile">
+								<test property="de.jcup.basheditor.isBashFileWithoutExtension" value="true"/>
+				            </adapt>
 				     </or>
 			        </iterate>
 			    </with>
