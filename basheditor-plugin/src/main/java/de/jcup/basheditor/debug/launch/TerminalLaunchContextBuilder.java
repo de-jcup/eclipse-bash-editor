@@ -34,6 +34,7 @@ public class TerminalLaunchContextBuilder {
     private boolean waitingAlways;
     private boolean waitingOnErrors;
     private String starterTemplate;
+	private Map<String, String> environment;
     private TerminalLaunchContextBuilder() {
         
     }
@@ -69,6 +70,11 @@ public class TerminalLaunchContextBuilder {
         this.waitingOnErrors=waitingOnErrors;
         return this;
     }
+
+    public TerminalLaunchContextBuilder environment(Map<String, String> environment) {
+    	this.environment=environment;
+    	return this;
+    }
     
     public TerminalLaunchContext build() {
         TerminalLaunchContext context = new TerminalLaunchContext();
@@ -83,7 +89,7 @@ public class TerminalLaunchContextBuilder {
         context.switchToWorkingDirNecessary=true;
         context.launchTerminalCommand="";
         context.commands=new ArrayList<String>();
-        
+        context.environment=environment;
         try{
             /* build command list */
             String internalCommand = itc.build(context);

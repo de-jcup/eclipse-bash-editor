@@ -17,6 +17,7 @@ package de.jcup.basheditor.debug.launch;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 public class TerminalLaunchContext {
     
@@ -31,10 +32,15 @@ public class TerminalLaunchContext {
     String terminalExecutionCommand;
     Exception exception;
     String startTemplate;
+	Map<String, String> environment;
     
     public String getLaunchTerminalCommand() {
         return launchTerminalCommand;
     }
+    
+    public Map<String, String> getEnvironment() {
+		return environment;
+	}
     
     public String getTerminalExecutionCommand() {
         return terminalExecutionCommand;

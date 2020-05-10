@@ -15,7 +15,9 @@
  */
 package de.jcup.basheditor.debug.launch;
 
+import static de.jcup.basheditor.debug.BashDebugConstants.LAUNCH_ENVIRONMENT_PROPERTIES;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,16 +85,15 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 
 		/* debug process is started, so launch terminal or inform */
 		if (canDoAutoRun) {
+			Map<String, String> environment = configuration.getAttribute(LAUNCH_ENVIRONMENT_PROPERTIES,
+					Collections.emptyMap());
+
 			Process process = terminalLauncher.execute(programFile, params, getPreferences().getTerminalCommand(),
-					getPreferences().getStarterCommand());
+					getPreferences().getStarterCommand(),environment);
 
 			IDebugTarget target = createDebugTargetOrNull(launch, process, debug, programFileResource, port);
 			if (target != null) {
 				launch.addDebugTarget(target);
-//				IProcess p = target.getProcess();
-//				if (p != null) {
-//					launch.addProcess(p);
-//				}
 			}
 			Map<String, String> attributes = new HashMap<String, String>();
 			RuntimeProcess runtimeProcess = new RuntimeProcess(launch, process, programFile.getName(), attributes);

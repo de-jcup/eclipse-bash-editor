@@ -25,6 +25,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -32,7 +33,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 
+import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.debug.BashDebugConstants;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashLaunchConfigurationDebugTab extends AbstractLaunchConfigurationTab {
 
@@ -117,6 +120,11 @@ public class BashLaunchConfigurationDebugTab extends AbstractLaunchConfiguration
 	public String getName() {
 		return "Debug";
 	}
+	
+	public Image getImage() {
+		return EclipseUtil.getImage("icons/debug_exc.gif",BashEditorActivator.getDefault());
+	}
+
 
 	public boolean isValid(ILaunchConfiguration launchConfig) {
 		return super.isValid(launchConfig);

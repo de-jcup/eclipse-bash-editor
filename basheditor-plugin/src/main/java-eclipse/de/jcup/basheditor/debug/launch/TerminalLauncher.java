@@ -18,6 +18,7 @@ package de.jcup.basheditor.debug.launch;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.debug.BashDebugConsole;
@@ -40,13 +41,13 @@ import de.jcup.eclipse.commons.ui.EclipseUtil;
  */
 public class TerminalLauncher {
     
-    public Process execute(File file, String params, String terminalCommand, String starterCommand) {
+    public Process execute(File file, String params, String terminalCommand, String starterCommand, Map<String, String> environment) {
         /* setup context */
         if (file==null) {
             EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
             return null;
         }
-        TerminalLaunchContext context = createContext(file, params, terminalCommand,starterCommand);
+        TerminalLaunchContext context = createContext(file, params, terminalCommand,starterCommand,environment);
         return execute(context);
         
     }
@@ -62,16 +63,25 @@ public class TerminalLauncher {
             return null;
         }
         /* execute in own thread */
-        LaunchRunnable launchRunnable = new LaunchRunnable(context.getWorkingDirFile(), context.commands);
+        LaunchRunnable launchRunnable = new LaunchRunnable(context.getWorkingDirFile(), context.commands, context.environment);
         Thread thread = new Thread(launchRunnable);
         thread.setName("Launch in terminal:" + context.file.getName());
         thread.start();
         
         return launchRunnable.waitForStartedProcessOrNull();
     }
-    
-	private TerminalLaunchContext createContext(File file, String params, String terminalCommand, String starterCommand) {
-	    return TerminalLaunchContextBuilder.builder().file(file).starterCommand(starterCommand).terminalCommand(terminalCommand).params(params).waitingAlways(isWaitingAlways()).waitingOnErrors(isWaitingOnErrors()).build();
+	private TerminalLaunchContext createContext(File file, String params, String terminalCommand, String starterCommand, Map<String, String> environment) {
+		/* @formatter:off */
+	    return TerminalLaunchContextBuilder.builder().
+	    		file(file).
+	    		starterCommand(starterCommand).
+	    		terminalCommand(terminalCommand).
+	    		params(params).
+	    		waitingAlways(isWaitingAlways()).
+	    		waitingOnErrors(isWaitingOnErrors()).
+	    		environment(environment).
+	    		build();
+	    /* @formatter:on */
 	}
 	
 
@@ -102,10 +112,12 @@ public class TerminalLauncher {
 		private List<String> commands;
 		Process p;
 		private boolean startedProcess;
+		private Map<String, String> environment;
 
-		public LaunchRunnable(File workingDir, List<String> commands) {
+		public LaunchRunnable(File workingDir, List<String> commands, Map<String, String> environment) {
 			this.workingDir = workingDir;
 			this.commands = commands;
+			this.environment=environment;
 		}
 		
 		public Process waitForStartedProcessOrNull() {
@@ -127,6 +139,7 @@ public class TerminalLauncher {
 		    }
 			ProcessBuilder pb = new ProcessBuilder(commands);
 			pb.directory(workingDir);
+			pb.environment().putAll(this.environment);
 			logExecutedCommand(this);
 			try {
 				pb.inheritIO();

@@ -19,12 +19,15 @@ import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 
+import de.jcup.basheditor.debug.BashDebugConstants;
+
 public class BashLaunchConfigurationTabGroup extends AbstractLaunchConfigurationTabGroup {
 
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		setTabs(new ILaunchConfigurationTab[] {
 				new BashLaunchConfigurationMainTab(),
-				new BashLaunchConfigurationDebugTab()
+				new BashLaunchConfigurationDebugTab(),
+				new BashLaunchConfigurationPropertiesTab("Environment", "environment", "icons/launch-environmentproperties.gif", BashDebugConstants.LAUNCH_ENVIRONMENT_PROPERTIES)
 		});
 	}
 }
