@@ -34,6 +34,8 @@ public class BashThread extends AbstractBashDebugElement implements IThread, Deb
 	 */
 	private boolean stepping = false;
 
+	private boolean terminated;
+
 	/**
 	 * Constructs a new thread for the given target
 	 * 
@@ -142,10 +144,14 @@ public class BashThread extends AbstractBashDebugElement implements IThread, Deb
 	}
 
 	public boolean isTerminated() {
-		return getDebugTarget().isTerminated();
+		return terminated;
 	}
 
 	public void terminate() throws DebugException {
+		if (terminated) {
+			return;
+		}
+		terminated = true;
 		getDebugTarget().terminate();
 	}
 

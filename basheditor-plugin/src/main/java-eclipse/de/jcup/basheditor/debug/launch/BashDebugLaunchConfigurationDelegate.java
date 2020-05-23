@@ -102,9 +102,15 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 			if (target != null) {
 				launch.addDebugTarget(target);
 			}
-			Map<String, String> attributes = new HashMap<String, String>();
-			RuntimeProcess runtimeProcess = new RuntimeProcess(launch, process, programFile.getName(), attributes);
-			launch.addProcess(runtimeProcess);
+			if (!debug) {
+				/* we need this process for run mode */
+				Map<String, String> attributes = new HashMap<String, String>();
+				RuntimeProcess runtimeProcess = new RuntimeProcess(launch, process, programFile.getName(), attributes);
+				launch.addProcess(runtimeProcess);
+			}else {
+				/* we use created debug remote process */
+				launch.addProcess(target.getProcess());
+			}
 		} else {
 			EclipseUtil.safeAsyncExec(new Runnable() {
 
@@ -164,14 +170,14 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 	 * @throws CoreException
 	 * @throws DebugException
 	 */
-	private IDebugTarget createDebugTargetOrNull(ILaunch launch, Process process, boolean debug,
+	private IDebugTarget createDebugTargetOrNull(ILaunch launch, Process terminalProcess, boolean debug,
 			IFile programFileResource, int port) throws CoreException, DebugException {
 		if (!debug) {
 			return null;
 		}
 		IDebugTarget target = null;
 		if (debug) {
-			IProcess remoteProcess = new BashRemoteProcess(launch);
+			IProcess remoteProcess = new BashRemoteProcess(launch,terminalProcess);
 			terminateFormerDebugTarget();
 			debugTarget = new BashDebugTarget(launch, remoteProcess, port, programFileResource);
 			if (!debugTarget.startDebugSession()) {
@@ -184,7 +190,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 			}
 			target = debugTarget;
 		} else {
-			target = new RunOnlyBashDebugTarget(launch, process, programFileResource.getName(),
+			target = new RunOnlyBashDebugTarget(launch, terminalProcess, programFileResource.getName(),
 					new HashMap<String, String>());
 		}
 		return target;

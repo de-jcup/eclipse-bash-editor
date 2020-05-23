@@ -45,7 +45,7 @@ public class FallbackBashDebugTarget implements IDebugTarget, DebugEventSource {
 
 	public FallbackBashDebugTarget(ILaunch launch, String name) {
 	    this.launch=launch;
-	    this.process = new BashRemoteProcess(launch);
+	    this.process = new BashRemoteProcess(launch,null);
 	    this.name=name;
 	}
 	
