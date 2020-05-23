@@ -24,9 +24,11 @@ public class BashRemoteProcess implements IProcess {
 	public boolean terminated = false;
     private ILaunch launch;
     private int exitValue = -1;
+	private Process terminalProcess;
 	
-	public BashRemoteProcess(ILaunch launch) {
+	public BashRemoteProcess(ILaunch launch, Process terminalProcess) {
 	    this.launch=launch;
+	    this.terminalProcess=terminalProcess;
 	}
 
 	public synchronized boolean isTerminated() {
@@ -42,8 +44,17 @@ public class BashRemoteProcess implements IProcess {
 	}
 
 	public void terminate() throws DebugException {
+		if (terminated) {
+			return;
+		}
 		terminated = true;
-
+		launch.terminate();
+		
+		if (terminalProcess!=null) {
+			if (terminalProcess.isAlive()) {
+				terminalProcess.destroyForcibly();
+			}
+		}
 	}
 
 	public String getLabel() {

@@ -84,6 +84,8 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 	private IFile fileResource;
 	
 	private BashDocumentChangeRegistry documentChangeRegistry;
+
+	private boolean terminated;
 	
 	public BashDebugTarget(ILaunch launch, IProcess process, int port, IFile programFileResource) throws CoreException {
 		super(null);
@@ -185,15 +187,23 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 	}
 
 	public boolean canTerminate() {
-		return getProcess().canTerminate();
+		return !isTerminated();
 	}
 
 	public boolean isTerminated() {
-		return getProcess().isTerminated();
+		return terminated;
 	}
 
 	public void terminate() throws DebugException {
+		if (terminated) {
+			return;
+		}
+		terminated=true;
 		debugger.sendCommand(DebugCommand.TERMINATE);
+		for (IThread t: threads) {
+			t.terminate();
+		}
+		launch.terminate();
 	}
 
 	public boolean canResume() {
