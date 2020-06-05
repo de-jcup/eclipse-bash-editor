@@ -146,10 +146,8 @@ public class TerminalLauncher {
 				p = pb.start();
 				startedProcess=true;
 				int result = p.waitFor();
-				if (result != 0) {
-					System.err.println("result:" + result);
-				} else {
-					System.out.println("OK");
+				if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
+					BashDebugConsole.println("Bash process terminated with exit code:" + result);
 				}
 
 			} catch (IOException e) {

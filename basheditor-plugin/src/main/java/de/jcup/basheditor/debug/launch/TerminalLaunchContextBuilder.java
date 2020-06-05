@@ -90,6 +90,10 @@ public class TerminalLaunchContextBuilder {
         context.launchTerminalCommand="";
         context.commands=new ArrayList<String>();
         context.environment=environment;
+        if (context.environment==null) {
+        	/* fallback */
+        	context.environment=new HashMap<String, String>();
+        }
         try{
             /* build command list */
             String internalCommand = itc.build(context);

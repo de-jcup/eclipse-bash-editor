@@ -40,6 +40,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import de.jcup.basheditor.BashEditorActivator;
+import de.jcup.basheditor.BashEditorUtil;
 import de.jcup.basheditor.InfoPopup;
 import de.jcup.basheditor.debug.BashDebugConstants;
 import de.jcup.basheditor.debug.element.BashDebugTarget;
@@ -72,10 +73,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 		}
 		File programFile = programFileResource.getLocation().toFile();
 
-		boolean canBeExecuted = handleNotExecutable(programFile);
-		if (!canBeExecuted) {
-			return;
-		}
+		boolean shellScriptIsExecutable = handleNotExecutable(programFile);
 
 		/* only for debugging we support "stopOnStartup" ... */
 		boolean stopOnStartup = debug
@@ -88,7 +86,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 						BashDebugConstants.DEFAULT_DEBUG_PORT)
 				: -1;
 
-		boolean canDoAutoRun = runOnly || getPreferences().isAutomaticLaunchInExternalTerminalEnabled();
+		boolean canDoAutoRun = shellScriptIsExecutable && (runOnly || getPreferences().isAutomaticLaunchInExternalTerminalEnabled());
 
 		/* debug process is started, so launch terminal or inform */
 		if (canDoAutoRun) {
@@ -107,37 +105,47 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 				Map<String, String> attributes = new HashMap<String, String>();
 				RuntimeProcess runtimeProcess = new RuntimeProcess(launch, process, programFile.getName(), attributes);
 				launch.addProcess(runtimeProcess);
-			}else {
+			} else {
 				/* we use created debug remote process */
 				launch.addProcess(target.getProcess());
 			}
 		} else {
-			EclipseUtil.safeAsyncExec(new Runnable() {
-
-				@Override
-				public void run() {
-					Shell shell = EclipseUtil.getSafeDisplay().getActiveShell();
-
-					String titleText = "Bash launch necessary";
-					String infoText = "You have only started the debug remote connection.\nThe bash program is currently not started.";
-					String subMessage = "Either you start your bash program from commandline\nor you change your preferences to launch in terminal";
-
-					InfoPopup popup = new InfoPopup(shell, titleText, infoText, null);
-					popup.setSubMessage(subMessage);
-					popup.setLinkToPreferencesId(
-							"basheditor.eclipse.gradleeditor.preferences.BashEditorDebugPreferencePage");
-					popup.setLinkToPreferencesText(
-							"Change behaviour in <a href=\"https://github.com/de-jcup/eclipse-bash-editor\">preferences</a>");
-					popup.open();
-				}
-
-			});
+			
+			if (shellScriptIsExecutable) {
+				EclipseUtil.safeAsyncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						Shell shell = EclipseUtil.getSafeDisplay().getActiveShell();
+						
+						String titleText = "Bash launch necessary";
+						String infoText = "You have only started the debug remote connection.\nThe bash program is currently not started.";
+						String subMessage = "Either you start your bash program from commandline\nor you change your preferences to launch in terminal";
+						
+						InfoPopup popup = new InfoPopup(shell, titleText, infoText, null);
+						popup.setSubMessage(subMessage);
+						popup.setLinkToPreferencesId(
+								"basheditor.eclipse.gradleeditor.preferences.BashEditorDebugPreferencePage");
+						popup.setLinkToPreferencesText(
+								"Change behaviour in <a href=\"https://github.com/de-jcup/eclipse-bash-editor\">preferences</a>");
+						popup.open();
+					}
+					
+				});
+			}
+			
+			FallbackProcess process = new FallbackProcess(launch);
+			process.setLabel("Not executable: " + programFile.getName());
+			launch.addProcess(process);
+			launch.addDebugTarget(new FallbackBashDebugTarget(launch,"Execution failed"));
+			launch.terminate();
 		}
 	}
 
 	private boolean handleNotExecutable(File programFile) {
 		if (programFile == null) {
-			throw new IllegalStateException("file is null");
+			BashEditorUtil.logError("Cannot execute, because file null", new IllegalStateException("file is null"));
+			return false;
 		}
 		if (programFile.canExecute()) {
 			return true;
@@ -148,9 +156,10 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 			public void run() {
 				Shell shell = EclipseUtil.getSafeDisplay().getActiveShell();
 
-				String titleText = "Bashscript '"+programFile.getName()+"' cannot be executed";
-				String infoText = "The file:\n\n"+programFile.getAbsolutePath()+"\n\ncannot be executed by user who started eclipse / or any user at all.\n\n" + 
-						"Please define correct permissions to the file and try again";
+				String titleText = "Bashscript '" + programFile.getName() + "' cannot be executed";
+				String infoText = "The file:\n\n" + programFile.getAbsolutePath()
+						+ "\n\ncannot be executed by user who started eclipse / or any user at all.\n\n"
+						+ "Please define correct permissions to the file and try again";
 				MessageDialog.openError(shell, titleText, infoText);
 			}
 
@@ -177,7 +186,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 		}
 		IDebugTarget target = null;
 		if (debug) {
-			IProcess remoteProcess = new BashRemoteProcess(launch,terminalProcess);
+			IProcess remoteProcess = new BashRemoteProcess(launch, terminalProcess);
 			terminateFormerDebugTarget();
 			debugTarget = new BashDebugTarget(launch, remoteProcess, port, programFileResource);
 			if (!debugTarget.startDebugSession()) {

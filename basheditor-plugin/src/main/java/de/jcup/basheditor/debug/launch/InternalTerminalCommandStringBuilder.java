@@ -46,6 +46,7 @@ public class InternalTerminalCommandStringBuilder {
         } else if (context.waitOnErrors) {
             sb.append("if [ $_exit_status -ne 0 ]; then read -p \"Unexpected exit code:$_exit_status , press enter to continue\";fi");
         }
+//        sb.append("; exit $_exit_status");
         return sb.toString();
     }
 }
