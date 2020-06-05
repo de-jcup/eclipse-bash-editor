@@ -16,10 +16,7 @@
 package de.jcup.basheditor.script;
 
 import static de.jcup.basheditor.script.AssertScriptModel.assertThat;
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.util.List;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +31,24 @@ public class BashScriptModelBuilderTest {
     public void before() {
         builderToTest = new BashScriptModelBuilder();
     }
+    
+    @Test
+    public void bugfix_196_inside_heredoc_something_looking_like_a_function_is_not_a_function() throws Exception{
+    	/* @formatter:off*/
+    	String testScript = "cat << -EOT\n" + 
+    			"st.getval();\n" + 
+    			"-EOT";
+    	/* @formatter:on*/
+    	 /* execute */
+        BashScriptModel bashScriptModel = builderToTest.build(testScript);
+
+        /* test @formatter:off*/
+        assertThat(bashScriptModel).
+            hasNoErrors().
+            hasNoFunctions();
+        /* @formatter:on */
+    }
+    
     @Test
     public void an_empty_script_has_novariables() throws Exception{
         /* prepare */
@@ -48,6 +63,7 @@ public class BashScriptModelBuilderTest {
             hasNoVariables();
         /* @formatter:on */
     }
+    
     @Test
     public void a_variable_xxx_is_recognized() throws Exception{
         /* prepare */
@@ -206,47 +222,6 @@ public class BashScriptModelBuilderTest {
             hasFunction("other").and().
             hasFunctions(3);
         /* @formatter:on */
-    }
-
-    @Test
-    public void none_of_the_testscripts_contains_any_failure() throws Exception {
-        /* prepare */
-        StringBuilder errorCollector = new StringBuilder();
-        List<File> scriptFiles = TestScriptLoader.fetchAllTestScriptFiles();
-        for (File scriptFile : scriptFiles) {
-
-            String script = TestScriptLoader.loadScript(scriptFile);
-
-            /* execute */
-            try {
-                BashScriptModel bashScriptModel = builderToTest.build(script);
-                /* test */
-                if (bashScriptModel.hasErrors()) {
-                    errorCollector.append("script file:").append(scriptFile).append(" contains errors:\n");
-                    for (BashError error : bashScriptModel.getErrors()) {
-                        errorCollector.append("-");
-                        errorCollector.append(error.getMessage());
-                        errorCollector.append("\n");
-                    }
-                }
-            } catch (BashScriptModelException e) {
-                /* test */
-                errorCollector.append("script file:").append(scriptFile).append(" contains errors:\n");
-                errorCollector.append("-");
-                Throwable root = e;
-                while (root.getCause() != null) {
-                    root = root.getCause();
-                }
-                errorCollector.append("Root cause:" + root.getMessage());
-                errorCollector.append("\n");
-
-                root.printStackTrace();
-            }
-
-        }
-        if (errorCollector.length() > 0) {
-            fail(errorCollector.toString());
-        }
     }
 
     @Test

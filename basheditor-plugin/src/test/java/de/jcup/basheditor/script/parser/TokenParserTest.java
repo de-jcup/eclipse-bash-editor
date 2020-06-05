@@ -35,6 +35,18 @@ public class TokenParserTest {
     public void before() {
         parserToTest = new TokenParser();
     }
+    
+    @Test
+    public void bugfix_196_inside_heredoc_tokens_are_parsed_as_expected() throws Exception{
+    	/* @formatter:off*/
+    	String testScript = "cat << -EOT\n" + 
+    			"st.getval();\n" + 
+    			"-EOT";
+    	/* @formatter:on*/
+    	assertParsing(testScript).
+		resultsIn("cat", "<<", "-EOT","st.getval()","-EOT");
+    	
+    }
 
     @Test
     public void bugfix_186_1() throws Exception{

@@ -163,10 +163,58 @@ public class BashScriptModelBuilder {
         }
         return validators;
     }
-
+    
+    private class HereDocInspector{
+    	private String hereDocLiteral;
+    	private boolean markedAsHereDoc;
+    	
+    	public void inspect(ParseToken token) {
+    		if (token.isHereDoc()) {
+        		markAsHereDocStartWhenNotAlreadyHeredoc();
+        		return;
+        	}
+    		/* parser does create heredoc, than literal than other than literal again as tokens */
+    		if (markedAsHereDoc) {
+    			if (hereDocLiteral==null) {
+    				hereDocLiteral=token.getText();
+    			}else {
+    				if (hereDocLiteral.contentEquals(token.getText())){
+    					/* means closing literal found...*/
+    					reset();
+    				}else {
+    					/* just content between - do nothing */
+    				}
+    			}
+    		}
+    	}
+    	
+    	public boolean isInsideHereDoc() {
+    		return markedAsHereDoc;
+    	}
+    	
+    	private void markAsHereDocStartWhenNotAlreadyHeredoc() {
+    		if (markedAsHereDoc) {
+    			return;
+    		}
+    		markedAsHereDoc=true;
+    	}
+    	
+    	private void reset() {
+    		markedAsHereDoc=false;
+    		hereDocLiteral=null;
+    	}
+    }
+    
     private void buildFunctionsByTokens(BashScriptModel model, List<ParseToken> tokens) {
-
+    	HereDocInspector his = new HereDocInspector();
+    	
         for (int tokenNr = 0; tokenNr < tokens.size(); tokenNr++) {
+        	ParseToken token = tokens.get(tokenNr);
+        	his.inspect(token);
+        	
+        	if (his.isInsideHereDoc()) {
+        		continue;
+        	}
             FunctionScope functionScope = inspectAndCreateFunctionScope(tokens, tokenNr);
 
             if (functionScope.isFunction()) {
