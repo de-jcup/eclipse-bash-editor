@@ -117,6 +117,10 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     public static final String EDITOR_RULER_CONTEXT_MENU_ID = EDITOR_CONTEXT_MENU_ID + ".ruler";
     /** Max execution time for external tool to run on save action */
     public static final int EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS = 10;
+    
+    private static final BashTextFileDocumentProvider SHARED_TEXTFILE_DOCUMENT_PROVIDER=new BashTextFileDocumentProvider();
+    private static final BashFileDocumentProvider SHARED_FILE_DOCUMENT_PROVIDER= new BashFileDocumentProvider();
+
 
     private ReplaceTabBySpacesSupport replaceTabBySpaceSupport = new ReplaceTabBySpacesSupport();
     private BashBracketsSupport bracketMatcher = new BashBracketsSupport();
@@ -465,7 +469,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
     @Override
     protected void doSetInput(IEditorInput input) throws CoreException {
-        setDocumentProvider(createDocumentProvider(input));
+        setDocumentProvider(resolveSharedDocumentProvider(input));
         super.doSetInput(input);
 
         rebuildOutline();
@@ -603,12 +607,12 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         boolean isMarkerChangeForThisResource = (delta.getFlags() & IResourceDelta.MARKERS) != 0;
         return isMarkerChangeForThisResource;
     }
-
-    private IDocumentProvider createDocumentProvider(IEditorInput input) {
+    
+    private IDocumentProvider resolveSharedDocumentProvider(IEditorInput input) {
         if (input instanceof FileStoreEditorInput) {
-            return new BashTextFileDocumentProvider();
+            return SHARED_TEXTFILE_DOCUMENT_PROVIDER;
         } else {
-            return new BashFileDocumentProvider();
+            return SHARED_FILE_DOCUMENT_PROVIDER;
         }
     }
 
