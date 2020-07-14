@@ -144,7 +144,7 @@ public class BashEditorDebugLaunchShortCut implements ILaunchShortcut2 {
 	 * launch configurations. Returns the chosen configuration, or <code>null</code>
 	 * if the user cancels.
 	 * 
-	 * @param configList list of configurations to choose from
+	 * @param configList children of configurations to choose from
 	 * @return configuration to launch or <code>null</code> to cancel
 	 */
 	protected ILaunchConfiguration chooseConfiguration(List<ILaunchConfiguration> configList) {
@@ -254,13 +254,13 @@ public class BashEditorDebugLaunchShortCut implements ILaunchShortcut2 {
 	 * @param resource       the type
 	 * @param configType     the {@link ILaunchConfigurationType}
 	 * @param additonalScope additional scope can be <code>null</code>
-	 * @return the list of {@link ILaunchConfiguration}s or an empty list, never
+	 * @return the children of {@link ILaunchConfiguration}s or an empty children, never
 	 *         <code>null</code>
 	 * @since 3.8
 	 */
 	List<ILaunchConfiguration> getCandidates(IResource selectedResource, Object additionalScope, ILaunchConfigurationType configType) {
 		IResource resource = getResourceToMap(selectedResource);
-		List<ILaunchConfiguration> candidateConfigs = Collections.emptyList(); // empty list s fallback when next line fails
+		List<ILaunchConfiguration> candidateConfigs = Collections.emptyList(); // empty children s fallback when next line fails
 		try {
 			ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(configType);
 			candidateConfigs = new ArrayList<ILaunchConfiguration>(configs.length);

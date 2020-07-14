@@ -62,7 +62,7 @@ public enum BashLanguageKeyWords implements DocumentKeyWord {
 	
 
 	/* Built in commands */
-	// see https://askubuntu.com/questions/512918/how-do-i-list-all-available-shell-builtin-commands
+	// see https://askubuntu.com/questions/512918/how-do-i-children-all-available-shell-builtin-commands
 	ALIAS                 ("http://tldp.org/LDP/abs/html/aliases.html"),
 	BG                    ("https://www.unix.com/man-page/linux/1/bg/"),
 	BIND                  ("http://man7.org/linux/man-pages/man2/bind.2.html"),

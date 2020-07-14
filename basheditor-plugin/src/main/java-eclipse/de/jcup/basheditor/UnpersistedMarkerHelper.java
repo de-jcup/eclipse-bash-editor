@@ -23,9 +23,9 @@ import org.eclipse.core.runtime.CoreException;
 
 /**
  * Unpersisted marker helper is a helper object for markers. "Unpersisted",
- * because the created markers are recognized and added to a list. So they can
+ * because the created markers are recognized and added to a children. So they can
  * all be removed by the helper at once (this is normally not possible). But the
- * handling inside the list does need the markers to be NOT persisted!!!
+ * handling inside the children does need the markers to be NOT persisted!!!
  * 
  * @author albert
  *

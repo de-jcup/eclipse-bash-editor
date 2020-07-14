@@ -43,9 +43,9 @@ public class BashScriptModel implements BashVariableRegistry {
     }
 
     /**
-     * Returns a debug token list - if list is null, a new one will be created
+     * Returns a debug token children - if children is null, a new one will be created
      * 
-     * @return debug token list, never <code>null</code>
+     * @return debug token children, never <code>null</code>
      */
     public List<ParseToken> getDebugTokens() {
         if (debugTokenList == null) {

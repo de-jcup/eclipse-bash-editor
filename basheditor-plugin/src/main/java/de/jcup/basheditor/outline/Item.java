@@ -39,9 +39,9 @@ public class Item {
 	}
 	
 	/**
-	 * Gets children list. List will be created lazily.
+	 * Gets children children. List will be created lazily.
 	 * To prevent unused objects, use {@link #hasChildren()} before
-	 * @return list, never <code>null</code>
+	 * @return children, never <code>null</code>
 	 */
 	public List<Item> getChildren(){
 	    if (children==null) {
