@@ -15,19 +15,7 @@
  */
 package de.jcup.basheditor.document;
 
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.BACKTICK_STRING;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_COMMAND;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_KEYWORD;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.BASH_SYSTEM_KEYWORD;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.COMMENT;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.DOUBLE_STRING;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.HERE_DOCUMENT;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.HERE_STRING;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.INCLUDE_KEYWORD;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.KNOWN_VARIABLES;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.PARAMETER;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.SINGLE_STRING;
-import static de.jcup.basheditor.document.BashDocumentIdentifiers.VARIABLES;
+import static de.jcup.basheditor.document.BashDocumentIdentifiers.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +36,6 @@ import de.jcup.eclipse.commons.keyword.DocumentKeyWord;
 public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 
 	private OnlyLettersKeyWordDetector onlyLettersWordDetector = new OnlyLettersKeyWordDetector();
-	private VariableDefKeyWordDetector variableDefKeyWordDetector = new VariableDefKeyWordDetector();
 
 	public BashDocumentPartitionScanner() {
 		IToken hereDocument = createToken(HERE_DOCUMENT);
@@ -80,12 +67,14 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		rules.add(new BashDoubleQuoteRule("`", "`", backtickString));
 
 		rules.add(new CommandParameterRule(parameters));
+		
+		rules.add(new BashVariableDefineRule(bashKeyword, "true",true));
+		rules.add(new BashVariableDefineRule(bashKeyword, "false",true));
 
 		buildWordRules(rules, includeKeyword, BashIncludeKeyWords.values());
 		buildWordRules(rules, bashKeyword, BashLanguageKeyWords.values());
 		buildWordRules(rules, bashCommand, BashGnuCommandKeyWords.values());
 
-//		buildVarDefRules(rules, knownVariables, BashSpecialVariableKeyWords.values());
 		buildWordRules(rules, knownVariables, BashSpecialVariableKeyWords.values());
 
 		setPredicateRules(rules.toArray(new IPredicateRule[rules.size()]));
@@ -97,14 +86,7 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 					keyWord.isBreakingOnEof()));
 		}
 	}
-
-	private void buildVarDefRules(List<IPredicateRule> rules, IToken token, DocumentKeyWord[] values) {
-		for (DocumentKeyWord keyWord : values) {
-			rules.add(new VariableDefKeyWordPatternRule(variableDefKeyWordDetector, createWordStart(keyWord), token,
-					keyWord.isBreakingOnEof()));
-		}
-	}
-
+	
 	private String createWordStart(DocumentKeyWord keyWord) {
 		return keyWord.getText();
 	}
