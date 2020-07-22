@@ -35,59 +35,101 @@ public class TokenParserTest {
     public void before() {
         parserToTest = new TokenParser();
     }
+
+    @Test
+    public void bugfix_199_single_quote_do_not_escape() throws Exception {
+        /* @formatter:off*/
+        String testScript = "'test1'\\''test2'";
+        /* @formatter:on*/
+        assertParsing(testScript).resultsIn("'test1'\\''test2'");
+    }
     
     @Test
-    public void bugfix_196_inside_heredoc_tokens_are_parsed_as_expected() throws Exception{
-    	/* @formatter:off*/
+    public void bugfix_199_single_quote_do_not_escape_with_curly_at_end() throws Exception {
+        /* @formatter:off*/
+        String testScript = "'test1'\\''test2'\n}";
+        /* @formatter:on*/
+        assertParsing(testScript).resultsIn("'test1'\\''test2'","}");
+    }
+    
+    @Test
+    public void bugfix_199_single_quote_do_not_escape_with_curly_at_end_simple_variant1() throws Exception {
+        /* @formatter:off*/
+        String testScript = "\\''test2'\n}";
+        /* @formatter:on*/
+        assertParsing(testScript).resultsIn("\\''test2'","}");
+    }
+    
+    @Test
+    public void bugfix_199_single_quote_do_not_escape_with_curly_at_end_simple_variant2() throws Exception {
+        /* @formatter:off*/
+        String testScript = "\\\'\n}";
+        System.out.println(testScript);
+        /* @formatter:on*/
+        assertParsing(testScript).resultsIn("\\'","}");
+    }
+    
+    @Test
+    public void bugfix_199_single_quote_do_not_escape_full() throws Exception {
+        /* @formatter:off*/
+        String testScript = "function errorCodes {\n" + 
+                "    echo 'test'\\''test'\n" + 
+                "}";
+        /* @formatter:on*/
+        assertParsing(testScript).resultsIn("function","errorCodes","{","echo","'test'\\''test'","}");
+    }
+
+    @Test
+    public void bugfix_196_inside_heredoc_tokens_are_parsed_as_expected() throws Exception {
+        /* @formatter:off*/
     	String testScript = "cat << -EOT\n" + 
     			"st.getval();\n" + 
     			"-EOT";
     	/* @formatter:on*/
-    	assertParsing(testScript).
-		resultsIn("cat", "<<", "-EOT","st.getval()","-EOT");
-    	
+        assertParsing(testScript).resultsIn("cat", "<<", "-EOT", "st.getval()", "-EOT");
+
     }
 
     @Test
-    public void bugfix_186_1() throws Exception{
-    	String testScript ="if [[ \"${PAARMSS[$((idx+1))]}\" =~ ^[[:space:]]{.$ ]]";
-    	
-    	/* @formatter:off*/
+    public void bugfix_186_1() throws Exception {
+        String testScript = "if [[ \"${PAARMSS[$((idx+1))]}\" =~ ^[[:space:]]{.$ ]]";
+
+        /* @formatter:off*/
     	assertParsing(testScript).
 			resultsIn("if", "[[", " \"${PAARMSS[$((idx+1))]}\" =~ ^[[:space:]]{.$","]]");
     	/* @formatter:on*/
     }
-    
+
     @Test
-    public void bugfix_186_2() throws Exception{
-    	String testScript ="if [[ \"${PAARMSS[$((idx+1))]}\" =~ ^[[:space:]]{.$ \" ]]\" ]]";
-    	
-    	/* @formatter:off*/
+    public void bugfix_186_2() throws Exception {
+        String testScript = "if [[ \"${PAARMSS[$((idx+1))]}\" =~ ^[[:space:]]{.$ \" ]]\" ]]";
+
+        /* @formatter:off*/
     	assertParsing(testScript).
 			resultsIn("if", "[[", " \"${PAARMSS[$((idx+1))]}\" =~ ^[[:space:]]{.$ \" ]]\"","]]");
     	/* @formatter:on*/
     }
-    
+
     @Test
-    public void bugfix_184_1() throws Exception{
-    	String testScript ="$USER@${be_servers[$i]}:$UPGRADES_FOLDER";
-    	
-    	/* @formatter:off*/
+    public void bugfix_184_1() throws Exception {
+        String testScript = "$USER@${be_servers[$i]}:$UPGRADES_FOLDER";
+
+        /* @formatter:off*/
     	assertParsing(testScript).
 			resultsIn("$USER@${be_servers[$i]}:$UPGRADES_FOLDER");
     	/* @formatter:on*/
     }
-    
+
     @Test
-    public void bugfix_184_2() throws Exception{
-    	String testScript ="function { $USER@${be_servers[$i]}:$UPGRADES_FOLDER }";
-    	
-    	/* @formatter:off*/
+    public void bugfix_184_2() throws Exception {
+        String testScript = "function { $USER@${be_servers[$i]}:$UPGRADES_FOLDER }";
+
+        /* @formatter:off*/
     	assertParsing(testScript).
 			resultsIn("function", "{", "$USER@${be_servers[$i]}:$UPGRADES_FOLDER","}");
     	/* @formatter:on*/
     }
-    
+
     @Test
     public void parse_var1_1_is_recognized_as_variable() throws Exception {
         /* @formatter:off*/
@@ -135,8 +177,7 @@ public class TokenParserTest {
 
     @Test
     public void bug_106_cat_with_heredoc_followed_by_negative_and_string_throws_no_exception() throws Exception {
-        assertParsing("cat <<-\" OF\"").
-            simplyDoesNotFail();
+        assertParsing("cat <<-\" OF\"").simplyDoesNotFail();
         ;
     }
 
@@ -262,16 +303,17 @@ public class TokenParserTest {
     public void heredoc_found_when_a_heredoc_EOF_nl_b_space_hyphen_x_nl_EOF() throws Exception {
         assertParsing("a <<EOF\nb 'x\nEOF").resultsIn("a", "<<EOF", "b 'x", "EOF");
     }
-    
+
     @Test
     public void heredoc_found_when_a_heredoc_space_EOF_nl_b_space_hyphen_x_nl_EOF() throws Exception {
         assertParsing("a << EOF\nb 'x\nEOF").resultsIn("a", "<<EOF", "b 'x", "EOF");
     }
-    
+
     @Test
     public void heredoc_found_issue_169_example_without_minus() throws Exception {
         assertParsing("a << EOF > /tmp/file\n\tbla\nEOF").resultsIn("a", "<<EOF", "> /tmp/file\n\tbla", "EOF");
     }
+
     @Test
     public void heredoc_found_issue_169_example_with_minus() throws Exception {
         assertParsing("a <<- EOF > /tmp/file\n\tbla\nEOF").resultsIn("a", "<<-EOF", "> /tmp/file\n\tbla", "EOF");
@@ -286,7 +328,7 @@ public class TokenParserTest {
     public void heredoc_found_when_a_heredoc_negative_hyphen_EOF_hyphen_nl_b_space_hyphen_x_nl_EOF() throws Exception {
         assertParsing("a <<-'EOF'\nb 'x\nEOF").resultsIn("a", "<<-'EOF'", "b 'x", "EOF");
     }
-    
+
     @Test
     public void heredoc_found_when_a_heredoc_negative_hyphen_space_EOF_hyphen_nl_b_space_hyphen_x_nl_EOF() throws Exception {
         assertParsing("a <<- 'EOF'\nb 'x\nEOF").resultsIn("a", "<<-'EOF'", "b 'x", "EOF");
