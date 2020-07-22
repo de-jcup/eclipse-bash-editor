@@ -15,6 +15,10 @@
  */
 package de.jcup.basheditor;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -67,10 +71,26 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		modelProvider.getWorkspaceModelSupport().install();
-		taskSupportProvider.getTodoTaskSupport().install();
+		
+		InstallJob job = new InstallJob();
+		job.schedule();
 	}
 
+	private class InstallJob extends Job{
+
+        public InstallJob() {
+            super("Install bash editor model and task support");
+        }
+
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+            modelProvider.getWorkspaceModelSupport().install();
+            taskSupportProvider.getTodoTaskSupport().install();
+            return Status.OK_STATUS;
+        }
+	    
+	}
+	
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		colorManager.dispose();
