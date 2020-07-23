@@ -583,7 +583,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         return file;
     }
 
-    private IResource resolveResource() {
+    public IResource resolveResource() {
         return resolveResourceAsIFile();
     }
 

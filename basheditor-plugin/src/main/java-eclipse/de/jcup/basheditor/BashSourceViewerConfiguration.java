@@ -164,7 +164,7 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 	
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
-		return new BashTextHover();
+		return new BashTextHover(adaptable);
 	}
 
 	@Override

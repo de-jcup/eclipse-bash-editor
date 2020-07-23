@@ -106,8 +106,15 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 				RuntimeProcess runtimeProcess = new RuntimeProcess(launch, process, programFile.getName(), attributes);
 				launch.addProcess(runtimeProcess);
 			} else {
-				/* we use created debug remote process */
-				launch.addProcess(target.getProcess());
+			    if (target!=null) {
+			        /* we use created debug remote process */
+			        IProcess process2 = target.getProcess();
+			        launch.addProcess(process2);
+			    }else {
+			        FallbackProcess process3 = new FallbackProcess(launch);
+			        process3.setLabel("No debug target available for: " + programFile.getName());
+			        launch.addProcess(process3);
+			    }
 			}
 		} else {
 			

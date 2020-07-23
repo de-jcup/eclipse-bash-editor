@@ -57,6 +57,14 @@ public class BashVariable extends AbstractBashDebugElement implements IVariable,
 	public IValue getValue() throws DebugException {
 		return value;
 	}
+	
+	
+	public String getBashValueAsString() throws DebugException {
+	    if (value==null) {
+	        return null;
+	    }
+	    return value.getValueString();
+	}
 
 	public String getName() throws DebugException {
 		return name;
@@ -94,5 +102,7 @@ public class BashVariable extends AbstractBashDebugElement implements IVariable,
 		}
 		return lowerCaseName.compareTo(o.lowerCaseName);
 	}
+
+    
 
 }

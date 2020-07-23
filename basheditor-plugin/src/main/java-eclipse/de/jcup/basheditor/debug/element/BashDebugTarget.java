@@ -69,7 +69,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 
 	private boolean suspended;
 
-	private BashThread thread;
+	private BashThread bashThread;
 
 	private IThread[] threads;
 
@@ -100,11 +100,15 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 		this.port = port;
 		this.stopOnStartup = Boolean.valueOf(launch.getAttribute(BashDebugConstants.LAUNCH_ATTR_STOP_ON_STARTUP));
 		this.process = process;
-		this.thread = new BashThread(this);
-		this.threads = new IThread[] { thread };
+		this.bashThread = new BashThread(this);
+		this.threads = new IThread[] { bashThread };
 		this.documentChangeRegistry= BashDocumentChangeRegistry.INSTANCE;
-		this.debugger = new BashDebugger(this, thread);
+		this.debugger = new BashDebugger(this, bashThread);
 	}
+	
+	public BashThread getBashThread() {
+        return bashThread;
+    }
 	
 	/**
 	 * Starts debug session on target
@@ -205,7 +209,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 		}
 		launch.terminate();
 	}
-
+	
 	public boolean canResume() {
 		return !isTerminated() && isSuspended();
 	}
@@ -224,12 +228,12 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 
 	public void resumed(int detail) {
 		suspended = false;
-		eventsupport.fireResumeEvent(thread, detail);
+		eventsupport.fireResumeEvent(bashThread, detail);
 	}
 
 	public void suspended(int detail) {
 		suspended = true;
-		eventsupport.fireSuspendEvent(thread, detail);
+		eventsupport.fireSuspendEvent(bashThread, detail);
 	}
 
 	public void suspend() throws DebugException {
