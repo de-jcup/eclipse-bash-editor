@@ -97,7 +97,7 @@ public class DebugBashCodeToggleSupportTest {
 		assertTrue(file.exists()); // file must be recreated
 		// check content is as expected:
 
-		DebugBashCodeBuilder codeBuilder = new DebugBashCodeBuilder();
+		BashDebugCodeBuilder codeBuilder = BashDebugCodeBuilder.SHARED;
 		String expected = codeBuilder.buildDebugBashCodeSnippet();
 
 		String contentOfFile = TestScriptLoader.loadScript(file);

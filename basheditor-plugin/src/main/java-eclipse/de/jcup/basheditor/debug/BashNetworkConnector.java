@@ -23,9 +23,12 @@ import java.net.Socket;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import de.jcup.basheditor.BashEditorActivator;
+import de.jcup.basheditor.BashEditorUtil;
 import de.jcup.basheditor.EclipseDeveloperSettings;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.script.parser.ParseToken;
@@ -34,215 +37,237 @@ import de.jcup.basheditor.script.parser.TokenParserException;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashNetworkConnector {
-	private ServerSocket serverSocket;
-	private Socket socket;
+    private ServerSocket serverSocket;
+    private Socket socket;
 
-	private InputStream inputStream;
-	private OutputStream outputStream;
+    private InputStream inputStream;
+    private OutputStream outputStream;
 
-	private BashNetworkVariableData bashLineNumber;
-	private BashNetworkVariableData functionName;
-	private BashNetworkVariableData bashSource;
+    private BashNetworkVariableData bashLineNumber;
+    private BashNetworkVariableData functionName;
+    private BashNetworkVariableData bashSource;
 
-	private Vector<BashNetworkVariableData> bashVariables = new Vector<BashNetworkVariableData>();
-	private TokenParser parser = new TokenParser();
-	private DebugBashCodeBuilder builder;
-	private int port;
+    private Vector<BashNetworkVariableData> bashVariables = new Vector<BashNetworkVariableData>();
+    private TokenParser parser = new TokenParser();
+    private BashDebugCodeBuilder builder;
+    private int port;
 
-	public BashNetworkConnector(int port) {
-		this.port = port;
-		this.builder = new DebugBashCodeBuilder();
-	}
+    private static Map<Integer, BashNetworkConnector> portToConnectorMap = new TreeMap<>();
 
-	public BashNetworkVariableData getBashLineNumber() {
-		return bashLineNumber;
-	}
+    public static BashNetworkConnector getConnector(int port) {
+        BashNetworkConnector connector = portToConnectorMap.computeIfAbsent(port, p -> new BashNetworkConnector(p));
+        return connector;
+    }
 
-	public BashNetworkVariableData getBashSource() {
-		return bashSource;
-	}
+    private BashNetworkConnector(int port) {
+        this.port = port;
+        this.builder = BashDebugCodeBuilder.SHARED;
+    }
 
-	public BashNetworkVariableData getFunctionName() {
-		return functionName;
-	}
+    public BashNetworkVariableData getBashLineNumber() {
+        return bashLineNumber;
+    }
 
-	public void startServerSocket() throws IOException {
-		serverSocket = new ServerSocket(port);
-	}
+    public BashNetworkVariableData getBashSource() {
+        return bashSource;
+    }
 
-	public void connect() throws IOException {
-		socket = serverSocket.accept();
+    public BashNetworkVariableData getFunctionName() {
+        return functionName;
+    }
 
-		inputStream = socket.getInputStream();
-		outputStream = socket.getOutputStream();
-	}
+    public void startServerSocket() throws IOException {
+        sendExitCommand(200);
 
-	public void cancel() throws IOException {
-		disconnect();
-	}
+        closeSockets();
+        serverSocket = new ServerSocket(port);
+    }
 
-	public void disconnect() throws IOException {
-		if (serverSocket != null && !serverSocket.isClosed()) {
-			serverSocket.close();
-		}
-		if (socket != null && !socket.isClosed()) {
-			socket.close();
-		}
-	}
+    public void connect() throws IOException {
+        if (socket != null) {
+            try {
+                // close former socket if still open
+                socket.close();
+            } catch (IOException e) {
+                BashEditorUtil.logError("Was not able to close old server socket", e);
+            }
+        }
+        socket = serverSocket.accept();
 
-	public void stepBegin() throws IOException {
-		if (isShowingMetaInformation()) {
-			BashDebugConsole.println(">> =============== <<");
-			BashDebugConsole.println(">> Begin new step  <<");
-			BashDebugConsole.println(">> =============== <<");
-		}
-		bashVariables.clear();
+        inputStream = socket.getInputStream();
+        outputStream = socket.getOutputStream();
+    }
 
-		String command = builder.buildRemoteDebugCommand();
-		outputStream.write(command.getBytes());
-		outputStream.flush();
+    public void cancel() throws IOException {
+        disconnect();
+    }
 
-		StepParseContext spc = new StepParseContext();
+    public void disconnect() throws IOException {
+        closeSockets();
+    }
 
-		byte[] buffer = new byte[100 * 1024];
-		int numberOfLines = 0;
-		for (int i = 0; i < buffer.length; i++) {
-			int n = inputStream.read();
-			if (n == '\n') {
-				numberOfLines++;
-			} else {
-				if (n == '\t' && numberOfLines > builder.getLinesOfDebugCode()) {
-					spc.stepStr = new String(buffer, 0, i);
-					parse(spc);
-					break;
-				} else {
-					numberOfLines = 0;
-				}
-			}
-			buffer[i] = (byte) n;
-		}
+    private void closeSockets() throws IOException {
+        if (socket != null) {
+            socket.close();
+        }
+        if (serverSocket != null) {
+            serverSocket.close();
+        }
+    }
 
-		int indexToRemove = -1;
-		for (int i = 0; i < functionName.getArraySize(); i++) {
-			if (isTrapFunction(i)) {
-				indexToRemove = i;
-				break;
-			}
+    public void stepBegin() throws IOException {
+        if (isShowingMetaInformation()) {
+            BashDebugConsole.println(">> =============== <<");
+            BashDebugConsole.println(">> Begin new step  <<");
+            BashDebugConsole.println(">> =============== <<");
+        }
+        bashVariables.clear();
 
-		}
-		if (indexToRemove != -1) {
-			functionName.removeFromArray(indexToRemove);
-			bashSource.removeFromArray(indexToRemove);
-		}
-	}
+        String command = builder.buildRemoteDebugCommand();
+        outputStream.write(command.getBytes());
+        outputStream.flush();
 
-	private boolean isTrapFunction(int functionIndex) {
-		String nameOfFirstFunction = functionName.getStringValue(functionIndex);
-		return nameOfFirstFunction.equalsIgnoreCase(builder.getNameOfTrapFunction());
-	}
+        StepParseContext spc = new StepParseContext();
 
-	private void parse(StepParseContext spc) {
-		String stepSourceCode = spc.stepStr;
-		String[] sourceCodeLines = stepSourceCode.split("\n");
+        byte[] buffer = new byte[100 * 1024];
+        int numberOfLines = 0;
+        for (int i = 0; i < buffer.length; i++) {
+            int n = inputStream.read();
+            if (n == '\n') {
+                numberOfLines++;
+            } else {
+                if (n == '\t' && numberOfLines > builder.getLinesOfDebugCode()) {
+                    spc.stepStr = new String(buffer, 0, i);
+                    parse(spc);
+                    break;
+                } else {
+                    numberOfLines = 0;
+                }
+            }
+            buffer[i] = (byte) n;
+        }
 
-		for (String sourceCodeLine : sourceCodeLines) {
-		    if (isShowingMetaInformation()) {
-		        BashDebugConsole.println("Parse:" + sourceCodeLine);
-		    }
-			addBashVariables(spc, sourceCodeLine);
-		}
-		Collections.sort(bashVariables);
-	}
+        int indexToRemove = -1;
+        for (int i = 0; i < functionName.getArraySize(); i++) {
+            if (isTrapFunction(i)) {
+                indexToRemove = i;
+                break;
+            }
 
-	private class StepParseContext {
-		private String stepStr;
-		private boolean trapFunctionFound;
+        }
+        if (indexToRemove != -1) {
+            functionName.removeFromArray(indexToRemove);
+            bashSource.removeFromArray(indexToRemove);
+        }
+    }
 
-		public boolean isTrapFunctionAlreadyFound() {
-			return trapFunctionFound;
-		}
-	}
+    private boolean isTrapFunction(int functionIndex) {
+        String nameOfFirstFunction = functionName.getStringValue(functionIndex);
+        return nameOfFirstFunction.equalsIgnoreCase(builder.getNameOfTrapFunction());
+    }
 
-	private void addBashVariables(StepParseContext context, String sourceCodeLine) {
-		if (context.isTrapFunctionAlreadyFound()) {
-			/*
-			 * trap function is first function which will be found. After this output is
-			 * only function content. We must ignore next lines for variables, because
-			 * current variable content is already known and parsing more will result in
-			 * duplicates (code scan in functions...)
-			 */
-			return;
-		}
-		if (sourceCodeLine.startsWith(builder.getNameOfTrapFunction())) {
-			if (isShowingMetaInformation()) {
-				BashDebugConsole.println(">>>Function found, mark end of variables reached:" + sourceCodeLine);
-			}
-			context.trapFunctionFound = true;
-			return;
-		}
-		try {
-			List<ParseToken> parsed = parser.parse(sourceCodeLine);
-			if (isShowingMetaInformationInTraceMode()) {
-				BashDebugConsole.println(">>>Tokens found:"+parsed);
-			}
-			// e.g. [EXPRESSION:'BASH_ARGC=', EXPRESSION:'([0]=', STRING:'"6")']
-			// e.g. [EXPRESSION:'BASH_ARGV=', EXPRESSION:'([0]=', STRING:'"-d"',
-			// EXPRESSION:'[1]=', STRING:'"1.0.0"', EXPRESSION:'[2]=', STRING:'"-s"',
-			// EXPRESSION:'[3]=', STRING:'"int"', EXPRESSION:'[4]=', STRING:'"-e"',
-			// EXPRESSION:'[5]=', STRING:'"mycmd")']
-			BashNetworkVariableData variable = null;
-			for (Iterator<ParseToken> it = parsed.iterator(); it.hasNext();) {
-				ParseToken token = it.next();
+    private void parse(StepParseContext spc) {
+        String stepSourceCode = spc.stepStr;
+        String[] sourceCodeLines = stepSourceCode.split("\n");
 
-				if (token.isVariableDefinition()) {
-					String variableName = token.getTextAsVariableName();
-					variable = new BashNetworkVariableData(variableName);
-					if (variableName.equals("_") || variableName.isEmpty()) {
-						return;
-					} else if (variableName.equals(builder.getNameOfDebugCommand())) {
-						return;
-					} else if (variableName.equals(builder.getNameOfBashLineNumberVariable())) {
-						bashLineNumber = variable;
-					} else if (variableName.equals(builder.getNameOfFunctionNameVariable())) {
-						functionName = variable;
-					} else if (variableName.equals(builder.getNameOfBashSourceVariable())) {
-						bashSource = variable;
-					}
-					if (!it.hasNext()) {
-						return;
-					}
-					ParseToken identifierToken = it.next();
-					String value = identifierToken.getText();
-					if (value.startsWith("(")) {
-						variable.defineAsArray();
-						variable.setValue(sourceCodeLine);
-						if (!it.hasNext()) {
-							break;
-						}
-						ParseToken contentToken = it.next();
-						variable.addArrayValue(builder.buildSafeArrayValue(contentToken.getText()));
+        for (String sourceCodeLine : sourceCodeLines) {
+            if (isShowingMetaInformation()) {
+                BashDebugConsole.println("Parse:" + sourceCodeLine);
+            }
+            addBashVariables(spc, sourceCodeLine);
+        }
+        Collections.sort(bashVariables);
+    }
 
-						while (it.hasNext()) {
-							identifierToken = it.next();
-							if (it.hasNext()) {
-								contentToken = it.next();
-								variable.addArrayValue(builder.buildSafeArrayValue(contentToken.getText()));
-							}
+    private class StepParseContext {
+        private String stepStr;
+        private boolean trapFunctionFound;
 
-						}
-					} else {
-						variable.setValue(value);
-					}
-					if (isShowingMetaInformationInTraceMode()) {
-						BashDebugConsole.println(">> found + add variable:"+variable);
-					}
-					bashVariables.add(variable);
-				}
-			}
-		} catch (TokenParserException e) {
-			EclipseUtil.logError("Parse problems at line:" + sourceCodeLine, e, BashEditorActivator.getDefault());
-		}
-	}
+        public boolean isTrapFunctionAlreadyFound() {
+            return trapFunctionFound;
+        }
+    }
+
+    private void addBashVariables(StepParseContext context, String sourceCodeLine) {
+        if (context.isTrapFunctionAlreadyFound()) {
+            /*
+             * trap function is first function which will be found. After this output is
+             * only function content. We must ignore next lines for variables, because
+             * current variable content is already known and parsing more will result in
+             * duplicates (code scan in functions...)
+             */
+            return;
+        }
+        if (sourceCodeLine.startsWith(builder.getNameOfTrapFunction())) {
+            if (isShowingMetaInformation()) {
+                BashDebugConsole.println(">>>Function found, mark end of variables reached:" + sourceCodeLine);
+            }
+            context.trapFunctionFound = true;
+            return;
+        }
+        try {
+            List<ParseToken> parsed = parser.parse(sourceCodeLine);
+            if (isShowingMetaInformationInTraceMode()) {
+                BashDebugConsole.println(">>>Tokens found:" + parsed);
+            }
+            // e.g. [EXPRESSION:'BASH_ARGC=', EXPRESSION:'([0]=', STRING:'"6")']
+            // e.g. [EXPRESSION:'BASH_ARGV=', EXPRESSION:'([0]=', STRING:'"-d"',
+            // EXPRESSION:'[1]=', STRING:'"1.0.0"', EXPRESSION:'[2]=', STRING:'"-s"',
+            // EXPRESSION:'[3]=', STRING:'"int"', EXPRESSION:'[4]=', STRING:'"-e"',
+            // EXPRESSION:'[5]=', STRING:'"mycmd")']
+            BashNetworkVariableData variable = null;
+            for (Iterator<ParseToken> it = parsed.iterator(); it.hasNext();) {
+                ParseToken token = it.next();
+
+                if (token.isVariableDefinition()) {
+                    String variableName = token.getTextAsVariableName();
+                    variable = new BashNetworkVariableData(variableName);
+                    if (variableName.equals("_") || variableName.isEmpty()) {
+                        return;
+                    } else if (variableName.equals(builder.getNameOfDebugCommand())) {
+                        return;
+                    } else if (variableName.equals(builder.getNameOfBashLineNumberVariable())) {
+                        bashLineNumber = variable;
+                    } else if (variableName.equals(builder.getNameOfFunctionNameVariable())) {
+                        functionName = variable;
+                    } else if (variableName.equals(builder.getNameOfBashSourceVariable())) {
+                        bashSource = variable;
+                    }
+                    if (!it.hasNext()) {
+                        return;
+                    }
+                    ParseToken identifierToken = it.next();
+                    String value = identifierToken.getText();
+                    if (value.startsWith("(")) {
+                        variable.defineAsArray();
+                        variable.setValue(sourceCodeLine);
+                        if (!it.hasNext()) {
+                            break;
+                        }
+                        ParseToken contentToken = it.next();
+                        variable.addArrayValue(builder.buildSafeArrayValue(contentToken.getText()));
+
+                        while (it.hasNext()) {
+                            identifierToken = it.next();
+                            if (it.hasNext()) {
+                                contentToken = it.next();
+                                variable.addArrayValue(builder.buildSafeArrayValue(contentToken.getText()));
+                            }
+
+                        }
+                    } else {
+                        variable.setValue(value);
+                    }
+                    if (isShowingMetaInformationInTraceMode()) {
+                        BashDebugConsole.println(">> found + add variable:" + variable);
+                    }
+                    bashVariables.add(variable);
+                }
+            }
+        } catch (TokenParserException e) {
+            EclipseUtil.logError("Parse problems at line:" + sourceCodeLine, e, BashEditorActivator.getDefault());
+        }
+    }
 
     private boolean isShowingMetaInformationInTraceMode() {
         return EclipseDeveloperSettings.SHOW_METAINFORMATION_TRACEMODE && isShowingMetaInformation();
@@ -252,34 +277,53 @@ public class BashNetworkConnector {
         return BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled();
     }
 
-	public void stepEnd() throws IOException {
-		if (!isConnected()) {
-			return;
-		}
-		outputStream.write("\n".getBytes());
-		outputStream.flush();
-	}
+    public void stepEnd() throws IOException {
+        if (!isConnected()) {
+            return;
+        }
+        outputStream.write("\n".getBytes());
+        outputStream.flush();
+    }
 
-	public void terminate() throws IOException {
-		String command = "exit 0\n";
-		outputStream.write(command.getBytes());
-		outputStream.flush();
-		serverSocket.close();
-	}
+    public void terminate() throws IOException {
+        sendExitCommand(100);
+        closeSockets();
+    }
 
-	public int getVariableCount() {
-		return bashVariables.size();
-	}
+    private void sendExitCommand(int exitCode) throws IOException {
+        String command = "exit " + exitCode + "\n";
+        sendCommand(command);
+    }
 
-	public BashNetworkVariableData getVariableData(int i) {
-		return bashVariables.get(i);
-	}
+    private void sendCommand(String command) throws IOException {
+        if (socket == null || socket.isClosed()) {
+            return;
+        }
+        if (outputStream == null) {
+            return;
+        }
+        try {
+            outputStream.write(command.getBytes());
+            outputStream.flush();
+        } catch (Exception e) {
+            BashEditorUtil.logError("Sending command failed", e);
+        }
+    }
 
-	public boolean isConnected() {
-		if (socket == null) {
-			return false;
-		}
-		return socket.isConnected();
-	}
+
+    public int getVariableCount() {
+        return bashVariables.size();
+    }
+
+    public BashNetworkVariableData getVariableData(int i) {
+        return bashVariables.get(i);
+    }
+
+    public boolean isConnected() {
+        if (socket == null) {
+            return false;
+        }
+        return socket.isConnected();
+    }
 
 }

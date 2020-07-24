@@ -30,20 +30,22 @@ import java.util.Objects;
  *
  */
 public class DebugBashCodeToggleSupport {
-    private static final String PATH_FROM_USER_HOME_TO_DEBUGGER_SCRIPT = ".basheditor/remote-debugging-v1.sh";
+    private static final String PATH_FROM_USER_HOME_TO_DEBUGGER_SCRIPT = ".basheditor/remote-debugging-v2.sh";
+    private static final String PATH_FROM_USER_HOME_TO_KILL_OLD_TERMINALS_SCRIPT = ".basheditor/kill-old-terminals-v1.sh";
     private static final String DEBUG_POSTFIX = "#BASHEDITOR-TMP-REMOTE-DEBUGGING-END|Origin line:";
-    private DebugBashCodeBuilder codeBuilder;
+    private BashDebugCodeBuilder codeBuilder;
     private BashDebugInfoProvider infoProvider;
 
     public DebugBashCodeToggleSupport(BashDebugInfoProvider infoProvider) {
         Objects.requireNonNull(infoProvider);
         
         this.infoProvider=infoProvider;
-        this.codeBuilder = new DebugBashCodeBuilder();
+        this.codeBuilder = BashDebugCodeBuilder.SHARED;
         
     }
 
     public String enableDebugging(String sourceCode, String hostname, int port) throws IOException {
+        ensureKillOldTerminalFileExistsInSystemUserHome();
         ensureDebugFileExistsInSystemUserHome();
         String nSourceCode= disableDebugging(sourceCode); // if we got some call before with maybe another port or host etc.
         StringBuilder sb = new StringBuilder();
@@ -61,6 +63,10 @@ public class DebugBashCodeToggleSupport {
     private File resolveDebuggerFile(String base) {
         return new File(base, PATH_FROM_USER_HOME_TO_DEBUGGER_SCRIPT);
     }
+    
+    private File resolveKillOldTerminalFiles(String base) {
+        return new File(base, PATH_FROM_USER_HOME_TO_KILL_OLD_TERMINALS_SCRIPT);
+    }
 
     private String createSourceToInclude(String base) { 
         StringBuilder sb = new StringBuilder();
@@ -77,7 +83,9 @@ public class DebugBashCodeToggleSupport {
         return sb.toString();
     }
     
-
+    public String getAbsolutePathToEnsuredKillOldTerminalScript() throws IOException {
+        return ensureKillOldTerminalFileExistsInSystemUserHome().toPath().toAbsolutePath().toString();
+    }
    
     private File ensureDebugFileExistsInSystemUserHome() throws IOException {
         /* ensure debug script file does really exist on user.home */
@@ -89,11 +97,28 @@ public class DebugBashCodeToggleSupport {
         debuggerFile.createNewFile();
         debuggerFile.setExecutable(true, true);
 
-        String snippet = codeBuilder.buildDebugBashCodeSnippet();
+        String snippet = "#!/bin/bash\n\n"+ codeBuilder.buildDebugBashCodeSnippet();
         try (FileWriter fw = new FileWriter(debuggerFile); BufferedWriter bw = new BufferedWriter(fw)) {
             bw.write(snippet);
         }
         return debuggerFile;
+
+    }
+    private  File ensureKillOldTerminalFileExistsInSystemUserHome() throws IOException {
+        /* ensure debug script file does really exist on user.home */
+        File killFile = resolveKillOldTerminalFiles(infoProvider.getSystemUserHomePath());
+        if (killFile.exists()) {
+            return killFile;
+        }
+        killFile.getParentFile().mkdirs();
+        killFile.createNewFile();
+        killFile.setExecutable(true, true);
+
+        String snippet = codeBuilder.buildKillOldTerminalsSnippet("$1");
+        try (FileWriter fw = new FileWriter(killFile); BufferedWriter bw = new BufferedWriter(fw)) {
+            bw.write(snippet);
+        }
+        return killFile;
 
     }
 

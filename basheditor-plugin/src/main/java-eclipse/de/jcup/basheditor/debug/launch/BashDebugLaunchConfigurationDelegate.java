@@ -15,7 +15,7 @@
  */
 package de.jcup.basheditor.debug.launch;
 
-import static de.jcup.basheditor.debug.BashDebugConstants.LAUNCH_ENVIRONMENT_PROPERTIES;
+import static de.jcup.basheditor.debug.BashDebugConstants.*;
 
 import java.io.File;
 import java.util.Collections;
@@ -54,7 +54,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 	private BashDebugTarget debugTarget; // at the moment, we remember the debug target and allow only ONE debug session
 											// - maybe we should change this in future...
 	private TerminalLauncher terminalLauncher = new TerminalLauncher();
-
+	
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
 		boolean debug = mode.equals(ILaunchManager.DEBUG_MODE);
@@ -93,10 +93,13 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 			Map<String, String> environment = configuration.getAttribute(LAUNCH_ENVIRONMENT_PROPERTIES,
 					Collections.emptyMap());
 
+		
+			terminalLauncher.removeOldTerminalsOfPort(port);
+			
 			Process process = terminalLauncher.execute(programFile, params, getPreferences().getTerminalCommand(),
-					getPreferences().getStarterCommand(), environment);
+					getPreferences().getStarterCommand(), environment,port);
 
-			IDebugTarget target = createDebugTargetOrNull(launch, process, debug, programFileResource, port);
+			IDebugTarget target = createDebugTargetOrNull(launch, process, debug, programFileResource, port,terminalLauncher);
 			if (target != null) {
 				launch.addDebugTarget(target);
 			}
@@ -182,12 +185,13 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 	 * @param debug
 	 * @param programFileResource
 	 * @param port
+	 * @param terminalLauncher2 
 	 * @return
 	 * @throws CoreException
 	 * @throws DebugException
 	 */
 	private IDebugTarget createDebugTargetOrNull(ILaunch launch, Process terminalProcess, boolean debug,
-			IFile programFileResource, int port) throws CoreException, DebugException {
+			IFile programFileResource, int port, TerminalLauncher terminalLauncher) throws CoreException, DebugException {
 		if (!debug) {
 			return null;
 		}
@@ -195,7 +199,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 		if (debug) {
 			IProcess remoteProcess = new BashRemoteProcess(launch, terminalProcess);
 			terminateFormerDebugTarget();
-			debugTarget = new BashDebugTarget(launch, remoteProcess, port, programFileResource);
+			debugTarget = new BashDebugTarget(launch, remoteProcess, port, programFileResource,terminalLauncher);
 			if (!debugTarget.startDebugSession()) {
 				debugTarget.disconnect();
 				FallbackBashDebugTarget fallbackTarget = new FallbackBashDebugTarget(launch,

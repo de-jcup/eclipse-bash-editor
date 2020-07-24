@@ -17,11 +17,14 @@ package de.jcup.basheditor.debug.launch;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import de.jcup.basheditor.BashEditorActivator;
+import de.jcup.basheditor.BashEditorUtil;
 import de.jcup.basheditor.debug.BashDebugConsole;
+import de.jcup.basheditor.debug.DebugBashCodeToggleSupport;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
 
@@ -40,25 +43,55 @@ import de.jcup.eclipse.commons.ui.EclipseUtil;
  * @formatter:on
  */
 public class TerminalLauncher {
-    
-    public Process execute(File file, String params, String terminalCommand, String starterCommand, Map<String, String> environment) {
+
+    DebugBashCodeToggleSupport support;
+
+    public TerminalLauncher() {
+        support = new DebugBashCodeToggleSupport(BashEditorActivator.getDefault());
+    }
+
+    public Process execute(File file, String params, String terminalCommand, String starterCommand, Map<String, String> environment, int port) {
         /* setup context */
-        if (file==null) {
+        if (file == null) {
             EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
             return null;
         }
-        TerminalLaunchContext context = createContext(file, params, terminalCommand,starterCommand,environment);
+        TerminalLaunchContext context = createContext(file, params, terminalCommand, starterCommand, environment, port);
         return execute(context);
-        
+
     }
 
-    
+    public void removeOldTerminalsOfPort(int port) {
+        try {
+            List<String> commands = new ArrayList<String>();
+            if (OSUtil.isWindows()) {
+                commands.add("cmd");
+            }
+            commands.add("bash");
+            commands.add(support.getAbsolutePathToEnsuredKillOldTerminalScript());
+            commands.add(""+port); // first param
+            
+            ProcessBuilder pb = new ProcessBuilder(commands);
+            pb.inheritIO();
+            Process process = pb.start();
+            int terminated = process.waitFor();
+            if (terminated != 0 && terminated !=1) { 
+                // 0 = kill done
+                // 1 = one of the commands did fail - e.g. because process already removed  by user
+                // other: e.g. 127 shall be prompted as errors, because script failures
+                BashEditorUtil.logError("Unexepected exit code while trying to remove old terminals:" + terminated, null);
+            }
+        } catch (InterruptedException | IOException e) {
+            BashEditorUtil.logError("Remove old terminals failed", null);
+        }
+    }
+
     public Process execute(TerminalLaunchContext context) {
-        if (context==null) {
+        if (context == null) {
             EclipseUtil.logError("Context was null", null, BashEditorActivator.getDefault());
             return null;
         }
-        if (context.file==null) {
+        if (context.file == null) {
             EclipseUtil.logError("File was null", null, BashEditorActivator.getDefault());
             return null;
         }
@@ -67,110 +100,109 @@ public class TerminalLauncher {
         Thread thread = new Thread(launchRunnable);
         thread.setName("Launch in terminal:" + context.file.getName());
         thread.start();
-        
+
         return launchRunnable.waitForStartedProcessOrNull();
     }
-	private TerminalLaunchContext createContext(File file, String params, String terminalCommand, String starterCommand, Map<String, String> environment) {
-		/* @formatter:off */
+
+    private TerminalLaunchContext createContext(File file, String params, String terminalCommand, String starterCommand, Map<String, String> environment, int port) {
+        /* @formatter:off */
 	    return TerminalLaunchContextBuilder.builder().
 	    		file(file).
 	    		starterCommand(starterCommand).
 	    		terminalCommand(terminalCommand).
 	    		params(params).
+	    		port(port).
 	    		waitingAlways(isWaitingAlways()).
 	    		waitingOnErrors(isWaitingOnErrors()).
 	    		environment(environment).
 	    		build();
 	    /* @formatter:on */
-	}
-	
+    }
 
     protected boolean isWaitingOnErrors() {
-		return BashEditorPreferences.getInstance().isLaunchedTerminalWaitingOnErrors();
-	}
+        return BashEditorPreferences.getInstance().isLaunchedTerminalWaitingOnErrors();
+    }
 
-	protected boolean isWaitingAlways() {
-		return BashEditorPreferences.getInstance().isLaunchedTerminalAlwaysWaiting();
-	}
+    protected boolean isWaitingAlways() {
+        return BashEditorPreferences.getInstance().isLaunchedTerminalAlwaysWaiting();
+    }
 
-	protected void logExectionError(IOException e) {
-		EclipseUtil.logError("Cannot start real runtime process, fall back to dummy", e, BashEditorActivator.getDefault());
-	}
+    protected void logExectionError(IOException e) {
+        EclipseUtil.logError("Cannot start real runtime process, fall back to dummy", e, BashEditorActivator.getDefault());
+    }
 
-	protected void logExecutedCommand(LaunchRunnable runnable) {
-		if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
-			BashDebugConsole.println(">>> Launch Terminal:");
-			BashDebugConsole.println("    " + runnable.createCommandString());
-		}
-	}
+    protected void logExecutedCommand(LaunchRunnable runnable) {
+        if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
+            BashDebugConsole.println(">>> Launch Terminal:");
+            BashDebugConsole.println("    " + runnable.createCommandString());
+        }
+    }
 
-	
+    protected class LaunchRunnable implements Runnable {
 
-	protected class LaunchRunnable implements Runnable {
+        private File workingDir;
+        private List<String> commands;
+        Process p;
+        private boolean startedProcess;
+        private Map<String, String> environment;
 
-		private File workingDir;
-		private List<String> commands;
-		Process p;
-		private boolean startedProcess;
-		private Map<String, String> environment;
+        public LaunchRunnable(File workingDir, List<String> commands, Map<String, String> environment) {
+            this.workingDir = workingDir;
+            this.commands = commands;
+            this.environment = environment;
+        }
 
-		public LaunchRunnable(File workingDir, List<String> commands, Map<String, String> environment) {
-			this.workingDir = workingDir;
-			this.commands = commands;
-			this.environment=environment;
-		}
-		
-		public Process waitForStartedProcessOrNull() {
-			while (!startedProcess) {
-				try {
-					Thread.sleep(300);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-			return p;
-		}
+        public Process waitForStartedProcessOrNull() {
+            while (!startedProcess) {
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            return p;
+        }
 
-		@Override
-		public void run() {
-		    if (commands==null || commands.isEmpty()) {
-		    	startedProcess=true;
-		    	return;
-		    }
-			ProcessBuilder pb = new ProcessBuilder(commands);
-			pb.directory(workingDir);
-			pb.environment().putAll(this.environment);
-			logExecutedCommand(this);
-			try {
-				pb.inheritIO();
-				p = pb.start();
-				startedProcess=true;
-				int result = p.waitFor();
-				if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
-					BashDebugConsole.println("Bash process terminated with exit code:" + result);
-				}
+        @Override
+        public void run() {
+            if (commands == null || commands.isEmpty()) {
+                startedProcess = true;
+                return;
+            }
+            ProcessBuilder pb = new ProcessBuilder(commands);
+            pb.directory(workingDir);
+            pb.environment().putAll(this.environment);
+            logExecutedCommand(this);
+            try {
+                pb.inheritIO();
+                p = pb.start();
+                startedProcess = true;
+                int result = p.waitFor();
+                if (BashEditorPreferences.getInstance().isShowMetaInfoInDebugConsoleEnabled()) {
+                    BashDebugConsole.println("Bash process terminated with exit code:" + result);
+                }
 
-			} catch (IOException e) {
-				logExectionError(e);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
-		}
+            } catch (IOException e) {
+                logExectionError(e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
 
-		/**
-		 * Creates a string presenting the command. Interesting for showing user the
-		 * expected command
-		 * 
-		 * @return
-		 */
-		String createCommandString() {
-			StringBuilder sb = new StringBuilder();
-			for (String command : commands) {
-				sb.append(command);
-				sb.append(" ");
-			}
-			return sb.toString().trim();
-		}
-	}
+        /**
+         * Creates a string presenting the command. Interesting for showing user the
+         * expected command
+         * 
+         * @return
+         */
+        String createCommandString() {
+            StringBuilder sb = new StringBuilder();
+            for (String command : commands) {
+                sb.append(command);
+                sb.append(" ");
+            }
+            return sb.toString().trim();
+        }
+    }
 
 }

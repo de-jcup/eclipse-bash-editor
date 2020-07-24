@@ -35,6 +35,7 @@ public class TerminalLaunchContextBuilder {
     private boolean waitingOnErrors;
     private String starterTemplate;
 	private Map<String, String> environment;
+    private int port;
     private TerminalLaunchContextBuilder() {
         
     }
@@ -58,6 +59,11 @@ public class TerminalLaunchContextBuilder {
     
     public TerminalLaunchContextBuilder params(String params) {
         this.params=params;
+        return this;
+    }
+    
+    public TerminalLaunchContextBuilder port(int port) {
+        this.port=port;
         return this;
     }
     
@@ -90,6 +96,7 @@ public class TerminalLaunchContextBuilder {
         context.launchTerminalCommand="";
         context.commands=new ArrayList<String>();
         context.environment=environment;
+        context.port=port;
         if (context.environment==null) {
         	/* fallback */
         	context.environment=new HashMap<String, String>();

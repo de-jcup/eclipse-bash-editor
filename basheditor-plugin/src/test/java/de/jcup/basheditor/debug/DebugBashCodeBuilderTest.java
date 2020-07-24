@@ -19,18 +19,53 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.junit.Before;
 import org.junit.Test;
 
 
 public class DebugBashCodeBuilderTest {
 
-	private DebugBashCodeBuilder builderToTest;
+	private BashDebugCodeBuilder builderToTest;
 
 	@Before
 	public void before() {
-		builderToTest = new DebugBashCodeBuilder();
+		builderToTest = BashDebugCodeBuilder.SHARED;
 	}
+	
+	@Test
+	public void buildPIDForPortPort1234_returns_path_as_tempfolder_debugger_terminal_pid_1234_txt() throws IOException {
+	    /* prepare */
+	    Path tmpFile = Files.createTempFile("test", "searchtempfolder");
+	    String tmpFolder = tmpFile.toFile().getParent();
+	    
+	    /* execute + test */
+	    assertEquals(tmpFolder+"/basheditor/debugger_terminal_pid_1234.txt", builderToTest.buildPIDFileAbsolutePath("1234"));
+	    
+	}
+	
+	@Test
+    public void buildWritePIDToPortSpecificTmpFileSnippet_generateds_expected_parts() throws IOException {
+        /* execute + test */
+        assertEquals("_debug_terminal_pid=$$;echo $_debug_terminal_pid > /tmp/basheditor/debugger_terminal_pid_12345.txt;", builderToTest.buildWritePIDToPortSpecificTmpFileSnippet("12345"));
+    }
+	
+	@Test
+    public void buildKillPIDSnippet() throws IOException {
+	    /* @formatter:on */
+        String expectedSnippet= 
+                "while IFS='' read -r LINE || [ -n \"${LINE}\" ]; do\n" + 
+                "    kill -9 ${LINE}\n" + 
+                " done < /tmp/basheditor/debugger_terminal_pid_$2.txt;";
+
+        /* execute + test */
+        assertEquals(expectedSnippet, builderToTest.buildKillOldTerminalsSnippet("$2"));
+        
+        /* @formatter:off */
+    }
 
 	@Test
 	public void buildSafeArrayValue() {

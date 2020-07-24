@@ -33,6 +33,11 @@ public class TerminalLaunchContext {
     Exception exception;
     String startTemplate;
 	Map<String, String> environment;
+	int port;
+	
+	public int getPort() {
+        return port;
+    }
     
     public String getLaunchTerminalCommand() {
         return launchTerminalCommand;

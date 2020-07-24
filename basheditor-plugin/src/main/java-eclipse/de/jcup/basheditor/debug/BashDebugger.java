@@ -170,7 +170,7 @@ public class BashDebugger {
 	public boolean startDebugServerSession(int port) throws Exception {
 		starting = true;
 
-		bashConnector = new BashNetworkConnector(port);
+		bashConnector = BashNetworkConnector.getConnector(port);
 		try {
 			bashConnector.startServerSocket();
 

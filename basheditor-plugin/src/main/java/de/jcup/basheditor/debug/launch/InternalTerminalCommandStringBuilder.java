@@ -15,13 +15,18 @@
  */
 package de.jcup.basheditor.debug.launch;
 
+import de.jcup.basheditor.debug.BashDebugCodeBuilder;
+
 public class InternalTerminalCommandStringBuilder {
+    
+    private BashDebugCodeBuilder bashCodeBuilder = BashDebugCodeBuilder.SHARED;
 
     public String build(TerminalLaunchContext context) {
         if (context==null) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
+        sb.append(bashCodeBuilder.buildWritePIDToPortSpecificTmpFileSnippet(""+context.getPort()));
         if (context.isSwitchToWorkingDirNecessary()) {
             sb.append("cd ");
             sb.append(context.getUnixStyledWorkingDir());
@@ -37,8 +42,7 @@ public class InternalTerminalCommandStringBuilder {
             sb.append(context.params);
         }
         sb.append(";");
-        sb.append("_exit_status=$?");
-        sb.append(";");
+        sb.append("_exit_status=$?;");
         sb.append("echo \"Exit code=$_exit_status\"");
         sb.append(";");
         if (context.waitAlways) {
