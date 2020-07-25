@@ -41,7 +41,7 @@ public class ShowInCallHiararchyHandler extends AbstractBashEditorHandler{
 		    int offset = textSelection.getOffset();
 		    try {
                 IViewPart viewpart = page.showView(BashCallHierarchyView.VIEW_ID);
-                if (!(viewpart instanceof BashCallHierarchyView)) {
+                if (viewpart instanceof BashCallHierarchyView) {
                     BashCallHierarchyView bchv = (BashCallHierarchyView) viewpart;
                     bchv.showTextSelectionHierarchy(text,offset);
                 }

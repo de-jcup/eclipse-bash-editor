@@ -149,7 +149,7 @@
    </extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          COMMANDS                                    -->
-   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->^
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    
    <extension point="org.eclipse.ui.commands">
        <category
@@ -163,6 +163,12 @@
       		description="Open file with bash editor"
       		categoryId="basheditor.commands.category"
       		id="basheditor.command.openWithBashEditor">
+       </command>
+       <command
+      		name="Open Call Hierarchy"
+      		description="Open Call Hierarchy"
+      		categoryId="basheditor.commands.category"
+      		id="basheditor.command.openCallHierarchy">
        </command>
    	   <command
             name="Quick outline"
@@ -214,6 +220,10 @@
             commandId="basheditor.command.openWithBashEditor"
             class="de.jcup.basheditor.handlers.OpenWithBashEditor">
       </handler>
+      <handler
+            commandId="basheditor.command.openCallHierarchy"
+            class="de.jcup.basheditor.handlers.ShowInCallHiararchyHandler">
+      </handler>
     </extension> 
     
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -238,6 +248,11 @@
             commandId="basheditor.editor.commands.gotomatchingbracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">	  
 		</key>
+         <key
+            sequence="M1+M2+G"
+            contextId="basheditor.editors.BashEditor.context"
+            commandId="basheditor.command.openCallHierarchy"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 		<key
             sequence="F5"
             contextId="basheditor.editors.BashEditor.context"
@@ -263,6 +278,7 @@
             locationURI="popup:basheditor.editors.BashEditor.context?after=additions">
          <command commandId="basheditor.editor.commands.source.validate" icon="icons/bash-editor.png" />
          <command commandId="basheditor.editor.commands.quickoutline" />
+         <command commandId="basheditor.command.openCallHierarchy" />
       </menuContribution>
       
       <menuContribution
@@ -284,6 +300,7 @@
             	commandId="basheditor.editor.commands.source.validate" 
             	icon="icons/bash-editor.png">
             </command>
+            <command commandId="basheditor.command.openCallHierarchy" />
          </menu>
       </menuContribution>
       
@@ -723,5 +740,14 @@ fi</pattern>
 	         icon="icons/bash-editor.png"
 	         label="Bash Debug Console">
 	   </consoleFactory>
+</extension>
+<extension
+      point="org.eclipse.ui.views">
+   <view
+         class="de.jcup.basheditor.callhierarchy.BashCallHierarchyView"
+         id="de.jcup.basheditor.callhierarchy.BashCallHierarchyView"
+         name="Bash Call Hierarchy"
+         restorable="true">
+   </view>
 </extension>
 </plugin>

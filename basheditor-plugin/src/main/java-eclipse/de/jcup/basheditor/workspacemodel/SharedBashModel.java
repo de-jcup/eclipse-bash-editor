@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -48,7 +49,8 @@ public class SharedBashModel {
         if (functionName==null) {
             return list;
         }
-        for (IResource resource: sharedMap.keySet()) {
+        Set<IResource> resources = sharedMap.keySet();
+        for (IResource resource: resources) {
             if (projectScope!=null) {
                 boolean notInProjectScope = ! projectScope.equals(resource.getProject());
                 if (notInProjectScope){
@@ -66,6 +68,13 @@ public class SharedBashModel {
 
     private void addFirstFunctionFoundInResource(List<SharedModelMethodTarget> targets, String functionName, IResource resource, BashScriptModel scriptModel) {
         Collection<BashFunction> functions = scriptModel.getFunctions();
+        if (functions==null || functions.isEmpty()) {
+            return;
+        }
+        if ("feature-129-lib1.sh".contentEquals(resource.getName())){
+            System.out.println("got resource:"+resource);
+        }
+//        System.out.println("resource:"+resource);
         for (BashFunction function: functions) {
             if (functionName.contentEquals(function.getName())){
                 SharedModelMethodTarget target = new SharedModelMethodTarget(resource,function);
