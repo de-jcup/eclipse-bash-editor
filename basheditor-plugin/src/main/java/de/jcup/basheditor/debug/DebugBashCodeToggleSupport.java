@@ -40,7 +40,7 @@ public class DebugBashCodeToggleSupport {
         Objects.requireNonNull(infoProvider);
         
         this.infoProvider=infoProvider;
-        this.codeBuilder = BashDebugCodeBuilder.SHARED;
+        this.codeBuilder = new BashDebugCodeBuilder();
         
     }
 
@@ -97,7 +97,7 @@ public class DebugBashCodeToggleSupport {
         debuggerFile.createNewFile();
         debuggerFile.setExecutable(true, true);
 
-        String snippet = "#!/bin/bash\n\n"+ codeBuilder.buildDebugBashCodeSnippet();
+        String snippet = codeBuilder.buildDebugBashCodeSnippet();
         try (FileWriter fw = new FileWriter(debuggerFile); BufferedWriter bw = new BufferedWriter(fw)) {
             bw.write(snippet);
         }

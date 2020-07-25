@@ -42,7 +42,7 @@ public class InternalTerminalCommandStringBuilderTest {
     
     @Test
     public void context_1() {
-        assertEquals("./null;_exit_status=$?;echo \"Exit code=$_exit_status\";", toTest.build(context));
+        assertTrue(toTest.build(context).contains("./null;_exit_status=$?;echo \"Exit code=$_exit_status\";"));
     }
     
     @Test
@@ -55,7 +55,7 @@ public class InternalTerminalCommandStringBuilderTest {
         context.waitOnErrors=true;
         
         /* test */
-        assertEquals("cd null;./null;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\"", toTest.build(context));
+        assertTrue(toTest.build(context).contains("cd null;./null;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\""));
     }
     
     @Test
@@ -71,7 +71,7 @@ public class InternalTerminalCommandStringBuilderTest {
         String path = context.file.getParentFile().toPath().toRealPath().toAbsolutePath().toString();
         String name = context.file.getName();
         /* test */
-        assertEquals("cd "+path+";./"+name+";_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\"", toTest.build(context));
+        assertTrue(toTest.build(context).contains("cd "+path+";./"+name+";_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\""));
     }
     
     @Test
@@ -87,7 +87,7 @@ public class InternalTerminalCommandStringBuilderTest {
         String path = context.file.getParentFile().toPath().toRealPath().toAbsolutePath().toString();
         String name = context.file.getName();
         /* test */
-        assertEquals("cd "+path+";./"+name+" -a 1 -b 2;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\"", toTest.build(context));
+        assertTrue(toTest.build(context).contains("cd "+path+";./"+name+" -a 1 -b 2;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\""));
     }
 
 }

@@ -26,7 +26,7 @@ import de.jcup.basheditor.TestScriptLoader;
 
 public class DebugBashCodeToggleSupportTest {
 
-	private static final String BASE_EXPECTED_DEBUG_ENABLED_CODE = "source scriptHome/.basheditor/remote-debugging-v1.sh";
+	private static final String BASE_EXPECTED_DEBUG_ENABLED_CODE = "source scriptHome/.basheditor/remote-debugging-v2.sh";
 	private static final String EXPECTED_DEBUG_ENABLED_CODE = BASE_EXPECTED_DEBUG_ENABLED_CODE+" localhost "+BashDebugConstants.DEFAULT_DEBUG_PORT+" #BASHEDITOR-TMP-REMOTE-DEBUGGING-END|Origin line:";
 	private DebugBashCodeToggleSupport supportToTest;
     private TestBashDebugInfoProvider infoProvider;
@@ -77,27 +77,28 @@ public class DebugBashCodeToggleSupportTest {
 
 	@Test
 	public void when_source_already_in_first_line_we_ignore_it() throws Exception {
-	    String origin = "source scriptHome/.basheditor/remote-debugging-v1.sh localhost 33333 #BASHEDITOR-TMP-REMOTE-DEBUGGING-END|Origin line:\nbla...";
+	    String origin = "source scriptHome/.basheditor/remote-debugging-v2.sh localhost 33333 #BASHEDITOR-TMP-REMOTE-DEBUGGING-END|Origin line:\nbla...";
 	    assertEquals(origin, supportToTest.enableDebugging(origin,"localhost",33333));
 	}
 	
 	@Test
 	public void enable_debugging_will_automatically_create_debug_bash_code_file_which_contains_data_of_code_builder() throws Exception {
 		/* prepare */
-		File file = new File(infoProvider.getSystemUserHomePath(),"/.basheditor/remote-debugging-v1.sh");
+		File file = new File(infoProvider.getSystemUserHomePath(),"/.basheditor/remote-debugging-v2.sh");
 		if (file.exists()) {
 			file.delete();
 		}
 		assertFalse(file.exists());
 
+		String sourceCode = "";
 		/* execute */
-		supportToTest.enableDebugging("","localhost",BashDebugConstants.DEFAULT_DEBUG_PORT);
+        supportToTest.enableDebugging(sourceCode,"localhost",BashDebugConstants.DEFAULT_DEBUG_PORT);
 
 		/* test */
 		assertTrue(file.exists()); // file must be recreated
 		// check content is as expected:
 
-		BashDebugCodeBuilder codeBuilder = BashDebugCodeBuilder.SHARED;
+		BashDebugCodeBuilder codeBuilder = new BashDebugCodeBuilder();
 		String expected = codeBuilder.buildDebugBashCodeSnippet();
 
 		String contentOfFile = TestScriptLoader.loadScript(file);

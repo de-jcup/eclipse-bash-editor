@@ -61,7 +61,7 @@ public class BashNetworkConnector {
 
     private BashNetworkConnector(int port) {
         this.port = port;
-        this.builder = BashDebugCodeBuilder.SHARED;
+        this.builder = new BashDebugCodeBuilder();
     }
 
     public BashNetworkVariableData getBashLineNumber() {

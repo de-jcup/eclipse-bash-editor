@@ -20,7 +20,6 @@ import java.io.File;
 public class BashDebugCodeBuilder {
 
     public static final String DEBUGGER_TERMINAL_PID_FILENAME = "basheditor_terminal_pid4port_";
-    public static final BashDebugCodeBuilder SHARED = new BashDebugCodeBuilder();
     private static final String DEFAULT_FUNCTION_NAME_TRAP = "_________DEBUG_TRAP";
     private static final String DEFAULT_DEBUG_COMMAND = "_________DEBUG_COMMAND";
 
@@ -31,7 +30,7 @@ public class BashDebugCodeBuilder {
     private File tmpFolder;
     private String userName;
 
-    private BashDebugCodeBuilder() {
+    public BashDebugCodeBuilder() {
         String tmpdir = System.getProperty("java.io.tmpdir");
         userName = System.getProperty("user.name");
         tmpFolder = new File(tmpdir);// ,"basheditor");
@@ -64,7 +63,7 @@ public class BashDebugCodeBuilder {
 
     public String buildDebugBashCodeSnippet() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\nexec " + fileDescriptor + "<>/dev/tcp/$1/$2 #params: 1=hostname(e.g localhost),2=port\n");
+        sb.append("exec " + fileDescriptor + "<>/dev/tcp/$1/$2 #params: 1=hostname(e.g localhost),2=port\n");
         sb.append("function " + nameOfTrapFunction + "()\n");
         sb.append("{\n");
         sb.append("	local " + nameOfDebugCommand + "\n");
@@ -92,7 +91,7 @@ public class BashDebugCodeBuilder {
         /* @formatter:on */
         sb.append("_debug_terminal_pid=$$;");
         String pidFileAbsolutePath = buildPIDFileAbsolutePath(port);
-        sb.append("echo \"using PID file:" + pidFileAbsolutePath + "\";");
+//        sb.append("echo \"using PID file:" + pidFileAbsolutePath + "\";");
         sb.append("touch " + pidFileAbsolutePath + ";");
         sb.append("echo $_debug_terminal_pid >> ").append(pidFileAbsolutePath).append(";");
         /* @formatter:off */

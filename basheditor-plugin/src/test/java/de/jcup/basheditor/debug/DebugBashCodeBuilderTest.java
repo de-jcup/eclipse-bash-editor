@@ -30,36 +30,39 @@ import org.junit.Test;
 public class DebugBashCodeBuilderTest {
 
 	private BashDebugCodeBuilder builderToTest;
+    private String user;
 
 	@Before
 	public void before() {
-		builderToTest = BashDebugCodeBuilder.SHARED;
+	    user = System.getProperty("user.name");
+		builderToTest = new BashDebugCodeBuilder();
 	}
 	
 	@Test
-	public void buildPIDForPortPort1234_returns_path_as_tempfolder_debugger_terminal_pid_1234_txt() throws IOException {
+	public void buildPIDForPortPort1234_returns_path_as_tempfolder_debugger_terminal_pid4port_1234_$username$_txt() throws IOException {
 	    /* prepare */
 	    Path tmpFile = Files.createTempFile("test", "searchtempfolder");
 	    String tmpFolder = tmpFile.toFile().getParent();
 	    
 	    /* execute + test */
-	    assertEquals(tmpFolder+"/basheditor/debugger_terminal_pid_1234.txt", builderToTest.buildPIDFileAbsolutePath("1234"));
+	    assertEquals(tmpFolder+"/basheditor_terminal_pid4port_12345_"+user+".txt", builderToTest.buildPIDFileAbsolutePath("12345"));
 	    
 	}
 	
 	@Test
     public void buildWritePIDToPortSpecificTmpFileSnippet_generateds_expected_parts() throws IOException {
         /* execute + test */
-        assertEquals("_debug_terminal_pid=$$;echo $_debug_terminal_pid > /tmp/basheditor/debugger_terminal_pid_12345.txt;", builderToTest.buildWritePIDToPortSpecificTmpFileSnippet("12345"));
+        assertEquals("_debug_terminal_pid=$$;touch /tmp/basheditor_terminal_pid4port_12345_"+user+".txt;echo $_debug_terminal_pid >> /tmp/basheditor_terminal_pid4port_12345_"+user+".txt;", builderToTest.buildWritePIDToPortSpecificTmpFileSnippet("12345"));
     }
 	
 	@Test
     public void buildKillPIDSnippet() throws IOException {
 	    /* @formatter:on */
         String expectedSnippet= 
-                "while IFS='' read -r LINE || [ -n \"${LINE}\" ]; do\n" + 
-                "    kill -9 ${LINE}\n" + 
-                " done < /tmp/basheditor/debugger_terminal_pid_$2.txt;";
+               "while IFS='' read -r LINE || [ -n \"${LINE}\" ]; do\n" + 
+               "        kill -9 ${LINE}\n" + 
+               " done < /tmp/basheditor_terminal_pid4port_$2_"+user+".txt;\n" + 
+               "rm /tmp/basheditor_terminal_pid4port_$2_"+user+".txt;";
 
         /* execute + test */
         assertEquals(expectedSnippet, builderToTest.buildKillOldTerminalsSnippet("$2"));

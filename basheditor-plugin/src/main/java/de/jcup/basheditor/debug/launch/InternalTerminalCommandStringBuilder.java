@@ -19,7 +19,7 @@ import de.jcup.basheditor.debug.BashDebugCodeBuilder;
 
 public class InternalTerminalCommandStringBuilder {
     
-    private BashDebugCodeBuilder bashCodeBuilder = BashDebugCodeBuilder.SHARED;
+    private BashDebugCodeBuilder bashCodeBuilder = new BashDebugCodeBuilder();
 
     public String build(TerminalLaunchContext context) {
         if (context==null) {
