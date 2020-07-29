@@ -22,33 +22,61 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 
 import de.jcup.basheditor.BashEditor;
+import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.BashEditorUtil;
+import de.jcup.basheditor.callhierarchy.BashCallHierarchyCalculator;
+import de.jcup.basheditor.callhierarchy.BashCallHierarchyEntry;
 import de.jcup.basheditor.callhierarchy.BashCallHierarchyView;
+import de.jcup.basheditor.outline.Item;
+import de.jcup.basheditor.workspacemodel.SharedBashModel;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class ShowInCallHiararchyHandler extends AbstractBashEditorHandler{
 
-	@Override
+	private BashCallHierarchyCalculator calculator;
+	
+	public ShowInCallHiararchyHandler(){
+	    calculator=new BashCallHierarchyCalculator();
+	}
+
+    @Override
 	protected void executeOnBashEditor(BashEditor bashEditor) {
 		ISelection selection = bashEditor.getSelectionProvider().getSelection();
 		IWorkbenchPage page = EclipseUtil.getActivePage();
 		if (page==null){
 		    return;
 		}
+		BashCallHierarchyEntry entry = null;
 		if (selection instanceof ITextSelection) {
 		    ITextSelection textSelection = (ITextSelection) selection;
-		    String text = textSelection.getText();
+
 		    int offset = textSelection.getOffset();
-		    try {
-                IViewPart viewpart = page.showView(BashCallHierarchyView.VIEW_ID);
-                if (viewpart instanceof BashCallHierarchyView) {
-                    BashCallHierarchyView bchv = (BashCallHierarchyView) viewpart;
-                    bchv.showTextSelectionHierarchy(text,offset);
-                }
-            } catch (PartInitException e) {
-               BashEditorUtil.logError("Not able to show hierarchy view", e);
-            }
+		    Item item = bashEditor.getItemAt(offset);
+		    SharedBashModel model = BashEditorActivator.getDefault().getModel();
+		    if (item!=null) {
+		        entry = new BashCallHierarchyEntry(model, calculator).setElement(item).setPos(item.getOffset());
+		    }else {
+	            String text = textSelection.getText();
+		        if (text==null || text.length()==0) {
+		            /* okay, complete file/resource */
+		            entry = new BashCallHierarchyEntry(model, calculator).setElement(bashEditor.resolveResource()).setPos(offset);
+		        }
+		    }
 		}
+		if (entry!=null) {
+		    entry.setResource(bashEditor.resolveResource());
+		}
+		try {
+		    IViewPart viewpart = page.showView(BashCallHierarchyView.VIEW_ID);
+		    if (viewpart instanceof BashCallHierarchyView) {
+		        BashCallHierarchyView bchv = (BashCallHierarchyView) viewpart;
+		        bchv.setRootEntry(entry);
+		        return;
+		    }
+		} catch (PartInitException e) {
+		    BashEditorUtil.logError("Not able to show hierarchy view", e);
+		}
+		
 	}
 
 }
