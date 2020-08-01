@@ -76,4 +76,18 @@ public class BashScriptModel implements BashVariableRegistry {
         return variables.get(varName);
     }
 
+    /**
+     * Finds bash function inside resource by given function name
+     * @param name
+     * @return  bash function inside resource, or <code>null</code>
+     */
+    public BashFunction findBashFunctionByName(String name) {
+        for (BashFunction function: functions) {
+            if (function.getName().contentEquals(name)) {
+                return function;
+            }
+        }
+        return null;
+    }
+
 }

@@ -6,8 +6,10 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 public class BashCallHierarchyContentProvider implements ITreeContentProvider {
 
     private static final Object[] NONE = new Object[] {};
+    private Object[] HOWTO_USE = new Object[] { "To display the bash call hierarchy, select one function or a script and select 'Open Bash Call Hierarchy' menu option." };;
 
     public IProject projectScope;
+
 
     public void setProjectScope(IProject projectScope) {
         this.projectScope = projectScope;
@@ -15,9 +17,16 @@ public class BashCallHierarchyContentProvider implements ITreeContentProvider {
 
     @Override
     public Object[] getElements(Object inputElement) {
+        if (inputElement==null) {
+            return HOWTO_USE;
+        }
         if (inputElement instanceof BashCallHierarchyRootElement) {
             BashCallHierarchyRootElement entry = (BashCallHierarchyRootElement) inputElement;
-            return entry.getEntries();
+            BashCallHierarchyEntry[] entries = entry.getEntries();
+            if (entries == null || entries.length == 0) {
+                return HOWTO_USE;
+            }
+            return entries;
         }
         return NONE;
     }
