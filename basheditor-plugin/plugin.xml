@@ -785,4 +785,25 @@ fi</pattern>
          restorable="true">
    </view>
 </extension>
+ <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!--                          DECORATION                                  -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<extension
+ point="org.eclipse.ui.decorators">
+ <decorator
+    lightweight="true"
+    adaptable="true"
+    label="Bash Call Hierarchy decorator"
+    class="de.jcup.basheditor.callhierarchy.BashCallHierarchyLabelProvider"
+    state="true"
+    location="BOTTOM_LEFT"
+    id="de.jcup.basheditor.callhierarchy.BashCallHierarchyLabelProvider">
+    <enablement>
+      <objectClass name="de.jcup.basheditor.callhierarchy.BashCallHierarchyEntry"/>
+    </enablement>
+ <description>
+    Decorator for bash call hierachy
+ </description>
+  </decorator>
+   </extension>
 </plugin>

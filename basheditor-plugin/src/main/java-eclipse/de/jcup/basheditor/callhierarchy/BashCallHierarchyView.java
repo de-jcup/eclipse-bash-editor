@@ -6,6 +6,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -39,7 +40,8 @@ public class BashCallHierarchyView extends ViewPart {
 
         viewer = new TreeViewer(parent);
         viewer.setContentProvider(contentProvider);
-        viewer.setLabelProvider(new BashCallHierarchyLabelProvider());
+        BashCallHierarchyLabelProvider labelAndDecorationProvider = new BashCallHierarchyLabelProvider();
+        viewer.setLabelProvider(new DecoratingLabelProvider(labelAndDecorationProvider,PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 
         viewer.addDoubleClickListener(event -> {
             ISelection selection = viewer.getSelection();
@@ -80,8 +82,8 @@ public class BashCallHierarchyView extends ViewPart {
         }
 
         private void initText() {
-            setText(projectOnly ? "Click to switch to search in all workspace projects" : "Click to search only in same project");
-            setDescription(projectOnly ? "Click to switch to search in all workspace projects" : "Click to search only in same project");
+            setText(projectOnly ? "Searches only in project" : "Searches complete workspace");
+            setDescription(getText()+"  - " + (projectOnly ? "Click to switch to search in all workspace projects" : "Click to search only in same project"));
         }
     }
 

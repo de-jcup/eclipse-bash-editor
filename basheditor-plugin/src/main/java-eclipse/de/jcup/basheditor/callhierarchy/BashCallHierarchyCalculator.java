@@ -23,63 +23,62 @@ import de.jcup.basheditor.script.BashScriptModel;
 import de.jcup.basheditor.workspacemodel.SharedBashModel;
 
 public class BashCallHierarchyCalculator {
-    
+
     private SharedBashModel model;
 
     public BashCallHierarchyCalculator() {
-        this.model= BashEditorActivator.getDefault().getModel();
+        this.model = BashEditorActivator.getDefault().getModel();
     }
 
-    public List<BashCallHierarchyEntry> findBashFunctionCallers(BashCallHierarchyEntry parent, BashFunction function, IProject projectScope){
-        if (model == null || function==null) {
+    public List<BashCallHierarchyEntry> findBashFunctionCallers(BashCallHierarchyEntry parent, BashFunction function, IProject projectScope) {
+        if (model == null || function == null) {
             return Collections.emptyList();
         }
-        
+
         List<BashCallHierarchyEntry> entries = new ArrayList<>();
-        entries.addAll(findResourcesContainingText(parent, function.getName(),projectScope));
+        entries.addAll(findResourcesContainingText(parent, function.getName(), projectScope));
         return entries;
-        
+
     }
-    
-    public List<BashCallHierarchyEntry> findChildren(BashCallHierarchyEntry entry, IProject projectScope){
-        if (model == null || entry==null || entry.getElement()==null) {
+
+    public List<BashCallHierarchyEntry> findChildren(BashCallHierarchyEntry entry, IProject projectScope) {
+        if (model == null || entry == null || entry.getElement() == null) {
             return Collections.emptyList();
         }
         Object element = entry.getElement();
-        
+
         /* when item we search for bash function */
         if (element instanceof Item) {
             Item item = (Item) element;
-            if (item.getItemType()!=ItemType.FUNCTION) {
+            if (item.getItemType() != ItemType.FUNCTION) {
                 return Collections.emptyList();
             }
             BashScriptModel m = model.getModel(entry.getResource());
             BashFunction function = m.findBashFunctionByName(item.getName());
-            if (function==null) {
+            if (function == null) {
                 return Collections.emptyList();
             }
-            return findBashFunctionCallers(entry, function,projectScope);
+            return findBashFunctionCallers(entry, function, projectScope);
         }
-        
+
         if (element instanceof BashFunction) {
-            return findBashFunctionCallers(entry, (BashFunction)element,projectScope);
+            return findBashFunctionCallers(entry, (BashFunction) element, projectScope);
         }
         if (element instanceof IResource) {
-            return findCallersAndIncludes(entry,(IResource)element,projectScope);
+            return findCallersAndIncludes(entry, (IResource) element, projectScope);
         }
         /* when other */
         List<BashCallHierarchyEntry> entries = new ArrayList<>();
-        
-        
+
         return entries;
     }
 
-    private List<BashCallHierarchyEntry> findCallersAndIncludes(BashCallHierarchyEntry parent,IResource element, IProject projectScope) {
+    private List<BashCallHierarchyEntry> findCallersAndIncludes(BashCallHierarchyEntry parent, IResource element, IProject projectScope) {
         List<BashCallHierarchyEntry> entries = new ArrayList<>();
-        entries.addAll(findResourcesContainingText(parent, element.getName(),projectScope));
+        entries.addAll(findResourcesContainingText(parent, element.getName(), projectScope));
         return entries;
     }
-    
+
     /**
      * Find all resources containing given text and return them as hierarchy entry.
      * Functions will be treated in special way.
@@ -131,56 +130,99 @@ public class BashCallHierarchyCalculator {
         }
     }
 
-    private void handleTextFoundInLine(String text, IFile file, BashCallHierarchyEntry parent, List<BashCallHierarchyEntry> entries, BashCallHierarchyEntry rootEntry, int offset, int lineNumber, int column) {
+    private void handleTextFoundInLine(String text, IFile file, BashCallHierarchyEntry parent, List<BashCallHierarchyEntry> entries, BashCallHierarchyEntry rootEntry, int offset, int lineNumber,
+            int column) {
         /* either we have a function here, or its a text call */
-        
-        BashCallHierarchyEntry entry = createEntry(file, parent);
         BashScriptModel scriptModel = model.getModel(file);
-        if (scriptModel != null) {
-            /* check if found text position is inside a function - means this this entry is for a function */
-            for (BashFunction function : scriptModel.getFunctions()) {
-                int start = function.getPosition();
-
-                int end = function.getEnd();
-                boolean insideFunctionMeansRecursion = false;
-                if (function.getName().contentEquals(text)) {
-                    IResource resource = rootEntry.getResource();
-                    if (file.equals(resource)) {
-                        if (offset==start) {
-                            /* function definition itself - so false positive */
-                            return;
-                        }else {
-                            insideFunctionMeansRecursion=true;
-                        }
-                    }else {
-                        /* function has same name but other resource, so would call itself but never other - so false positive */
-                        return;
-                    }
-                }
-                
-                
-                if (offset >= start && offset <= end) {
-                    entry.setElement(function);
-                    entry.setLength(function.getName().length());
-                    if (insideFunctionMeansRecursion) {
-                        entry.setRecursion(true);
-                    }
-                    /* found, is inside a function so we can beak */
-                    break;
-                }
-            }
+        if (scriptModel == null) {
+            return;
         }
-        if (entry.getElement() == null) {
-            /* was not inside a function */
-            entry.setElement(file);
-            entry.setLength(text.length());
-        }
+        BashCallHierarchyEntry entry = createEntry(file, parent);
         entry.setOffset(offset);
         entry.setColumn(column);
         entry.setLine(lineNumber);
 
+        FunctionCheckData data = checkCallFromFunction(text, entry, offset, scriptModel);
+        if (data.isFunctionItself) {
+            return;
+        }
+        if (!data.isCalledFromFunction) {
+            /* normal text, no function */
+            entry.setElement(file);
+            entry.setLength(text.length());
+        }
 
         entries.add(entry);
+    }
+
+    private FunctionCheckData checkCallFromFunction(String text, BashCallHierarchyEntry entry, int offset, BashScriptModel scriptModel) {
+        FunctionCheckData data = null;
+        /*
+         * check if found text position is inside a function - means this this entry is
+         * for a function
+         */
+        for (BashFunction function : scriptModel.getFunctions()) {
+
+            data = checkCallFromFunction(text, offset, entry, function);
+
+            if (data.isFunctionItself || data.isCalledFromFunction) {
+                break;
+            }
+        }
+        if (data == null) {
+            data = new FunctionCheckData();
+        }
+        return data;
+    }
+
+    private FunctionCheckData checkCallFromFunction(String text, int offsetInFileWhereTextIsFound, BashCallHierarchyEntry entry, BashFunction function) {
+        FunctionCheckData data = new FunctionCheckData();
+        int functionOffset = function.getPosition();
+        int functionOffsetEnd = function.getEnd();
+
+        if (function.getName().contentEquals(text)) {
+            /* same function name as caller */
+            IResource resource = entry.getParent().getResource();
+            if (entry.getResource().equals(resource)) {
+                /* same resource */
+                if (offsetInFileWhereTextIsFound == functionOffset) {
+                    /* function definition itself - so false positive */
+                    data.isFunctionItself=true;
+                    return data;
+                } else {
+                    /* not same offset, so inside this function it calls itself */
+                    data.rescursion = true;
+                }
+            } else {
+                /*
+                 * not same resource - but same function name. So this is a false positive,
+                 * because the function would always do a recursive call to itself!
+                 */
+                data.isFunctionItself=true;
+                return data;
+            }
+
+        } else {
+            /* maybe other function found - where this text was found */
+        }
+        /* check offset belongs to a function part */
+        boolean insideFunction = offsetInFileWhereTextIsFound >= functionOffset && offsetInFileWhereTextIsFound <= functionOffsetEnd;
+        if (!insideFunction) {
+            return data;
+        }
+        entry.setElement(function);
+        entry.setLength(function.getName().length());
+        if (data.rescursion) {
+            entry.setRecursion(true);
+        }
+        data.isCalledFromFunction = true;
+        return data;
+    }
+
+    private class FunctionCheckData {
+        boolean rescursion;
+        boolean isFunctionItself;
+        boolean isCalledFromFunction;
     }
 
     private BashCallHierarchyEntry createEntry(IFile file, BashCallHierarchyEntry parent) {

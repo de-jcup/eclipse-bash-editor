@@ -1,5 +1,6 @@
 package de.jcup.basheditor.callhierarchy;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -65,8 +66,12 @@ public class BashCallHierarchyEntry {
 
     public List<BashCallHierarchyEntry> getChildren(IProject projectScope) {
         if (children == null) {
-            /* lazy find */
-            children = calculator.findChildren(this, projectScope);
+            if (isRecursion()) {
+                children = Collections.emptyList();
+            }else {
+                /* lazy find */
+                children = calculator.findChildren(this, projectScope);
+            }
         }
         return children;
     }

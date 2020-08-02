@@ -20,19 +20,12 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPage;
 
 import de.jcup.basheditor.BashEditor;
-import de.jcup.basheditor.callhierarchy.BashCallHierarchyCalculator;
 import de.jcup.basheditor.callhierarchy.BashCallHierarchyEntry;
 import de.jcup.basheditor.callhierarchy.BashCallHierarchyView;
 import de.jcup.basheditor.outline.Item;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class ShowInCallHierarchyBashEditorHandler extends AbstractBashEditorHandler {
-
-    private BashCallHierarchyCalculator calculator;
-
-    public ShowInCallHierarchyBashEditorHandler() {
-        calculator = new BashCallHierarchyCalculator();
-    }
 
     @Override
     protected void executeOnBashEditor(BashEditor bashEditor) {
