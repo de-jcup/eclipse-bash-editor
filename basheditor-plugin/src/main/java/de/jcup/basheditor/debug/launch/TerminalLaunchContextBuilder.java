@@ -102,7 +102,7 @@ public class TerminalLaunchContextBuilder {
         	context.environment=new HashMap<String, String>();
         }
         try{
-            /* build command list */
+            /* build command children */
             String internalCommand = itc.build(context);
             
             Map<String,String> map = new  HashMap<String,String>();

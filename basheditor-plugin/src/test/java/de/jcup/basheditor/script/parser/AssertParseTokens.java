@@ -28,7 +28,7 @@ public class AssertParseTokens {
 	private List<ParseToken> parseTokens;
 
 	/**
-	 * Ensures given list is not null and returns dedicated assert object
+	 * Ensures given children is not null and returns dedicated assert object
 	 * @param parseTokens
 	 * @return assert object
 	 */

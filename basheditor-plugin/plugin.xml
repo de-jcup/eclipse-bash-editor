@@ -96,7 +96,6 @@
     <extension point="org.eclipse.ui.menus">
         <!-- http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2Fworkbench_cmd_menus.htm -->
         <menuContribution locationURI="popup:org.eclipse.ui.popup.any?before=additions">
-                <!-- Detect new root project --> 
                 <command
             	  commandId="basheditor.command.openWithBashEditor"
                   icon="icons/bash-editor.png"
@@ -108,14 +107,35 @@
                               checkEnabled="false">
                               <with
                                     variable="activeMenuSelection">
-                                    <and>
 				         				<count value="1"/>
 	                                    <iterate ifEmpty="false">
 	                                    	 <adapt type="org.eclipse.core.resources.IFile">
 			         							<test property="de.jcup.basheditor.isBashFileWithoutExtension" value="true"/>
 				         					</adapt>
 				         				</iterate>
-                                    </and>
+                              </with>
+                        </visibleWhen>
+                </command>
+                <command
+            	  commandId="basheditor.command.resource.openCallHierarchy"
+                  icon="icons/view/call_hierarchy.png"
+                  id="basheditor.maintoolbar.openBashCallhierarchy"
+                  label="Open Bash Call Hierarchy"
+                  tooltip="Open Call Hierarchy for this bash script"
+                  style="push">
+                        <visibleWhen 
+                              checkEnabled="false">
+                              <with
+                                    variable="activeMenuSelection">
+				         				<count value="1"/>
+	                                    <iterate ifEmpty="false">
+	                                    	 <adapt type="org.eclipse.core.resources.IFile">
+	                                    	  <or>
+			         							<test property="de.jcup.basheditor.isBashFileWithoutExtension" value="true"/>
+			         							<test property="org.eclipse.core.resources.extension" value="sh" />
+			         						  </or>
+				         					</adapt>
+				         				</iterate>
                               </with>
                         </visibleWhen>
                 </command>
@@ -149,7 +169,7 @@
    </extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          COMMANDS                                    -->
-   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->^
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    
    <extension point="org.eclipse.ui.commands">
        <category
@@ -163,6 +183,18 @@
       		description="Open file with bash editor"
       		categoryId="basheditor.commands.category"
       		id="basheditor.command.openWithBashEditor">
+       </command>
+       <command
+      		name="Open Bash Call Hierarchy"
+      		description="Open Bash Call Hierarchy from current selection inside editor"
+      		categoryId="basheditor.commands.category"
+      		id="basheditor.command.editor.openCallHierarchy">
+       </command>
+       <command
+      		name="Open Bash Call Hierarchy"
+      		description="Open Bash Call Hierarchy from current selected file"
+      		categoryId="basheditor.commands.category"
+      		id="basheditor.command.resource.openCallHierarchy">
        </command>
    	   <command
             name="Quick outline"
@@ -214,6 +246,14 @@
             commandId="basheditor.command.openWithBashEditor"
             class="de.jcup.basheditor.handlers.OpenWithBashEditor">
       </handler>
+      <handler
+            commandId="basheditor.command.editor.openCallHierarchy"
+            class="de.jcup.basheditor.handlers.ShowInCallHierarchyBashEditorHandler">
+      </handler>
+      <handler
+            commandId="basheditor.command.resource.openCallHierarchy"
+            class="de.jcup.basheditor.handlers.ShowInCallHierarchyByResourceHandler">
+      </handler>
     </extension> 
     
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -238,6 +278,11 @@
             commandId="basheditor.editor.commands.gotomatchingbracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">	  
 		</key>
+         <key
+            sequence="M1+M2+G"
+            contextId="basheditor.editors.BashEditor.context"
+            commandId="basheditor.command.editor.openCallHierarchy"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 		<key
             sequence="F5"
             contextId="basheditor.editors.BashEditor.context"
@@ -263,6 +308,7 @@
             locationURI="popup:basheditor.editors.BashEditor.context?after=additions">
          <command commandId="basheditor.editor.commands.source.validate" icon="icons/bash-editor.png" />
          <command commandId="basheditor.editor.commands.quickoutline" />
+         <command commandId="basheditor.command.editor.openCallHierarchy" icon="icons/view/call_hierarchy.png" />
       </menuContribution>
       
       <menuContribution
@@ -284,6 +330,8 @@
             	commandId="basheditor.editor.commands.source.validate" 
             	icon="icons/bash-editor.png">
             </command>
+            <command commandId="basheditor.command.editor.openCallHierarchy"
+                icon="icons/view/call_hierarchy.png" />
          </menu>
       </menuContribution>
       
@@ -724,4 +772,38 @@ fi</pattern>
 	         label="Bash Debug Console">
 	   </consoleFactory>
 </extension>
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!--                          VIEW                                        -->
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<extension
+      point="org.eclipse.ui.views">
+   <view
+         class="de.jcup.basheditor.callhierarchy.BashCallHierarchyView"
+         id="de.jcup.basheditor.callhierarchy.BashCallHierarchyView"
+         name="Bash Call Hierarchy"
+         icon="icons/view/call_hierarchy.png"
+         restorable="true">
+   </view>
+</extension>
+ <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!--                          DECORATION                                  -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<extension
+ point="org.eclipse.ui.decorators">
+ <decorator
+    lightweight="true"
+    adaptable="true"
+    label="Bash Call Hierarchy decorator"
+    class="de.jcup.basheditor.callhierarchy.BashCallHierarchyLabelProvider"
+    state="true"
+    location="BOTTOM_LEFT"
+    id="de.jcup.basheditor.callhierarchy.BashCallHierarchyLabelProvider">
+    <enablement>
+      <objectClass name="de.jcup.basheditor.callhierarchy.BashCallHierarchyEntry"/>
+    </enablement>
+ <description>
+    Decorator for bash call hierachy
+ </description>
+  </decorator>
+   </extension>
 </plugin>

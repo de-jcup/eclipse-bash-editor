@@ -18,8 +18,10 @@ package de.jcup.basheditor.workspacemodel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -28,7 +30,8 @@ import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.script.BashScriptModel;
 
 /**
- * This is ONE model for all. Means it will contain information for any 
+ * This is ONE model for all. Means it will contain information for any
+ * 
  * @author albert
  *
  */
@@ -42,21 +45,22 @@ public class SharedBashModel {
     public void remove(IResource resource) {
         sharedMap.remove(resource);
     }
-    
-    public List<SharedModelMethodTarget> findResourcesHavingMethods(String functionName, IProject projectScope){
+
+    public List<SharedModelMethodTarget> findResourcesHavingMethods(String functionName, IProject projectScope) {
         List<SharedModelMethodTarget> list = new ArrayList<SharedModelMethodTarget>();
-        if (functionName==null) {
+        if (functionName == null) {
             return list;
         }
-        for (IResource resource: sharedMap.keySet()) {
-            if (projectScope!=null) {
-                boolean notInProjectScope = ! projectScope.equals(resource.getProject());
-                if (notInProjectScope){
+        Set<IResource> resources = sharedMap.keySet();
+        for (IResource resource : resources) {
+            if (projectScope != null) {
+                boolean notInProjectScope = !projectScope.equals(resource.getProject());
+                if (notInProjectScope) {
                     continue;
                 }
             }
             BashScriptModel scriptModel = sharedMap.get(resource);
-            if (scriptModel==null) {
+            if (scriptModel == null) {
                 continue;
             }
             addFirstFunctionFoundInResource(list, functionName, resource, scriptModel);
@@ -66,15 +70,29 @@ public class SharedBashModel {
 
     private void addFirstFunctionFoundInResource(List<SharedModelMethodTarget> targets, String functionName, IResource resource, BashScriptModel scriptModel) {
         Collection<BashFunction> functions = scriptModel.getFunctions();
-        for (BashFunction function: functions) {
-            if (functionName.contentEquals(function.getName())){
-                SharedModelMethodTarget target = new SharedModelMethodTarget(resource,function);
+        if (functions == null || functions.isEmpty()) {
+            return;
+        }
+        if ("feature-129-lib1.sh".contentEquals(resource.getName())) {
+            System.out.println("got resource:" + resource);
+        }
+        for (BashFunction function : functions) {
+            if (functionName.contentEquals(function.getName())) {
+                SharedModelMethodTarget target = new SharedModelMethodTarget(resource, function);
                 targets.add(target);
                 /* we break on first function found here */
                 break;
             }
         }
     }
-	
 
+    public BashScriptModel getModel(IResource resource) {
+        return sharedMap.get(resource);
+    }
+
+    public Iterator<IResource> getResourceIterator() {
+        return sharedMap.keySet().iterator();
+    }
+
+    
 }

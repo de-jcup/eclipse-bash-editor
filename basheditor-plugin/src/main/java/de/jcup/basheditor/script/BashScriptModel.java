@@ -43,9 +43,9 @@ public class BashScriptModel implements BashVariableRegistry {
     }
 
     /**
-     * Returns a debug token list - if list is null, a new one will be created
+     * Returns a debug token children - if children is null, a new one will be created
      * 
-     * @return debug token list, never <code>null</code>
+     * @return debug token children, never <code>null</code>
      */
     public List<ParseToken> getDebugTokens() {
         if (debugTokenList == null) {
@@ -74,6 +74,20 @@ public class BashScriptModel implements BashVariableRegistry {
             return null;
         }
         return variables.get(varName);
+    }
+
+    /**
+     * Finds bash function inside resource by given function name
+     * @param name
+     * @return  bash function inside resource, or <code>null</code>
+     */
+    public BashFunction findBashFunctionByName(String name) {
+        for (BashFunction function: functions) {
+            if (function.getName().contentEquals(name)) {
+                return function;
+            }
+        }
+        return null;
     }
 
 }

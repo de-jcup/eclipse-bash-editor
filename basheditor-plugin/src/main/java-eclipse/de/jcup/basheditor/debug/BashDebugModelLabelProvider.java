@@ -42,7 +42,8 @@ import de.jcup.basheditor.debug.element.AbstractBashDebugElement;
 import de.jcup.basheditor.debug.element.BashVariable;
 
 public class BashDebugModelLabelProvider extends LabelProvider implements IDebugModelPresentation {
-	private static final String FALLBACK_DETAIL_VALUE = "";
+	private static final Image IMAGE_BASH_VARIABLE = EclipseUtil.getImage("icons/bash-editor.png", BashEditorActivator.getDefault().getPluginID());
+    private static final String FALLBACK_DETAIL_VALUE = "";
 	private BashFileExtensionMatcher matcher = new BashFileExtensionMatcher();
 	private FileExtensionExtractor extractor = new FileExtensionExtractor();
 	
@@ -51,7 +52,7 @@ public class BashDebugModelLabelProvider extends LabelProvider implements IDebug
 
 	public Image getImage(Object element) {
 		if (element instanceof BashVariable) {
-			return EclipseUtil.getImage("icons/bash-editor.png", BashEditorActivator.getDefault().getPluginID());
+			return IMAGE_BASH_VARIABLE;
 		}
 		if (element instanceof AbstractBashDebugElement) {
 			return null;
