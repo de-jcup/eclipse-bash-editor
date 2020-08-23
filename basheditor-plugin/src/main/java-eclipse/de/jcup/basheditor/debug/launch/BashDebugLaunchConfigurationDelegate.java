@@ -57,6 +57,9 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 	
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
+		if (monitor.isCanceled()) {
+			return;
+		}
 		boolean debug = mode.equals(ILaunchManager.DEBUG_MODE);
 		boolean runOnly = mode.equals(ILaunchManager.RUN_MODE);
 		if (!debug && !runOnly) {
@@ -94,7 +97,11 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 					Collections.emptyMap());
 
 		
-			terminalLauncher.removeOldTerminalsOfPort(port);
+			terminalLauncher.removeOldTerminalsOfPort(port, monitor);
+			
+			if (monitor.isCanceled()) {
+				return;
+			}
 			
 			Process process = terminalLauncher.execute(programFile, params, getPreferences().getTerminalCommand(),
 					getPreferences().getStarterCommand(), environment,port);

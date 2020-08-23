@@ -219,7 +219,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
         launch.terminate();
         
         /* destroy current terminal ...*/
-        terminalLauncher.removeOldTerminalsOfPort(port);
+        terminalLauncher.removeOldTerminalsOfPort(port, new NullProgressMonitor());
         
         
     }

@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.BashEditorUtil;
@@ -61,11 +64,12 @@ public class TerminalLauncher {
 
     }
 
-    public void removeOldTerminalsOfPort(int port) {
+    public void removeOldTerminalsOfPort(int port, IProgressMonitor monitor) {
         try {
             List<String> commands = new ArrayList<String>();
             if (OSUtil.isWindows()) {
-                commands.add("cmd");
+                commands.add("cmd.exe");
+                commands.add("/C");
             }
             commands.add("bash");
             commands.add(support.getAbsolutePathToEnsuredKillOldTerminalScript());
@@ -74,7 +78,16 @@ public class TerminalLauncher {
             ProcessBuilder pb = new ProcessBuilder(commands);
             pb.inheritIO();
             Process process = pb.start();
-            int terminated = process.waitFor();
+            boolean hasTerminated =false;
+            while (!hasTerminated) {
+            	if (monitor.isCanceled()) {
+            		process.destroyForcibly();
+            		return;
+            	}
+            	hasTerminated= process.waitFor(3, TimeUnit.SECONDS);
+            }
+            
+            int terminated = process.waitFor(); // problematic at windows!
             if (terminated != 0 && terminated !=1) { 
                 // 0 = kill done
                 // 1 = one of the commands did fail - e.g. because process already removed  by user
