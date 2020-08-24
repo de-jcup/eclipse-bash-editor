@@ -27,6 +27,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.BashEditorUtil;
 import de.jcup.basheditor.debug.BashDebugConsole;
+import de.jcup.basheditor.debug.BashDebugInfoProvider;
+import de.jcup.basheditor.debug.BashPIDSnippetSupport;
 import de.jcup.basheditor.debug.DebugBashCodeToggleSupport;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.eclipse.commons.ui.EclipseUtil;
@@ -47,10 +49,13 @@ import de.jcup.eclipse.commons.ui.EclipseUtil;
  */
 public class TerminalLauncher {
 
-    DebugBashCodeToggleSupport support;
+    DebugBashCodeToggleSupport toggleSupport;
+	private BashPIDSnippetSupport bashPIDSnippetSupport;
 
     public TerminalLauncher() {
-        support = new DebugBashCodeToggleSupport(BashEditorActivator.getDefault());
+        BashDebugInfoProvider infoProvider = BashEditorActivator.getDefault();
+		toggleSupport = new DebugBashCodeToggleSupport(infoProvider);
+        bashPIDSnippetSupport = new BashPIDSnippetSupport(infoProvider);
     }
 
     public Process execute(File file, String params, String terminalCommand, String starterCommand, Map<String, String> environment, int port) {
@@ -72,7 +77,7 @@ public class TerminalLauncher {
                 commands.add("/C");
             }
             commands.add("bash");
-            commands.add(support.getAbsolutePathToEnsuredKillOldTerminalScript());
+            commands.add(bashPIDSnippetSupport.getAbsolutePathToEnsuredKillOldTerminalScript());
             commands.add(""+port); // first param
             
             ProcessBuilder pb = new ProcessBuilder(commands);

@@ -15,7 +15,11 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_FUNCTIONS_STRATEGY;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_OUTLINE_WITH_EDITOR;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_REPLACE_TAB_BY_SPACES_STRATEGY;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHOW_VARIABLES_IN_OUTLINE;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;

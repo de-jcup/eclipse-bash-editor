@@ -28,6 +28,7 @@ public class TestBashDebugInfoProvider implements BashDebugInfoProvider {
             Path testFolder;
             testFolder = Files.createTempDirectory("test_bash_debug_info");
             testFolderPth = testFolder.toRealPath().toAbsolutePath().toString();
+            testFolder.toFile().delete();
         } catch (IOException e) {
            throw new IllegalStateException("Test corrupt!",e);
         }

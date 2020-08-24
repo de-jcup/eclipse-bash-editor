@@ -15,10 +15,11 @@
  */
 package de.jcup.basheditor.workspacemodel;
 
+import static java.util.Objects.requireNonNull;
+
 import org.eclipse.core.resources.IResource;
 
 import de.jcup.basheditor.script.BashFunction;
-import static java.util.Objects.*;
 
 public class SharedModelMethodTarget {
 

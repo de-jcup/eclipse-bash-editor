@@ -25,7 +25,6 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IThread;
-import org.eclipse.debug.core.model.RuntimeProcess;
 
 import de.jcup.basheditor.debug.BashDebugConstants;
 import de.jcup.basheditor.debug.DebugEventSource;

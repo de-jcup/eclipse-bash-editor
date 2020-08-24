@@ -15,7 +15,7 @@
  */
 package de.jcup.basheditor.script;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.List;

@@ -27,7 +27,6 @@ public class TerminalLaunchContext {
 	String terminalCommand;
 	boolean waitAlways;
 	boolean waitOnErrors;
-	boolean switchToWorkingDirNecessary;
     String launchTerminalCommand;
     String terminalExecutionCommand;
     Exception exception;
@@ -66,7 +65,4 @@ public class TerminalLaunchContext {
 		return file.getParentFile();
 	}
 
-	public boolean isSwitchToWorkingDirNecessary() {
-		return switchToWorkingDirNecessary;
-	}
 }

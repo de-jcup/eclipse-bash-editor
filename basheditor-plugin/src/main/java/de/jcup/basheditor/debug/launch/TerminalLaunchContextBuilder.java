@@ -92,7 +92,6 @@ public class TerminalLaunchContextBuilder {
 
         context.waitAlways = waitingAlways;
         context.waitOnErrors = waitingOnErrors;
-        context.switchToWorkingDirNecessary=true;
         context.launchTerminalCommand="";
         context.commands=new ArrayList<String>();
         context.environment=environment;

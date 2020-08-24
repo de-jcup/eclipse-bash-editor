@@ -15,7 +15,14 @@
  */
 package de.jcup.basheditor.script.parser;
 
-import static de.jcup.basheditor.script.parser.ParserState.*;
+import static de.jcup.basheditor.script.parser.ParserState.CODE;
+import static de.jcup.basheditor.script.parser.ParserState.INIT;
+import static de.jcup.basheditor.script.parser.ParserState.INSIDE_COMMENT;
+import static de.jcup.basheditor.script.parser.ParserState.INSIDE_DOUBLE_QUOTE;
+import static de.jcup.basheditor.script.parser.ParserState.INSIDE_DOUBLE_TICKED;
+import static de.jcup.basheditor.script.parser.ParserState.INSIDE_IF;
+import static de.jcup.basheditor.script.parser.ParserState.INSIDE_SINGLE_QUOTE;
+import static de.jcup.basheditor.script.parser.ParserState.VARIABLE;
 
 import java.util.ArrayList;
 import java.util.List;

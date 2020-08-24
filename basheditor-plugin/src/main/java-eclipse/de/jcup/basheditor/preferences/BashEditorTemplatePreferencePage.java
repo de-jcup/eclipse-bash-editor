@@ -15,8 +15,8 @@
  */
 package de.jcup.basheditor.preferences;
 
-import de.jcup.eclipse.commons.templates.TemplateSupportPreferencePage;
 import de.jcup.basheditor.BashEditorActivator;
+import de.jcup.eclipse.commons.templates.TemplateSupportPreferencePage;
 
 public class BashEditorTemplatePreferencePage extends TemplateSupportPreferencePage{
 

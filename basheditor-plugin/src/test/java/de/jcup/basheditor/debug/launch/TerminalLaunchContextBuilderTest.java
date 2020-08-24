@@ -15,7 +15,9 @@
  */
 package de.jcup.basheditor.debug.launch;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -23,26 +25,33 @@ import java.nio.file.Files;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.jcup.basheditor.debug.BashPIDSnippetSupport;
+
 public class TerminalLaunchContextBuilderTest {
 
     private File file;
     private String path;
-    private String user;
+	private String userPath;
 
     @Before
     public void before() throws Exception {
-        user = System.getProperty("user.name");
-        
         file = Files.createTempFile("xyz", ".sh").toFile();
         
         path = file.getParentFile().getAbsolutePath();
         path = OSUtil.toUnixPath(path);
+        
+        userPath = OSUtil.toUnixPath(System.getProperty("user.home"));
     }
 
     @Test
     public void check_default_linux_command_works() throws Exception {
         /* prepare */
-        String expectedTerminalCommand = "x-terminal-emulator -e bash --login -c '_debug_terminal_pid=$$;touch /tmp/basheditor_terminal_pid4port_0_"+user+".txt;echo $_debug_terminal_pid >> /tmp/basheditor_terminal_pid4port_0_"+user+".txt;cd "+path+";./" + file.getName() + " -a 1 -b 2;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\"'";
+    	/* @formatter:off */
+        String expectedTerminalCommand ="x-terminal-emulator -e bash "+
+    	                                "--login -c 'cd \""+userPath+"/.basheditor\";./"+
+    	                                BashPIDSnippetSupport.FILENAME_STORE_TERMINAL_PIDS_SCRIPT+" 0 $$;cd "+path+";./" + 
+        		                        file.getName() + " -a 1 -b 2;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\"'";
+        /* @formatter:on */
 
         /* execute */
         TerminalLaunchContext context =  testProviderAndReturnCommandString(new DefaultLinuxTerminalCommandStringProvider());
@@ -60,9 +69,11 @@ public class TerminalLaunchContextBuilderTest {
 
     @Test
     public void check_default_windows_command_works() throws Exception {
-        //cmd.exe /c start "my title" cmd.exe /C bash --login -c 'cd /C/Users/atrigna/AppData/Local/Temp;./terminallaunch8349202239915867888.sh -a 1 -b 2;_exit_status=$?;echo "Exit code=$_exit_status";read -p "Press enter to continue..."'
         /* prepare */
-        String expectedTerminalCommand = "start \"Bash Editor DEBUG Session:"+file.getName()+"\" cmd.exe /C bash --login -c '_debug_terminal_pid=$$;touch /tmp/basheditor_terminal_pid4port_0_"+user+".txt;echo $_debug_terminal_pid >> /tmp/basheditor_terminal_pid4port_0_"+user+".txt;cd "+path+";./" + file.getName() + " -a 1 -b 2;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\"'";
+        String expectedTerminalCommand = "start \"Bash Editor DEBUG Session:"+file.getName()+"\" cmd.exe /C bash "+
+        		                         "--login -c 'cd \""+userPath+"/.basheditor\";./"+
+                                         BashPIDSnippetSupport.FILENAME_STORE_TERMINAL_PIDS_SCRIPT+" 0 $$;cd "+path+";./" + 
+                                         file.getName() + " -a 1 -b 2;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\"'";
 
         /* execute */
         TerminalLaunchContext context = testProviderAndReturnCommandString(new DefaultWindowsTerminalCommandStringProvider());

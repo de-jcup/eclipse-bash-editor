@@ -15,7 +15,7 @@
  */
 package de.jcup.basheditor.debug.launch;
 
-import static de.jcup.basheditor.debug.BashDebugConstants.*;
+import static de.jcup.basheditor.debug.BashDebugConstants.LAUNCH_ENVIRONMENT_PROPERTIES;
 
 import java.io.File;
 import java.util.Collections;

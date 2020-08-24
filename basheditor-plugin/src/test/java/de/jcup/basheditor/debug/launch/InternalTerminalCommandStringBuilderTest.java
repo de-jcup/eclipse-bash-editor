@@ -15,9 +15,9 @@
  */
 package de.jcup.basheditor.debug.launch;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -50,7 +50,6 @@ public class InternalTerminalCommandStringBuilderTest {
         /* prepare */
         context.file=null;
         context.terminalCommand="terminalCommand";
-        context.switchToWorkingDirNecessary=true;
         context.waitAlways=true;
         context.waitOnErrors=true;
         
@@ -63,15 +62,21 @@ public class InternalTerminalCommandStringBuilderTest {
         /* prepare */
         context.file=Files.createTempFile("test", ".txt").toFile();
         context.terminalCommand="terminalCommand";
-        context.switchToWorkingDirNecessary=true;
         context.waitAlways=true;
         context.waitOnErrors=true;
         context.params=null;
        
-        String path = context.file.getParentFile().toPath().toRealPath().toAbsolutePath().toString();
+        String path = OSUtil.toUnixPath(context.file.getParentFile().toPath().toRealPath().toAbsolutePath().toString());
         String name = context.file.getName();
-        /* test */
-        assertTrue(toTest.build(context).contains("cd "+path+";./"+name+";_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\""));
+        
+        /* execute */
+        String result = toTest.build(context);
+        
+        String contained ="cd "+path+";./"+name+";_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\"";
+		/* test */
+		if (!result.contains(contained)){
+        	assertEquals("Not contained:\n"+contained,result); // we use equals... easier to show diff in IDE
+        }
     }
     
     @Test
@@ -79,12 +84,11 @@ public class InternalTerminalCommandStringBuilderTest {
         /* prepare */
         context.file=Files.createTempFile("test", ".txt").toFile();
         context.terminalCommand="terminalCommand";
-        context.switchToWorkingDirNecessary=true;
         context.waitAlways=true;
         context.waitOnErrors=true;
         context.params="-a 1 -b 2";
        
-        String path = context.file.getParentFile().toPath().toRealPath().toAbsolutePath().toString();
+        String path = OSUtil.toUnixPath(context.file.getParentFile().toPath().toRealPath().toAbsolutePath().toString());
         String name = context.file.getName();
         /* test */
         assertTrue(toTest.build(context).contains("cd "+path+";./"+name+" -a 1 -b 2;_exit_status=$?;echo \"Exit code=$_exit_status\";read -p \"Press enter to continue...\""));

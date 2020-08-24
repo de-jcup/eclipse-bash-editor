@@ -15,8 +15,13 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.NeonCompatiblity.*;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+import static de.jcup.basheditor.NeonCompatiblity.widgetSelectedAdapter;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ALWAYS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ON_ERRORS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_STARTER_COMMAND;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_TERMINAL_COMMAND;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHOW_META_INFO_IN_DEBUG_CONSOLE;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_USER_HOME_CUSTOMPATH;
 
 import java.io.BufferedWriter;
 import java.io.File;

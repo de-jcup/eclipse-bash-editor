@@ -15,10 +15,27 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.BashEditorUtil.*;
-import static de.jcup.basheditor.preferences.BashEditorLinkFunctionStrategy.*;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
-import static de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy.*;
+import static de.jcup.basheditor.BashEditorUtil.getPreferences;
+import static de.jcup.basheditor.preferences.BashEditorLinkFunctionStrategy.PROJECT;
+import static de.jcup.basheditor.preferences.BashEditorLinkFunctionStrategy.SCRIPT;
+import static de.jcup.basheditor.preferences.BashEditorLinkFunctionStrategy.WORKSPACE;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_KEYWORDS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_SIMPLEWORDS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_AUTO_CREATE_END_BRACKETSY;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_ENCLOSING_BRACKETS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_COLOR;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_ENABLED;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_FUNCTIONS_STRATEGY;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_OUTLINE_WITH_EDITOR;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_REPLACE_TAB_BY_SPACES_STRATEGY;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHARED_MODEL_ENABLED;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHOW_VARIABLES_IN_OUTLINE;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_TOOLTIPS_ENABLED;
+import static de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy.ALWAYS;
+import static de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy.NEVER;
+import static de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy.USE_DEFAULT;
 
 import java.util.Arrays;
 

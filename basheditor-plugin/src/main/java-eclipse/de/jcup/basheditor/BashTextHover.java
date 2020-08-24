@@ -15,7 +15,7 @@
  */
 package de.jcup.basheditor;
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_TOOLTIPS_ENABLED;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;

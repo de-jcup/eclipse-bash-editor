@@ -15,11 +15,11 @@
  */
 package de.jcup.basheditor.debug;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
+
+import de.jcup.basheditor.debug.launch.SnippetUtil;
 
 /**
  * Class is responsible to change existing source code on a file to have
@@ -31,21 +31,24 @@ import java.util.Objects;
  */
 public class DebugBashCodeToggleSupport {
     private static final String PATH_FROM_USER_HOME_TO_DEBUGGER_SCRIPT = ".basheditor/remote-debugging-v2.sh";
-    private static final String PATH_FROM_USER_HOME_TO_KILL_OLD_TERMINALS_SCRIPT = ".basheditor/kill-old-terminals-v1.sh";
     private static final String DEBUG_POSTFIX = "#BASHEDITOR-TMP-REMOTE-DEBUGGING-END|Origin line:";
     private BashDebugCodeBuilder codeBuilder;
+    private BashPIDSnippetSupport bashPIDSnippetSupport;
     private BashDebugInfoProvider infoProvider;
 
     public DebugBashCodeToggleSupport(BashDebugInfoProvider infoProvider) {
         Objects.requireNonNull(infoProvider);
         
         this.infoProvider=infoProvider;
+        this.bashPIDSnippetSupport= new BashPIDSnippetSupport(infoProvider);
         this.codeBuilder = new BashDebugCodeBuilder();
         
     }
 
     public String enableDebugging(String sourceCode, String hostname, int port) throws IOException {
-        ensureKillOldTerminalFileExistsInSystemUserHome();
+    	bashPIDSnippetSupport.ensureKillOldTerminalFileExistsInSystemUserHome();
+    	bashPIDSnippetSupport.ensureStoreTerminalPIDFileExistsInSystemUserHome();
+    	
         ensureDebugFileExistsInSystemUserHome();
         String nSourceCode= disableDebugging(sourceCode); // if we got some call before with maybe another port or host etc.
         StringBuilder sb = new StringBuilder();
@@ -64,9 +67,7 @@ public class DebugBashCodeToggleSupport {
         return new File(base, PATH_FROM_USER_HOME_TO_DEBUGGER_SCRIPT);
     }
     
-    private File resolveKillOldTerminalFiles(String base) {
-        return new File(base, PATH_FROM_USER_HOME_TO_KILL_OLD_TERMINALS_SCRIPT);
-    }
+    
 
     private String createSourceToInclude(String base) { 
         StringBuilder sb = new StringBuilder();
@@ -83,45 +84,11 @@ public class DebugBashCodeToggleSupport {
         return sb.toString();
     }
     
-    public String getAbsolutePathToEnsuredKillOldTerminalScript() throws IOException {
-        return ensureKillOldTerminalFileExistsInSystemUserHome().toPath().toAbsolutePath().toString();
-    }
-   
     private File ensureDebugFileExistsInSystemUserHome() throws IOException {
-        /* ensure debug script file does really exist on user.home */
-        File debuggerFile = resolveDebuggerFile(infoProvider.getSystemUserHomePath());
-        if (debuggerFile.exists()) {
-            return debuggerFile;
-        }
-        debuggerFile.getParentFile().mkdirs();
-        debuggerFile.createNewFile();
-        debuggerFile.setExecutable(true, true);
-
-        String snippet = codeBuilder.buildDebugBashCodeSnippet();
-        try (FileWriter fw = new FileWriter(debuggerFile); BufferedWriter bw = new BufferedWriter(fw)) {
-            bw.write(snippet);
-        }
-        return debuggerFile;
-
+     	File file = resolveDebuggerFile(infoProvider.getSystemUserHomePath());
+    	return SnippetUtil.ensureExecutableFile(file, ()-> codeBuilder.buildDebugBashCodeSnippet());
     }
-    private  File ensureKillOldTerminalFileExistsInSystemUserHome() throws IOException {
-        /* ensure debug script file does really exist on user.home */
-        File killFile = resolveKillOldTerminalFiles(infoProvider.getSystemUserHomePath());
-        if (killFile.exists()) {
-            return killFile;
-        }
-        killFile.getParentFile().mkdirs();
-        killFile.createNewFile();
-        killFile.setExecutable(true, true);
-
-        String snippet = codeBuilder.buildKillOldTerminalsSnippet("$1");
-        try (FileWriter fw = new FileWriter(killFile); BufferedWriter bw = new BufferedWriter(fw)) {
-            bw.write(snippet);
-        }
-        return killFile;
-
-    }
-
+    
     public String disableDebugging(String sourceCode) throws IOException {
         int index = sourceCode.indexOf(DEBUG_POSTFIX);
         if (index == -1) {
