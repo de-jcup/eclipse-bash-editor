@@ -44,24 +44,27 @@ public class BashSingleQuoteRule implements IPredicateRule {
 	public IToken evaluate(ICharacterScanner scanner, boolean resume) {
 
 		int column = scanner.getColumn();
-		int read = scanner.read();
+		int read = scanner.read(); // read '
 		if (read != '\'') {
-			scanner.unread();
+			scanner.unread(); // go back ...
 			return Token.UNDEFINED;
 		}
+		// last read was a '
 		if (column != 1) {
-			scanner.unread();
-			scanner.unread();
+			scanner.unread(); // go to ' 
+			scanner.unread(); // go to char before '
 			int before = scanner.read();
 			char charBefore = (char) before;
 			if (charBefore == '\\') {
 				/* in this case we must ignore because not quoted */
+				return Token.UNDEFINED;
 			}
-			return Token.UNDEFINED;
-		}
-		while (read!= ICharacterScanner.EOF && ((char)read)!='\'') {
 			read = scanner.read();
 		}
+		
+		do {
+			read = scanner.read();
+		}while(read!= ICharacterScanner.EOF && ((char)read)!='\'');
 
 		return sucessToken;
 	}
