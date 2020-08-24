@@ -13,45 +13,57 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.document;
+package de.jcup.basheditor.document;
 
 import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.IToken;
-import org.eclipse.jface.text.rules.PatternRule;
 import org.eclipse.jface.text.rules.Token;
 
-public class BashSingleQuoteRule extends PatternRule {
+//  echo 'test'\''test'  -> test'test
+//  echo 'test\'\''test' -> test\'test
+public class BashSingleQuoteRule implements IPredicateRule {
 
-	private static final boolean BREAKS_ON_EOL = false; // support multi line strings!
-	private static final boolean BREAKS_ON_EOF = true;
-	private static final boolean ESCAPE_CONTINUES_LINE = false;
+	private IToken sucessToken;
 
-
-	public BashSingleQuoteRule(String startSequence, String endSequence, IToken token) {
-		super(startSequence, endSequence, token, (char)-1, BREAKS_ON_EOL, BREAKS_ON_EOF, ESCAPE_CONTINUES_LINE);
+	public BashSingleQuoteRule(IToken token) {
+		this.sucessToken = token;
 	}
 
-	
-	protected IToken doEvaluate(ICharacterScanner scanner, boolean resume) {
+	@Override
+	public IToken evaluate(ICharacterScanner scanner) {
+		return evaluate(scanner, false);
+	}
 
-		if (resume) {
+	@Override
+	public IToken getSuccessToken() {
+		return sucessToken;
+	}
 
-			if (endSequenceDetected(scanner))
-				return fToken;
+	@Override
+	public IToken evaluate(ICharacterScanner scanner, boolean resume) {
 
-		} else {
-			int c= scanner.read();
-			if (c == fStartSequence[0]) {
-				
-				if (sequenceDetected(scanner, fStartSequence, false)) {
-					if (endSequenceDetected(scanner))
-						return fToken;
-				}
+		int column = scanner.getColumn();
+		int read = scanner.read();
+		if (read != '\'') {
+			scanner.unread();
+			return Token.UNDEFINED;
+		}
+		if (column != 1) {
+			scanner.unread();
+			scanner.unread();
+			int before = scanner.read();
+			char charBefore = (char) before;
+			if (charBefore == '\\') {
+				/* in this case we must ignore because not quoted */
 			}
+			return Token.UNDEFINED;
+		}
+		while (read!= ICharacterScanner.EOF && ((char)read)!='\'') {
+			read = scanner.read();
 		}
 
-		scanner.unread();
-		return Token.UNDEFINED;
+		return sucessToken;
 	}
-	
+
 }

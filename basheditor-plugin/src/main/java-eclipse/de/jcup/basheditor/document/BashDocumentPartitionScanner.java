@@ -74,7 +74,7 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		rules.add(new SingleLineRule("#", "", comment, (char) -1, true));
 
 		rules.add(new BashDoubleQuoteRule("\"", "\"", doubleString));
-		rules.add(new BashSingleQuoteRule("'", "'", simpleString));
+		rules.add(new BashSingleQuoteRule(simpleString));
 		rules.add(new BashDoubleQuoteRule("`", "`", backtickString));
 
 		rules.add(new BashVariableReferenceRule(variables));
