@@ -69,23 +69,25 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 		List<IPredicateRule> rules = new ArrayList<>();
 		rules.add(new HereStringRule(hereString));
 		rules.add(new HereDocumentRule(hereDocument));
-		
+
 		buildWordRules(rules, systemKeyword, BashSystemKeyWords.values());
-		rules.add(new BashVariableRule(variables));
 		rules.add(new SingleLineRule("#", "", comment, (char) -1, true));
 
 		rules.add(new BashDoubleQuoteRule("\"", "\"", doubleString));
-		rules.add(new BashSingleQuoteRule("\'", "\'", simpleString));
+		rules.add(new BashSingleQuoteRule("'", "'", simpleString));
 		rules.add(new BashDoubleQuoteRule("`", "`", backtickString));
 
+		rules.add(new BashVariableReferenceRule(variables));
+		rules.add(new BashCommandOutputToVariableRule(bashCommand));
+
 		rules.add(new CommandParameterRule(parameters));
-		
-		rules.add(new BashVariableDefineRule(bashKeyword, "true",true));
-		rules.add(new BashVariableDefineRule(bashKeyword, "false",true));
+
+		rules.add(new BashVariableDefineRule(bashKeyword, "true", true));
+		rules.add(new BashVariableDefineRule(bashKeyword, "false", true));
 
 		buildWordRules(rules, includeKeyword, BashIncludeKeyWords.values());
 		buildWordRules(rules, bashKeyword, BashLanguageKeyWords.values());
-		buildWordRules(rules, bashCommand, BashGnuCommandKeyWords.values());
+		buildWordRules(rules, bashCommand, BashGnuCommandKeyWords.values(), true);
 
 		buildWordRules(rules, knownVariables, BashSpecialVariableKeyWords.values());
 
@@ -93,12 +95,19 @@ public class BashDocumentPartitionScanner extends RuleBasedPartitionScanner {
 	}
 
 	private void buildWordRules(List<IPredicateRule> rules, IToken token, DocumentKeyWord[] values) {
+		buildWordRules(rules, token, values, false);
+	}
+
+	private void buildWordRules(List<IPredicateRule> rules, IToken token, DocumentKeyWord[] values,
+			boolean acceptStartBrackets) {
 		for (DocumentKeyWord keyWord : values) {
-			rules.add(new ExactWordPatternRule(onlyLettersWordDetector, createWordStart(keyWord), token,
-					keyWord.isBreakingOnEof()));
+			ExactWordPatternRule rule = new ExactWordPatternRule(onlyLettersWordDetector, createWordStart(keyWord),
+					token, keyWord.isBreakingOnEof());
+			rule.setAcceptStartBrackets(acceptStartBrackets);
+			rules.add(rule);
 		}
 	}
-	
+
 	private String createWordStart(DocumentKeyWord keyWord) {
 		return keyWord.getText();
 	}

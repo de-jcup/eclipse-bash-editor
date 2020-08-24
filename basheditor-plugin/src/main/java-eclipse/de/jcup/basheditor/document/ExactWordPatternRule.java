@@ -25,6 +25,11 @@ public class ExactWordPatternRule extends WordPatternRule{
 	private String toStringValue;
 	StringBuilder traceSb;
 	boolean trace = false;
+	private boolean acceptStartBrackets;
+	
+	public void setAcceptStartBrackets(boolean acceptStartBrackets) {
+		this.acceptStartBrackets = acceptStartBrackets;
+	}
 	
 	public ExactWordPatternRule(IWordDetector detector, String exactWord, IToken token) {
 		this(detector,exactWord,token,true);
@@ -58,7 +63,12 @@ public class ExactWordPatternRule extends WordPatternRule{
 			scannerUnread(scanner, counter);
 			char charBefore =(char)scannerRead(scanner, counter);
 			scannerRead(scanner, counter);
-			wordHasPrefix = isPrefixCharacter(charBefore);
+			if (charBefore=='(' && acceptStartBrackets) {
+				/* we accept this */
+				wordHasPrefix=false;
+			}else {
+				wordHasPrefix = isPrefixCharacter(charBefore);
+			}
 		}
 		if (wordHasPrefix){
 			scannerRead(scanner, counter);
