@@ -117,6 +117,9 @@ public class BashTextHover implements ITextHover, ITextHoverExtension {
         if (word.isEmpty()) {
             return "";
         }
+        if (word.startsWith("$(")) {
+            word=word.substring(2); // cut off - example: "BLACK=$(tput setaf 0)" and user hovers over tput... we have $(tput as word and must handle this
+        }
 
         if (frameToInspect != null) {
             try {
