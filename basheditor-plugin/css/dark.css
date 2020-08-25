@@ -1,0 +1,16 @@
+IEclipsePreferences#de-jcup-basheditor:de-jcup-basheditor { /* pseudo attribute added to allow contributions without replacing this node, see Bug 466075 */
+	preferences:
+		'colorNormalText=192,192,192'
+		'colorBashKeywords=0, 128, 0'
+		'colorSingleStrings=128,128,128'
+		'colorDoubleStrings=255,128,64'
+		'colorBackTickStrings=255,72,164'
+		'colorComments=63,127,95'
+		'colorIncludeKeywords=128,128,0'
+		'colorCommands=0,128,128'
+		'colorVariables=99,198,0'
+		'colorParameters=85,255,255'
+		'colorHereDocs=49,98,98'
+		'colorHereStrings=88,98,98'
+}
+

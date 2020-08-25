@@ -21,8 +21,8 @@ package de.jcup.basheditor.preferences;
 public enum BashEditorSyntaxColorPreferenceConstants implements PreferenceIdentifiable, PreferenceLabeled{
 	COLOR_NORMAL_TEXT("colorNormalText","Normal text color"),
 	COLOR_BASH_KEYWORD("colorBashKeywords", "Bash keywords"),
-	COLOR_NORMAL_STRING("colorSingleStrings", "Single quoted strings"),
-	COLOR_GSTRING("colorDoubleStrings", "Double quoted strings"),
+	COLOR_SINGLE_STRINGS("colorSingleStrings", "Single quoted strings"),
+	COLOR_DOUBLE_STRINGS("colorDoubleStrings", "Double quoted strings"),
 	COLOR_BSTRING("colorBackTickStrings", "Backtick strings"),
 	COLOR_COMMENT("colorComments", "Comment"),
 	COLOR_INCLUDE_KEYWORD("colorIncludeKeywords","Includes"),

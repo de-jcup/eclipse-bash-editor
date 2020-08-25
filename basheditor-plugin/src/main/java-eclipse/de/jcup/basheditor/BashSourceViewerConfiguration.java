@@ -34,12 +34,12 @@ import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceCons
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_BASH_KEYWORD;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_BSTRING;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_COMMENT;
-import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_GSTRING;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_DOUBLE_STRINGS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_HEREDOCS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_HERESTRINGS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_INCLUDE_KEYWORD;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_VARIABLES;
-import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_NORMAL_STRING;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_SINGLE_STRINGS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_NORMAL_TEXT;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_PARAMETERS;
 
@@ -196,8 +196,8 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 		addPresentation(reconciler, BASH_SYSTEM_KEYWORD.getId(), getPreferences().getColor(COLOR_BASH_KEYWORD),SWT.BOLD);
 
 		// Groovy provides different strings: simple and GStrings, so we use separate colors:
-		addPresentation(reconciler, SINGLE_STRING.getId(), getPreferences().getColor(COLOR_NORMAL_STRING),SWT.NONE);
-		addPresentation(reconciler, DOUBLE_STRING.getId(), getPreferences().getColor(COLOR_GSTRING),SWT.NONE);
+		addPresentation(reconciler, SINGLE_STRING.getId(), getPreferences().getColor(COLOR_SINGLE_STRINGS),SWT.NONE);
+		addPresentation(reconciler, DOUBLE_STRING.getId(), getPreferences().getColor(COLOR_DOUBLE_STRINGS),SWT.NONE);
 		addPresentation(reconciler, BACKTICK_STRING.getId(), getPreferences().getColor(COLOR_BSTRING),SWT.NONE);
 		
 		addPresentation(reconciler, COMMENT.getId(), getPreferences().getColor(COLOR_COMMENT),SWT.NONE);

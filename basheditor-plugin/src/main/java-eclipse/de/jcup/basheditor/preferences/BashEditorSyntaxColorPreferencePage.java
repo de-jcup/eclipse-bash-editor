@@ -17,15 +17,16 @@ package de.jcup.basheditor.preferences;
 
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_BASH_COMMAND;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_BASH_KEYWORD;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_BSTRING;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_COMMENT;
-import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_GSTRING;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_DOUBLE_STRINGS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_HEREDOCS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_HERESTRINGS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_INCLUDE_KEYWORD;
-import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_VARIABLES;
-import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_NORMAL_STRING;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_NORMAL_TEXT;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_PARAMETERS;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_SINGLE_STRINGS;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_VARIABLES;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -75,12 +76,14 @@ public class BashEditorSyntaxColorPreferencePage extends FieldEditorPreferencePa
 				changeColor(editorMap, COLOR_NORMAL_TEXT, BashEditorColorConstants.GRAY_JAVA);
 				changeColor(editorMap, COLOR_BASH_KEYWORD, BashEditorColorConstants.MIDDLE_GREEN);
 				
-				changeColor(editorMap, COLOR_NORMAL_STRING, BashEditorColorConstants.MIDDLE_GRAY);
-				changeColor(editorMap, COLOR_GSTRING, BashEditorColorConstants.MIDDLE_ORANGE);
+				changeColor(editorMap, COLOR_SINGLE_STRINGS, BashEditorColorConstants.MIDDLE_GRAY);
+				changeColor(editorMap, COLOR_DOUBLE_STRINGS, BashEditorColorConstants.MIDDLE_ORANGE);
+				changeColor(editorMap, COLOR_BSTRING, BashEditorColorConstants.DARK_PINK);
+				
 				changeColor(editorMap, COLOR_COMMENT, BashEditorColorConstants.GREEN_JAVA);
 				changeColor(editorMap, COLOR_INCLUDE_KEYWORD, BashEditorColorConstants.MIDDLE_BROWN);
 				changeColor(editorMap, COLOR_BASH_COMMAND, BashEditorColorConstants.TASK_CYAN);
-				changeColor(editorMap, COLOR_VARIABLES, BashEditorColorConstants.DARK_THEME_GRAY);
+				changeColor(editorMap, COLOR_VARIABLES, BashEditorColorConstants.DARK_MIDDLE_GREEN);
 				changeColor(editorMap, COLOR_PARAMETERS, BashEditorColorConstants.BRIGHT_CYAN);
 				changeColor(editorMap, COLOR_HEREDOCS, BashEditorColorConstants.DARK_THEME_HEREDOC);
 				changeColor(editorMap, COLOR_HERESTRINGS, BashEditorColorConstants.DARK_THEME_HERESTRING);

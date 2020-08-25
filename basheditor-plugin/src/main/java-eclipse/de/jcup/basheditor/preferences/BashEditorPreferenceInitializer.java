@@ -56,12 +56,12 @@ import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceCons
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_BASH_KEYWORD;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_BSTRING;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_COMMENT;
-import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_GSTRING;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_DOUBLE_STRINGS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_HEREDOCS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_HERESTRINGS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_INCLUDE_KEYWORD;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_VARIABLES;
-import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_NORMAL_STRING;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_SINGLE_STRINGS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_NORMAL_TEXT;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_PARAMETERS;
 import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_BLOCK_STATEMENTS;
@@ -118,9 +118,9 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		preferences.setDefaultColor(COLOR_NORMAL_TEXT, BLACK);
 
 		preferences.setDefaultColor(COLOR_BASH_KEYWORD, KEYWORD_DEFAULT_PURPLE);
-		preferences.setDefaultColor(COLOR_NORMAL_STRING, STRING_DEFAULT_BLUE);
+		preferences.setDefaultColor(COLOR_SINGLE_STRINGS, STRING_DEFAULT_BLUE);
 
-		preferences.setDefaultColor(COLOR_GSTRING, ROYALBLUE);
+		preferences.setDefaultColor(COLOR_DOUBLE_STRINGS, ROYALBLUE);
 		preferences.setDefaultColor(COLOR_BSTRING, CADET_BLUE);
 		preferences.setDefaultColor(COLOR_COMMENT, GREEN_JAVA);
 

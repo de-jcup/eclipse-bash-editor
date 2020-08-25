@@ -90,6 +90,8 @@ public interface BashEditorColorConstants {
 	public static final RGB WHITE = rgb(255, 255, 255);
 
 	public static final RGB TASK_CYAN = rgb(0,128,128);
+	public static final RGB DARK_PINK = rgb(255,72,164);
+	public static final RGB DARK_MIDDLE_GREEN = rgb(99,198,0);
 	
 	/**
 	 * A special dark cyan color for here doc on dark themes
