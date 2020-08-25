@@ -590,7 +590,9 @@ public class TokenParser {
              */
             return;
         }
-        if (context.isCharBeforeEscapeSign()) {
+        if (c=='\'') {
+        	/* just ignore - we do not escape single chars*/
+        }else if (context.isCharBeforeEscapeSign()) {
             return;
         }
         char stringCharToScan = c;
@@ -607,7 +609,7 @@ public class TokenParser {
 
         char c = context.getCharAtPos();
         if (c == stringCharToScan) {
-            if (!context.isCharBeforeEscapeSign()) {
+            if (c=='\'' || !context.isCharBeforeEscapeSign()) {
                 /* found ending of string - so simply return */
                 return;
             }

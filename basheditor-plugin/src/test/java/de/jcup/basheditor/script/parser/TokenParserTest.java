@@ -35,6 +35,25 @@ public class TokenParserTest {
     public void before() {
         parserToTest = new TokenParser();
     }
+    
+    @Test
+    public void bugfix_211_do_done_with_var_having_curly_braces() throws Exception {
+        /* @formatter:off*/
+        String testScript = "while read line; do\r\n" + 
+        		"    a=${var%'\\'}\r\n" + 
+        		"done";
+        /* @formatter:on*/
+        assertParsing(testScript).resultsIn("while","read","line","do","a=","${var%'\\'}","done");
+    }
+    @Test
+    public void bugfix_211_do_done_with_var_having_curly_braces_reduced() throws Exception {
+        /* @formatter:off*/
+        String testScript =  
+        		"${v'\\'}\n" + 
+        		"x";
+        /* @formatter:on*/
+        assertParsing(testScript).resultsIn("${v'\\'}","x");
+    }
 
     @Test
     public void bugfix_199_single_quote_do_not_escape() throws Exception {
@@ -452,11 +471,6 @@ public class TokenParserTest {
     }
 
     @Test
-    public void moveUntilNextCharWillBeNoStringContent_tests_with_escaped_strings() throws Exception {
-        assertMoveUntilNextCharWillBeNoStringContent("$('non\\\'sense ;-)'", 2, "'non\\\'sense ;-)'", 17);
-    }
-
-    @Test
     public void moveUntilNextCharWillBeNoStringContent_tests_with_other_stringtype_inside() throws Exception {
         assertMoveUntilNextCharWillBeNoStringContent("$('non\"sense ;-)'", 2, "'non\"sense ;-)'", 16);
     }
@@ -476,8 +490,13 @@ public class TokenParserTest {
     }
 
     @Test
-    public void a_variable_array_with_string_inside_and_escaped_string_char_having_bracket() throws Exception {
-        assertParsing("$abc['\\\'nonsense]']").resultsIn("$abc['\\\'nonsense]']");
+    public void a_variable_array_with_double_quoted_string_inside_and_escaped_string_char_having_bracket() throws Exception {
+        assertParsing("$abc[\"\\\"nonsense]\"]").resultsIn("$abc[\"\\\"nonsense]\"]");
+    }
+    
+    @Test
+    public void a_variable_array_with_single_quoted_string_inside_and_escaped_string_char_having_bracket() throws Exception {
+        assertParsing("$abc['\\\'nonsense]]").resultsIn("$abc['\\\'nonsense]]");
     }
 
     @Test
