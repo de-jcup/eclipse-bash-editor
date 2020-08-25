@@ -27,7 +27,7 @@ public enum BashEditorSyntaxColorPreferenceConstants implements PreferenceIdenti
 	COLOR_COMMENT("colorComments", "Comment"),
 	COLOR_INCLUDE_KEYWORD("colorIncludeKeywords","Includes"),
 	COLOR_BASH_COMMAND("colorCommands","Commands"),
-	COLOR_KNOWN_VARIABLES("colorKnownVariables","Known variables"),
+	COLOR_VARIABLES("colorVariables","Variables"),
 	COLOR_PARAMETERS("colorParameters","Parameters"),
 	COLOR_HEREDOCS("colorHereDocs","Here documents"),
 	COLOR_HERESTRINGS("colorHereStrings","Here strings"),

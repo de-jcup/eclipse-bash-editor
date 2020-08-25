@@ -38,7 +38,7 @@ import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceCons
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_HEREDOCS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_HERESTRINGS;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_INCLUDE_KEYWORD;
-import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_KNOWN_VARIABLES;
+import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_VARIABLES;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_NORMAL_STRING;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_NORMAL_TEXT;
 import static de.jcup.basheditor.preferences.BashEditorSyntaxColorPreferenceConstants.COLOR_PARAMETERS;
@@ -206,8 +206,8 @@ public class BashSourceViewerConfiguration extends TextSourceViewerConfiguration
 		addPresentation(reconciler, BASH_COMMAND.getId(), getPreferences().getColor(COLOR_BASH_COMMAND),SWT.BOLD|SWT.NONE);
 		
 		
-		addPresentation(reconciler, VARIABLES.getId(), getPreferences().getColor(COLOR_KNOWN_VARIABLES),SWT.NONE);
-		addPresentation(reconciler, KNOWN_VARIABLES.getId(), getPreferences().getColor(COLOR_KNOWN_VARIABLES),SWT.NONE);
+		addPresentation(reconciler, VARIABLES.getId(), getPreferences().getColor(COLOR_VARIABLES),SWT.NONE);
+		addPresentation(reconciler, KNOWN_VARIABLES.getId(), getPreferences().getColor(COLOR_VARIABLES),SWT.NONE);
 		
 		return reconciler;
 	}
