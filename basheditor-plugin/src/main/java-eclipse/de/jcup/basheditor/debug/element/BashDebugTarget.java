@@ -62,8 +62,6 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 
     private BashDebugger debugger;
 
-    private DebugBashCodeToggleSupport toggleSupport;
-
     private IProcess process;
 
     private ILaunch launch;
@@ -92,11 +90,9 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
 
     private TerminalLauncher terminalLauncher;
 
-
     public BashDebugTarget(ILaunch launch, IProcess process, int port, IFile programFileResource, TerminalLauncher terminalLauncher) throws CoreException {
         super(null);
-
-        toggleSupport = new DebugBashCodeToggleSupport(BashEditorActivator.getDefault());
+        
         if (programFileResource == null) {
             throw new IllegalArgumentException("File resource must be not null!");
         }
@@ -124,6 +120,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
      *         <code>false</code>
      */
     public boolean startDebugSession() {
+        
         try {
             if (!debugger.startDebugServerSession(port)) {
                 return false;
@@ -331,6 +328,10 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
         getBreakpointManager().removeBreakpointListener(this);
         eventsupport.fireTerminateEvent(this);
     }
+    
+    private DebugBashCodeToggleSupport getToggleSupport() {
+        return BashEditorActivator.getDefault().getToggleSupport();
+    }
 
     protected IStackFrame[] getStackFrames() throws DebugException {
         if (debugger == null) {
@@ -403,7 +404,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
             }
 
             try {
-                String debugCode = toggleSupport.enableDebugging(originCode, "localhost", port);
+                String debugCode = getToggleSupport().enableDebugging(originCode, "localhost", port);
                 ScriptUtil.saveScript(startFile, debugCode);
                 /*
                  * reload content in editor BEFORE debugging. Important because editor otherwise
@@ -466,7 +467,7 @@ public class BashDebugTarget extends AbstractBashDebugElement implements IDebugT
                  * only off!
                  */
                 String debugCode = ScriptUtil.loadScript(startFile);
-                originCode = toggleSupport.disableDebugging(debugCode);
+                originCode = getToggleSupport().disableDebugging(debugCode);
                 ScriptUtil.saveScript(startFile, originCode);
 
                 fileResource.refreshLocal(IResource.DEPTH_ZERO, NO_PROGRESSMONITOR);

@@ -23,6 +23,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import de.jcup.basheditor.debug.BashDebugInfoProvider;
+import de.jcup.basheditor.debug.DebugBashCodeToggleSupport;
 import de.jcup.basheditor.debug.launch.OSUtil;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.templates.BashEditorTemplateSupportConfig;
@@ -49,6 +50,8 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
 
 	private BashTaskTagsSupportProvider taskSupportProvider;
 
+    private DebugBashCodeToggleSupport toggleSupport;
+
 	/**
 	 * The constructor
 	 */
@@ -71,6 +74,8 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+        toggleSupport = new DebugBashCodeToggleSupport(BashEditorActivator.getDefault());
 		
 		InstallJob job = new InstallJob();
 		job.schedule();
@@ -149,5 +154,9 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
 	public TemplateSupportProvider getTemplateSupportProvider() {
 		return templateSupportProvider;
 	}
+
+    public DebugBashCodeToggleSupport getToggleSupport() {
+        return toggleSupport;
+    }
 
 }

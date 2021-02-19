@@ -44,12 +44,18 @@ public class DebugBashCodeToggleSupport {
         this.codeBuilder = new BashDebugCodeBuilder();
         
     }
+    
+    public void ensureInternalBashScriptsCreated() throws IOException{
+        bashPIDSnippetSupport.ensureKillOldTerminalFileExistsInSystemUserHome();
+        bashPIDSnippetSupport.ensureStoreTerminalPIDFileExistsInSystemUserHome();
+        ensureDebugFileExistsInSystemUserHome();
+    }
+    
 
     public String enableDebugging(String sourceCode, String hostname, int port) throws IOException {
-    	bashPIDSnippetSupport.ensureKillOldTerminalFileExistsInSystemUserHome();
-    	bashPIDSnippetSupport.ensureStoreTerminalPIDFileExistsInSystemUserHome();
-    	
-        ensureDebugFileExistsInSystemUserHome();
+        
+        ensureInternalBashScriptsCreated();
+        
         String nSourceCode= disableDebugging(sourceCode); // if we got some call before with maybe another port or host etc.
         StringBuilder sb = new StringBuilder();
         sb.append(createSourceToInclude(infoProvider.getResultingScriptPathToUserHome())).append(" ").append(hostname).append(" ").append(port).append(" ");

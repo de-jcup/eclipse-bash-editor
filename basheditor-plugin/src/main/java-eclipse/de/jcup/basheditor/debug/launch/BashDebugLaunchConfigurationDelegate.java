@@ -15,9 +15,10 @@
  */
 package de.jcup.basheditor.debug.launch;
 
-import static de.jcup.basheditor.debug.BashDebugConstants.LAUNCH_ENVIRONMENT_PROPERTIES;
+import static de.jcup.basheditor.debug.BashDebugConstants.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +61,13 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
         if (monitor.isCanceled()) {
             return;
         }
+        // first of all ensure internal bash scripts are available
+        try {
+            BashEditorActivator.getDefault().getToggleSupport().ensureInternalBashScriptsCreated();
+        } catch (IOException e) {
+            BashEditorUtil.logError("Was not able to create internal bash scripts!", e);
+        }
+        
         boolean debug = mode.equals(ILaunchManager.DEBUG_MODE);
         boolean runOnly = mode.equals(ILaunchManager.RUN_MODE);
         if (!debug && !runOnly) {
@@ -190,7 +198,6 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
         });
         return false;
     }
-
     /**
      * # Creates debug/run target - if not possible (e.g. debug session cannot be
      * started) the returned target is <code>null</code>
