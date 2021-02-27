@@ -67,6 +67,14 @@ public class SharedBashModelSupportProvider extends AbstractConfigurableModelBui
                  */
                 return true;
             }
+            /* handle file names with tilde at the end - means backup files. */
+            String fileName = file.getName();
+            if (fileName!= null && fileName.endsWith("~")){
+                if (EclipseDeveloperSettings.SHOW_SHAREDMODEL_TRACEMODE) {
+                    System.out.println("Filename ends with tilde, so recognize this as a backupfile and ignore it:"+file);
+                }
+                return false;
+            }
             /*
              * hmm.. could be a binary as well. So we just read the first two bytes. If it is
              * valid script it will start with "#!" This is always a convention to identify

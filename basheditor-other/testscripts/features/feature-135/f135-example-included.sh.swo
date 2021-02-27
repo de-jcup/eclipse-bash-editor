@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# ----------------------------------------------------------------
+# -------------- this should not be a hyperlink  -----------------
+# -------------- filenames ending with .swp are meant to be a backup-
+# ----------------------------------------------------------------
+
+function doSomething(){
+    varLocal1="I am local in doSomething() with param:$1"
+    echo "i do something and have a local variable inside:$varLocal1"
+}
