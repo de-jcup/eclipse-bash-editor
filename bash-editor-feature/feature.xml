@@ -241,7 +241,7 @@ and limitations under the License.
    </license>
 
    <url>
-      <update label="Bash Editor update site" url="https://dl.bintray.com/de-jcup/basheditor"/>
+      <update label="Bash Editor update-site" url="https://de-jcup.github.io/update-site-eclipse-bash-editor/update-site"/>
    </url>
 
    <plugin
