@@ -268,17 +268,17 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
     
     class ToggleAlphabeticalSortAction extends Action {
 
-
         private BashEditorViewerComparator comparator;
 
         private ToggleAlphabeticalSortAction() {
+            comparator = new BashEditorViewerComparator();
+
             sortOutlineAlphabeticalEnabled= BashEditorPreferences.getInstance().isSortAlphabeticalInOutlineEnabled();
 
             setDescription("Sort alphabetical");
             setImageDescriptor(IMG_DESC_ALPHABETICAL_SORT);
             initSelectionState();
             initText();
-            comparator = new BashEditorViewerComparator();
         }
 
         @Override
