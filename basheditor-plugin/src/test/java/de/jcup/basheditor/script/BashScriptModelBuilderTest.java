@@ -65,6 +65,22 @@ public class BashScriptModelBuilderTest {
     }
     
     @Test
+    public void bugfix_238_a_variable_x_is_recognized() throws Exception{
+        /* prepare */
+        String script = "x=1234";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModel bashScriptModel = builderToTest.build(script);
+
+        /* test @formatter:off*/
+        assertThat(bashScriptModel).
+            hasNoErrors().
+            hasVariable("x").withValue("1234").isGlobal();
+        /* @formatter:on */
+    }
+    
+    @Test
     public void a_variable_xxx_is_recognized() throws Exception{
         /* prepare */
         String script = "xxx=1234";

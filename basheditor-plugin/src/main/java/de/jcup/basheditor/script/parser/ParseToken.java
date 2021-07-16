@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 public class ParseToken {
 
-	private static final Pattern VALID_VARIABLE_NAME_PATTERN=Pattern.compile("[a-z_A-Z]+[a-z_A-Z0-9]+=");
+	private static final Pattern VALID_VARIABLE_NAME_PATTERN=Pattern.compile("[a-z_A-Z]+[a-z_A-Z0-9]*=");
 	
 	private static final String EQUAL_OPERAND = "=";
 	String text;

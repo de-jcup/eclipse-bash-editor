@@ -37,6 +37,22 @@ public class TokenParserTest {
     }
     
     @Test
+    public void bugfix_238_variables_with_two_character_as_name() throws Exception {
+        /* @formatter:off*/
+        String testScript = "ab=1";
+        /* @formatter:on*/
+        assertParsing(testScript).resultsIn("ab=","1");
+    }
+    
+    @Test
+    public void bugfix_238_variables_with_single_character_as_name() throws Exception {
+        /* @formatter:off*/
+        String testScript = "a=1";
+        /* @formatter:on*/
+        assertParsing(testScript).resultsIn("a=","1");
+    }
+    
+    @Test
     public void bugfix_211_do_done_with_var_having_curly_braces() throws Exception {
         /* @formatter:off*/
         String testScript = "while read line; do\r\n" + 
