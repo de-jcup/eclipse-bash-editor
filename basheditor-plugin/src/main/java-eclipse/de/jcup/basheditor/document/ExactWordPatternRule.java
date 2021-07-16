@@ -74,6 +74,7 @@ public class ExactWordPatternRule extends WordPatternRule{
 			scannerRead(scanner, counter);
 			return counter.cleanupAndReturn(scanner,false);
 		}
+		// scan fall characters in sequence
 		for (int i= 1; i < sequence.length; i++) {
 			int c= scannerRead(scanner, counter);
 			if (c == ICharacterScanner.EOF){
@@ -95,7 +96,7 @@ public class ExactWordPatternRule extends WordPatternRule{
 		scannerUnread(scanner, counter);
 		
 		/* when not a whitespace and not end reached - do cleanup*/
-		if (! Character.isWhitespace(charAfter) && ICharacterScanner.EOF!=read){
+		if (! isMetaCharacter(charAfter) && ICharacterScanner.EOF!=read){
 			/* the word is more than the exact one - e.g. instead of 'test' 'testx' ... so not correct*/
 			return counter.cleanupAndReturn(scanner,false);
 		}
@@ -103,8 +104,21 @@ public class ExactWordPatternRule extends WordPatternRule{
 	}
 
 	
+	private boolean isMetaCharacter(char character) {
+	    boolean isMetaCharacter = false;
+	    isMetaCharacter = isMetaCharacter || character=='|';
+	    isMetaCharacter = isMetaCharacter || character=='&';
+	    isMetaCharacter = isMetaCharacter || character==';';
+	    isMetaCharacter = isMetaCharacter || character=='(';
+	    isMetaCharacter = isMetaCharacter || character==')';
+	    isMetaCharacter = isMetaCharacter || character=='<';
+	    isMetaCharacter = isMetaCharacter || character=='>';
+	    isMetaCharacter = isMetaCharacter || Character.isWhitespace(character);
+	    return isMetaCharacter;
+	}
+	
 	private boolean isPrefixCharacter(char charBefore) {
-		boolean isPrefix = ! Character.isWhitespace(charBefore);
+		boolean isPrefix = ! isMetaCharacter(charBefore);//Character.isWhitespace(charBefore);
 		return isPrefix;
 	}
 

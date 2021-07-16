@@ -15,7 +15,9 @@
  */
  package de.jcup.basheditor.document;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
 
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
@@ -34,13 +36,70 @@ public class ExactWordPatternRuleTest {
 	private IToken token;
 	private SimpleTestCharacterScanner scanner;
 	private IWordDetector detector;
+    private ArrayList<String> metacharacterList;
 
 	@Before
 	public void before(){
 		token = new Token("mocked");
 		detector = new OnlyLettersKeyWordDetector();
+		
+		metacharacterList = new ArrayList<String>();
+		metacharacterList.add(" ");
+		metacharacterList.add("\t");
+		metacharacterList.add("\n");
+		
+		// additional parts: see https://github.com/de-jcup/eclipse-bash-editor/issues/234
+		metacharacterList.add("|");
+		metacharacterList.add("&");
+		metacharacterList.add("(");
+		metacharacterList.add(")");
+		metacharacterList.add("<");
+		metacharacterList.add(">");
+		
 	}
 
+	@Test
+    public void testPart_endswith_metacharacters_token_will_be_found() {
+        /* prepare */
+	    String part="testPart";
+	    
+	    for (String metacharacter: metacharacterList) {
+	        
+	        scanner = new SimpleTestCharacterScanner(part+metacharacter+"other");
+	        ExactWordPatternRule rule = new ExactWordPatternRule(detector, part , token);
+	        //  rule.trace=true;
+	        /* execute */
+	        IToken result = rule.evaluate(scanner);
+	        
+	        /* test */
+	        assertEquals("Token must be found for metacharacter: '"+metacharacter+"'", token,result);
+	        assertEquals(part.length(),scanner.column);
+	    }
+        
+        
+    }
+	
+	@Test
+    public void testPart_starts_and_endswith_metacharacters_token_will_NOT_be_found() {
+        /* prepare */
+        String part="testPart";
+        
+        for (String metacharacter: metacharacterList) {
+            
+            scanner = new SimpleTestCharacterScanner(metacharacter+part+metacharacter+"other");
+            ExactWordPatternRule rule = new ExactWordPatternRule(detector, part , token);
+            //  rule.trace=true;
+            /* execute */
+            IToken result = rule.evaluate(scanner);
+            
+            /* test */
+            assertNotEquals("Token must NOT be found for metacharacter: '"+metacharacter+"'", token,result);
+            
+        }
+        
+        
+    }
+	
 	@Test
 	public void interface_is_found() {
 		/* prepare */
