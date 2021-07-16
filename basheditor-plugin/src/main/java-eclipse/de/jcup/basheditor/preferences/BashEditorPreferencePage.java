@@ -32,6 +32,7 @@ import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LIN
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_REPLACE_TAB_BY_SPACES_STRATEGY;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHARED_MODEL_ENABLED;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHOW_VARIABLES_IN_OUTLINE;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SORT_OUTLINE_ALPHABETICAL;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_TOOLTIPS_ENABLED;
 import static de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy.ALWAYS;
 import static de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy.NEVER;
@@ -91,6 +92,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
     private UIMasterSlaveSupport uiMasterSlaveSupport;
     private AccessibleBooleanFieldEditor sharedModelBuildEnabled;
     private boolean sharedModelBuildEnabledBefore;
+    private BooleanFieldEditor sortOutlineAlphabetical;
 
     public BashEditorPreferencePage() {
         super(GRID);
@@ -154,6 +156,11 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
         showVariablesInOutline = new BooleanFieldEditor(P_SHOW_VARIABLES_IN_OUTLINE.getId(), "Variables are shown in outline", otherComposite);
         showVariablesInOutline.getDescriptionControl(otherComposite).setToolTipText("This defines the behaviour of outline in new opened editors.\nYou have to close and reopen existing files by bash editor to get the effect there as well.");
         addField(showVariablesInOutline);
+        
+        /* enable sort outline */
+        sortOutlineAlphabetical= new BooleanFieldEditor(P_SORT_OUTLINE_ALPHABETICAL.getId(), "Sort outline alphabetical", otherComposite);
+        sortOutlineAlphabetical.getDescriptionControl(otherComposite).setToolTipText("This defines the behaviour of outline in new opened editors.\nYou have to close and reopen existing files by bash editor to get the effect there as well.");
+        addField(sortOutlineAlphabetical);
 
         Label spacer = new Label(appearanceComposite, SWT.LEFT);
         GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);

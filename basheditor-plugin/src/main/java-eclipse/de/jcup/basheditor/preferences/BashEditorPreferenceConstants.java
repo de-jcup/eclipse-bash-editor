@@ -58,6 +58,8 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	
 	P_USER_HOME_CUSTOMPATH("userHomeCustomPath"),
 	
+	P_SORT_OUTLINE_ALPHABETICAL("sortOutlineAlphabetical"),
+	
 	;
 	
 

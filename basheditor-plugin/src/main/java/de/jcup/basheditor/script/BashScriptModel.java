@@ -17,9 +17,9 @@ package de.jcup.basheditor.script;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import de.jcup.basheditor.script.parser.ParseToken;
 
@@ -28,7 +28,7 @@ public class BashScriptModel implements BashVariableRegistry {
     Collection<BashFunction> functions = new ArrayList<>();
     Collection<BashError> errors = new ArrayList<>();
     List<ParseToken> debugTokenList;
-    Map<String, BashVariable> variables = new TreeMap<String, BashVariable>();
+    Map<String, BashVariable> variables = new LinkedHashMap<>();
 
     public Collection<BashFunction> getFunctions() {
         return functions;

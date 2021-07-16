@@ -15,13 +15,13 @@
  */
  package de.jcup.basheditor.script;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class BashFunction implements BashVariableRegistry  {
 
 	String name;
-	Map<String, BashVariable> variables = new TreeMap<String, BashVariable>();
+	Map<String, BashVariable> variables = new LinkedHashMap<>();
 	int position;
 	int lengthToNameEnd;
 	int end;

@@ -45,12 +45,14 @@ import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.EclipseUtil;
 import de.jcup.basheditor.callhierarchy.BashCallHierarchyEntry;
 import de.jcup.basheditor.callhierarchy.BashCallHierarchyView;
+import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.script.BashScriptModel;
 
 public class BashEditorContentOutlinePage extends ContentOutlinePage implements IDoubleClickListener {
     private static final ImageDescriptor IMG_DESC_OPEN_CALL_HIERARCHY = EclipseUtil.createImageDescriptor("icons/view/call_hierarchy.png", BashEditorActivator.PLUGIN_ID);
     private static final ImageDescriptor IMG_DESC_LINKED = EclipseUtil.createImageDescriptor("/icons/outline/synced.png", BashEditorActivator.PLUGIN_ID);
     private static final ImageDescriptor IMG_DESC_NOT_LINKED = EclipseUtil.createImageDescriptor("/icons/outline/sync_broken.png", BashEditorActivator.PLUGIN_ID);
+    private static final ImageDescriptor IMG_DESC_ALPHABETICAL_SORT= EclipseUtil.createImageDescriptor("/icons/outline/alphab_sort_co.png", BashEditorActivator.PLUGIN_ID);
 
     private BashEditorTreeContentProvider contentProvider;
     private Object input;
@@ -61,6 +63,8 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
     private boolean ignoreNextSelectionEvents;
     private ToggleLinkingAction toggleLinkingAction;
     private TreeViewer viewer;
+    public boolean sortOutlineAlphabeticalEnabled;
+    private ToggleAlphabeticalSortAction switchSortAlphabeticalAction;
 
     public BashEditorContentOutlinePage(BashEditor editor) {
         this.editor = editor;
@@ -91,10 +95,13 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
         toggleLinkingAction = new ToggleLinkingAction();
         toggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 
+        switchSortAlphabeticalAction =new ToggleAlphabeticalSortAction();
+        
         IActionBars actionBars = getSite().getActionBars();
 
         IToolBarManager toolBarManager = actionBars.getToolBarManager();
         toolBarManager.add(toggleLinkingAction);
+        toolBarManager.add(switchSortAlphabeticalAction);
 
         IMenuManager viewMenuManager = actionBars.getMenuManager();
         viewMenuManager.add(new Separator("EndFilterGroup")); //$NON-NLS-1$
@@ -255,6 +262,44 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
 
         private void initText() {
             setText(linkingWithEditorEnabled ? "Click to unlink from editor" : "Click to link with editor");
+        }
+
+    }
+    
+    class ToggleAlphabeticalSortAction extends Action {
+
+
+        private BashEditorViewerComparator comparator;
+
+        private ToggleAlphabeticalSortAction() {
+            sortOutlineAlphabeticalEnabled= BashEditorPreferences.getInstance().isSortAlphabeticalInOutlineEnabled();
+
+            setDescription("Sort alphabetical");
+            setImageDescriptor(IMG_DESC_ALPHABETICAL_SORT);
+            initSelectionState();
+            initText();
+            comparator = new BashEditorViewerComparator();
+        }
+
+        @Override
+        public void run() {
+            sortOutlineAlphabeticalEnabled = !sortOutlineAlphabeticalEnabled;
+
+            initText();
+            initSelectionState();
+        }
+
+        private void initSelectionState() {
+            setChecked(sortOutlineAlphabeticalEnabled);
+            if (sortOutlineAlphabeticalEnabled) {
+                viewer.setComparator(comparator);            
+            }else {
+                viewer.setComparator(null);
+            }
+        }
+
+        private void initText() {
+            setText(sortOutlineAlphabeticalEnabled ? "Click to see origin ordering" : "Click to sort alphabetical");
         }
 
     }

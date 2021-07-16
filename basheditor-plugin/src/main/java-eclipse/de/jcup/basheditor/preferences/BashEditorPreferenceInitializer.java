@@ -31,6 +31,7 @@ import static de.jcup.basheditor.BashEditorColorConstants.TASK_DEFAULT_RED;
 import static de.jcup.basheditor.BashEditorUtil.getPreferences;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_KEYWORDS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SORT_OUTLINE_ALPHABETICAL;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_SIMPLEWORDS;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_AUTO_CREATE_END_BRACKETSY;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_ENCLOSING_BRACKETS;
@@ -91,6 +92,7 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		/* Outline */
 		store.setDefault(P_LINK_OUTLINE_WITH_EDITOR.getId(), true);
 		store.setDefault(P_SHOW_VARIABLES_IN_OUTLINE.getId(), true);
+		store.setDefault(P_SORT_OUTLINE_ALPHABETICAL.getId(), true);
 
 		/* ++++++++++++ */
 		/* + Brackets + */

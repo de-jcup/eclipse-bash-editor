@@ -18,6 +18,7 @@ package de.jcup.basheditor.preferences;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_FUNCTIONS_STRATEGY;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_OUTLINE_WITH_EDITOR;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SORT_OUTLINE_ALPHABETICAL;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_REPLACE_TAB_BY_SPACES_STRATEGY;
 import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHOW_VARIABLES_IN_OUTLINE;
 
@@ -140,6 +141,11 @@ public class BashEditorPreferences {
 	public boolean isLinkOutlineWithEditorEnabled() {
 		return getBooleanPreference(P_LINK_OUTLINE_WITH_EDITOR);
 	}
+	
+	public boolean isSortAlphabeticalInOutlineEnabled() {
+        return getBooleanPreference(P_SORT_OUTLINE_ALPHABETICAL);
+    }
+	
 	public boolean isOutlineShowVariablesEnabled() {
 	    return getBooleanPreference(P_SHOW_VARIABLES_IN_OUTLINE);
 	}
