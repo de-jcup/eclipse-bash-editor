@@ -158,8 +158,8 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
         addField(showVariablesInOutline);
         
         /* enable sort outline */
-        sortOutlineAlphabetical= new BooleanFieldEditor(P_SORT_OUTLINE_ALPHABETICAL.getId(), "Sort outline alphabetical", otherComposite);
-        sortOutlineAlphabetical.getDescriptionControl(otherComposite).setToolTipText("This defines the behaviour of outline in new opened editors.\nYou have to close and reopen existing files by bash editor to get the effect there as well.");
+        sortOutlineAlphabetical= new BooleanFieldEditor(P_SORT_OUTLINE_ALPHABETICAL.getId(), "New opened outlines have alphabetical sort enabled", otherComposite);
+        sortOutlineAlphabetical.getDescriptionControl(otherComposite).setToolTipText("This defines the behaviour of outline in new opened outlines.\nYou have to close and reopen existing files by bash editor to get the effect there as well.");
         addField(sortOutlineAlphabetical);
 
         Label spacer = new Label(appearanceComposite, SWT.LEFT);
