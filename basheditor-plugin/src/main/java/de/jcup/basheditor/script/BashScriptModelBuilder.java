@@ -45,6 +45,8 @@ public class BashScriptModelBuilder {
         public boolean fetchVariableUsage;
         public String variableName;
         public boolean ignoreFunctions;
+        public String functionUsageName;
+        public boolean fetchFunctionUsage;
     }
 
     /**
@@ -142,48 +144,93 @@ public class BashScriptModelBuilder {
                 beforeWaslocal = token.isLocalDef();
             }
         }
+        inspectBashVariablesIfNecessary(model, tokens, configuration);
+
+    }
+
+    private void inspectBashVariablesIfNecessary(BashVariableRegistry model, List<ParseToken> tokens, BashScriptModelBuilderConfiguration configuration) {
         BashVariable variableToInspect = null;
         if (configuration.fetchVariableUsage && configuration.variableName != null) {
             variableToInspect = model.getVariable(configuration.variableName);
         }
 
-        if (variableToInspect != null) {
+        if (variableToInspect == null) {
+            return;
+        }
 
-            Iterator<ParseToken> it2 = tokens.iterator();
+        String normalUsage = "$" + variableToInspect.getName();
+        List<String> variantsIdentifiableByIndexOf = buildVariableIndexOfVariants(variableToInspect);
 
-            while (it2.hasNext()) {
-                ParseToken token = it2.next();
-                String text = token.getText();
-                int start = token.getStart();
-                int end = token.getEnd();
-                
-                boolean found = text.equals("$"+variableToInspect.getName());
-                if (!found) {
-                    List<String> variants = new ArrayList<>();
-                    variants.add("$(" + variableToInspect.getName() + ")");
-                    variants.add("${" + variableToInspect.getName() + "}");
-                    variants.add("$" + variableToInspect.getName() + "[");
-                    
-                    for (String variant: variants) {
-                        int indexOf = text.indexOf(variant);
-                        if (indexOf!=-1) {
-                            found=true;
-                            start=start+indexOf;
-                            end = start+variant.length(); 
+        Iterator<ParseToken> it2 = tokens.iterator();
+        while (it2.hasNext()) {
+            ParseToken token = it2.next();
+            String text = token.getText();
+
+            if (text.equals(normalUsage)) {
+                addVariableUsage(variableToInspect, token.getStart(), token.getEnd());
+            } else {
+                int start;
+                int end;
+
+                for (String variant : variantsIdentifiableByIndexOf) {
+                    int indexOf = -1;
+
+                    do {
+                        /* @formatter:off
+                         * "${xxx}"  : length:6 
+                         * ^-0
+                         *       ^-5
+                         *        
+                         * @formatter:on
+                         */
+                        if (text.length() < indexOf + 2) {
+                            /* avoid index of of bounds ...*/
                             break;
                         }
-                    }
-                }
-                if (found) {
-                    BashVariableUsage usage = new BashVariableUsage();
-                    usage.setStart(start);
-                    usage.setEnd(end);
+                        indexOf = text.indexOf(variant, indexOf + 1);
+                        if (indexOf != -1) {
 
-                    variableToInspect.getUsages().add(usage);
+                            start = token.getStart() + indexOf;
+                            end = start + variant.length();
+
+                            addVariableUsage(variableToInspect, start, end);
+                        }
+                    } while (indexOf != -1);
                 }
             }
         }
+    }
 
+    private void addVariableUsage(BashVariable variableToInspect, int start, int end) {
+        BashVariableUsage usage = new BashVariableUsage();
+        usage.setStart(start);
+        usage.setEnd(end);
+
+        variableToInspect.getUsages().add(usage);
+    }
+
+    /* builds a list of strings which identifies the bash variable usage */
+    private List<String> buildVariableIndexOfVariants(BashVariable variableToInspect) {
+        String variableName = variableToInspect.getName();
+        // the next line may not be used here directly, because we do not want
+        // "xxx" found inside "$xxxy" but only for "$xxx"
+        // index of means that the identified part makes it clear, that this is really
+        // the variable usage
+        // e.g. : "xxx" is represented by "$(xxx)abc"
+        String prefix = "$" + variableName;
+
+        List<String> variants = new ArrayList<>();
+        variants.add("$(" + variableName + ")");
+        variants.add("${" + variableName + "}");
+        variants.add(prefix + "[");
+        variants.add(prefix + " ");
+        variants.add(prefix + "'");
+        variants.add(prefix + "\"");
+        variants.add(prefix + "\\");
+        for (char metaCharacter : BashMetacharacters.METACHARACTERS_WITHOUT_WHITESPACES) {
+            variants.add(prefix + metaCharacter);
+        }
+        return variants;
     }
 
     private void appendDebugTokens(BashScriptModel model, List<ParseToken> tokens) {
@@ -346,6 +393,32 @@ public class BashScriptModelBuilder {
                 }
             }
         }
+
+        inspectFunctionAndusageIfNecessary(model, tokens, configuration);
+    }
+
+    private void inspectFunctionAndusageIfNecessary(BashScriptModel model, List<ParseToken> tokens, BashScriptModelBuilderConfiguration configuration) {
+        if (!configuration.fetchFunctionUsage || configuration.functionUsageName == null) {
+            return;
+        }
+        BashFunction functionToInspect = model.findBashFunctionByName(configuration.functionUsageName);
+        if (functionToInspect == null) {
+            return;
+        }
+        for (ParseToken token : tokens) {
+            String tokenText = token.getText();
+            if (configuration.functionUsageName.equals(tokenText)) {
+                if (token.getStart() == functionToInspect.getPosition()) {
+                    /* function itself - so ignore */
+                    continue;
+                }
+                BashFunctionUsage usage = new BashFunctionUsage();
+                usage.setStart(token.getStart());
+                usage.setEnd(token.getEnd());
+
+                functionToInspect.getUsages().add(usage);
+            }
+        }
     }
 
     protected FunctionScope inspectAndCreateFunctionScope(List<ParseToken> t, int tokenNr) {
@@ -372,6 +445,11 @@ public class BashScriptModelBuilder {
         function.position = functionScope.getFunctionStart();
         function.name = functionName;
         function.end = -1;
+        if (Boolean.TRUE.equals(functionScope.hasFunctionKeywordPrefix())){
+            function.positionFunctionName=function.position+"function ".length();
+        }else {
+            function.positionFunctionName=function.position;
+        }
 
         scanForFunctionEnd(functionScope, function);
 

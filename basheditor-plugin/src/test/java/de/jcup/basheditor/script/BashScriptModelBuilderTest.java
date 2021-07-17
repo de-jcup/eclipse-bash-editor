@@ -34,15 +34,15 @@ public class BashScriptModelBuilderTest {
     public void before() {
         builderToTest = new BashScriptModelBuilder();
     }
-    
+
     @Test
-    public void bugfix_196_inside_heredoc_something_looking_like_a_function_is_not_a_function() throws Exception{
-    	/* @formatter:off*/
+    public void bugfix_196_inside_heredoc_something_looking_like_a_function_is_not_a_function() throws Exception {
+        /* @formatter:off*/
     	String testScript = "cat << -EOT\n" + 
     			"st.getval();\n" + 
     			"-EOT";
     	/* @formatter:on*/
-    	 /* execute */
+        /* execute */
         BashScriptModel bashScriptModel = builderToTest.build(testScript);
 
         /* test @formatter:off*/
@@ -51,9 +51,9 @@ public class BashScriptModelBuilderTest {
             hasNoFunctions();
         /* @formatter:on */
     }
-    
+
     @Test
-    public void an_empty_script_has_novariables() throws Exception{
+    public void an_empty_script_has_novariables() throws Exception {
         /* prepare */
         String script = "";
 
@@ -66,9 +66,9 @@ public class BashScriptModelBuilderTest {
             hasNoVariables();
         /* @formatter:on */
     }
-    
+
     @Test
-    public void bugfix_238_a_variable_x_is_recognized() throws Exception{
+    public void bugfix_238_a_variable_x_is_recognized() throws Exception {
         /* prepare */
         String script = "x=1234";
 
@@ -82,18 +82,34 @@ public class BashScriptModelBuilderTest {
             hasVariable("x").withValue("1234").isGlobal();
         /* @formatter:on */
     }
-    
+
     @Test
-    public void fetchusage_enabled_and_variablename_set_to_xxx() throws Exception{
+    public void a_variable_underscore_x_is_recognized() throws Exception {
+        /* prepare */
+        String script = "_x=1234";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModel bashScriptModel = builderToTest.build(script);
+
+        /* test @formatter:off*/
+        assertThat(bashScriptModel).
+            hasNoErrors().
+            hasVariable("_x").withValue("1234").isGlobal();
+        /* @formatter:on */
+    }
+
+    @Test
+    public void fetchusage_enabled_and_variablename_set_to_xxx() throws Exception {
         /* prepare */
         String script = "xxx=1234\necho $xxx;echo $xxx and more";
 
         /* execute */
         builderToTest.setDebug(true);
         BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
-        configuration.fetchVariableUsage=true;
-        configuration.variableName="xxx";
-        
+        configuration.fetchVariableUsage = true;
+        configuration.variableName = "xxx";
+
         BashScriptModel bashScriptModel = builderToTest.build(script, configuration);
 
         /* test @formatter:off*/
@@ -108,9 +124,131 @@ public class BashScriptModelBuilderTest {
         assertEquals(18, usage1.getEnd());
         /* @formatter:on */
     }
+
+    @Test
+    public void fetchusage_enabled_and_variablename_set_to_xxx_var_in_function() throws Exception {
+        /* prepare */
+        String script = "function abc() {\nxxx=1234\necho $xxx;echo $xxx and more\n}";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
+        configuration.fetchVariableUsage = true;
+        configuration.variableName = "xxx";
+
+        BashScriptModel bashScriptModel = builderToTest.build(script, configuration);
+
+        /* test @formatter:off*/
+        BashVariable variable = bashScriptModel.getVariable("xxx");
+        assertNotNull(variable);
+        List<BashVariableUsage> usages = variable.getUsages();
+        assertNotNull(usages);
+        assertEquals(2, usages.size());
+        BashVariableUsage usage1 = usages.iterator().next();
+        assertNotNull(usage1);
+        assertEquals(31, usage1.getStart());
+        assertEquals(35, usage1.getEnd());
+        /* @formatter:on */
+    }
     
     @Test
-    public void a_variable_xxx_is_recognized() throws Exception{
+    public void fetchusage_same_variables_used_twice_inside_string_is_recognized_as_2_usages() throws Exception {
+        /* prepare */
+        String script = "xxx=1234\necho \"${xxx}bla;${xxx}\"\n}";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
+        configuration.fetchVariableUsage = true;
+        configuration.variableName = "xxx";
+
+        BashScriptModel bashScriptModel = builderToTest.build(script, configuration);
+
+        /* test @formatter:off*/
+        BashVariable variable = bashScriptModel.getVariable("xxx");
+        assertNotNull(variable);
+        List<BashVariableUsage> usages = variable.getUsages();
+        assertNotNull(usages);
+        assertEquals(2, usages.size());
+        /* @formatter:on */
+    }
+
+    @Test
+    public void doublequoted_string_fetchusage_enabled_and_variablename_set_to_xxx() throws Exception {
+        assertOneUsageOfXXXfound("xxx=1234\necho \"$xxx and more\"");
+        assertOneUsageOfXXXfound("xxx=1234\necho \"$xxx\"");
+        assertOneUsageOfXXXfound("xxx=1234\necho '$xxx'");
+        assertOneUsageOfXXXfound("xxx=1234\necho '$xxx|abc'");
+        assertOneUsageOfXXXfound("xxx=1234\necho '$xxx;abc'");
+
+    }
+
+    private void assertOneUsageOfXXXfound(String script) throws BashScriptModelException {
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
+        configuration.fetchVariableUsage = true;
+        configuration.variableName = "xxx";
+
+        BashScriptModel bashScriptModel = builderToTest.build(script, configuration);
+
+        /* test @formatter:off*/
+        BashVariable variable = bashScriptModel.getVariable("xxx");
+        assertNotNull(variable);
+        List<BashVariableUsage> usages = variable.getUsages();
+        assertNotNull(usages);
+        assertEquals(1, usages.size());
+        BashVariableUsage usage1 = usages.iterator().next();
+        assertNotNull(usage1);
+        assertEquals(15, usage1.getStart());
+        assertEquals(20, usage1.getEnd());
+        /* @formatter:on */
+    }
+
+    @Test
+    public void fetchusage_enabled_but_variablename_is_null() throws Exception {
+        /* prepare */
+        String script = "xxx=1234\necho $xxx;echo $xxx and more";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
+        configuration.fetchVariableUsage = true;
+
+        BashScriptModel bashScriptModel = builderToTest.build(script, configuration);
+
+        /* test @formatter:off*/
+        BashVariable variable = bashScriptModel.getVariable("xxx");
+        assertNotNull(variable);
+        List<BashVariableUsage> usages = variable.getUsages();
+        assertNotNull(usages);
+        assertEquals(0, usages.size());
+        /* @formatter:on */
+    }
+
+    @Test
+    public void fetchusage_not_enabled_but_variablename_set_xxx() throws Exception {
+        /* prepare */
+        String script = "xxx=1234\necho $xxx;echo $xxx and more";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
+        configuration.variableName = "xxx";
+
+        BashScriptModel bashScriptModel = builderToTest.build(script, configuration);
+
+        /* test @formatter:off*/
+        BashVariable variable = bashScriptModel.getVariable("xxx");
+        assertNotNull(variable);
+        List<BashVariableUsage> usages = variable.getUsages();
+        assertNotNull(usages);
+        assertEquals(0, usages.size());
+        /* @formatter:on */
+    }
+
+    @Test
+    public void a_variable_xxx_is_recognized() throws Exception {
         /* prepare */
         String script = "xxx=1234";
 
@@ -124,9 +262,9 @@ public class BashScriptModelBuilderTest {
             hasVariable("xxx").withValue("1234").isGlobal();
         /* @formatter:on */
     }
-    
+
     @Test
-    public void when_turned_off_a_variable_xxx_is_NOT_recognized() throws Exception{
+    public void when_turned_off_a_variable_xxx_is_NOT_recognized() throws Exception {
         /* prepare */
         String script = "xxx=1234";
 
@@ -141,10 +279,9 @@ public class BashScriptModelBuilderTest {
             hasNoVariables();
         /* @formatter:on */
     }
-    
-    
+
     @Test
-    public void a_local_variable_xxx_is_recognized_inside_function() throws Exception{
+    public void a_local_variable_xxx_is_recognized_inside_function() throws Exception {
         /* prepare */
         String script = "function abc {local xxx=1234}";
 
@@ -158,9 +295,9 @@ public class BashScriptModelBuilderTest {
             hasFunction("abc").hasVariable("xxx").withValue("1234").islocal();
         /* @formatter:on */
     }
-    
+
     @Test
-    public void a_global_variable_xxx_in_afunction_is_recognized_inside_model() throws Exception{
+    public void a_global_variable_xxx_in_afunction_is_recognized_inside_model() throws Exception {
         /* prepare */
         String script = "function abc {xxx=1234}";
 
@@ -174,9 +311,9 @@ public class BashScriptModelBuilderTest {
             hasVariable("xxx").withValue("1234").isGlobal();
         /* @formatter:on */
     }
-    
+
     @Test
-    public void a_variable_xxx_and_changedf_in_another_line_is_recognized() throws Exception{
+    public void a_variable_xxx_and_changedf_in_another_line_is_recognized() throws Exception {
         /* prepare */
         String script = "xxx=1234\n#some remarks\nxxx=5432";
 
@@ -190,7 +327,7 @@ public class BashScriptModelBuilderTest {
             hasVariable("xxx").withValue("1234").hasAssignments(2);
         /* @formatter:on */
     }
-    
+
     @Test
     public void bugfix_130_case_esac_no_problems() throws Exception {
         /* prepare */
@@ -205,7 +342,7 @@ public class BashScriptModelBuilderTest {
             hasNoErrors();
         /* @formatter:on */
     }
-    
+
     @Test
     public void bugfix_115_one_function_with_keyword_and_name_but__space_in_brackets_is_recognized() throws Exception {
         /* prepare */
@@ -221,7 +358,7 @@ public class BashScriptModelBuilderTest {
             hasNoErrors();
         /* @formatter:on */
     }
-    
+
     @Test
     public void bugfix_116_one_function_with_keyword_and_name_but__space_in_brackets_is_recognized() throws Exception {
         /* prepare */
@@ -236,7 +373,7 @@ public class BashScriptModelBuilderTest {
             hasFunctions(1);
         /* @formatter:on */
     }
-    
+
     @Test
     public void bugfix_116_one_function_with_name_only_but__space_in_brackets_is_recognized() throws Exception {
         /* prepare */
@@ -251,7 +388,7 @@ public class BashScriptModelBuilderTest {
             hasFunctions(1);
         /* @formatter:on */
     }
-    
+
     @Test
     public void bugfix_116_functions_with_spaces_in_brackets_are_recognized_as_well() throws Exception {
         /* prepare */
@@ -488,8 +625,8 @@ public class BashScriptModelBuilderTest {
 
     @Test
     /**
-     * Bash does not support functions inside functions - so if somebody such
-     * things it's not allowed
+     * Bash does not support functions inside functions - so if somebody such things
+     * it's not allowed
      */
     public void function_f1_has_only_open_bracket__must_have_no_function_but_two_error() throws Exception {
         /* prepare */
@@ -510,8 +647,8 @@ public class BashScriptModelBuilderTest {
 
     @Test
     /**
-     * Bash does not support functions inside functions - so if somebody such
-     * things it's not allowed
+     * Bash does not support functions inside functions - so if somebody such things
+     * it's not allowed
      */
     public void function_f1_containing_illegal_child_function_f1b__followed_by_function_f2__results_in_functions_f1_f2__only() throws Exception {
         /* prepare */
@@ -537,8 +674,7 @@ public class BashScriptModelBuilderTest {
     }
 
     @Test
-    public void function_read_hyphen_file__curlyBrackets_open_close__is_recognized_as_function_read_hyphen_file__and_has_no_errors()
-            throws Exception {
+    public void function_read_hyphen_file__curlyBrackets_open_close__is_recognized_as_function_read_hyphen_file__and_has_no_errors() throws Exception {
         /* prepare */
         String code = "function read-file{}";
 
@@ -550,8 +686,7 @@ public class BashScriptModelBuilderTest {
     }
 
     @Test
-    public void function_read_hyphen_file_curlyBraceOpen_NewLine__content_NewLine_curlybraceClose_is_recognized_as_function_read_hyphen_file()
-            throws Exception {
+    public void function_read_hyphen_file_curlyBraceOpen_NewLine__content_NewLine_curlybraceClose_is_recognized_as_function_read_hyphen_file() throws Exception {
         /* prepare */
         String code = "function read-file{\n#something\n}";
 
@@ -563,8 +698,7 @@ public class BashScriptModelBuilderTest {
     }
 
     @Test
-    public void function_read_hyphen_file_hypen_format_followed_with_brackets_is_recognized_as_function_read_hyphen_file_hypen_format()
-            throws Exception {
+    public void function_read_hyphen_file_hypen_format_followed_with_brackets_is_recognized_as_function_read_hyphen_file_hypen_format() throws Exception {
         /* prepare */
         String code = "function read-file-format()\n{\n}";
 
@@ -576,8 +710,7 @@ public class BashScriptModelBuilderTest {
     }
 
     @Test
-    public void function_read_hyphen_file_hypen_format_space_followed_with_brackets_is_recognized_as_function_read_hyphen_file_hypen_format()
-            throws Exception {
+    public void function_read_hyphen_file_hypen_format_space_followed_with_brackets_is_recognized_as_function_read_hyphen_file_hypen_format() throws Exception {
         /* prepare */
         String code = "function read-file-format (){}";
 
@@ -618,15 +751,13 @@ public class BashScriptModelBuilderTest {
 
     @Test
     public void two_lines_with_functions_test1_and_test2_are_recognized_and_returns_2_function_with_name_test1_and_teset2() throws Exception {
-        BashScriptModel bashScriptModel = builderToTest
-                .build("function test1 {\n#something\n}\n #other line\n\nfunction test2 {\n#something else\n}\n");
+        BashScriptModel bashScriptModel = builderToTest.build("function test1 {\n#something\n}\n #other line\n\nfunction test2 {\n#something else\n}\n");
         /* test */
         assertThat(bashScriptModel).hasFunction("test1").and().hasFunction("test2").and().hasFunctions(2);
     }
 
     @Test
-    public void two_lines_with_functions_test1_and_test2_are_recognized_and_returns_2_function_with_name_test1_and_teset2__but_with_backslash_r()
-            throws Exception {
+    public void two_lines_with_functions_test1_and_test2_are_recognized_and_returns_2_function_with_name_test1_and_teset2__but_with_backslash_r() throws Exception {
         /* prepare */
         String bashScript = "function test1 {\n#something\n}\n #other line\n\nfunction test2 {\r\n#something else\r\n}\r\n";
 

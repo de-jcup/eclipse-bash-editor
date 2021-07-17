@@ -25,8 +25,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,8 +106,7 @@ import de.jcup.basheditor.script.BashScriptModelBuilder;
 import de.jcup.basheditor.script.BashScriptModelBuilder.BashScriptModelBuilderConfiguration;
 import de.jcup.basheditor.script.BashScriptModelException;
 import de.jcup.basheditor.script.BashVariable;
-import de.jcup.basheditor.script.BashVariableAssignment;
-import de.jcup.basheditor.script.BashVariableUsage;
+import de.jcup.basheditor.script.PositionMarker;
 import de.jcup.basheditor.script.parser.validator.BashEditorValidationErrorLevel;
 import de.jcup.eclipse.commons.PluginContextProvider;
 import de.jcup.eclipse.commons.replacetabbyspaces.ReplaceTabBySpacesProvider;
@@ -116,6 +115,8 @@ import de.jcup.eclipse.commons.replacetabbyspaces.ReplaceTabBySpacesSupport;
 @AdaptedFromEGradle
 public class BashEditor extends TextEditor implements StatusMessageSupport, IResourceChangeListener {
 
+    private static final String ANNOTATION_OCCURRENCES = "de.jcup.basheditor.occurrences";
+    private static final String ANNOTATION_OCCURRENCES_WRITE = "de.jcup.basheditor.occurrences.write";
     /** The COMMAND_ID of this editor as defined in plugin.xml */
     public static final String EDITOR_ID = "basheditor.editors.BashEditor";
     /** The COMMAND_ID of the editor context menu */
@@ -140,7 +141,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     private ExternalToolCommandArrayBuilder commandArrayBuilder = new ExternalToolCommandArrayBuilder();
     private TimeStampChangedEnforcer timestampChangeEnforder = new TimeStampChangedEnforcer();
     private List<Annotation> markerAnnotations = new ArrayList<>();
-    
+
     public BashEditor() {
         setSourceViewerConfiguration(new BashSourceViewerConfiguration(this));
         this.modelBuilder = new BashScriptModelBuilder();
@@ -189,7 +190,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
         BashScriptModel model;
         try {
-            model = modelBuilder.build(text,configuration);
+            model = modelBuilder.build(text, configuration);
         } catch (BashScriptModelException e) {
             BashEditorUtil.logError("Was not able to build script model", e);
             model = FALLBACK_MODEL;
@@ -287,12 +288,27 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
                     ITextSelection textSelection = (ITextSelection) selection;
 
                     String text = textSelection.getText();
-                    BashVariable variable = findBashVariable(text);
-                    if (variable == null) {
+                    if (text == null || text.isEmpty()) {
                         return;
                     }
-                    /* now this is very dumb, but we simple search inside text for locations */
-                    markOccurrences(variable);
+                    BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
+                    configuration.fetchVariableUsage = true;
+                    configuration.variableName = text;
+                    configuration.fetchFunctionUsage = true;
+                    configuration.functionUsageName= text;
+
+                    BashScriptModel model = buildModelWithoutValidation(configuration);
+
+                    BashVariable variable = model.getVariable(text);
+                    if (variable != null) {
+                        markOccurrences(variable);
+                        return;
+                    }
+
+                    BashFunction function = model.findBashFunctionByName(text);
+                    if (function != null) {
+                        markOccurrences(function);
+                    }
                 }
             });
         }
@@ -401,40 +417,46 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         markOccurrences(null);
     }
 
-    public void markOccurrences(BashVariable variable) {
-
+    private void markOccurrences(Object object) {
         IAnnotationModel annotationModel = getSourceViewer().getAnnotationModel();
 
-        if (annotationModel instanceof IAnnotationModelExtension) {
-            Annotation[] annotationsToRemove = markerAnnotations.toArray(new Annotation[markerAnnotations.size()]);
-            markerAnnotations.clear();
+        if (!(annotationModel instanceof IAnnotationModelExtension)) {
+            return;
+        }
+        IAnnotationModelExtension annotationModelExtension = (IAnnotationModelExtension) annotationModel;
+        
+        Annotation[] annotationsToRemove = markerAnnotations.toArray(new Annotation[markerAnnotations.size()]);
+        markerAnnotations.clear();
 
-            IAnnotationModelExtension m2 = (IAnnotationModelExtension) annotationModel;
-            Map<Annotation, Position> annotationsToAdd = new HashMap<>();
-            List<BashVariableAssignment> assignments = variable == null ? Collections.emptyList() : variable.getAssignments();
-            for (BashVariableAssignment assignment : assignments) {
-                Annotation annotation = new Annotation("de.jcup.basheditor.occurrences.write", false, null);
-                markerAnnotations.add(annotation);
+        Map<Annotation, Position> annotationsToAdd = new HashMap<>();
+        
+        if (object instanceof BashVariable) {
+            BashVariable variable = (BashVariable)object;
 
-                int offset = assignment.getStart();
-                int length = assignment.getEnd() - offset;
-                Position position = new Position(offset, length);
-                annotationsToAdd.put(annotation, position);
-
-            }
+            mark(ANNOTATION_OCCURRENCES_WRITE, annotationsToAdd, variable.getAssignments(),"Occurrence of setting variable '"+variable.getName()+"'");
+            mark(ANNOTATION_OCCURRENCES, annotationsToAdd, variable.getUsages(),"Occurrence of using variable '"+variable.getName()+"'");
             
-            List<BashVariableUsage> usages = variable == null ? Collections.emptyList() : variable.getUsages();
-            for (BashVariableUsage usage : usages) {
-                Annotation annotation = new Annotation("de.jcup.basheditor.occurrences", false, null);
-                markerAnnotations.add(annotation);
+        }else if (object instanceof BashFunction) {
+            BashFunction function = (BashFunction) object;
+            mark(ANNOTATION_OCCURRENCES_WRITE, annotationsToAdd, Arrays.asList(function.createPositionMarker()),"Occurrence of function '"+function.getName()+"'");
+            mark(ANNOTATION_OCCURRENCES, annotationsToAdd, function.getUsages(),"Occurrence of function call '"+function.getName()+"'");
+            
+        }
 
-                int offset = usage.getStart();
-                int length = usage.getEnd() - offset;
-                Position position = new Position(offset, length);
-                annotationsToAdd.put(annotation, position);
 
-            }
-            m2.replaceAnnotations(annotationsToRemove, annotationsToAdd);
+        annotationModelExtension.replaceAnnotations(annotationsToRemove, annotationsToAdd);
+    }
+
+    private void mark(String type, Map<Annotation, Position> annotationsToAdd, List<? extends PositionMarker> positionMarkers, String text) {
+        for (PositionMarker positionMarker : positionMarkers) {
+            Annotation annotation = new Annotation(type, false, text);
+            markerAnnotations.add(annotation);
+
+            int offset = positionMarker.getStart();
+            int length = positionMarker.getEnd() - offset;
+            Position position = new Position(offset, length);
+            annotationsToAdd.put(annotation, position);
+
         }
     }
 
@@ -857,11 +879,6 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         return item;
     }
 
-    public void selectFunction(String text) {
-        System.out.println("should select functin:" + text);
-
-    }
-
     public BashFunction findBashFunction(String functionName) {
         if (functionName == null) {
             return null;
@@ -874,19 +891,6 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
             }
         }
         return null;
-    }
-
-    public BashVariable findBashVariable(String varName) {
-        if (varName == null) {
-            return null;
-        }
-        BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
-        configuration.fetchVariableUsage=true;
-        configuration.variableName=varName;
-        configuration.ignoreFunctions=true;
-        
-        BashScriptModel model = buildModelWithoutValidation(configuration);
-        return model.getVariable(varName);
     }
 
     public BashEditorPreferences getPreferences() {

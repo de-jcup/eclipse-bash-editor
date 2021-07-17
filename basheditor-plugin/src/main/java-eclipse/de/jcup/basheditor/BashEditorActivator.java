@@ -15,6 +15,7 @@
  */
 package de.jcup.basheditor;
 
+import org.eclipse.core.commands.Command;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -22,12 +23,15 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import de.jcup.basheditor.debug.BashDebugInfoProvider;
 import de.jcup.basheditor.debug.DebugBashCodeToggleSupport;
 import de.jcup.basheditor.debug.launch.OSUtil;
+import de.jcup.basheditor.handlers.ToggleMarkOccurencesResourcesHandler;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.templates.BashEditorTemplateSupportConfig;
 import de.jcup.basheditor.workspacemodel.SharedBashModel;
@@ -80,6 +84,13 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
         super.start(context);
         plugin = this;
 
+        
+        ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);  
+        Command command = commandService.getCommand("basheditor.editor.commands.togglemarkoccurrences");  
+        
+        /* initialize with persisted state */
+        markOccurrences = ToggleMarkOccurencesResourcesHandler.getCurrentUIToggleMarkOccurrences(command);
+        
         toggleSupport = new DebugBashCodeToggleSupport(BashEditorActivator.getDefault());
 
         InstallJob job = new InstallJob();
@@ -164,12 +175,16 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
         return toggleSupport;
     }
 
-    public void toggleMarkOccurrences() {
+    /**
+     * 
+     * @return new state;
+     */
+    public boolean toggleMarkOccurrences() {
         if (markOccurrences) {
             /* inform all Bash editors about color changes */
             IWorkbenchPage activePage = EclipseUtil.getActivePage();
             if (activePage == null) {
-                return;
+                return markOccurrences; // keep as is
             }
             IEditorReference[] references = activePage.getEditorReferences();
             for (IEditorReference ref : references) {
@@ -185,6 +200,7 @@ public class BashEditorActivator extends AbstractUIPlugin implements PluginConte
             }
         }
         this.markOccurrences = !markOccurrences;
+        return markOccurrences;
     }
     
     public boolean isMarkOccurrencesActivated() {

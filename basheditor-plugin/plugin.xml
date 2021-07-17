@@ -147,13 +147,13 @@
                id="de.jcup.basheditor.toolbars.mainToolbar"
                label="Bash Editor Toolbar">
             <command
-                  commandId="basheditor.editor.commands.markoccurrences"
+                  commandId="basheditor.editor.commands.togglemarkoccurrences"
                   icon="icons/mark_occurrences.png"
-                  id="basheditor.toolbar.editor.commands.markoccurrences"
-                  label="Mark occurrences"
+                  id="basheditor.toolbar.editor.commands.togglemarkoccurrences"
+                  label="Toggle Mark Occurrences"
                   style="toggle"
-                  tooltip="Mark occurrences inside editor">
-        
+                  tooltip="Toggle Mark Occurrences">
+                
                 <visibleWhen checkEnabled="true">
                      <with variable="activeEditor">
                         <instanceof
@@ -185,7 +185,6 @@
       <specification
             annotationType="de.jcup.basheditor.occurrences"
             label="Bash occurrences"
-            icon="icons/searchm_obj.png"
             textPreferenceKey="occurrenceIndication"
             textPreferenceValue="false"
             highlightPreferenceKey="occurrenceHighlighting"
@@ -304,10 +303,13 @@
             id="basheditor.editor.commands.gotomatchingbracket">
       </command>
       <command
-            name="Mark occurrences"
-            description="Mark occurrences of a variable inside this script"
+            name="Toggle Mark Occurrences"
+            description="When enabled, double click on a variable or a function inside editor will highlight definitions and usages inside script"
             categoryId="basheditor.commands.category"
-            id="basheditor.editor.commands.markoccurrences">
+            id="basheditor.editor.commands.togglemarkoccurrences">
+            <state class="org.eclipse.ui.handlers.RegistryToggleState:true"
+                id="org.eclipse.ui.commands.toggleState">
+            </state>
       </command>
 	</extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -344,8 +346,8 @@
             class="de.jcup.basheditor.handlers.ShowInCallHierarchyByResourceHandler">
       </handler>
       <handler
-            commandId="basheditor.editor.commands.markoccurrences"
-            class="de.jcup.basheditor.handlers.MarkOccurencesResourcesHandler">
+            commandId="basheditor.editor.commands.togglemarkoccurrences"
+            class="de.jcup.basheditor.handlers.ToggleMarkOccurencesResourcesHandler">
       </handler>
     </extension> 
     
@@ -371,6 +373,12 @@
             commandId="basheditor.editor.commands.gotomatchingbracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">	  
 		</key>
+		<key
+            sequence="M2+M3+O"
+            contextId="basheditor.editors.BashEditor.context"
+            commandId="basheditor.editor.commands.togglemarkoccurrences"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">    
+        </key>
          <key
             sequence="M1+M2+G"
             contextId="basheditor.editors.BashEditor.context"
