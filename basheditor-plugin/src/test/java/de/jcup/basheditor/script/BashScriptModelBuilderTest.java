@@ -16,12 +16,15 @@
 package de.jcup.basheditor.script;
 
 import static de.jcup.basheditor.script.AssertScriptModel.assertThat;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
+
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import de.jcup.basheditor.TestScriptLoader;
+import de.jcup.basheditor.script.BashScriptModelBuilder.BashScriptModelBuilderConfiguration;
 
 public class BashScriptModelBuilderTest {
 
@@ -77,6 +80,32 @@ public class BashScriptModelBuilderTest {
         assertThat(bashScriptModel).
             hasNoErrors().
             hasVariable("x").withValue("1234").isGlobal();
+        /* @formatter:on */
+    }
+    
+    @Test
+    public void fetchusage_enabled_and_variablename_set_to_xxx() throws Exception{
+        /* prepare */
+        String script = "xxx=1234\necho $xxx;echo $xxx and more";
+
+        /* execute */
+        builderToTest.setDebug(true);
+        BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
+        configuration.fetchVariableUsage=true;
+        configuration.variableName="xxx";
+        
+        BashScriptModel bashScriptModel = builderToTest.build(script, configuration);
+
+        /* test @formatter:off*/
+        BashVariable variable = bashScriptModel.getVariable("xxx");
+        assertNotNull(variable);
+        List<BashVariableUsage> usages = variable.getUsages();
+        assertNotNull(usages);
+        assertEquals(2, usages.size());
+        BashVariableUsage usage1 = usages.iterator().next();
+        assertNotNull(usage1);
+        assertEquals(14, usage1.getStart());
+        assertEquals(18, usage1.getEnd());
         /* @formatter:on */
     }
     
