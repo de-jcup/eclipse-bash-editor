@@ -23,6 +23,7 @@ public class BashVariable {
     private String name;
     private String initialValue;
     private List<BashVariableAssignment> assignments = new ArrayList<>();
+    private List<BashVariableUsage> usages = new ArrayList<>();
     private boolean local;
 
     public BashVariable(String name, BashVariableAssignment assignment) {
@@ -50,6 +51,14 @@ public class BashVariable {
      */
     public List<BashVariableAssignment> getAssignments() {
         return assignments;
+    }
+
+    
+    /**
+     * @return usages of this variable or empty list
+     */
+    public List<BashVariableUsage> getUsages() {
+        return usages;
     }
 
     public String getName() {

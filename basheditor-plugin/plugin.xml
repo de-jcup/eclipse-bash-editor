@@ -141,9 +141,91 @@
                 </command>
                 
         </menuContribution>
+        <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="de.jcup.basheditor.toolbars.mainToolbar"
+               label="Bash Editor Toolbar">
+            <command
+                  commandId="basheditor.editor.commands.togglemarkoccurrences"
+                  icon="icons/mark_occurrences.png"
+                  id="basheditor.toolbar.editor.commands.togglemarkoccurrences"
+                  label="Toggle Mark Occurrences"
+                  style="toggle"
+                  tooltip="Toggle Mark Occurrences">
+                
+                <visibleWhen checkEnabled="true">
+                     <with variable="activeEditor">
+                        <instanceof
+                            value="de.jcup.basheditor.BashEditor"/>
+                     </with>
+                </visibleWhen>
+                  
+            </command>
+         </toolbar>
+      </menuContribution>
    </extension>
    
-    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <!--                          ANNOTATION                       			 -->
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+         name="de.jcup.basheditor.occurrences">
+      </type>
+      <type
+         name="de.jcup.basheditor.occurrences.write"
+         super="de.jcup.basheditor.occurrences">
+      </type>
+
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="de.jcup.basheditor.occurrences"
+            label="Bash occurrences"
+            textPreferenceKey="occurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="occurrenceHighlighting"
+            highlightPreferenceValue="true"
+            contributesToHeader="false"
+            overviewRulerPreferenceKey="occurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="occurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="occurrenceIndicationColor"
+            colorPreferenceValue="212,212,212"
+            presentationLayer="4"
+            showInNextPrevDropdownToolbarActionKey="showOccurrenceInNextPrevDropdownToolbarAction"
+            showInNextPrevDropdownToolbarAction="true"
+            isGoToNextNavigationTargetKey="isOccurrenceGoToNextNavigationTarget"
+            isGoToNextNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="isOccurrenceGoToPreviousNavigationTarget"
+            isGoToPreviousNavigationTarget="false"
+            textStylePreferenceKey="occurrenceTextStyle"
+            textStylePreferenceValue="NONE">
+      </specification>
+      <specification
+            annotationType="de.jcup.basheditor.occurrences.write"
+            label="Bash write occurrences"
+            textPreferenceKey="writeOccurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="writeOccurrenceHighlighting"
+            highlightPreferenceValue="true"
+            overviewRulerPreferenceKey="writeOccurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="writeOccurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="writeOccurrenceIndicationColor"
+            colorPreferenceValue="240,216,168"
+            presentationLayer="4"
+            textStylePreferenceKey="writeOccurrenceTextStyle"
+            textStylePreferenceValue="NONE">
+      </specification>    
+   </extension>
+    
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          MARKER                          			 -->
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ --> 
    <extension 
@@ -220,6 +302,15 @@
             categoryId="basheditor.commands.category"
             id="basheditor.editor.commands.gotomatchingbracket">
       </command>
+      <command
+            name="Toggle Mark Occurrences"
+            description="When enabled, double click on a variable or a function inside editor will highlight definitions and usages inside script"
+            categoryId="basheditor.commands.category"
+            id="basheditor.editor.commands.togglemarkoccurrences">
+            <state class="org.eclipse.ui.handlers.RegistryToggleState:true"
+                id="org.eclipse.ui.commands.toggleState">
+            </state>
+      </command>
 	</extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          HANDLERS                                    -->
@@ -254,6 +345,10 @@
             commandId="basheditor.command.resource.openCallHierarchy"
             class="de.jcup.basheditor.handlers.ShowInCallHierarchyByResourceHandler">
       </handler>
+      <handler
+            commandId="basheditor.editor.commands.togglemarkoccurrences"
+            class="de.jcup.basheditor.handlers.ToggleMarkOccurencesResourcesHandler">
+      </handler>
     </extension> 
     
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -278,6 +373,12 @@
             commandId="basheditor.editor.commands.gotomatchingbracket"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">	  
 		</key>
+		<key
+            sequence="M2+M3+O"
+            contextId="basheditor.editors.BashEditor.context"
+            commandId="basheditor.editor.commands.togglemarkoccurrences"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">    
+        </key>
          <key
             sequence="M1+M2+G"
             contextId="basheditor.editors.BashEditor.context"

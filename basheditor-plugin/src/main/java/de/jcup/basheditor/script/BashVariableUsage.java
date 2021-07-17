@@ -15,7 +15,7 @@
  */
 package de.jcup.basheditor.script;
 
-public class BashVariableAssignment implements PositionMarker{
+public class BashVariableUsage implements PositionMarker{
 
     private int start;
     private int end;

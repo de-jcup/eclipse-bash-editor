@@ -15,17 +15,8 @@
  */
 package de.jcup.basheditor;
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_ENCLOSING_BRACKETS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_COLOR;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_ENABLED;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_COMMAND;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SAVE_ACTION_EXTERNAL_TOOL_ENABLED;
-import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_BLOCK_STATEMENTS;
-import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_DO_STATEMENTS;
-import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_ERROR_LEVEL;
-import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_FUNCTION_STATEMENTS;
-import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.VALIDATE_IF_STATEMENTS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
+import static de.jcup.basheditor.preferences.BashEditorValidationPreferenceConstants.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -33,7 +24,12 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filesystem.EFS;
@@ -56,8 +52,13 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -67,6 +68,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -100,7 +103,10 @@ import de.jcup.basheditor.script.BashError;
 import de.jcup.basheditor.script.BashFunction;
 import de.jcup.basheditor.script.BashScriptModel;
 import de.jcup.basheditor.script.BashScriptModelBuilder;
+import de.jcup.basheditor.script.BashScriptModelBuilder.BashScriptModelBuilderConfiguration;
 import de.jcup.basheditor.script.BashScriptModelException;
+import de.jcup.basheditor.script.BashVariable;
+import de.jcup.basheditor.script.PositionMarker;
 import de.jcup.basheditor.script.parser.validator.BashEditorValidationErrorLevel;
 import de.jcup.eclipse.commons.PluginContextProvider;
 import de.jcup.eclipse.commons.replacetabbyspaces.ReplaceTabBySpacesProvider;
@@ -109,6 +115,8 @@ import de.jcup.eclipse.commons.replacetabbyspaces.ReplaceTabBySpacesSupport;
 @AdaptedFromEGradle
 public class BashEditor extends TextEditor implements StatusMessageSupport, IResourceChangeListener {
 
+    private static final String ANNOTATION_OCCURRENCES = "de.jcup.basheditor.occurrences";
+    private static final String ANNOTATION_OCCURRENCES_WRITE = "de.jcup.basheditor.occurrences.write";
     /** The COMMAND_ID of this editor as defined in plugin.xml */
     public static final String EDITOR_ID = "basheditor.editors.BashEditor";
     /** The COMMAND_ID of the editor context menu */
@@ -117,10 +125,9 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     public static final String EDITOR_RULER_CONTEXT_MENU_ID = EDITOR_CONTEXT_MENU_ID + ".ruler";
     /** Max execution time for external tool to run on save action */
     public static final int EXTERNAL_TOOL_TIMEOUT_ON_SAVE_SECS = 10;
-    
-    private static final BashTextFileDocumentProvider SHARED_TEXTFILE_DOCUMENT_PROVIDER=new BashTextFileDocumentProvider();
-    private static final BashFileDocumentProvider SHARED_FILE_DOCUMENT_PROVIDER= new BashFileDocumentProvider();
 
+    private static final BashTextFileDocumentProvider SHARED_TEXTFILE_DOCUMENT_PROVIDER = new BashTextFileDocumentProvider();
+    private static final BashFileDocumentProvider SHARED_FILE_DOCUMENT_PROVIDER = new BashFileDocumentProvider();
 
     private ReplaceTabBySpacesSupport replaceTabBySpaceSupport = new ReplaceTabBySpacesSupport();
     private BashBracketsSupport bracketMatcher = new BashBracketsSupport();
@@ -133,6 +140,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     private static final BashScriptModel FALLBACK_MODEL = new BashScriptModel();
     private ExternalToolCommandArrayBuilder commandArrayBuilder = new ExternalToolCommandArrayBuilder();
     private TimeStampChangedEnforcer timestampChangeEnforder = new TimeStampChangedEnforcer();
+    private List<Annotation> markerAnnotations = new ArrayList<>();
 
     public BashEditor() {
         setSourceViewerConfiguration(new BashSourceViewerConfiguration(this));
@@ -161,7 +169,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
             quickOutlineOpened = true;
         }
         Shell shell = getEditorSite().getShell();
-        BashScriptModel model = buildModelWithoutValidation();
+        BashScriptModel model = buildModelWithoutValidation(null);
         BashQuickOutlineDialog dialog = new BashQuickOutlineDialog(this, shell, "Quick outline");
         dialog.setInput(model);
 
@@ -171,7 +179,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         }
     }
 
-    private BashScriptModel buildModelWithoutValidation() {
+    private BashScriptModel buildModelWithoutValidation(BashScriptModelBuilderConfiguration configuration) {
         String text = getDocumentText();
 
         /* for quick outline create own model and ignore any validations */
@@ -182,7 +190,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
         BashScriptModel model;
         try {
-            model = modelBuilder.build(text);
+            model = modelBuilder.build(text, configuration);
         } catch (BashScriptModelException e) {
             BashEditorUtil.logError("Was not able to build script model", e);
             model = FALLBACK_MODEL;
@@ -264,6 +272,45 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         if (adapter instanceof StyledText) {
             StyledText text = (StyledText) adapter;
             text.addCaretListener(new BashEditorCaretListener());
+
+            text.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseDoubleClick(MouseEvent e) {
+                    if (!BashEditorActivator.getDefault().isMarkOccurrencesActivated()) {
+                        return;
+                    }
+
+                    ISelection selection = getSelectionProvider().getSelection();
+                    if (!(selection instanceof ITextSelection)) {
+                        return;
+                    }
+                    ITextSelection textSelection = (ITextSelection) selection;
+
+                    String text = textSelection.getText();
+                    if (text == null || text.isEmpty()) {
+                        return;
+                    }
+                    BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
+                    configuration.fetchVariableUsage = true;
+                    configuration.variableName = text;
+                    configuration.fetchFunctionUsage = true;
+                    configuration.functionUsageName= text;
+
+                    BashScriptModel model = buildModelWithoutValidation(configuration);
+
+                    BashVariable variable = model.getVariable(text);
+                    if (variable != null) {
+                        markOccurrences(variable);
+                        return;
+                    }
+
+                    BashFunction function = model.findBashFunctionByName(text);
+                    if (function != null) {
+                        markOccurrences(function);
+                    }
+                }
+            });
         }
 
         activateBashEditorContext();
@@ -366,7 +413,55 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         return fgColor;
     }
 
+    public void removeOccurrenceMarkers() {
+        markOccurrences(null);
+    }
+
+    private void markOccurrences(Object object) {
+        IAnnotationModel annotationModel = getSourceViewer().getAnnotationModel();
+
+        if (!(annotationModel instanceof IAnnotationModelExtension)) {
+            return;
+        }
+        IAnnotationModelExtension annotationModelExtension = (IAnnotationModelExtension) annotationModel;
+        
+        Annotation[] annotationsToRemove = markerAnnotations.toArray(new Annotation[markerAnnotations.size()]);
+        markerAnnotations.clear();
+
+        Map<Annotation, Position> annotationsToAdd = new HashMap<>();
+        
+        if (object instanceof BashVariable) {
+            BashVariable variable = (BashVariable)object;
+
+            mark(ANNOTATION_OCCURRENCES_WRITE, annotationsToAdd, variable.getAssignments(),"Occurrence of setting variable '"+variable.getName()+"'");
+            mark(ANNOTATION_OCCURRENCES, annotationsToAdd, variable.getUsages(),"Occurrence of using variable '"+variable.getName()+"'");
+            
+        }else if (object instanceof BashFunction) {
+            BashFunction function = (BashFunction) object;
+            mark(ANNOTATION_OCCURRENCES_WRITE, annotationsToAdd, Arrays.asList(function.createPositionMarker()),"Occurrence of function '"+function.getName()+"'");
+            mark(ANNOTATION_OCCURRENCES, annotationsToAdd, function.getUsages(),"Occurrence of function call '"+function.getName()+"'");
+            
+        }
+
+
+        annotationModelExtension.replaceAnnotations(annotationsToRemove, annotationsToAdd);
+    }
+
+    private void mark(String type, Map<Annotation, Position> annotationsToAdd, List<? extends PositionMarker> positionMarkers, String text) {
+        for (PositionMarker positionMarker : positionMarkers) {
+            Annotation annotation = new Annotation(type, false, text);
+            markerAnnotations.add(annotation);
+
+            int offset = positionMarker.getStart();
+            int length = positionMarker.getEnd() - offset;
+            Position position = new Position(offset, length);
+            annotationsToAdd.put(annotation, position);
+
+        }
+    }
+
     private void ensureColorsFetched() {
+
         if (bgColor == null || fgColor == null) {
 
             ISourceViewer sourceViewer = getSourceViewer();
@@ -405,9 +500,12 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         if (BashEditor.class.equals(adapter)) {
             return (T) this;
         }
-        if (ITextViewer.class.equals(adapter)){
-        	/* fall back for Eclipse neon working - AbstractTextEditor did not support his in neon, so adapter was always null... see #162 */
-        	return (T)getSourceViewer();
+        if (ITextViewer.class.equals(adapter)) {
+            /*
+             * fall back for Eclipse neon working - AbstractTextEditor did not support his
+             * in neon, so adapter was always null... see #162
+             */
+            return (T) getSourceViewer();
         }
         if (IContentOutlinePage.class.equals(adapter)) {
             return (T) getOutlinePage();
@@ -427,10 +525,10 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
             IEditorInput input = getEditorInput();
             if (input instanceof IFileEditorInput) {
                 IFileEditorInput feditorInput = (IFileEditorInput) input;
-                return (T)feditorInput.getFile().getProject();
+                return (T) feditorInput.getFile().getProject();
             }
         }
-        
+
         if (ISourceViewer.class.equals(adapter)) {
             return (T) getSourceViewer();
         }
@@ -607,7 +705,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         boolean isMarkerChangeForThisResource = (delta.getFlags() & IResourceDelta.MARKERS) != 0;
         return isMarkerChangeForThisResource;
     }
-    
+
     private IDocumentProvider resolveSharedDocumentProvider(IEditorInput input) {
         if (input instanceof FileStoreEditorInput) {
             return SHARED_TEXTFILE_DOCUMENT_PROVIDER;
@@ -781,16 +879,11 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         return item;
     }
 
-    public void selectFunction(String text) {
-        System.out.println("should select functin:" + text);
-
-    }
-
     public BashFunction findBashFunction(String functionName) {
         if (functionName == null) {
             return null;
         }
-        BashScriptModel model = buildModelWithoutValidation();
+        BashScriptModel model = buildModelWithoutValidation(null);
         Collection<BashFunction> functions = model.getFunctions();
         for (BashFunction function : functions) {
             if (functionName.equals(function.getName())) {
@@ -984,4 +1077,5 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
         return tempFile.getAbsolutePath();
     }
+
 }

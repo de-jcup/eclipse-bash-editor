@@ -41,6 +41,14 @@ public class BashScriptModelBuilder {
     private boolean debugMode;
     private boolean ignoreVariables;
 
+    public static class BashScriptModelBuilderConfiguration {
+        public boolean fetchVariableUsage;
+        public String variableName;
+        public boolean ignoreFunctions;
+        public String functionUsageName;
+        public boolean fetchFunctionUsage;
+    }
+
     /**
      * Parses given script and creates a bash script model
      * 
@@ -49,7 +57,22 @@ public class BashScriptModelBuilder {
      * @throws BashScriptModelException
      */
     public BashScriptModel build(String bashScript) throws BashScriptModelException {
+        return build(bashScript, null);
+    }
+
+    /**
+     * Parses given script and creates a bash script model
+     * 
+     * @param bashScript
+     * @param configuration
+     * @return a model about bash script
+     * @throws BashScriptModelException
+     */
+    public BashScriptModel build(String bashScript, BashScriptModelBuilderConfiguration configuration) throws BashScriptModelException {
         BashScriptModel model = new BashScriptModel();
+        if (configuration == null) {
+            configuration = new BashScriptModelBuilderConfiguration();// just an empty one as default
+        }
 
         TokenParser parser = new TokenParser();
         List<ParseToken> tokens;
@@ -58,8 +81,11 @@ public class BashScriptModelBuilder {
         } catch (TokenParserException e) {
             throw new BashScriptModelException("Was not able to build bashscript", e);
         }
-        buildScriptVariablesByTokens(model,false,true, tokens);
-        buildFunctionsByTokens(model, tokens);
+        buildScriptVariablesByTokens(model, false, true, tokens, configuration);
+
+        if (!configuration.ignoreFunctions) {
+            buildFunctionsByTokens(model, tokens, configuration);
+        }
 
         List<ValidationResult> results = new ArrayList<>();
         for (BashScriptValidator<List<ParseToken>> validator : createParseTokenValidators()) {
@@ -79,46 +105,132 @@ public class BashScriptModelBuilder {
         return model;
     }
 
-    private void buildScriptVariablesByTokens(BashVariableRegistry model, boolean acceptLocal, boolean acceptglobal, List<ParseToken> tokens) {
+    private void buildScriptVariablesByTokens(BashVariableRegistry model, boolean acceptLocal, boolean acceptglobal, List<ParseToken> tokens, BashScriptModelBuilderConfiguration configuration) {
         if (ignoreVariables) {
             return;
         }
         Iterator<ParseToken> it = tokens.iterator();
         boolean beforeWaslocal = false;
         while (it.hasNext()) {
-            ParseToken token = it.next();            
-            
+            ParseToken token = it.next();
+
             if (token.isVariableDefinition()) {
-                if (beforeWaslocal && ! acceptLocal) {
+                if (beforeWaslocal && !acceptLocal) {
                     continue;
                 }
-                if (!beforeWaslocal && ! acceptglobal) {
+                if (!beforeWaslocal && !acceptglobal) {
                     continue;
                 }
                 String varName = token.getTextAsVariableName();
                 BashVariable var = model.getVariable(varName);
-                
+
                 BashVariableAssignment assignment = new BashVariableAssignment();
                 assignment.setStart(token.getStart());
                 assignment.setEnd(token.getEnd());
-                if (var==null) {
-                    var = new BashVariable(varName,assignment);
+                if (var == null) {
+                    var = new BashVariable(varName, assignment);
                     var.setLocal(beforeWaslocal);
                     if (debugMode && it.hasNext()) {
                         ParseToken value = it.next();
                         /* we set this only for debug purpose */
                         var.setInitialValue(value.getText());
                     }
-                   model.getVariables().put(varName,var);
-                }else {
+                    model.getVariables().put(varName, var);
+                } else {
                     var.getAssignments().add(assignment);
                 }
-                
-            }else {
+
+            } else {
                 beforeWaslocal = token.isLocalDef();
             }
         }
+        inspectBashVariablesIfNecessary(model, tokens, configuration);
 
+    }
+
+    private void inspectBashVariablesIfNecessary(BashVariableRegistry model, List<ParseToken> tokens, BashScriptModelBuilderConfiguration configuration) {
+        BashVariable variableToInspect = null;
+        if (configuration.fetchVariableUsage && configuration.variableName != null) {
+            variableToInspect = model.getVariable(configuration.variableName);
+        }
+
+        if (variableToInspect == null) {
+            return;
+        }
+
+        String normalUsage = "$" + variableToInspect.getName();
+        List<String> variantsIdentifiableByIndexOf = buildVariableIndexOfVariants(variableToInspect);
+
+        Iterator<ParseToken> it2 = tokens.iterator();
+        while (it2.hasNext()) {
+            ParseToken token = it2.next();
+            String text = token.getText();
+
+            if (text.equals(normalUsage)) {
+                addVariableUsage(variableToInspect, token.getStart(), token.getEnd());
+            } else {
+                int start;
+                int end;
+
+                for (String variant : variantsIdentifiableByIndexOf) {
+                    int indexOf = -1;
+
+                    do {
+                        /* @formatter:off
+                         * "${xxx}"  : length:6 
+                         * ^-0
+                         *       ^-5
+                         *        
+                         * @formatter:on
+                         */
+                        if (text.length() < indexOf + 2) {
+                            /* avoid index of of bounds ...*/
+                            break;
+                        }
+                        indexOf = text.indexOf(variant, indexOf + 1);
+                        if (indexOf != -1) {
+
+                            start = token.getStart() + indexOf;
+                            end = start + variant.length();
+
+                            addVariableUsage(variableToInspect, start, end);
+                        }
+                    } while (indexOf != -1);
+                }
+            }
+        }
+    }
+
+    private void addVariableUsage(BashVariable variableToInspect, int start, int end) {
+        BashVariableUsage usage = new BashVariableUsage();
+        usage.setStart(start);
+        usage.setEnd(end);
+
+        variableToInspect.getUsages().add(usage);
+    }
+
+    /* builds a list of strings which identifies the bash variable usage */
+    private List<String> buildVariableIndexOfVariants(BashVariable variableToInspect) {
+        String variableName = variableToInspect.getName();
+        // the next line may not be used here directly, because we do not want
+        // "xxx" found inside "$xxxy" but only for "$xxx"
+        // index of means that the identified part makes it clear, that this is really
+        // the variable usage
+        // e.g. : "xxx" is represented by "$(xxx)abc"
+        String prefix = "$" + variableName;
+
+        List<String> variants = new ArrayList<>();
+        variants.add("$(" + variableName + ")");
+        variants.add("${" + variableName + "}");
+        variants.add(prefix + "[");
+        variants.add(prefix + " ");
+        variants.add(prefix + "'");
+        variants.add(prefix + "\"");
+        variants.add(prefix + "\\");
+        for (char metaCharacter : BashMetacharacters.METACHARACTERS_WITHOUT_WHITESPACES) {
+            variants.add(prefix + metaCharacter);
+        }
+        return variants;
     }
 
     private void appendDebugTokens(BashScriptModel model, List<ParseToken> tokens) {
@@ -128,13 +240,15 @@ public class BashScriptModelBuilder {
     public void setIgnoreBlockValidation(boolean ignoreBlockValidation) {
         this.ignoreBlockValidation = ignoreBlockValidation;
     }
-    
+
     /**
-     * When set to <code>true</code> the builder will not fetch any information about variables!
+     * When set to <code>true</code> the builder will not fetch any information
+     * about variables!
+     * 
      * @param ignoreVariables
      */
     public void setIgnoreVariables(boolean ignoreVariables) {
-       this.ignoreVariables=ignoreVariables;
+        this.ignoreVariables = ignoreVariables;
     }
 
     public void setIgnoreDoValidation(boolean ignoreDoValidation) {
@@ -163,58 +277,61 @@ public class BashScriptModelBuilder {
         }
         return validators;
     }
-    
-    private class HereDocInspector{
-    	private String hereDocLiteral;
-    	private boolean markedAsHereDoc;
-    	
-    	public void inspect(ParseToken token) {
-    		if (token.isHereDoc()) {
-        		markAsHereDocStartWhenNotAlreadyHeredoc();
-        		return;
-        	}
-    		/* parser does create heredoc, than literal than other than literal again as tokens */
-    		if (markedAsHereDoc) {
-    			if (hereDocLiteral==null) {
-    				hereDocLiteral=token.getText();
-    			}else {
-    				if (hereDocLiteral.contentEquals(token.getText())){
-    					/* means closing literal found...*/
-    					reset();
-    				}else {
-    					/* just content between - do nothing */
-    				}
-    			}
-    		}
-    	}
-    	
-    	public boolean isInsideHereDoc() {
-    		return markedAsHereDoc;
-    	}
-    	
-    	private void markAsHereDocStartWhenNotAlreadyHeredoc() {
-    		if (markedAsHereDoc) {
-    			return;
-    		}
-    		markedAsHereDoc=true;
-    	}
-    	
-    	private void reset() {
-    		markedAsHereDoc=false;
-    		hereDocLiteral=null;
-    	}
+
+    private class HereDocInspector {
+        private String hereDocLiteral;
+        private boolean markedAsHereDoc;
+
+        public void inspect(ParseToken token) {
+            if (token.isHereDoc()) {
+                markAsHereDocStartWhenNotAlreadyHeredoc();
+                return;
+            }
+            /*
+             * parser does create heredoc, than literal than other than literal again as
+             * tokens
+             */
+            if (markedAsHereDoc) {
+                if (hereDocLiteral == null) {
+                    hereDocLiteral = token.getText();
+                } else {
+                    if (hereDocLiteral.contentEquals(token.getText())) {
+                        /* means closing literal found... */
+                        reset();
+                    } else {
+                        /* just content between - do nothing */
+                    }
+                }
+            }
+        }
+
+        public boolean isInsideHereDoc() {
+            return markedAsHereDoc;
+        }
+
+        private void markAsHereDocStartWhenNotAlreadyHeredoc() {
+            if (markedAsHereDoc) {
+                return;
+            }
+            markedAsHereDoc = true;
+        }
+
+        private void reset() {
+            markedAsHereDoc = false;
+            hereDocLiteral = null;
+        }
     }
-    
-    private void buildFunctionsByTokens(BashScriptModel model, List<ParseToken> tokens) {
-    	HereDocInspector his = new HereDocInspector();
-    	
+
+    private void buildFunctionsByTokens(BashScriptModel model, List<ParseToken> tokens, BashScriptModelBuilderConfiguration configuration) {
+        HereDocInspector his = new HereDocInspector();
+
         for (int tokenNr = 0; tokenNr < tokens.size(); tokenNr++) {
-        	ParseToken token = tokens.get(tokenNr);
-        	his.inspect(token);
-        	
-        	if (his.isInsideHereDoc()) {
-        		continue;
-        	}
+            ParseToken token = tokens.get(tokenNr);
+            his.inspect(token);
+
+            if (his.isInsideHereDoc()) {
+                continue;
+            }
             FunctionScope functionScope = inspectAndCreateFunctionScope(tokens, tokenNr);
 
             if (functionScope.isFunction()) {
@@ -260,12 +377,10 @@ public class BashScriptModelBuilder {
                     /* avoid infinite loops... shoud not happen, but... */
                     tokenNr = newTokenNr;
                 }
-                
+
                 /* create local variables */
-                /* FIXME albert, 2019-04-29: add kill switch for variable detection and provide preference (so users can turn off the feature if wanted)*/
-                /* FIXME albert, 2019-04-29: add some junit tests to check local variable detection*/
-                buildScriptVariablesByTokens(function, true,false, functionScope.getTokensInside());
-                
+                buildScriptVariablesByTokens(function, true, false, functionScope.getTokensInside(), configuration);
+
             } else {
                 if (functionScope.hasFunctionKeywordPrefix()) {
                     /*
@@ -276,6 +391,32 @@ public class BashScriptModelBuilder {
                         model.errors.add(createBashErrorFunctionPrefixFoundButNotAFunction(functionScope.getFunctionName(), functionScope.getToken()));
                     }
                 }
+            }
+        }
+
+        inspectFunctionAndusageIfNecessary(model, tokens, configuration);
+    }
+
+    private void inspectFunctionAndusageIfNecessary(BashScriptModel model, List<ParseToken> tokens, BashScriptModelBuilderConfiguration configuration) {
+        if (!configuration.fetchFunctionUsage || configuration.functionUsageName == null) {
+            return;
+        }
+        BashFunction functionToInspect = model.findBashFunctionByName(configuration.functionUsageName);
+        if (functionToInspect == null) {
+            return;
+        }
+        for (ParseToken token : tokens) {
+            String tokenText = token.getText();
+            if (configuration.functionUsageName.equals(tokenText)) {
+                if (token.getStart() == functionToInspect.getPosition()) {
+                    /* function itself - so ignore */
+                    continue;
+                }
+                BashFunctionUsage usage = new BashFunctionUsage();
+                usage.setStart(token.getStart());
+                usage.setEnd(token.getEnd());
+
+                functionToInspect.getUsages().add(usage);
             }
         }
     }
@@ -304,6 +445,11 @@ public class BashScriptModelBuilder {
         function.position = functionScope.getFunctionStart();
         function.name = functionName;
         function.end = -1;
+        if (Boolean.TRUE.equals(functionScope.hasFunctionKeywordPrefix())){
+            function.positionFunctionName=function.position+"function ".length();
+        }else {
+            function.positionFunctionName=function.position;
+        }
 
         scanForFunctionEnd(functionScope, function);
 
@@ -378,7 +524,5 @@ public class BashScriptModelBuilder {
     public void setDebug(boolean debugMode) {
         this.debugMode = debugMode;
     }
-
-    
 
 }

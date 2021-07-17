@@ -13,41 +13,58 @@
  * and limitations under the License.
  *
  */
- package de.jcup.basheditor.script;
+package de.jcup.basheditor.script;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-public class BashFunction implements BashVariableRegistry  {
+public class BashFunction implements BashVariableRegistry {
 
-	String name;
-	Map<String, BashVariable> variables = new LinkedHashMap<>();
-	int position;
-	int lengthToNameEnd;
-	int end;
+    String name;
+    Map<String, BashVariable> variables = new LinkedHashMap<>();
+    int position;
+    int lengthToNameEnd;
+    int end;
+    private List<BashFunctionUsage> usages = new ArrayList<>();
+    int positionFunctionName;
 
-	public int getLengthToNameEnd() {
-		return lengthToNameEnd;
-	}
-	
-	public String getName() {
-		return name;
-	}
+    
+    BashFunction() {
+    }
+    
+    public int getLengthToNameEnd() {
+        return lengthToNameEnd;
+    }
 
-	public int getPosition() {
-		return position;
-	}
-	
-	public int getEnd() {
-		return end;
-	}
-	
-	@Override
-	public String toString() {
-		return "function "+name+"()";
-	}
+    public String getName() {
+        return name;
+    }
 
-	/**
+    public int getPosition() {
+        return position;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
+    public PositionMarker createPositionMarker() {
+        ChangeablePositionMarker marker = new ChangeablePositionMarker();
+
+        marker.setStart(positionFunctionName);
+        marker.setEnd(positionFunctionName + name.length());
+
+        return marker;
+    }
+
+    @Override
+    public String toString() {
+        return "function " + name + "()";
+    }
+
+    /**
      * @return map of variables, scope is root of script, no functions
      */
     public Map<String, BashVariable> getVariables() {
@@ -64,4 +81,9 @@ public class BashFunction implements BashVariableRegistry  {
         }
         return variables.get(varName);
     }
+
+    public List<BashFunctionUsage> getUsages() {
+        return usages;
+    }
+
 }

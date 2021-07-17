@@ -15,6 +15,8 @@
  */
  package de.jcup.basheditor.document;
 
+import static de.jcup.basheditor.script.BashMetacharacters.*;
+
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
@@ -103,20 +105,6 @@ public class ExactWordPatternRule extends WordPatternRule{
 		return counter.cleanupAndReturn(scanner,true);
 	}
 
-	
-	private boolean isMetaCharacter(char character) {
-	    boolean isMetaCharacter = false;
-	    isMetaCharacter = isMetaCharacter || character=='|';
-	    isMetaCharacter = isMetaCharacter || character=='&';
-	    isMetaCharacter = isMetaCharacter || character==';';
-	    isMetaCharacter = isMetaCharacter || character=='(';
-	    isMetaCharacter = isMetaCharacter || character==')';
-	    isMetaCharacter = isMetaCharacter || character=='<';
-	    isMetaCharacter = isMetaCharacter || character=='>';
-	    isMetaCharacter = isMetaCharacter || Character.isWhitespace(character);
-	    return isMetaCharacter;
-	}
-	
 	private boolean isPrefixCharacter(char charBefore) {
 		boolean isPrefix = ! isMetaCharacter(charBefore);//Character.isWhitespace(charBefore);
 		return isPrefix;
