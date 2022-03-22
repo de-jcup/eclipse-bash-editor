@@ -403,7 +403,7 @@ public class TokenParser {
             return true;
         }
 
-        /* array variant */
+        /* array variantFullText */
         if (variableContext.isInsideVariableArray()) {
             if (isStringChar(c)) {
                 context.appendCharToText();

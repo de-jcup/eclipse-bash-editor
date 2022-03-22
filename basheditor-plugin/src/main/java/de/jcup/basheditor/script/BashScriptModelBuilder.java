@@ -159,7 +159,7 @@ public class BashScriptModelBuilder {
         }
 
         String normalUsage = "$" + variableToInspect.getName();
-        List<String> variantsIdentifiableByIndexOf = buildVariableIndexOfVariants(variableToInspect);
+        List<VariableUsageVariant> variantsIdentifiableByIndexOf = buildVariableVariants(variableToInspect);
 
         Iterator<ParseToken> it2 = tokens.iterator();
         while (it2.hasNext()) {
@@ -172,7 +172,7 @@ public class BashScriptModelBuilder {
                 int start;
                 int end;
 
-                for (String variant : variantsIdentifiableByIndexOf) {
+                for (VariableUsageVariant variant : variantsIdentifiableByIndexOf) {
                     int indexOf = -1;
 
                     do {
@@ -187,12 +187,15 @@ public class BashScriptModelBuilder {
                             /* avoid index of of bounds ...*/
                             break;
                         }
-                        indexOf = text.indexOf(variant, indexOf + 1);
+                        indexOf = text.indexOf(variant.variantFullText, indexOf + 1);
                         if (indexOf != -1) {
+                            /* variantFullText found */
+                            start = indexOf + token.getStart();
+                            end = start + variant.variantFullText.length();
 
-                            start = token.getStart() + indexOf;
-                            end = start + variant.length();
-
+                            start = start +variant.highlightStartAdd;
+                            end = end -variant.highlightEndRemove;
+                            
                             addVariableUsage(variableToInspect, start, end);
                         }
                     } while (indexOf != -1);
@@ -209,8 +212,20 @@ public class BashScriptModelBuilder {
         variableToInspect.getUsages().add(usage);
     }
 
+    private class VariableUsageVariant{
+        String variantFullText;
+        int highlightStartAdd;
+        int highlightEndRemove;
+        
+        private VariableUsageVariant(String variant, int highlightStartAdd, int highlightEndRemove) {
+            this.variantFullText=variant;
+            this.highlightStartAdd=highlightStartAdd;
+            this.highlightEndRemove=highlightEndRemove;
+        }
+    }
+    
     /* builds a list of strings which identifies the bash variable usage */
-    private List<String> buildVariableIndexOfVariants(BashVariable variableToInspect) {
+    private List<VariableUsageVariant> buildVariableVariants(BashVariable variableToInspect) {
         String variableName = variableToInspect.getName();
         // the next line may not be used here directly, because we do not want
         // "xxx" found inside "$xxxy" but only for "$xxx"
@@ -219,16 +234,22 @@ public class BashScriptModelBuilder {
         // e.g. : "xxx" is represented by "$(xxx)abc"
         String prefix = "$" + variableName;
 
-        List<String> variants = new ArrayList<>();
-        variants.add("$(" + variableName + ")");
-        variants.add("${" + variableName + "}");
-        variants.add(prefix + "[");
-        variants.add(prefix + " ");
-        variants.add(prefix + "'");
-        variants.add(prefix + "\"");
-        variants.add(prefix + "\\");
+        List<VariableUsageVariant> variants = new ArrayList<>();
+        variants.add(new VariableUsageVariant("$(" + variableName + ")",0,0));
+        variants.add(new VariableUsageVariant("${" + variableName + "}",0,0));
+        variants.add(new VariableUsageVariant(prefix + "[",0,1));;
+        variants.add(new VariableUsageVariant(prefix + " ",0,1));;
+        variants.add(new VariableUsageVariant(prefix + "'",0,1));;
+        variants.add(new VariableUsageVariant(prefix + "\"",0,1));;
+        variants.add(new VariableUsageVariant(prefix + "\\",0,1));;
+        
+        variants.add(new VariableUsageVariant(prefix + "$",0,1));;
+        variants.add(new VariableUsageVariant(prefix + "+",0,1));;
+        variants.add(new VariableUsageVariant(prefix + "-",0,1));
+        variants.add(new VariableUsageVariant(prefix + "/",0,1));
+        
         for (char metaCharacter : BashMetacharacters.METACHARACTERS_WITHOUT_WHITESPACES) {
-            variants.add(prefix + metaCharacter);
+            variants.add(new VariableUsageVariant(prefix + metaCharacter,0,0));
         }
         return variants;
     }

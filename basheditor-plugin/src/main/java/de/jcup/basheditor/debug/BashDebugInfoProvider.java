@@ -30,7 +30,7 @@ public interface BashDebugInfoProvider {
     
     /**
      * @return the path to user home relevant for script. When a custom script path to user home is defined this will be used, otherwise the {@link #getDefaultScriptPathToUserHome()}
-     * variant
+     * variantFullText
      */
     String getResultingScriptPathToUserHome();
 

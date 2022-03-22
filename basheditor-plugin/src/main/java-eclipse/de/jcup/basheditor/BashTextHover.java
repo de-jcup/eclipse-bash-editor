@@ -225,7 +225,7 @@ public class BashTextHover implements ITextHover, ITextHoverExtension {
             sb.append("<b>Not available</b>");
         } else {
             if (TooltipTextSupport.isHTMLToolTip(tooltip)) {
-                /* it's already a HTML variant - so just keep as is */
+                /* it's already a HTML variantFullText - so just keep as is */
                 sb.append(tooltip);
             } else {
                 /* plain text */

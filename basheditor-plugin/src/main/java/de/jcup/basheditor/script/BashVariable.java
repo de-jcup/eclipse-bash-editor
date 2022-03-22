@@ -45,7 +45,7 @@ public class BashVariable {
 
     /**
      * Get the assignments in ordered way as defined inside script! So first entry
-     * here is also first (inital) assignment
+     * here is also first (initial) assignment
      * 
      * @return
      */

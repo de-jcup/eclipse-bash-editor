@@ -105,7 +105,7 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 
 	private IHyperlink[] createExternalHyperlinks(BashFunctionEditorInfo functionInfo,
 			boolean canShowMultipleHyperlinks) {
-		/* not found internal, so try external variant */
+		/* not found internal, so try external variantFullText */
 
 		if (!BashEditorPreferences.getInstance().isSharedModelBuildEnabled()) {
 			return null;

@@ -146,7 +146,7 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
         launchTerminalCommand.getTextControl(terminalGroup).setToolTipText("This represents " + TerminalCommandVariable.BE_TERMINAL.getVariableRepresentation() + " in start command before.\n"
                 + "Defines the command to provide a login shell which can execute script\n" + "and keeps terminal open for debug output.\n\n" + "Here you can use "
                 + TerminalCommandVariable.BE_CMD_CALL.getVariableRepresentation() + " as generated bash call script\n" + "and " + TerminalCommandVariable.BE_CMD_TITLE.getVariableRepresentation()
-                + " for a title information in your terminal if you want it.\n\n" + "Press `Show result cmd` button to show calculated variant.");
+                + " for a title information in your terminal if you want it.\n\n" + "Press `Show result cmd` button to show calculated variantFullText.");
         addField(launchTerminalCommand);
 
         Button showTestTerminalCommandButton = new Button(terminalGroup, SWT.PUSH);

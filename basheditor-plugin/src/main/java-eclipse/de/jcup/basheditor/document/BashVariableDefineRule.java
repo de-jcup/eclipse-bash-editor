@@ -21,7 +21,7 @@ import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 
 /**
- * Special variant, because boolean assignment to variables are not correct
+ * Special variantFullText, because boolean assignment to variables are not correct
  * highlighted otherwise "myvar=true" was not highlighted but "myvar= true"
  * which is wrong is highlighted
  * 
