@@ -31,7 +31,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import de.jcup.basheditor.BashEditor;
 import de.jcup.basheditor.EclipseUtil;
 
-public class OpenWithBashEditor extends AbstractHandler{
+public class OpenWithBashEditorHandler extends AbstractHandler{
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {

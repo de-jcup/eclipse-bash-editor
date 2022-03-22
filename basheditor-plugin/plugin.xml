@@ -87,6 +87,13 @@
           properties="isBashFileWithoutExtension"
           type="org.eclipse.core.resources.IResource">
       </propertyTester>
+       <propertyTester
+          class="de.jcup.basheditor.OpenPathInTerminalPropertyTester"
+          id="de.jcup.basheditor.OpenPathInTerminalPropertyTester"
+          namespace="de.jcup.basheditor"
+          properties="isOpenPathActionEnabled"
+          type="org.eclipse.core.resources.IResource">
+      </propertyTester>
    </extension>
    
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -135,6 +142,26 @@
 			         							<test property="org.eclipse.core.resources.extension" value="sh" />
 			         						  </or>
 				         					</adapt>
+				         				</iterate>
+                              </with>
+                        </visibleWhen>
+                </command>
+                <command
+            	  commandId="basheditor.command.openPathInTerminal"
+                  icon="icons/open_terminal.png"
+                  id="basheditor.popup.openPathInTerminal"
+                  label="Open path in terminal"
+                  tooltip="Open a the resource folder inside configured terminal."
+                  style="push">
+                        <visibleWhen 
+                              checkEnabled="false">
+                              <with
+                                    variable="activeMenuSelection">
+				         				<count value="1"/>
+	                                    <iterate ifEmpty="false">
+	                                    	 <adapt type="org.eclipse.core.resources.IResource">
+	                                    	     <test property="de.jcup.basheditor.isOpenPathActionEnabled" value="true"/>
+				         					 </adapt>
 				         				</iterate>
                               </with>
                         </visibleWhen>
@@ -311,6 +338,12 @@
                 id="org.eclipse.ui.commands.toggleState">
             </state>
       </command>
+      <command
+            name="Open path in terminal"
+            description="Opens current resource path in bash terminal"
+            categoryId="basheditor.commands.category"
+            id="basheditor.command.openPathInTerminal">
+      </command>
 	</extension>
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
    <!--                          HANDLERS                                    -->
@@ -335,7 +368,11 @@
       </handler>
       <handler
             commandId="basheditor.command.openWithBashEditor"
-            class="de.jcup.basheditor.handlers.OpenWithBashEditor">
+            class="de.jcup.basheditor.handlers.OpenWithBashEditorHandler">
+      </handler>
+      <handler
+            commandId="basheditor.command.openPathInTerminal"
+            class="de.jcup.basheditor.handlers.OpenPathInTerminalHandler">
       </handler>
       <handler
             commandId="basheditor.command.editor.openCallHierarchy"

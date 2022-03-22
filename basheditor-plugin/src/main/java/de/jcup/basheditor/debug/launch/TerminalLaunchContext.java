@@ -20,49 +20,79 @@ import java.util.List;
 import java.util.Map;
 
 public class TerminalLaunchContext {
-    
+
+    public enum RunMode {
+        DEBUG,
+
+        RUN,
+
+        JUST_OPEN_TERMINAL,
+
+    }
+
+    RunMode runMode = RunMode.DEBUG;
     List<String> commands;
-	File file;
-	String params;
-	String terminalCommand;
-	boolean waitAlways;
-	boolean waitOnErrors;
+    File file;
+    String params;
+    String terminalCommand;
+    boolean waitAlways;
+    boolean waitOnErrors;
     String launchTerminalCommand;
     String terminalExecutionCommand;
     Exception exception;
     String startTemplate;
-	Map<String, String> environment;
-	int port;
-	
-	public int getPort() {
+    Map<String, String> environment;
+    int port;
+    File workingDir;
+
+    public int getPort() {
         return port;
     }
-    
+
+    public File getWorkingDir() {
+        return workingDir;
+    }
+
+    public RunMode getRunMode() {
+        return runMode;
+    }
+
     public String getLaunchTerminalCommand() {
         return launchTerminalCommand;
     }
-    
+
     public Map<String, String> getEnvironment() {
-		return environment;
-	}
-    
+        return environment;
+    }
+
     public String getTerminalExecutionCommand() {
         return terminalExecutionCommand;
     }
-    
-	public String getUnixStyledWorkingDir() {
-		File workingDirFile = getWorkingDirFile();
-		if (workingDirFile==null) {
-		    return null;
-		}
-        return OSUtil.toUnixPath(workingDirFile.getAbsolutePath());
-	}
 
-	public File getWorkingDirFile() {
-	    if (file==null) {
-	        return null;
-	    }
-		return file.getParentFile();
-	}
+    public String getUnixStyledWorkingDir() {
+        File workingDirFile = getWorkingDirFile();
+        if (workingDirFile == null) {
+            return null;
+        }
+        return OSUtil.toUnixPath(workingDirFile.getAbsolutePath());
+    }
+
+    /**
+     * Resolves working directory. If directly set in context, the defined working
+     * directory will be used. If not set, but file to execute is defined, the
+     * working directory will be the files parent directory. If no file defined
+     * working directory result will be <code>null</code>
+     * 
+     * @return working dir or <code>null</code>
+     */
+    public File getWorkingDirFile() {
+        if (workingDir != null) {
+            return workingDir;
+        }
+        if (file == null) {
+            return null;
+        }
+        return file.getParentFile();
+    }
 
 }

@@ -15,13 +15,8 @@ package de.jcup.basheditor.preferences;
  *
  */
 
-import static de.jcup.basheditor.NeonCompatiblity.widgetSelectedAdapter;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ALWAYS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_KEEP_TERMINAL_OPEN_ON_ERRORS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_STARTER_COMMAND;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LAUNCH_TERMINAL_COMMAND;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHOW_META_INFO_IN_DEBUG_CONSOLE;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_USER_HOME_CUSTOMPATH;
+import static de.jcup.basheditor.NeonCompatiblity.*;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -62,8 +57,10 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
     private Text testCommandOutputText;
     private StringFieldEditor launchStarterCommand;
     private StringFieldEditor customUserHomePath;
+    private StringFieldEditor justOpenTerminalCommand;
+    private BooleanFieldEditor showOpenPathInTerminalCommandEnabled;
     private static final String params = "-a 1 -b 2";
-    
+
     public BashEditorLaunchPreferencePage() {
         super(GRID);
         setPreferenceStore(BashEditorUtil.getPreferences().getPreferenceStore());
@@ -138,7 +135,7 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
         keepExternalTerminalOpenAlways.getDescriptionControl(terminalGroup).setToolTipText("Keep external terminal  always open, even when exit code =0.");
         addField(keepExternalTerminalOpenAlways);
 
-        launchStarterCommand = new StringFieldEditor(P_LAUNCH_STARTER_COMMAND.getId(), "Start command", terminalGroup);
+        launchStarterCommand = new StringFieldEditor(P_LAUNCH_STARTER_COMMAND.getId(), "Start bash script command", terminalGroup);
         launchStarterCommand.getTextControl(terminalGroup)
                 .setToolTipText("Defines how to start a command environment where terminal command can be executed.\n"
                         + "This command must be run in background, so in Linux ensure you end this command with an &\n\n" + "You must use "
@@ -186,6 +183,15 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
         testCommandOutputText.setText("");
         testCommandOutputText.setToolTipText(TOOLTIP_HEADER_TESTOUTPUT);
         testCommandOutputText.setEditable(false);
+        
+        showOpenPathInTerminalCommandEnabled = new BooleanFieldEditor(P_OPEN_PATH_IN_TERMINAL_ENABLED.getId(), "Show 'Open path in terminal'", terminalGroup);
+        showOpenPathInTerminalCommandEnabled.getDescriptionControl(terminalGroup).setToolTipText("When enabled the 'Open path in terminal' command will be shown inside project and package explorer.");
+        addField(showOpenPathInTerminalCommandEnabled);
+        
+        justOpenTerminalCommand = new StringFieldEditor(P_JUST_OPEN_TERMINAL_COMMAND.getId(), "Command for 'Open path in terminal'", terminalGroup);
+        justOpenTerminalCommand.getTextControl(terminalGroup).setToolTipText("Defines command used for 'Open path in terminal' action inside project or package explorer view.");
+        addField(justOpenTerminalCommand);
+
     }
 
     private Object doShowCommandString() {
@@ -204,7 +210,7 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
         boolean alwaysWait = keepExternalTerminalOpenAlways.getBooleanValue();
         String terminalCommand = launchTerminalCommand.getStringValue();
         String starterCommand = launchStarterCommand.getStringValue();
-        
+
         /* @formatter:off*/
         TerminalLaunchContext context = TerminalLaunchContextBuilder.builder().
                 file(createTempFile()).
@@ -215,10 +221,9 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
                 starterCommand(starterCommand).build();
         /* @formatter:on*/
         return context;
-        
+
     }
-    
-  
+
     private static File createTempFile() throws IOException {
         // --------------------------------------------------------------------------------------------------------------------------------|123456789
         Path tempFile = Files.createTempFile("terminallaunch", ".sh");

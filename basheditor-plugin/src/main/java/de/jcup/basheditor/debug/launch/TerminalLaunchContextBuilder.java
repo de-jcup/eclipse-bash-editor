@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.jcup.basheditor.debug.launch.TerminalLaunchContext.RunMode;
+
 public class TerminalLaunchContextBuilder {
 
     private InternalTerminalCommandStringBuilder itc = new InternalTerminalCommandStringBuilder();
@@ -28,6 +30,7 @@ public class TerminalLaunchContextBuilder {
     private CommandStringVariableReplaceSupport variableReplaceSupport = new CommandStringVariableReplaceSupport();
 
     private File file;
+    private File workingDir;
     private String terminalCommand;
     private String params;
     
@@ -36,6 +39,7 @@ public class TerminalLaunchContextBuilder {
     private String starterTemplate;
 	private Map<String, String> environment;
     private int port;
+    private RunMode runMode = RunMode.DEBUG;
     private TerminalLaunchContextBuilder() {
         
     }
@@ -67,6 +71,11 @@ public class TerminalLaunchContextBuilder {
         return this;
     }
     
+    public TerminalLaunchContextBuilder workingDir(File workingDir) {
+        this.workingDir=workingDir;
+        return this;
+    }
+    
     public TerminalLaunchContextBuilder waitingAlways(boolean waitingAlways) {
         this.waitingAlways=waitingAlways;
         return this;
@@ -81,9 +90,16 @@ public class TerminalLaunchContextBuilder {
     	this.environment=environment;
     	return this;
     }
+    public TerminalLaunchContextBuilder runMode(RunMode runMode) {
+        this.runMode=runMode;
+        return this;
+    }
+    
     
     public TerminalLaunchContext build() {
         TerminalLaunchContext context = new TerminalLaunchContext();
+        context.runMode=runMode;
+
         context.file = file;
         context.params = params;
         
@@ -96,6 +112,9 @@ public class TerminalLaunchContextBuilder {
         context.commands=new ArrayList<String>();
         context.environment=environment;
         context.port=port;
+        context.workingDir=workingDir;
+        
+        
         if (context.environment==null) {
         	/* fallback */
         	context.environment=new HashMap<String, String>();
@@ -106,7 +125,11 @@ public class TerminalLaunchContextBuilder {
             
             Map<String,String> map = new  HashMap<String,String>();
             map.put(TerminalCommandVariable.BE_CMD_CALL.getId(), internalCommand);
-            map.put(TerminalCommandVariable.BE_CMD_TITLE.getId(), "Bash Editor DEBUG Session:"+file.getName());
+            if (runMode==RunMode.DEBUG) {
+                map.put(TerminalCommandVariable.BE_CMD_TITLE.getId(), "Bash Editor DEBUG Session:"+file.getName());
+            }else {
+                map.put(TerminalCommandVariable.BE_CMD_TITLE.getId(), "Bash Editor :"+file.getName());
+            }
             
             context.terminalExecutionCommand = variableReplaceSupport.replaceVariables(context.terminalCommand, map);
             map.put(TerminalCommandVariable.BE_TERMINAL.getId(), context.terminalExecutionCommand);
