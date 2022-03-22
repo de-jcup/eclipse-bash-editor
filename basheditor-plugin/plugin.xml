@@ -151,7 +151,7 @@
                   icon="icons/open_terminal.png"
                   id="basheditor.popup.openPathInTerminal"
                   label="Open path in terminal"
-                  tooltip="Open a the resource folder inside configured terminal."
+                  tooltip="Open the resource folder inside configured terminal (Can be configured in bash editor preferences)"
                   style="push">
                         <visibleWhen 
                               checkEnabled="false">
