@@ -6,6 +6,9 @@
    <feature url="features/de.jcup.basheditor_2.7.0.jar" id="de.jcup.basheditor" version="2.7.0">
       <category name="de.jcup.basheditor.stable"/>
    </feature>
+   <feature url="features/de.jcup.basheditor_2.8.0.jar" id="de.jcup.basheditor" version="2.8.0">
+      <category name="de.jcup.basheditor.stable"/>
+   </feature>
    <category-def name="de.jcup.basheditor.stable" label="Stable">
       <description>
          Stable versions
