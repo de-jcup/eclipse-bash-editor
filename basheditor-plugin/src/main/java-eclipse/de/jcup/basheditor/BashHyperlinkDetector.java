@@ -65,25 +65,25 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 		if (editor == null) {
 			return null;
 		}
-		BashFunctionEditorInfo functionInfo = findFunctionData(textViewer, region);
-		if (functionInfo == null) {
+		HoveredTextInfo textInfo = createTextInfo(textViewer, region);
+		if (textInfo == null) {
 			return null;
 		}
-		IHyperlink[] result = createInternalHyperlinks(editor, functionInfo);
+		IHyperlink[] result = createHyperlinksForFunctionsInsideEditor(editor, textInfo);
 		if (result != null) {
 			return result;
 		}
-		result = createExternalHyperlinks(functionInfo, canShowMultipleHyperlinks);
+		result = createHyperlinksToFunctionsInExternalFiles(textInfo, canShowMultipleHyperlinks);
 		if (result != null) {
 			return result;
 		}
-		result = createExternalFilelinks(functionInfo, canShowMultipleHyperlinks);
+		result = createHyperlinksToFiles(textInfo, canShowMultipleHyperlinks);
 		return result;
 	}
 
-	private IHyperlink[] createExternalFilelinks(BashFunctionEditorInfo functionInfo,
+	private IHyperlink[] createHyperlinksToFiles(HoveredTextInfo textInfo,
 			boolean canShowMultipleHyperlinks) {
-		String path = functionInfo.functionName;
+		String path = textInfo.text;
 		if (path == null) {
 			return null;
 		}
@@ -97,13 +97,13 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 		}
 		IFile target = parent.getFile(new Path(path));
 		if (target!=null && target.exists()) {
-			Region targetRegion = new Region(functionInfo.offsetLeft, path.length());
+			Region targetRegion = new Region(textInfo.offsetLeft, path.length());
 			return new IHyperlink[] {new BashExternalFileHyperlink(targetRegion, target)};
 		}
 		return null;
 	}
 
-	private IHyperlink[] createExternalHyperlinks(BashFunctionEditorInfo functionInfo,
+	private IHyperlink[] createHyperlinksToFunctionsInExternalFiles(HoveredTextInfo functionInfo,
 			boolean canShowMultipleHyperlinks) {
 		/* not found internal, so try external variantFullText */
 
@@ -120,7 +120,7 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 			project = adaptable.getAdapter(IProject.class);
 		}
 		List<SharedModelMethodTarget> foundFunctionCandidates = BashEditorActivator.getDefault().getModel()
-				.findResourcesHavingMethods(functionInfo.functionName, project);
+				.findResourcesHavingMethods(functionInfo.text, project);
 		if (foundFunctionCandidates.isEmpty()) {
 			return null;
 		}
@@ -144,17 +144,17 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 		return result.toArray(new IHyperlink[result.size()]);
 	}
 
-	private IHyperlink[] createInternalHyperlinks(BashEditor editor, BashFunctionEditorInfo d) {
-		BashFunction function = editor.findBashFunction(d.functionName);
-		if (function == null) {
-			return null;
-		}
-		/* we found internal link - so we use this, no external search necessary */
-		Region targetRegion = new Region(d.offsetLeft, d.functionName.length());
-		return new IHyperlink[] { new BashFunctionHyperlink(targetRegion, function, editor) };
+	private IHyperlink[] createHyperlinksForFunctionsInsideEditor(BashEditor editor, HoveredTextInfo textInfo) {
+		BashFunction function = editor.findBashFunction(textInfo.text);
+		if (function != null) {
+        	/* we found internal link - so we use this, no external search necessary */
+        	Region targetRegion = new Region(textInfo.offsetLeft, textInfo.text.length());
+        	return new IHyperlink[] { new BashFunctionHyperlink(targetRegion, function, editor) };
+        }
+		return null;
 	}
 
-	private BashFunctionEditorInfo findFunctionData(ITextViewer textViewer, IRegion region) {
+	private HoveredTextInfo createTextInfo(ITextViewer textViewer, IRegion region) {
 		IDocument document = textViewer.getDocument();
 		int offset = region.getOffset();
 
@@ -167,13 +167,18 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 			return null;
 		}
 
-		return createFunctionData(offset, lineInfo, line);
+		return createTextInfo(offset, lineInfo, line);
+	}
+	
+	private HoveredTextInfo createTextInfo(int offset, IRegion lineInfo, String line) {
+	    HoveredTextInfo info = new HoveredTextInfo(offset);
+	    String text = fetchText(offset, lineInfo, line, info);
+		info.text = text;
+		return info;
 	}
 
-	private BashFunctionEditorInfo createFunctionData(int offset, IRegion lineInfo, String line) {
-		BashFunctionEditorInfo info = new BashFunctionEditorInfo();
-		info.offsetLeft = offset;
-		int offsetInLine = offset - lineInfo.getOffset();
+    private String fetchText(int offset, IRegion lineInfo, String line, HoveredTextInfo info) {
+        int offsetInLine = offset - lineInfo.getOffset();
 		String leftChars = line.substring(0, offsetInLine);
 		String rightChars = line.substring(offsetInLine);
 		StringBuilder sb = new StringBuilder();
@@ -192,11 +197,11 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 			}
 			sb.append(c);
 		}
-		info.functionName = sb.toString();
-		return info;
-	}
+		String text = sb.toString();
+        return text;
+    }
 
-	private IHyperlink createExternalHyperlink(BashFunctionEditorInfo info, SharedModelMethodTarget target) {
+	private IHyperlink createExternalHyperlink(HoveredTextInfo info, SharedModelMethodTarget target) {
 		BashFunction function = target.getFunction();
 		if (function == null) {
 			return null;
@@ -207,11 +212,20 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 		}
 		IFile file = (IFile) resource;
 		int offsetLeft = info.offsetLeft;
-		String functionName = info.functionName;
+		String functionName = info.text;
 
 		/* we found internal link - so we use this, no external search necessary */
 		Region targetRegion = new Region(offsetLeft, functionName.length());
 		BashExternalFunctionHyperlink link = new BashExternalFunctionHyperlink(targetRegion, function, file);
 		return link;
 	}
+	
+	private class HoveredTextInfo {
+	    public HoveredTextInfo(int offset) {
+            this.offsetLeft=offset;
+        }
+        int offsetLeft;
+	    String text;
+	}
+	
 }
