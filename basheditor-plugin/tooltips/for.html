@@ -1,11 +1,31 @@
 for
 <br><br>
 The syntax of the for command is:
+
 <div class='example'>
-	for name [ [in [words …] ] ; ] do commands; done
+    for NAME [in WORDS ... ] ; do COMMANDS; done
 </div>
 
-Expand words, and execute commands once for each member in the resultant list, with name bound to the current member. If ‘in words’ is not present, the for command executes the commands once for each positional parameter that is set, as if ‘in "$@"’ had been specified (see Special Parameters). The return status is the exit status of the last command that executes. If there are no items in the expansion of words, no commands are executed, and the return status is zero.
+Execute commands for each member in a list.<br>
+<br>
+The `for' loop executes a sequence of commands for each member in a
+list of items.  If `in WORDS ...;' is not present, then `in "$@"' is
+assumed.  For each element in WORDS, NAME is set to that element, and
+the COMMANDS are executed.<br>
+<br>
+Exit Status:<br>
+Returns the status of the last command executed.<br>
+<br>
+Example:<br>
+<div class='example'>
+ #!/bin/bash
+ echo "print some strings:"
+ for NAME in 'Albert' 'Tregnaghi' ; do echo "name=${NAME}"; done
+ 
+ echo "print some numbers:"
+ for i in 0 1 2 3 ; do echo "number=$i"; done
+</div>
+
 <br><br>
 An alternate form of the for command is also supported:
 <br><br>
