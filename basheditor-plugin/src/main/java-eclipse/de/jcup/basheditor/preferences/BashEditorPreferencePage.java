@@ -19,21 +19,7 @@ import static de.jcup.basheditor.BashEditorUtil.getPreferences;
 import static de.jcup.basheditor.preferences.BashEditorLinkFunctionStrategy.PROJECT;
 import static de.jcup.basheditor.preferences.BashEditorLinkFunctionStrategy.SCRIPT;
 import static de.jcup.basheditor.preferences.BashEditorLinkFunctionStrategy.WORKSPACE;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_AMOUNT_OF_SPACES_FOR_TAB_REPLACEMENT;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_KEYWORDS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_SIMPLEWORDS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_AUTO_CREATE_END_BRACKETSY;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_ENCLOSING_BRACKETS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_COLOR;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_EDITOR_MATCHING_BRACKETS_ENABLED;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_FUNCTIONS_STRATEGY;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_LINK_OUTLINE_WITH_EDITOR;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_REPLACE_TAB_BY_SPACES_STRATEGY;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHARED_MODEL_ENABLED;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SHOW_VARIABLES_IN_OUTLINE;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_SORT_OUTLINE_ALPHABETICAL;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_TOOLTIPS_ENABLED;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 import static de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy.ALWAYS;
 import static de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy.NEVER;
 import static de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy.USE_DEFAULT;
@@ -93,6 +79,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
     private AccessibleBooleanFieldEditor sharedModelBuildEnabled;
     private boolean sharedModelBuildEnabledBefore;
     private BooleanFieldEditor sortOutlineAlphabetical;
+    private BooleanFieldEditor codeAssistWithVariables;
 
     public BashEditorPreferencePage() {
         super(GRID);
@@ -262,8 +249,14 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
 
         codeAssistWithSimpleWords = new BooleanFieldEditor(P_CODE_ASSIST_ADD_SIMPLEWORDS.getId(), "Existing words", codeAssistGroup);
         codeAssistWithSimpleWords.getDescriptionControl(codeAssistGroup)
-                .setToolTipText("When enaprotected static final int INDENT = 20;bled the current source will be scanned for words. The existing words will be available as code proposals");
+                .setToolTipText("When enabled the current source will be scanned for words. The existing words will be available as code proposals");
         addField(codeAssistWithSimpleWords);
+        
+        codeAssistWithVariables= new BooleanFieldEditor(P_CODE_ASSIST_ADD_VARIABLES.getId(), "Variables", codeAssistGroup);
+        codeAssistWithVariables.getDescriptionControl(codeAssistGroup)
+                .setToolTipText("When enabled the variables available inside the script will be available as code proposals.");
+        addField(codeAssistWithVariables);
+        
         toolTipsEnabled = new BooleanFieldEditor(P_TOOLTIPS_ENABLED.getId(), "Tooltips for keywords", codeAssistGroup);
         toolTipsEnabled.getDescriptionControl(codeAssistGroup).setToolTipText("When enabled tool tips will occure for keywords");
         addField(toolTipsEnabled);

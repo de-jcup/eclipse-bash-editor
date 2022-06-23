@@ -92,6 +92,7 @@ import de.jcup.basheditor.outline.BashEditorContentOutlinePage;
 import de.jcup.basheditor.outline.BashEditorTreeContentProvider;
 import de.jcup.basheditor.outline.BashQuickOutlineDialog;
 import de.jcup.basheditor.outline.Item;
+import de.jcup.basheditor.outline.ItemType;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.preferences.BashEditorTabReplaceStrategy;
 import de.jcup.basheditor.process.BashEditorFileProcessContext;
@@ -877,6 +878,18 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         }
         Item item = contentProvider.tryToFindByOffset(offset);
         return item;
+    }
+    
+    public List<String> resolveAllScriptVariableNames(){
+        List<String> variables = new ArrayList<>();
+        BashEditorTreeContentProvider contentProvider = outlinePage.getContentProvider();
+        if (contentProvider != null) {
+            List<Item> variableItems = contentProvider.findItemsOfType(ItemType.GLOBAL_VARIABLE,ItemType.GLOBAL_VARIABLE);
+            for (Item item: variableItems) {
+                variables.add(item.getName());
+            }
+        }
+        return variables;
     }
 
     public BashFunction findBashFunction(String functionName) {

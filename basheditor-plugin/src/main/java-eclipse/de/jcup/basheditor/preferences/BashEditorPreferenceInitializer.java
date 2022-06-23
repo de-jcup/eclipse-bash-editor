@@ -58,6 +58,7 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 
 		store.setDefault(P_CODE_ASSIST_ADD_KEYWORDS.getId(), true);
 		store.setDefault(P_CODE_ASSIST_ADD_SIMPLEWORDS.getId(), true);
+		store.setDefault(P_CODE_ASSIST_ADD_VARIABLES.getId(), true);
 		
 		/* +++++++++++++++++++ */
 		/* + Tooltips        + */

@@ -15,8 +15,7 @@
  */
 package de.jcup.basheditor;
 
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_KEYWORDS;
-import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.P_CODE_ASSIST_ADD_SIMPLEWORDS;
+import static de.jcup.basheditor.preferences.BashEditorPreferenceConstants.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +35,7 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.ui.IEditorPart;
 
 import de.jcup.basheditor.document.keywords.BashGnuCommandKeyWords;
 import de.jcup.basheditor.document.keywords.BashIncludeKeyWords;
@@ -198,6 +198,7 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		BashEditorPreferences preferences = BashEditorPreferences.getInstance();
 		boolean addKeyWords = preferences.getBooleanPreference(P_CODE_ASSIST_ADD_KEYWORDS);
 		boolean addSimpleWords = preferences.getBooleanPreference(P_CODE_ASSIST_ADD_SIMPLEWORDS);
+		boolean addVariables = preferences.getBooleanPreference(P_CODE_ASSIST_ADD_VARIABLES);
 
 		if (addSimpleWords) {
 			simpleWordCompletion.setWordListBuilder(WORD_LIST_BUILDER);
@@ -206,6 +207,16 @@ public class BashEditorSimpleWordContentAssistProcessor implements IContentAssis
 		}
 		if (addKeyWords) {
 			addAllBashKeyWords();
+		}
+		if (addVariables) {
+		    IEditorPart editor = EclipseUtil.getActiveEditor();
+		    if (editor instanceof BashEditor) {
+		        BashEditor bashEditor = (BashEditor) editor;
+		        List<String> names = bashEditor.resolveAllScriptVariableNames();
+		        for (String variableName: names) {
+		            simpleWordCompletion.add("$"+variableName);
+		        }
+		    }
 		}
 	}
 
