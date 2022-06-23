@@ -17,7 +17,6 @@ package de.jcup.basheditor.debug.launch;
 
 import de.jcup.basheditor.debug.BashCallPIDStoreSnippetBuilder;
 import de.jcup.basheditor.debug.launch.TerminalLaunchContext.RunMode;
-import de.jcup.basheditor.preferences.BashEditorPreferences;
 
 public class InternalTerminalCommandStringBuilder {
 
@@ -28,8 +27,7 @@ public class InternalTerminalCommandStringBuilder {
             return "";
         }
         if (context.runMode == RunMode.JUST_OPEN_TERMINAL) {
-            String getJustOpenTerminalCommand = BashEditorPreferences.getInstance().getJustOpenTerminalCommand();
-            return getJustOpenTerminalCommand;
+            return context.getOpenInTerminalCommand();
         }
         StringBuilder sb = new StringBuilder();
         sb.append(bashPIDFileSupport.buildWritePIDToPortSpecificTmpFileSnippet(context.getPort()));

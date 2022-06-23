@@ -40,6 +40,7 @@ public class TerminalLaunchContextBuilder {
 	private Map<String, String> environment;
     private int port;
     private RunMode runMode = RunMode.DEBUG;
+    private String openInTerminalCommand="";
     private TerminalLaunchContextBuilder() {
         
     }
@@ -94,6 +95,10 @@ public class TerminalLaunchContextBuilder {
         this.runMode=runMode;
         return this;
     }
+    public TerminalLaunchContextBuilder openTerminalCommand(String command) {
+        this.openInTerminalCommand=command;
+        return this;
+    }
     
     
     public TerminalLaunchContext build() {
@@ -113,6 +118,7 @@ public class TerminalLaunchContextBuilder {
         context.environment=environment;
         context.port=port;
         context.workingDir=workingDir;
+        context.openInTerminalCommand=openInTerminalCommand;
         
         
         if (context.environment==null) {

@@ -44,6 +44,7 @@ public class TerminalLaunchContext {
     Map<String, String> environment;
     int port;
     File workingDir;
+    String openInTerminalCommand;
 
     public int getPort() {
         return port;
@@ -55,6 +56,10 @@ public class TerminalLaunchContext {
 
     public RunMode getRunMode() {
         return runMode;
+    }
+    
+    public String getOpenInTerminalCommand() {
+        return openInTerminalCommand;
     }
 
     public String getLaunchTerminalCommand() {

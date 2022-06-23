@@ -46,7 +46,7 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	P_LAUNCH_TERMINAL_COMMAND("launchTerminalCommand2"), 
 	P_LAUNCH_STARTER_COMMAND("launchStarterCommand2"), 
 	
-	P_JUST_OPEN_TERMINAL_COMMAND("justOpenTerminalCommand"), 
+	P_JUST_OPEN_TERMINAL_COMMAND("openInTerminalCommand"), 
 	P_OPEN_PATH_IN_TERMINAL_ENABLED("openPathInTerminalEnabled"), 
 	
 	P_KEEP_TERMINAL_OPEN_ALWAYS("keepLaunchedTerminalOpenAlways2"), 

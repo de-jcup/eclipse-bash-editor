@@ -55,8 +55,12 @@ public class OpenPathInTerminalHandler extends AbstractHandler {
             file = file.getParentFile();
         }
         TerminalLauncher launcher = new TerminalLauncher();
-        String terminalCommand = BashEditorPreferences.getInstance().getTerminalCommand();
-        String starterCommand = BashEditorPreferences.getInstance().getStarterCommand();
+        BashEditorPreferences preferences = BashEditorPreferences.getInstance();
+        
+        String terminalCommand = preferences.getTerminalCommand();
+        String starterCommand = preferences.getStarterCommand();
+        String openInTerminalCommand = preferences.getJustOpenTerminalCommand();
+        
         /* @formatter:on */
         TerminalLaunchContext context = TerminalLaunchContextBuilder.
              builder().
@@ -64,6 +68,7 @@ public class OpenPathInTerminalHandler extends AbstractHandler {
                 starterCommand(starterCommand).
                 file(file).
                 workingDir(file).
+                openTerminalCommand(openInTerminalCommand).
                 runMode(RunMode.JUST_OPEN_TERMINAL).
              build();
         /* @formatter:off */
