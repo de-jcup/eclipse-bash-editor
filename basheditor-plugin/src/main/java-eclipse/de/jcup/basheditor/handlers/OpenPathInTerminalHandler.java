@@ -44,6 +44,9 @@ public class OpenPathInTerminalHandler extends AbstractHandler {
         if (resource == null) {
             return null;
         }
+        if (!resource.exists()) {
+            return null;
+        }
         File file;
         try {
             file = EclipseResourceHelper.DEFAULT.toFile(resource);
@@ -54,24 +57,26 @@ public class OpenPathInTerminalHandler extends AbstractHandler {
         if (!file.isDirectory()) {
             file = file.getParentFile();
         }
+        if (file == null || !file.exists()) {
+            return null;
+        }
         TerminalLauncher launcher = new TerminalLauncher();
         BashEditorPreferences preferences = BashEditorPreferences.getInstance();
-        
+
         String terminalCommand = preferences.getTerminalCommand();
         String starterCommand = preferences.getStarterCommand();
         String openInTerminalCommand = preferences.getJustOpenTerminalCommand();
-        
-        /* @formatter:on */
-        TerminalLaunchContext context = TerminalLaunchContextBuilder.
-             builder().
+
+        /* @formatter:off */
+        TerminalLaunchContext context = TerminalLaunchContextBuilder.builder().
                 terminalCommand(terminalCommand).
                 starterCommand(starterCommand).
                 file(file).
                 workingDir(file).
                 openTerminalCommand(openInTerminalCommand).
                 runMode(RunMode.JUST_OPEN_TERMINAL).
-             build();
-        /* @formatter:off */
+                build();
+        /* @formatter:on */
         launcher.execute(context);
 
         return null;
