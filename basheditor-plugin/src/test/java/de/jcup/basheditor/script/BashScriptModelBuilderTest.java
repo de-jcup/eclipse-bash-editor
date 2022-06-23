@@ -150,7 +150,7 @@ public class BashScriptModelBuilderTest {
         assertEquals(35, usage1.getEnd());
         /* @formatter:on */
     }
-    
+
     @Test
     public void fetchusage_same_variables_used_twice_inside_string_is_recognized_as_2_usages() throws Exception {
         /* prepare */
@@ -175,15 +175,23 @@ public class BashScriptModelBuilderTest {
 
     @Test
     public void doublequoted_string_fetchusage_enabled_and_variablename_set_to_xxx() throws Exception {
-        assertOneUsageOfXXXfound("xxx=1234\necho \"$xxx and more\"");
-        assertOneUsageOfXXXfound("xxx=1234\necho \"$xxx\"");
-        assertOneUsageOfXXXfound("xxx=1234\necho '$xxx'");
-        assertOneUsageOfXXXfound("xxx=1234\necho '$xxx|abc'");
-        assertOneUsageOfXXXfound("xxx=1234\necho '$xxx;abc'");
-
+        assertOneUsageOfXXXfound("xxx=1234\necho \"$xxx\"",15,19);
+        // -----------------------01234567.890123.45678.9012345
+        // ----------------------------------------^----^
+        assertOneUsageOfXXXfound("xxx=1234\necho \"$xxx and more\"",15,19);
+        
+    }
+    
+    @Test
+    public void singleequoted_string_fetchusage_enabled_and_variablename_set_to_xxx() throws Exception {
+        assertOneUsageOfXXXfound("xxx=1234\necho '$xxx'",15,19);
+        // -----------------------01234567.890123456789012345
+        // ----------------------------------------^----^
+        assertOneUsageOfXXXfound("xxx=1234\necho '$xxx|abc'",15,20);
+        assertOneUsageOfXXXfound("xxx=1234\necho '$xxx;abc'",15,20);
     }
 
-    private void assertOneUsageOfXXXfound(String script) throws BashScriptModelException {
+    private void assertOneUsageOfXXXfound(String script, int start, int end) throws BashScriptModelException {
         /* execute */
         builderToTest.setDebug(true);
         BashScriptModelBuilderConfiguration configuration = new BashScriptModelBuilderConfiguration();
@@ -192,7 +200,6 @@ public class BashScriptModelBuilderTest {
 
         BashScriptModel bashScriptModel = builderToTest.build(script, configuration);
 
-        /* test @formatter:off*/
         BashVariable variable = bashScriptModel.getVariable("xxx");
         assertNotNull(variable);
         List<BashVariableUsage> usages = variable.getUsages();
@@ -200,9 +207,8 @@ public class BashScriptModelBuilderTest {
         assertEquals(1, usages.size());
         BashVariableUsage usage1 = usages.iterator().next();
         assertNotNull(usage1);
-        assertEquals(15, usage1.getStart());
-        assertEquals(20, usage1.getEnd());
-        /* @formatter:on */
+        assertEquals("script start failed for:\n" + script, start, usage1.getStart());
+        assertEquals("script end failed for:\n" + script, end, usage1.getEnd());
     }
 
     @Test
