@@ -46,6 +46,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.UIJob;
 
 import de.jcup.basheditor.outline.FallbackOutlineContentProvider;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 @AdaptedFromEGradle
 public abstract class AbstractFilterableTreeQuickDialog<T> extends AbstractQuickDialog implements IDoubleClickListener {
@@ -372,7 +373,7 @@ public abstract class AbstractFilterableTreeQuickDialog<T> extends AbstractQuick
 							selectFirstMaching();
 						}
 					} catch (RuntimeException e) {
-						EclipseUtil.logError("quick dialog failure", e);
+						EclipseUtil.logError("quick dialog failure", e, BashEditorActivator.getDefault());
 					}
 					dirty = false;
 					return Status.OK_STATUS;

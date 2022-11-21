@@ -39,11 +39,11 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.BashEditorUtil;
-import de.jcup.basheditor.EclipseUtil;
 import de.jcup.basheditor.debug.launch.TerminalCommandVariable;
 import de.jcup.basheditor.debug.launch.TerminalLaunchContext;
 import de.jcup.basheditor.debug.launch.TerminalLaunchContextBuilder;
 import de.jcup.basheditor.debug.launch.TerminalLauncher;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
     private static final String TOOLTIP_HEADER_TESTOUTPUT = "Here you will find the last output created by `Show result cmd`.\n"
@@ -183,11 +183,11 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
         testCommandOutputText.setText("");
         testCommandOutputText.setToolTipText(TOOLTIP_HEADER_TESTOUTPUT);
         testCommandOutputText.setEditable(false);
-        
+
         showOpenPathInTerminalCommandEnabled = new BooleanFieldEditor(P_OPEN_PATH_IN_TERMINAL_ENABLED.getId(), "Show 'Open path in terminal'", terminalGroup);
         showOpenPathInTerminalCommandEnabled.getDescriptionControl(terminalGroup).setToolTipText("When enabled the 'Open path in terminal' command will be shown inside project and package explorer.");
         addField(showOpenPathInTerminalCommandEnabled);
-        
+
         justOpenTerminalCommand = new StringFieldEditor(P_JUST_OPEN_TERMINAL_COMMAND.getId(), "Command for 'Open path in terminal'", terminalGroup);
         justOpenTerminalCommand.getTextControl(terminalGroup).setToolTipText("Defines command used for 'Open path in terminal' action inside project or package explorer view.");
         addField(justOpenTerminalCommand);
@@ -200,7 +200,7 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
             testCommandOutputText.setText(context.getTerminalExecutionCommand());
             testCommandOutputText.setToolTipText(TOOLTIP_HEADER_TESTOUTPUT + "\n\nBash editor will launch this:\n" + context.getLaunchTerminalCommand());
         } catch (IOException e) {
-            EclipseUtil.logError("Was not able execute test", e);
+            EclipseUtil.logError("Was not able execute test", e, BashEditorActivator.getDefault());
         }
         return null;
     }
@@ -245,7 +245,7 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
             launcher.execute(createTestLaunchContext());
 
         } catch (IOException e) {
-            EclipseUtil.logError("Was not able execute test", e);
+            EclipseUtil.logError("Was not able execute test", e, BashEditorActivator.getDefault());
         }
         return null;
     }

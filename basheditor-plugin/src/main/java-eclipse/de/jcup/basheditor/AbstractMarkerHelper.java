@@ -26,6 +26,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
+import de.jcup.eclipse.commons.ui.EclipseUtil;
+
 @AdaptedFromEGradle
 abstract class AbstractMarkerHelper {
 	protected String markerType;
@@ -146,7 +148,7 @@ abstract class AbstractMarkerHelper {
 				}
 
 			} catch (CoreException e) {
-				EclipseUtil.logError("Was not able to delete markers", e);
+				EclipseUtil.logError("Was not able to delete markers", e, BashEditorActivator.getDefault());
 			}
 		}
 		if (tasks == null) {

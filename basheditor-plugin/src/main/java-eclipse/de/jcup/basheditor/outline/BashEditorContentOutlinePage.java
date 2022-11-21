@@ -42,11 +42,11 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import de.jcup.basheditor.BashEditor;
 import de.jcup.basheditor.BashEditorActivator;
-import de.jcup.basheditor.EclipseUtil;
 import de.jcup.basheditor.callhierarchy.BashCallHierarchyEntry;
 import de.jcup.basheditor.callhierarchy.BashCallHierarchyView;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.basheditor.script.BashScriptModel;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashEditorContentOutlinePage extends ContentOutlinePage implements IDoubleClickListener {
     private static final ImageDescriptor IMG_DESC_OPEN_CALL_HIERARCHY = EclipseUtil.createImageDescriptor("icons/view/call_hierarchy.png", BashEditorActivator.PLUGIN_ID);

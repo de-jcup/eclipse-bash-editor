@@ -36,13 +36,13 @@ import org.eclipse.ui.part.FileEditorInput;
 import de.jcup.basheditor.BashEditor;
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.BashFileExtensionMatcher;
-import de.jcup.basheditor.EclipseUtil;
 import de.jcup.basheditor.FileExtensionExtractor;
 import de.jcup.basheditor.debug.element.AbstractBashDebugElement;
 import de.jcup.basheditor.debug.element.BashVariable;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashDebugModelLabelProvider extends LabelProvider implements IDebugModelPresentation {
-	private static final Image IMAGE_BASH_VARIABLE = EclipseUtil.getImage("icons/bash-editor.png", BashEditorActivator.getDefault().getPluginID());
+	private static final Image IMAGE_BASH_VARIABLE = EclipseUtil.getImage("icons/bash-editor.png", BashEditorActivator.getDefault());
     private static final String FALLBACK_DETAIL_VALUE = "";
 	private BashFileExtensionMatcher matcher = new BashFileExtensionMatcher();
 	private FileExtensionExtractor extractor = new FileExtensionExtractor();
@@ -71,7 +71,7 @@ public class BashDebugModelLabelProvider extends LabelProvider implements IDebug
 		try {
 			detail = value.getValueString();
 		} catch (DebugException e) { 
-			EclipseUtil.logError("Cannot get value as string:"+value,e);
+			EclipseUtil.logError("Cannot get value as string:"+value,e, BashEditorActivator.getDefault());
 		}
 		listener.detailComputed(value, detail);
 	}
@@ -95,7 +95,7 @@ public class BashDebugModelLabelProvider extends LabelProvider implements IDebug
                 fileStore= EFS.getStore(file.toURI());
                 return new FileStoreEditorInput(fileStore);
             }catch(Exception e) {
-                EclipseUtil.logError("Was not able to get file store for file:"+file, e);
+                EclipseUtil.logError("Was not able to get file store for file:"+file, e, BashEditorActivator.getDefault());
             }
 		}
 		return null;

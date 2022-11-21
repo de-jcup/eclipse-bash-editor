@@ -112,6 +112,7 @@ import de.jcup.basheditor.script.parser.validator.BashEditorValidationErrorLevel
 import de.jcup.eclipse.commons.PluginContextProvider;
 import de.jcup.eclipse.commons.replacetabbyspaces.ReplaceTabBySpacesProvider;
 import de.jcup.eclipse.commons.replacetabbyspaces.ReplaceTabBySpacesSupport;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 @AdaptedFromEGradle
 public class BashEditor extends TextEditor implements StatusMessageSupport, IResourceChangeListener {
@@ -200,7 +201,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     }
 
     void setTitleImageDependingOnSeverity(int severity) {
-        EclipseUtil.safeAsyncExec(() -> setTitleImage(EclipseUtil.getImage("icons/" + getTitleImageName(severity), BashEditorActivator.PLUGIN_ID)));
+        EclipseUtil.safeAsyncExec(() -> setTitleImage(EclipseUtil.getImage("icons/" + getTitleImageName(severity), BashEditorActivator.getDefault())));
     }
 
     private String getTitleImageName(int severity) {
@@ -249,7 +250,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
             try {
                 line = document.getLineOfOffset(startPos);
             } catch (BadLocationException e) {
-                EclipseUtil.logError("Cannot get line offset for " + startPos, e);
+                EclipseUtil.logError("Cannot get line offset for " + startPos, e, BashEditorActivator.getDefault());
                 line = 0;
             }
             BashEditorUtil.addScriptError(this, line, error, severity);
@@ -296,7 +297,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
                     configuration.fetchVariableUsage = true;
                     configuration.variableName = text;
                     configuration.fetchFunctionUsage = true;
-                    configuration.functionUsageName= text;
+                    configuration.functionUsageName = text;
 
                     BashScriptModel model = buildModelWithoutValidation(configuration);
 
@@ -425,25 +426,24 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
             return;
         }
         IAnnotationModelExtension annotationModelExtension = (IAnnotationModelExtension) annotationModel;
-        
+
         Annotation[] annotationsToRemove = markerAnnotations.toArray(new Annotation[markerAnnotations.size()]);
         markerAnnotations.clear();
 
         Map<Annotation, Position> annotationsToAdd = new HashMap<>();
-        
+
         if (object instanceof BashVariable) {
-            BashVariable variable = (BashVariable)object;
+            BashVariable variable = (BashVariable) object;
 
-            mark(ANNOTATION_OCCURRENCES_WRITE, annotationsToAdd, variable.getAssignments(),"Occurrence of setting variable '"+variable.getName()+"'");
-            mark(ANNOTATION_OCCURRENCES, annotationsToAdd, variable.getUsages(),"Occurrence of using variable '"+variable.getName()+"'");
-            
-        }else if (object instanceof BashFunction) {
+            mark(ANNOTATION_OCCURRENCES_WRITE, annotationsToAdd, variable.getAssignments(), "Occurrence of setting variable '" + variable.getName() + "'");
+            mark(ANNOTATION_OCCURRENCES, annotationsToAdd, variable.getUsages(), "Occurrence of using variable '" + variable.getName() + "'");
+
+        } else if (object instanceof BashFunction) {
             BashFunction function = (BashFunction) object;
-            mark(ANNOTATION_OCCURRENCES_WRITE, annotationsToAdd, Arrays.asList(function.createPositionMarker()),"Occurrence of function '"+function.getName()+"'");
-            mark(ANNOTATION_OCCURRENCES, annotationsToAdd, function.getUsages(),"Occurrence of function call '"+function.getName()+"'");
-            
-        }
+            mark(ANNOTATION_OCCURRENCES_WRITE, annotationsToAdd, Arrays.asList(function.createPositionMarker()), "Occurrence of function '" + function.getName() + "'");
+            mark(ANNOTATION_OCCURRENCES, annotationsToAdd, function.getUsages(), "Occurrence of function call '" + function.getName() + "'");
 
+        }
 
         annotationModelExtension.replaceAnnotations(annotationsToRemove, annotationsToAdd);
     }
@@ -879,13 +879,13 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         Item item = contentProvider.tryToFindByOffset(offset);
         return item;
     }
-    
-    public List<String> resolveAllScriptVariableNames(){
+
+    public List<String> resolveAllScriptVariableNames() {
         List<String> variables = new ArrayList<>();
         BashEditorTreeContentProvider contentProvider = outlinePage.getContentProvider();
         if (contentProvider != null) {
-            List<Item> variableItems = contentProvider.findItemsOfType(ItemType.GLOBAL_VARIABLE,ItemType.GLOBAL_VARIABLE);
-            for (Item item: variableItems) {
+            List<Item> variableItems = contentProvider.findItemsOfType(ItemType.GLOBAL_VARIABLE, ItemType.GLOBAL_VARIABLE);
+            for (Item item : variableItems) {
                 variables.add(item.getName());
             }
         }

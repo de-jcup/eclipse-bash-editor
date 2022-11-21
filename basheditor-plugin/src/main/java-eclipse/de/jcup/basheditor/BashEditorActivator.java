@@ -40,6 +40,7 @@ import de.jcup.eclipse.commons.PluginContextProvider;
 import de.jcup.eclipse.commons.keyword.TooltipTextSupport;
 import de.jcup.eclipse.commons.resource.EclipseResourceInputStreamProvider;
 import de.jcup.eclipse.commons.templates.TemplateSupportProvider;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 /**
  * The activator class controls the plug-in life cycle

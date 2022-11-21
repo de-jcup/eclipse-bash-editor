@@ -31,7 +31,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import de.jcup.basheditor.BashEditor;
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.ColorUtil;
-import de.jcup.basheditor.EclipseUtil;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashEditorPreferences {
 

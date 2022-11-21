@@ -28,13 +28,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import de.jcup.basheditor.EclipseUtil;
+import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.debug.launch.TerminalLaunchContext;
 import de.jcup.basheditor.debug.launch.TerminalLaunchContext.RunMode;
 import de.jcup.basheditor.debug.launch.TerminalLaunchContextBuilder;
 import de.jcup.basheditor.debug.launch.TerminalLauncher;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.eclipse.commons.EclipseResourceHelper;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class OpenPathInTerminalHandler extends AbstractHandler {
 
@@ -51,7 +52,7 @@ public class OpenPathInTerminalHandler extends AbstractHandler {
         try {
             file = EclipseResourceHelper.DEFAULT.toFile(resource);
         } catch (CoreException e) {
-            EclipseUtil.logError("Was not able to fetch as file:" + resource, e);
+            EclipseUtil.logError("Was not able to fetch as file:" + resource, e, BashEditorActivator.getDefault());
             return null;
         }
         if (!file.isDirectory()) {

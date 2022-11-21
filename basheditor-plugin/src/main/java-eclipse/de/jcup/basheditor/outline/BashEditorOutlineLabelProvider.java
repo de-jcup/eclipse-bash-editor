@@ -27,7 +27,7 @@ import org.eclipse.swt.graphics.TextStyle;
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.BashEditorColorConstants;
 import de.jcup.basheditor.ColorManager;
-import de.jcup.basheditor.EclipseUtil;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashEditorOutlineLabelProvider extends BaseLabelProvider implements IStyledLabelProvider, IColorProvider {
 
@@ -128,7 +128,7 @@ public class BashEditorOutlineLabelProvider extends BaseLabelProvider implements
 	}
 
 	private Image getOutlineImage(String name) {
-		return EclipseUtil.getImage("/icons/outline/" + name, BashEditorActivator.PLUGIN_ID);
+		return EclipseUtil.getImage("/icons/outline/" + name, BashEditorActivator.getDefault());
 	}
 
 }

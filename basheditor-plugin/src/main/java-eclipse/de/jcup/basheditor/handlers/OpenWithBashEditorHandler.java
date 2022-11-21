@@ -29,7 +29,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
 import de.jcup.basheditor.BashEditor;
-import de.jcup.basheditor.EclipseUtil;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class OpenWithBashEditorHandler extends AbstractHandler{
 

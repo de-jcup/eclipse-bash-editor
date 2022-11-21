@@ -44,6 +44,7 @@ import de.jcup.basheditor.document.keywords.BashSpecialVariableKeyWords;
 import de.jcup.basheditor.document.keywords.BashSystemKeyWords;
 import de.jcup.basheditor.preferences.BashEditorPreferences;
 import de.jcup.eclipse.commons.keyword.DocumentKeyWord;
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashEditorSimpleWordContentAssistProcessor implements IContentAssistProcessor, ICompletionListener {
 

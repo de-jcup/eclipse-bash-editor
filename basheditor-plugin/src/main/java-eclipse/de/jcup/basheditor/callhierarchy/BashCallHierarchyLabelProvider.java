@@ -24,15 +24,15 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 
+import de.jcup.eclipse.commons.ui.EclipseUtil;
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.EclipseDeveloperSettings;
-import de.jcup.basheditor.EclipseUtil;
 import de.jcup.basheditor.outline.BashEditorOutlineLabelProvider;
 import de.jcup.basheditor.outline.Item;
 import de.jcup.basheditor.script.BashFunction;
 
 public class BashCallHierarchyLabelProvider extends LabelProvider implements ILightweightLabelDecorator {
-    private static final Image IMAGE_DEFAULT_ENTRY = EclipseUtil.getImage("icons/view/call_hierarchy_entry_default.png", BashEditorActivator.getDefault().getPluginID());
+    private static final Image IMAGE_DEFAULT_ENTRY = EclipseUtil.getImage("icons/view/call_hierarchy_entry_default.png", BashEditorActivator.getDefault());
     private static final ImageDescriptor IMAGE_DESCRIPTOR_RECURSIVE_ENTRY = EclipseUtil.createImageDescriptor("icons/view/recursive_co.png", BashEditorActivator.getDefault().getPluginID());
     private BashEditorOutlineLabelProvider itemLabelProvider = new BashEditorOutlineLabelProvider();
 
