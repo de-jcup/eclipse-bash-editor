@@ -25,5 +25,5 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.ui,
  org.eclipse.ui.texteditor.templates
 Bundle-ClassPath: .,
- lib/de-jcup-eclipse-commons.jar
+ lib/eclipse-commons-1.2.0.jar
 Automatic-Module-Name: de.jcup.basheditor
