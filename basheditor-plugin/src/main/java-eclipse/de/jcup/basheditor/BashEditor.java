@@ -144,9 +144,16 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     private TimeStampChangedEnforcer timestampChangeEnforder = new TimeStampChangedEnforcer();
     private List<Annotation> markerAnnotations = new ArrayList<>();
 
+    private String bgColor;
+    private String fgColor;
+    private boolean ignoreNextCaretMove;
+    private boolean lastModelBuildHadErrors;
+    private boolean outlineShowingVariables;
+    
     public BashEditor() {
         setSourceViewerConfiguration(new BashSourceViewerConfiguration(this));
         this.modelBuilder = new BashScriptModelBuilder();
+        this.outlineShowingVariables= BashEditorPreferences.getInstance().isOutlineShowVariablesEnabled();
     }
 
     public void resourceChanged(IResourceChangeEvent event) {
@@ -490,10 +497,6 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
     }
 
-    private String bgColor;
-    private String fgColor;
-    private boolean ignoreNextCaretMove;
-    private boolean lastModelBuildHadErrors;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -614,7 +617,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
                 BashScriptModel model;
                 try {
-                    modelBuilder.setIgnoreVariables(!BashEditorPreferences.getInstance().isOutlineShowVariablesEnabled());
+                    modelBuilder.setIgnoreVariables(!outlineShowingVariables);
 
                     model = modelBuilder.build(text);
                 } catch (BashScriptModelException e) {
@@ -908,6 +911,18 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
     public BashEditorPreferences getPreferences() {
         return BashEditorPreferences.getInstance();
+    }
+    
+    public void setOutlineShowingVariables(boolean outlineShowsVariables) {
+        if (this.outlineShowingVariables==outlineShowsVariables) {
+            return;
+        }
+        this.outlineShowingVariables = outlineShowsVariables;
+        rebuildOutline();
+    }
+    
+    public boolean isOutlineShowingVariables() {
+        return outlineShowingVariables;
     }
 
     private class BashEditorCaretListener implements CaretListener {
