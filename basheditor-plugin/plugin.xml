@@ -729,11 +729,11 @@ fi
             contextTypeId="de.jcup.basheditor.template.context"
             id="basheditor.templates.default.ifelifelse">
          <pattern>if [[ "$$${variableName}" = "${state1}" ]]; then
-	echo "${state1}"
+    echo "${state1}"
 elif [[ "$$${variableName}" = "${state2}" ]]; then
-	echo "${state2}"
+    echo "${state2}"
 else
-  	echo "other state"
+    echo "other state"
 fi</pattern>
       </template>
 </extension>
