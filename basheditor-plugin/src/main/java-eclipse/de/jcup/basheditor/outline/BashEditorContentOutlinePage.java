@@ -50,10 +50,16 @@ import de.jcup.eclipse.commons.ui.EclipseUtil;
 
 public class BashEditorContentOutlinePage extends ContentOutlinePage implements IDoubleClickListener {
     private static final ImageDescriptor IMG_DESC_OPEN_CALL_HIERARCHY = EclipseUtil.createImageDescriptor("icons/view/call_hierarchy.png", BashEditorActivator.PLUGIN_ID);
+    
     private static final ImageDescriptor IMG_DESC_LINKED = EclipseUtil.createImageDescriptor("/icons/outline/synced.png", BashEditorActivator.PLUGIN_ID);
     private static final ImageDescriptor IMG_DESC_NOT_LINKED = EclipseUtil.createImageDescriptor("/icons/outline/sync_broken.png", BashEditorActivator.PLUGIN_ID);
+    
     private static final ImageDescriptor IMG_DESC_ALPHABETICAL_SORT= EclipseUtil.createImageDescriptor("/icons/outline/alphab_sort_co.png", BashEditorActivator.PLUGIN_ID);
 
+    private static final ImageDescriptor IMG_DESC_SHOW_VARIABLES = EclipseUtil.createImageDescriptor("/icons/outline/variables_on.png", BashEditorActivator.PLUGIN_ID);
+    private static final ImageDescriptor IMG_DESC_DONT_SHOW_VARIABLES = EclipseUtil.createImageDescriptor("/icons/outline/variables_off.png", BashEditorActivator.PLUGIN_ID);
+    
+    
     private BashEditorTreeContentProvider contentProvider;
     private Object input;
     private BashEditor editor;
@@ -65,6 +71,8 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
     private TreeViewer viewer;
     public boolean sortOutlineAlphabeticalEnabled;
     private ToggleAlphabeticalSortAction switchSortAlphabeticalAction;
+
+    private ToggleShowVariablesAction toggleShowVariablesAction;
 
     public BashEditorContentOutlinePage(BashEditor editor) {
         this.editor = editor;
@@ -96,18 +104,21 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
         toggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 
         switchSortAlphabeticalAction =new ToggleAlphabeticalSortAction();
+        toggleShowVariablesAction = new ToggleShowVariablesAction();
         
         IActionBars actionBars = getSite().getActionBars();
 
         IToolBarManager toolBarManager = actionBars.getToolBarManager();
         toolBarManager.add(toggleLinkingAction);
         toolBarManager.add(switchSortAlphabeticalAction);
+        toolBarManager.add(toggleShowVariablesAction);
 
         IMenuManager viewMenuManager = actionBars.getMenuManager();
         viewMenuManager.add(new Separator("EndFilterGroup")); //$NON-NLS-1$
 
         viewMenuManager.add(new Separator("treeGroup")); //$NON-NLS-1$
         viewMenuManager.add(toggleLinkingAction);
+        viewMenuManager.add(toggleShowVariablesAction);
 
         /*
          * when no input is set on init state - let the editor rebuild outline (async)
@@ -266,6 +277,42 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
 
     }
     
+    class ToggleShowVariablesAction extends Action {
+        
+
+        private ToggleShowVariablesAction() {
+            setDescription("Toggle outline showing variables");
+            initImage();
+            initText();
+        }
+
+        @Override
+        public void run() {
+            if (editor == null) {
+                return;
+            }
+            editor.setOutlineShowingVariables(!editor.isOutlineShowingVariables());
+            
+            initText();
+            initImage();
+        }
+
+        private void initImage() {
+            if (editor == null) {
+                return;
+            }
+            setImageDescriptor(editor.isOutlineShowingVariables() ? getImageDescriptionForShowingVariables() : getImageDescriptionForNotShowingVariables());
+        }
+
+        private void initText() {
+            if (editor == null) {
+                return;
+            }
+            setText(editor.isOutlineShowingVariables() ? "Click to hide variables" : "Click to show variables");
+        }
+
+    }
+    
     class ToggleAlphabeticalSortAction extends Action {
 
         private BashEditorViewerComparator comparator;
@@ -311,5 +358,14 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
     protected ImageDescriptor getImageDescriptionNotLinked() {
         return IMG_DESC_NOT_LINKED;
     }
+    
+    protected ImageDescriptor getImageDescriptionForShowingVariables() {
+        return IMG_DESC_SHOW_VARIABLES;
+    }
+
+    protected ImageDescriptor getImageDescriptionForNotShowingVariables() {
+        return IMG_DESC_DONT_SHOW_VARIABLES;
+    }
+
 
 }

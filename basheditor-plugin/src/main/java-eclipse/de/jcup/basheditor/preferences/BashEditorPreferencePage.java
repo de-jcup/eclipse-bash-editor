@@ -140,7 +140,7 @@ public class BashEditorPreferencePage extends FieldEditorPreferencePage implemen
         addField(linkEditorWithOutline);
         
         /* enable variables inside putline */
-        showVariablesInOutline = new BooleanFieldEditor(P_SHOW_VARIABLES_IN_OUTLINE.getId(), "Variables are shown in outline", otherComposite);
+        showVariablesInOutline = new BooleanFieldEditor(P_SHOW_VARIABLES_IN_OUTLINE.getId(), "Variables are shown in outline per default", otherComposite);
         showVariablesInOutline.getDescriptionControl(otherComposite).setToolTipText("This defines the behaviour of outline in new opened editors.\nYou have to close and reopen existing files by bash editor to get the effect there as well.");
         addField(showVariablesInOutline);
         

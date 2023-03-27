@@ -110,7 +110,7 @@ public class BashEditorPreferences {
             return changedAtAll;
         }
     }
-
+    
     public String getStringPreference(BashEditorPreferenceConstants id) {
         String data = getPreferenceStore().getString(id.getId());
         if (data == null) {
