@@ -117,6 +117,8 @@ public class BashEditorPreferenceInitializer extends AbstractPreferenceInitializ
 		store.setDefault(P_OPEN_PATH_IN_TERMINAL_ENABLED.getId(),true);
 		store.setDefault(P_USER_HOME_CUSTOMPATH.getId(),"");
 		
+		store.setDefault(P_OPEN_DEBUG_PERSPECTIVE_AUTOMATICALLY.getId(),true);
+		
 		
 		
 		/* ++++++++++++++++ */

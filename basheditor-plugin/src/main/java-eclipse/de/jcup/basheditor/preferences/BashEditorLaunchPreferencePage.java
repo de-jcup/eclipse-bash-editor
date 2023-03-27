@@ -59,6 +59,7 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
     private StringFieldEditor customUserHomePath;
     private StringFieldEditor justOpenTerminalCommand;
     private BooleanFieldEditor showOpenPathInTerminalCommandEnabled;
+    private BooleanFieldEditor openDebugPerspectiveAutomaticallyEnabled;
     private static final String params = "-a 1 -b 2";
 
     public BashEditorLaunchPreferencePage() {
@@ -191,6 +192,11 @@ public class BashEditorLaunchPreferencePage extends FieldEditorPreferencePage im
         justOpenTerminalCommand = new StringFieldEditor(P_JUST_OPEN_TERMINAL_COMMAND.getId(), "Command for 'Open path in terminal'", terminalGroup);
         justOpenTerminalCommand.getTextControl(terminalGroup).setToolTipText("Defines command used for 'Open path in terminal' action inside project or package explorer view.");
         addField(justOpenTerminalCommand);
+
+        
+        openDebugPerspectiveAutomaticallyEnabled = new BooleanFieldEditor(P_OPEN_DEBUG_PERSPECTIVE_AUTOMATICALLY.getId(), "Open debug perspective for bash debug sessions automatically", terminalGroup);
+        openDebugPerspectiveAutomaticallyEnabled.getDescriptionControl(terminalGroup).setToolTipText("When enabled a bash debug session will automatically open the debug perspective.");
+        addField(openDebugPerspectiveAutomaticallyEnabled);
 
     }
 

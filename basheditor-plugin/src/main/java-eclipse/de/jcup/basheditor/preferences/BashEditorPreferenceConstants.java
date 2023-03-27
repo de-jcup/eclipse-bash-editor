@@ -67,6 +67,8 @@ public enum BashEditorPreferenceConstants implements PreferenceIdentifiable {
 	
 	P_SORT_OUTLINE_ALPHABETICAL("sortOutlineAlphabetical"),
 	
+	P_OPEN_DEBUG_PERSPECTIVE_AUTOMATICALLY("openDebugPerspectiveAutomatically"),
+	
 	;
 	
 

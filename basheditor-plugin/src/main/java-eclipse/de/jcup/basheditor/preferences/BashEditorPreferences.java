@@ -236,4 +236,8 @@ public class BashEditorPreferences {
         return getBooleanPreference(P_OPEN_PATH_IN_TERMINAL_ENABLED);
     }
 
+    public boolean isOpeningDebugPerspectiveAutomaticallyEnabled() {
+        return getBooleanPreference(P_OPEN_DEBUG_PERSPECTIVE_AUTOMATICALLY);
+    }
+
 }

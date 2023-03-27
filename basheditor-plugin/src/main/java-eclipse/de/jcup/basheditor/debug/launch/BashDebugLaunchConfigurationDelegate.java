@@ -40,6 +40,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.BashEditorUtil;
@@ -67,7 +68,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
         } catch (IOException e) {
             BashEditorUtil.logError("Was not able to create internal bash scripts!", e);
         }
-        
+
         boolean debug = mode.equals(ILaunchManager.DEBUG_MODE);
         boolean runOnly = mode.equals(ILaunchManager.RUN_MODE);
         if (!debug && !runOnly) {
@@ -95,9 +96,10 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
 
         boolean canDoAutoRun = shellScriptIsExecutable && (runOnly || getPreferences().isAutomaticLaunchInExternalTerminalEnabled());
 
-        // we always show debug view, so we got always the cancel button available - which is sometimes also for run mode interesting
+        // we always show debug view, so we got always the cancel button available -
+        // which is sometimes also for run mode interesting
         showDebugView();
-        
+
         /* debug process is started, so launch terminal or inform */
         if (canDoAutoRun) {
 
@@ -198,6 +200,7 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
         });
         return false;
     }
+
     /**
      * # Creates debug/run target - if not possible (e.g. debug session cannot be
      * started) the returned target is <code>null</code>
@@ -216,6 +219,12 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
         if (!debug) {
             return null;
         }
+        if (BashEditorPreferences.getInstance().isOpeningDebugPerspectiveAutomaticallyEnabled()) {
+            String debugPerspeciveId = "org.eclipse.debug.ui.DebugPerspective";
+            PlatformUI.getWorkbench().showPerspective(debugPerspeciveId, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+        }
+        
+
         IDebugTarget target = null;
         if (debug) {
             IProcess remoteProcess = new BashRemoteProcess(launch, terminalProcess);
