@@ -148,12 +148,10 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     private String fgColor;
     private boolean ignoreNextCaretMove;
     private boolean lastModelBuildHadErrors;
-    private boolean outlineShowingVariables;
     
     public BashEditor() {
         setSourceViewerConfiguration(new BashSourceViewerConfiguration(this));
         this.modelBuilder = new BashScriptModelBuilder();
-        this.outlineShowingVariables= BashEditorPreferences.getInstance().isOutlineShowVariablesEnabled();
     }
 
     public void resourceChanged(IResourceChangeEvent event) {
@@ -617,7 +615,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
                 BashScriptModel model;
                 try {
-                    modelBuilder.setIgnoreVariables(!outlineShowingVariables);
+                    modelBuilder.setIgnoreVariables(Boolean.getBoolean("de.jcup.basheditor.ignorevariables")); // possibility for users to turn this off if there are problems
 
                     model = modelBuilder.build(text);
                 } catch (BashScriptModelException e) {
@@ -913,18 +911,6 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
         return BashEditorPreferences.getInstance();
     }
     
-    public void setOutlineShowingVariables(boolean outlineShowsVariables) {
-        if (this.outlineShowingVariables==outlineShowsVariables) {
-            return;
-        }
-        this.outlineShowingVariables = outlineShowsVariables;
-        rebuildOutline();
-    }
-    
-    public boolean isOutlineShowingVariables() {
-        return outlineShowingVariables;
-    }
-
     private class BashEditorCaretListener implements CaretListener {
 
         @Override

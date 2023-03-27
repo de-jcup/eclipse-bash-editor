@@ -73,10 +73,14 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
     private ToggleAlphabeticalSortAction switchSortAlphabeticalAction;
 
     private ToggleShowVariablesAction toggleShowVariablesAction;
+    private boolean variablesEnabled;
 
     public BashEditorContentOutlinePage(BashEditor editor) {
         this.editor = editor;
+        this.variablesEnabled= BashEditorPreferences.getInstance().isOutlineShowVariablesEnabled();
+
         this.contentProvider = new BashEditorTreeContentProvider();
+        this.contentProvider.setVariablesEnabled(variablesEnabled);
     }
 
     public BashEditorTreeContentProvider getContentProvider() {
@@ -278,7 +282,6 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
     }
     
     class ToggleShowVariablesAction extends Action {
-        
 
         private ToggleShowVariablesAction() {
             setDescription("Toggle outline showing variables");
@@ -291,7 +294,10 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
             if (editor == null) {
                 return;
             }
-            editor.setOutlineShowingVariables(!editor.isOutlineShowingVariables());
+            variablesEnabled=!variablesEnabled;
+            contentProvider.setVariablesEnabled(variablesEnabled);
+            
+            editor.rebuildOutline();
             
             initText();
             initImage();
@@ -301,14 +307,14 @@ public class BashEditorContentOutlinePage extends ContentOutlinePage implements 
             if (editor == null) {
                 return;
             }
-            setImageDescriptor(editor.isOutlineShowingVariables() ? getImageDescriptionForShowingVariables() : getImageDescriptionForNotShowingVariables());
+            setImageDescriptor(variablesEnabled ? getImageDescriptionForShowingVariables() : getImageDescriptionForNotShowingVariables());
         }
 
         private void initText() {
             if (editor == null) {
                 return;
             }
-            setText(editor.isOutlineShowingVariables() ? "Click to hide variables" : "Click to show variables");
+            setText(variablesEnabled ? "Click to hide variables" : "Click to show variables");
         }
 
     }

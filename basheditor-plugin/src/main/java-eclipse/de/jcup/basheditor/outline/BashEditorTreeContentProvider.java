@@ -35,6 +35,7 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
     private static final Object[] RESULT_WHEN_EMPTY = new Object[] { BASH_SCRIPT_DOES_NOT_CONTAIN_ANY_FUNCTIONS };
     private Object[] items;
     private Object monitor = new Object();
+    private boolean variablesEnabled;
 
     BashEditorTreeContentProvider() {
         items = RESULT_WHEN_EMPTY;
@@ -131,6 +132,9 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
     }
 
     private void addVariables(List<Item> list, Map<String, BashVariable> variablesMap) {
+        if (!variablesEnabled) {
+            return;
+        }
         for (BashVariable variable : variablesMap.values()) {
             BashVariableAssignment initial = variable.getInitialAssignment();
             Item item = new Item();
@@ -205,6 +209,10 @@ public class BashEditorTreeContentProvider implements ITreeContentProvider {
             }
         }
         return null;
+    }
+
+    void setVariablesEnabled(boolean variablesEnabled) {
+       this.variablesEnabled=variablesEnabled;
     }
 
 }
