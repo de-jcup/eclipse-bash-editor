@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Bash Editor
 Bundle-SymbolicName: de.jcup.basheditor;singleton:=true
-Bundle-Version: 2.9.0
+Bundle-Version: 2.9.1
 Bundle-Activator: de.jcup.basheditor.BashEditorActivator
 Bundle-Vendor: Albert Tregnaghi
 Require-Bundle: org.eclipse.ui,
@@ -25,5 +25,5 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.ui,
  org.eclipse.ui.texteditor.templates
 Bundle-ClassPath: .,
- lib/eclipse-commons-1.2.0.jar
+ lib/eclipse-commons.jar
 Automatic-Module-Name: de.jcup.basheditor
