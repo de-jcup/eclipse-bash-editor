@@ -83,7 +83,7 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 
 	private IHyperlink[] createHyperlinksToFiles(HoveredTextInfo textInfo,
 			boolean canShowMultipleHyperlinks) {
-		String path = textInfo.text;
+		String path = textInfo.fileName;
 		if (path == null) {
 			return null;
 		}
@@ -95,10 +95,14 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 		if (parent==null) {
 			return null;
 		}
-		IFile target = parent.getFile(new Path(path));
-		if (target!=null && target.exists()) {
-			Region targetRegion = new Region(textInfo.offsetLeft, path.length());
-			return new IHyperlink[] {new BashExternalFileHyperlink(targetRegion, target)};
+		try {
+		    IFile target = parent.getFile(new Path(path));
+		    if (target!=null && target.exists()) {
+		        Region targetRegion = new Region(textInfo.filenameOffsetLeft, path.length());
+		        return new IHyperlink[] {new BashExternalFileHyperlink(targetRegion, target)};
+		    }
+		}catch(IllegalArgumentException e) {
+		    /* path not as expected - just ignore here to prevent event loops */
 		}
 		return null;
 	}
@@ -120,7 +124,7 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 			project = adaptable.getAdapter(IProject.class);
 		}
 		List<SharedModelMethodTarget> foundFunctionCandidates = BashEditorActivator.getDefault().getModel()
-				.findResourcesHavingMethods(functionInfo.text, project);
+				.findResourcesHavingMethods(functionInfo.functionName, project);
 		if (foundFunctionCandidates.isEmpty()) {
 			return null;
 		}
@@ -145,10 +149,10 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 	}
 
 	private IHyperlink[] createHyperlinksForFunctionsInsideEditor(BashEditor editor, HoveredTextInfo textInfo) {
-		BashFunction function = editor.findBashFunction(textInfo.text);
+		BashFunction function = editor.findBashFunction(textInfo.functionName);
 		if (function != null) {
         	/* we found internal link - so we use this, no external search necessary */
-        	Region targetRegion = new Region(textInfo.offsetLeft, textInfo.text.length());
+        	Region targetRegion = new Region(textInfo.functionOffsetLeft, textInfo.functionName.length());
         	return new IHyperlink[] { new BashFunctionHyperlink(targetRegion, function, editor) };
         }
 		return null;
@@ -171,34 +175,12 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 	}
 	
 	private HoveredTextInfo createTextInfo(int offset, IRegion lineInfo, String line) {
-	    HoveredTextInfo info = new HoveredTextInfo(offset);
-	    String text = fetchText(offset, lineInfo, line, info);
-		info.text = text;
-		return info;
-	}
-
-    private String fetchText(int offset, IRegion lineInfo, String line, HoveredTextInfo info) {
+	   
         int offsetInLine = offset - lineInfo.getOffset();
 		String leftChars = line.substring(0, offsetInLine);
 		String rightChars = line.substring(offsetInLine);
-		StringBuilder sb = new StringBuilder();
-		char[] left = leftChars.toCharArray();
-		for (int i = left.length - 1; i >= 0; i--) {
-			char c = left[i];
-			if (Character.isWhitespace(c)) {
-				break;
-			}
-			info.offsetLeft--;
-			sb.insert(0, c);
-		}
-		for (char c : rightChars.toCharArray()) {
-			if (Character.isWhitespace(c)) {
-				break;
-			}
-			sb.append(c);
-		}
-		String text = sb.toString();
-        return text;
+		
+		return HyperlinkDetectorUtil.createHoveredTextInfo(leftChars,rightChars, offset);
     }
 
 	private IHyperlink createExternalHyperlink(HoveredTextInfo info, SharedModelMethodTarget target) {
@@ -211,8 +193,8 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 			return null;
 		}
 		IFile file = (IFile) resource;
-		int offsetLeft = info.offsetLeft;
-		String functionName = info.text;
+		int offsetLeft = info.functionOffsetLeft;
+		String functionName = info.functionName;
 
 		/* we found internal link - so we use this, no external search necessary */
 		Region targetRegion = new Region(offsetLeft, functionName.length());
@@ -220,12 +202,6 @@ public class BashHyperlinkDetector extends AbstractHyperlinkDetector {
 		return link;
 	}
 	
-	private class HoveredTextInfo {
-	    public HoveredTextInfo(int offset) {
-            this.offsetLeft=offset;
-        }
-        int offsetLeft;
-	    String text;
-	}
+	
 	
 }
