@@ -38,9 +38,12 @@ import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.debug.core.model.RuntimeProcess;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 
 import de.jcup.basheditor.BashEditorActivator;
 import de.jcup.basheditor.BashEditorUtil;
@@ -220,10 +223,8 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
             return null;
         }
         if (BashEditorPreferences.getInstance().isOpeningDebugPerspectiveAutomaticallyEnabled()) {
-            String debugPerspeciveId = "org.eclipse.debug.ui.DebugPerspective";
-            PlatformUI.getWorkbench().showPerspective(debugPerspeciveId, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+            switchToDebugPerspectiveIfNecessary();
         }
-        
 
         IDebugTarget target = null;
         if (debug) {
@@ -242,6 +243,22 @@ public class BashDebugLaunchConfigurationDelegate extends LaunchConfigurationDel
             target = new RunOnlyBashDebugTarget(launch, terminalProcess, programFileResource.getName(), new HashMap<String, String>());
         }
         return target;
+    }
+
+    private void switchToDebugPerspectiveIfNecessary() {
+        String debugPerspeciveId = "org.eclipse.debug.ui.DebugPerspective";
+
+        /* ensure perspective change/call is done inside SWT thread: */
+        Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+                try {
+                    IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+                    PlatformUI.getWorkbench().showPerspective(debugPerspeciveId, activeWorkbenchWindow);
+                } catch (WorkbenchException e) {
+                    BashEditorUtil.logError("Was not able to switch to debug perspective", e);
+                }
+            }
+        });
     }
 
     /**
