@@ -41,6 +41,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -76,6 +77,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.contexts.IContextService;
@@ -148,7 +150,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     private String fgColor;
     private boolean ignoreNextCaretMove;
     private boolean lastModelBuildHadErrors;
-    
+
     public BashEditor() {
         setSourceViewerConfiguration(new BashSourceViewerConfiguration(this));
         this.modelBuilder = new BashScriptModelBuilder();
@@ -495,7 +497,6 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
 
     }
 
-
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getAdapter(Class<T> adapter) {
@@ -672,8 +673,21 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     }
 
     private File resolveResourceAsFile() throws CoreException {
-        IFile ifile = resolveResourceAsIFile();
-        IPath location = ifile.getLocation();
+        IPath location = null;
+        IFile resourceAsIFile = resolveResourceAsIFile();
+        if (resourceAsIFile != null) {
+            location = resourceAsIFile.getLocation();
+        } else {
+            /* not available as IFile - try by storage */
+            IEditorInput input = getEditorInput();
+            if (input instanceof IStorageEditorInput) {
+                IStorageEditorInput storageEditorInput = (IStorageEditorInput) input;
+                IStorage storage = storageEditorInput.getStorage();
+                if (storage != null) {
+                    location = storage.getFullPath();
+                }
+            }
+        }
         if (location == null) {
             return null;
         }
@@ -910,7 +924,7 @@ public class BashEditor extends TextEditor implements StatusMessageSupport, IRes
     public BashEditorPreferences getPreferences() {
         return BashEditorPreferences.getInstance();
     }
-    
+
     private class BashEditorCaretListener implements CaretListener {
 
         @Override
